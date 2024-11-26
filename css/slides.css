@@ -1226,34 +1226,34 @@ img.rounded {
 .whiteSlide {
   /*default*/
 }
-.whiteSlide.fade .content {
+.whiteSlide .fade .content {
   background: rgba(255, 255, 255, 0.6);
 }
-.whiteSlide.fade-1 .content {
+.whiteSlide .fade-1 .content {
   background: rgba(255, 255, 255, 0.1);
 }
-.whiteSlide.fade-2 .content {
+.whiteSlide .fade-2 .content {
   background: rgba(255, 255, 255, 0.2);
 }
-.whiteSlide.fade-3 .content {
+.whiteSlide .fade-3 .content {
   background: rgba(255, 255, 255, 0.3);
 }
-.whiteSlide.fade-4 .content {
+.whiteSlide .fade-4 .content {
   background: rgba(255, 255, 255, 0.4);
 }
-.whiteSlide.fade-5 .content {
+.whiteSlide .fade-5 .content {
   background: rgba(255, 255, 255, 0.5);
 }
-.whiteSlide.fade-6 .content {
+.whiteSlide .fade-6 .content {
   background: rgba(255, 255, 255, 0.6);
 }
-.whiteSlide.fade-7 .content {
+.whiteSlide .fade-7 .content {
   background: rgba(255, 255, 255, 0.7);
 }
-.whiteSlide.fade-8 .content {
+.whiteSlide .fade-8 .content {
   background: rgba(255, 255, 255, 0.8);
 }
-.whiteSlide.fade-9 .content {
+.whiteSlide .fade-9 .content {
   background: rgba(255, 255, 255, 0.9);
 }
 

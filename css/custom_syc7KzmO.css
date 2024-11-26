@@ -1,0 +1,59 @@
+/* Slide 26 (#3) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-26-d2b7439a"] */
+.slide[data-cid=slide-26-d2b7439a] .icon-26 {
+  margin-right: 4px;
+}
+.slide[data-cid=slide-26-d2b7439a] .app-26 {
+  width: 70px;
+  position: absolute;
+  left: 0;
+}
+.slide[data-cid=slide-26-d2b7439a] .text-26 {
+  margin-left: 95px;
+  margin-top: 35px;
+}
+@media (min-width: 1024px) {
+  .slide[data-cid=slide-26-d2b7439a] .text-26 {
+    max-width: 360px;
+  }
+}
+.slide[data-cid=slide-26-d2b7439a] .cell-26 {
+  margin-top: 22px;
+}
+@media (min-width: 1024px) {
+  .slide[data-cid=slide-26-d2b7439a] .cell-26 {
+    padding-bottom: 40px;
+  }
+}
+
+/* Slide 101 (#4) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-101-ad4ec9c9"] */
+.slide[data-cid=slide-101-ad4ec9c9] .social-101:hover {
+  opacity: 1 !important;
+}
+
+/* Slide 112 (#5) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-112-73bbacff"] */
+.scroll .slide[data-cid=slide-112-73bbacff].slide-112,
+.scroll .slide[data-cid=slide-112-73bbacff].slide-112 .container {
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .slide[data-cid=slide-112-73bbacff].slide-112 .wrap {
+    padding: 50px;
+  }
+}
+@media (max-width: 1023px) {
+  .slide[data-cid=slide-112-73bbacff].slide-112 .wrap {
+    width: 100%;
+    display: table;
+  }
+  .slide[data-cid=slide-112-73bbacff] .poster-112 {
+    position: static;
+    height: 50vh;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+  }
+}

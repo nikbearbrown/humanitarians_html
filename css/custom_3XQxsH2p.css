@@ -1,0 +1,176 @@
+/* Slide 13 (#1) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-13-392328c6"] */
+.slide[data-cid=slide-13-392328c6] form input[type=text].input-13,
+.slide[data-cid=slide-13-392328c6] form input[type=name].input-13,
+.slide[data-cid=slide-13-392328c6] form input[type=email].input-13 {
+  max-width: 300px;
+}
+
+/* Slide 46 (#3) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-46-f5f26847"] */
+@media (max-width: 767px) {
+  .slide[data-cid=slide-46-f5f26847] .box-46 {
+    margin-bottom: 30px;
+  }
+}
+.slide[data-cid=slide-46-f5f26847].whiteSlide .box-46 .shadow {
+  box-shadow: none;
+}
+
+/* Slide 47 (#4) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-47-d8e69917"] */
+.slide[data-cid=slide-47-d8e69917] .flex-47 .material-icons {
+  margin-bottom: 15px;
+  margin-top: 15px;
+  font-size: 36px;
+}
+
+/* Slide 48 (#6) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-48-406bbbf5"] */
+.slide[data-cid=slide-48-406bbbf5] .flex-48 .material-icons {
+  margin-bottom: 30px;
+  margin-top: 15px;
+  font-size: 72px;
+}
+
+/* Slide 96 (#7) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-96-1b5a60c4"] */
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player.pause .play {
+  display: block;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player.pause .pause {
+  display: none;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .play {
+  display: none;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .pause {
+  display: block;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .playpause {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 27px;
+  height: 27px;
+  cursor: pointer;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.101421), 0px 1px 2px rgba(0, 0, 0, 0.101421);
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .playpause img {
+  width: 13px;
+  height: 13px;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .trackinfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .scrubber {
+  margin-top: 17px;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .scrubber .bar {
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  height: 3px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .scrubber .bar:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+.slide[data-cid=slide-96-1b5a60c4] .music-96 .player .scrubber .played {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: -1px;
+  background: #ffffff;
+  border-radius: 2px;
+}
+.slide[data-cid=slide-96-1b5a60c4].whiteSlide .music-96 .scrubber .bar {
+  border-bottom: 1px solid rgba(32, 32, 32, 0.2);
+}
+.slide[data-cid=slide-96-1b5a60c4].whiteSlide .music-96 .scrubber .played {
+  background: rgba(32, 32, 32, 0.5);
+}
+
+/* Slide 141 (#8) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-141-d1e18e53"] */
+@media (max-width: 767px) {
+  .slide[data-cid=slide-141-d1e18e53] .box-141-center {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+}
+@media (min-width: 1024px) {
+  .slide[data-cid=slide-141-d1e18e53] .box-141-right {
+    margin-top: -100px;
+  }
+}
+
+/* Slide 168 (#9) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-168-7acff123"] */
+.slide[data-cid=slide-168-7acff123] .img-168 {
+  max-width: 70%;
+}
+@media (max-width: 767px) {
+  .slide[data-cid=slide-168-7acff123] .img-168 {
+    left: unset !important;
+    right: 0;
+  }
+}
+
+/* Slide 170 (#12) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-170-f8ccd1c5"] */
+.slide[data-cid=slide-170-f8ccd1c5] .poster-170 {
+  transition: 0.15s;
+}
+.slide[data-cid=slide-170-f8ccd1c5] .box-170 {
+  min-height: 380px;
+}
+.slide[data-cid=slide-170-f8ccd1c5] .box-170:hover {
+  opacity: 1;
+}
+.slide[data-cid=slide-170-f8ccd1c5] .box-170:hover .poster-170 {
+  opacity: 0.3 !important;
+}
+.slide[data-cid=slide-170-f8ccd1c5] .btn-170 {
+  line-height: 31px;
+  padding: 0 12px;
+}
+
+/* Slide 62 (#14) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-62-585958d8"] */
+.slide[data-cid=slide-62-585958d8] .flex-62 .material-icons {
+  margin-bottom: 10px;
+  margin-top: 15px;
+  font-size: 36px;
+}
+@media (min-width: 1024px) {
+  .slide[data-cid=slide-62-585958d8] img.macbook-62 {
+    max-width: none;
+    float: left;
+    margin-left: 50px;
+  }
+}
+
+/* Slide 68 (#17) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-68-382ef26c"] */
+.slide[data-cid=slide-68-382ef26c] .flex-68 a {
+  display: inline-block;
+  margin-top: 14px;
+  margin-bottom: 14px;
+  opacity: 0.9;
+  transition: opacity 0.1s ease-in, transform 0.15s cubic-bezier(0.5, 0, 0.25, 2.5);
+}
+.slide[data-cid=slide-68-382ef26c] .flex-68 a:hover {
+  opacity: 1;
+  transform: scale(1.05);
+}
+.slide[data-cid=slide-68-382ef26c].whiteSlide .tintLogos {
+  filter: brightness(0.2);
+}
+.slide[data-cid=slide-68-382ef26c]:not(.whiteSlide) .tintLogos {
+  filter: brightness(1.3);
+}

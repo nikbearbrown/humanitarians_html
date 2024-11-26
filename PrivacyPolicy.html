@@ -1,0 +1,956 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <base href="./">
+  <title>Humanitarians AI Privacy Policy</title>
+  <meta property="og:title" content="Humanitarians AI" />
+  <meta name="twitter:title" content="Humanitarians AI" />
+  <meta name="description" content="We strategically design AI-powered websites and digital products that deliver real results. Our bespoke creations connect with your audience and align with your company's goals." />
+  <meta name="og:description" content="We strategically design AI-powered websites and digital products that deliver real results. Our bespoke creations connect with your audience and align with your company's goals." />
+  <meta name="twitter:description" content="We strategically design AI-powered websites and digital products that deliver real results. Our bespoke creations connect with your audience and align with your company's goals." />
+  <link rel="icon" sizes="any" href="assets/uploads/favicon.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="icon" sizes="192x192" href="assets/uploads/favicon-192x192.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="icon" sizes="96x96" href="assets/uploads/favicon-96x96.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="icon" sizes="48x48" href="assets/uploads/favicon-48x48.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="icon" sizes="32x32" href="assets/uploads/favicon-32x32.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="icon" sizes="16x16" href="assets/uploads/favicon-16x16.png?p=dRrnKuF3&t=1718138653" type="image/png">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+  <link href="css/slides.min.css?62360" rel="stylesheet" type="text/css" id="js-slides-css">
+  <link rel="stylesheet" as="font" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Playfair+Display:wght@700&family=Material+Icons&display=swap" id="js-google-fonts"/>
+  <!-- Add icon library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+
+    <style type="text/css" id="js-slides-fonts">
+      .slides,
+      .slides p {
+          font-family: "Lato", -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+          font-weight: 400;
+      }
+      .slides h1,
+      .slides h2,
+      .slides h3,
+      .slides h4,
+      .slides h5,
+      .slides h6 {
+          font-family: "Playfair Display", -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+          font-weight: 700;
+      }
+      .slides .button{
+        color: teal;
+      }
+      
+      .slides .slides-form {
+          font-family: "Lato", -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+          font-weight: 700;
+      }
+      .button.crimson {
+   /* Assuming this is the intended background color */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding for size */
+  text-align: center; /* Center text */
+  font-size: 18px; /* Font size */
+  border-radius: 5px; /* Rounded corners */
+  text-decoration: none; /* Remove underline */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Drop shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+  margin-top: 30px; /* Add margin-top for spacing */
+}
+
+.button.crimson:hover {
+  background-color: rgb(237, 237, 239); /* Full opacity teal on hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+  color: black; /* Ensure text color remains white */
+}
+
+/* Logo size for larger screens */
+.logo {
+  width: 470px;
+  background-color: transparent !important; 
+}
+/* Center the navbar items */
+.navbar-nav {
+   align-content: center;
+    text-align: center;
+}
+
+
+
+.navbar-nav .nav-link {
+    color: white;
+    transition: color 0.3s, transform 0.3s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #050505;
+    transform: scale(1.2);
+}
+.navigation.default ul {
+ 
+  text-align: center;
+}
+
+/* Media query for mobile screens */
+@media (max-width: 768px) {
+  .logo {
+    width: 270px !important;
+    background-color: transparent !important; 
+  }
+}
+/* Sidebar menu styles for mobile */
+.fixed-navbar {
+  position: fixed !important;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: transparent !important; /* Ensure transparency */
+  
+}
+
+
+/* Sidebar menu styles for mobile */
+.navigation.default {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: rgba(119, 9, 9, 0.5) !important; /* Adjust based on your design */
+  padding-top: 60px; /* Add padding to ensure content is not under the top bar */
+  z-index: 2000; /* Ensure it stays above other content */
+  overflow-x: hidden; /* Disable horizontal scroll */
+  transition: 0.5s; /* Smooth transition effect */
+}
+
+.navigation.default.open {
+  display: block; /* Show when open */
+  
+}
+
+.navigation.default ul {
+  list-style-type: none; /* Remove list bullets */
+  padding: 0;
+  text-align: center;
+}
+
+.navigation.default ul li {
+  padding: 8px 16px;
+  text-align: center; /* Align text to the left */
+}
+
+.navigation.default ul li a {
+  text-decoration: none;
+  font-size: 25px;
+  color: white;
+  display: block;
+  transition: 0.3s; /* Smooth hover effect */
+}
+
+.navigation.default ul li a:hover {
+  color: #f1f1f1;
+}
+
+/* Media query for mobile screens */
+/* Mobile view adjustments */
+@media (max-width: 991px) {
+    .navbar-brand {
+        position: static;
+        transform: none;
+    }
+    .navbar-nav {
+        text-align: center;
+    }
+    .navbar-collapse {
+        background-color: rgba(60, 58, 58, 0.8); /* Light semi-transparent background */
+        padding: 10px;
+      
+        border-radius: 8px; /* Optional: to give rounded corners */
+        text-align: center !important;
+        
+    }
+    .navbar-collapse.collapsing {
+        height: auto;
+        transition: none;
+    }
+    .navbar-collapse.show {
+        display: block !important;
+        overflow: visible;
+    }
+    .navbar-toggler {
+        margin-left: 15px;
+        text-align: center;
+        
+    }
+}
+
+/* Desktop view adjustments */
+@media (min-width: 992px) {
+    .navbar-collapse {
+        background-color: transparent; /* No background on desktop view */
+    }
+}
+
+/* Additional custom styles */
+
+
+
+
+.clickable-card {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.clickable-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+.modal-dialog {
+  max-width: 80%;
+  margin: 30px auto;
+}
+
+.modal-content {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.modal-header, .modal-body {
+  color: black;
+  font-family: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 700;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: center; /* Center align the header content */
+  position: relative; /* Positioning context for close button */
+}
+
+.modal-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  overflow-y: auto;
+  max-height: 70vh;
+}
+
+.modal-body img {
+  max-width: 50%; /* Adjust as needed */
+  max-height: 50vh;
+  height: auto;
+  margin-left: 20px; /* Space between text and image */
+}
+
+.modal-body .text-content {
+  max-width: 100%; /* Adjust as needed */
+  padding-right: 20px; /* Space between text and image */
+  text-align: center;
+}
+
+.modal-header .close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+.social-icons {
+  margin-top: 10px;
+}
+
+.social-icons a {
+  margin: 0 10px;
+  font-size: 24px;
+  color: #007bff; /* Adjust color as needed */
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  color: #0056b3; /* Adjust hover color as needed */
+} 
+
+
+      nav .menu a {
+          color: white;
+          transition: transform 0.3s, color 0.3s;
+        
+      }
+      nav .menu a:hover {
+          color: #050505;
+          transform: scale(1.2);
+          text-decoration:none;
+      }
+      .menu .nav-link.active {
+          color: black; /* or any other style you want for active state */
+          font-weight: bold;
+      }
+      .btn-primary {
+          color: #ddd;
+      }
+/* AI for Good Section */
+
+    .aiforgood-section {
+          padding: 60px 0;
+          background-color: transparent;
+      }
+      .aiforgood-title {
+          text-align: center;
+          
+          margin-bottom: 30px;
+      }
+      .nav-tabs {
+          border-bottom: 2px solid #ddd;
+          justify-content: center;
+      }
+      .nav-tabs .nav-item {
+          margin-bottom: -1px;
+      }
+      .nav-tabs .nav-link {
+          border: 1px solid transparent;
+          border-radius: 0;
+          color: #fff; 
+          font-size: 18px;
+          padding: 10px 20px;
+          margin: 0 5px;
+      }
+      .nav-tabs .nav-link.active {
+          background-color: #8ccbf2;
+          color: #333;
+      }
+      
+      .tab-content {
+          padding: 30px;
+          background-color: transparent;
+           color: #fff; 
+          border-top: none;
+      }
+      .tab-pane img {
+          max-width: 100%;
+          height: auto;
+          margin-bottom: 20px;
+      }
+      .tab-pane p {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #fff; /* White text color for better contrast */
+  text-align: center; /* Change this to center align the text */
+  max-width: 80%; /* Reduce width of the paragraph */
+}
+      
+.tab-pane .text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align the content */
+  text-align: center;
+  max-width: 100%;
+}
+
+.tab-pane .text-content p {
+  text-align: center; /* Center align the paragraph text */
+}
+
+.tab-pane .contact-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #007bff;
+  border-radius: 5px;
+  text-decoration: none;
+  margin-top: 20px; /* Add margin-top for spacing */
+  align-self: center; /* Center align the button */
+}
+      /* Loading Screen CSS */
+      #loading-screen {
+          display: none; /* Hidden by default */
+          position: fixed;
+          z-index: 9999;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          background-color: rgba(255, 255, 255, 0.8);
+          text-align: center;
+          padding-top: 20%;
+      }
+      #loading-screen .spinner {
+          border: 8px solid #f3f3f3; /* Light grey */
+          border-top: 8px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 60px;
+          height: 60px;
+          animation: spin 2s linear infinite;
+      }
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+      /*Mission Section CSS*/
+      .card {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+      }
+
+      .card-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .card-text {
+          flex-grow: 1;
+      }
+
+      .button.mt-auto {
+          margin-top: auto;
+      }
+
+      .row {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+      }
+
+      .col-md-4 {
+          display: flex;
+          flex: 0 0 33.3333%;
+          max-width: 33.3333%;
+          padding: 15px;
+          box-sizing: border-box;
+          text-decoration: none;
+      }
+
+      .d-flex {
+          display: flex !important;
+          text-decoration: none;
+      }
+
+      .align-items-stretch {
+          align-items: stretch !important;
+      }
+      .form-container {
+    display: flex;
+    justify-content: center; /* Center align the container */
+    flex-wrap: wrap; /* Allow wrapping */
+    padding-top: 50px;
+    
+}
+
+.form-column{
+  padding-left: 250px; /* Remove left padding */
+    padding-right: 250px; /* Remove right padding */
+}
+.join-our-team-column {
+    flex: 0 0 100%; /* Full width */
+    max-width: 100%; /* Full width */
+    margin-bottom: 20px; /* Space between sections */
+}
+
+.join-our-team-column {
+
+    padding-top: 50px; /* Add top padding for spacing */
+}
+@media (max-width: 768px) {
+    .form-container,
+    .form-column,
+    .join-our-team-column {
+        padding-left: 10px; /* Reduce left padding */
+        padding-right: 10px; /* Reduce right padding */
+        width: 100%; /* Ensure width stays consistent */
+        box-sizing: border-box; /* Ensure padding doesn't affect total width */
+    }
+}
+
+      
+      /* Footer styles */
+      .footer {
+          position: fixed;
+          bottom: 50px;
+          width: 100%;
+          background-color: none;
+          color: white;
+          text-align: right;
+          padding: 10px 10px;
+          z-index: 1000; /* Ensure it stays on top */
+      }
+
+      .footer a {
+          color: white;
+          margin: 0 15px;
+          font-size: 24px;
+      }
+
+      .footer a:hover {
+          color: #1f1e1e;
+      }
+      @media (max-width: 768px) {
+    .container,
+    .content,
+    .wrap {
+        padding-left: 0px; /* Reduce left padding */
+        padding-right:0px; /* Reduce right padding */
+        width: 100%;
+    }
+  }
+ /* Responsive adjustments for modal */
+ @media (max-width: 768px) {
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .modal-body img {
+            order: -1;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .modal-body .text-content {
+            padding: 0;
+            font-size: 16px;
+        }
+        .modal-body .social-icons {
+            margin-top: 10px;
+        }
+    }
+    /* Responsive adjustments for people page */
+  /* Responsive adjustments for people page */
+@media (max-width: 768px) {
+    .people-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .clickable-card {
+        flex: 0 0 45%;
+        max-width: 45%;
+        margin: 10px;
+        text-align: center;
+    }
+
+    .clickable-card img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%; /* Ensure the image is a circle */
+        object-fit: cover; /* Cover the entire circle */
+    }
+
+    .clickable-card h4 {
+        font-size: 14px;
+        white-space: nowrap; /* Prevent line breaks */
+    }
+
+    .clickable-card p {
+        font-size: 12px;
+    }
+}
+
+/* Additional styles to ensure titles are on one line */
+.clickable-card h4 {
+    white-space: nowrap; /* Prevent line breaks */
+    
+}
+
+ /* Ensure last row has correct alignment */
+ .people-list .clickable-card:nth-last-child(2),
+    .people-list .clickable-card:nth-last-child(1) {
+        flex: 0 0 45%; /* Adjust width to fit two in a row */
+        max-width: 45%;
+    }
+
+
+    /* Respnsive adjustments for aiforgood section */
+    @media (max-width: 768px) {
+        .aiforgood-section {
+            padding: 30px 0;
+        }
+        .aiforgood-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0 10px;
+        }
+        .aiforgood-content .image-content {
+            order: -1;
+            margin-bottom: 20px;
+        }
+        .aiforgood-content .text-content {
+            padding: 0;
+        }
+        .aiforgood-content .text-content p {
+            font-size: 16px;
+        }
+        .aiforgood-content .contact-button {
+            margin-top: 10px;
+        }
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-tabs .nav-item {
+            flex: 1 1 45%;
+            margin-bottom: 5px;
+        }
+        .nav-tabs .nav-link {
+            font-size: 14px;
+            padding: 8px 12px;
+            margin: 0 3px;
+        }
+        .tab-content {
+            padding: 10px;
+        }
+        .tab-pane p {
+            font-size: 16px;
+            max-width: 100%;
+        }
+    }
+    @media (max-width: 480px) {
+        .aiforgood-content .text-content p {
+            font-size: 18px;
+        }
+        .tab-pane p {
+            font-size: 14px;
+            max-width: 100%;
+        }
+    }
+    /* Responsive adjustments for mission section */
+    @media (max-width: 768px) {
+        .row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .col-md-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 15px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .card-body {
+            padding: 10px;
+        }
+        .card-title {
+            font-size: 18px;
+        }
+        .card-text {
+            font-size: 14px;
+        }
+        .button.mt-auto {
+            margin-top: 10px;
+        }
+    }
+    @media (max-width: 480px) {
+        .card-title {
+            font-size: 18px;
+        }
+        .card-text {
+            font-size: 14px;
+        }
+        .card-body {
+            padding: 8px;
+        }
+        .button.mt-auto {
+            margin-top: 8px;
+        }
+    }
+
+</style>
+  
+    <link href="css/custom_3XQxsH2p.css?p=dRrnKuF3&rnd=95247" rel="stylesheet" type="text/css">    
+    <link rel="preload" href="assets/svg/icon-set.svg?p=dRrnKuF3" as="image" type="image/svg+xml" crossorigin>
+</head>
+<body class="slides animated noPreload">
+  <div class="overlay"></div>
+<!-- Loading Screen -->
+<div id="loading-screen">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+</div>
+
+<!--Navigation styles-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-navbar">
+  <a class="navbar-brand" href="https://humanitarians.ai/#home">
+    <svg class="logo" style="height:auto">
+      <use href="assets/svg/icons.svg#logo"></use>
+    </svg>
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="https://humanitarians.ai/#home">Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://humanitarians.ai/#mission">Mission</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://humanitarians.ai/#aiforgood">AI for Good</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://humanitarians.ai/#people">People</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="https://humanitarians.ai/#contact">Contact Us</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+
+
+<!-- Privacy Policy -->
+<section id="privacypolicy" data-cid="slide-13-392328c6" class="slide fade-6 kenBurns">
+  <div class="content">
+    <div class="container">
+      <div class="wrap">
+        <div class="fix-8-12">
+          <h1 class="smaller margin-bottom-2 ae-1">Privacy Policy</h1>
+          <p class="larger light ae-2"><span class="opacity-8">
+          
+    <p>Effective Date: July 22, 2024</p>
+
+    <h2>Introduction</h2>
+    <p>Welcome to Humanitarians AI. We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy policy or our practices with regard to your personal information, please contact us at [insert contact email].</p>
+
+    <h2>Information We Collect</h2>
+    <p>We collect personal information that you voluntarily provide to us when you register on our website, express an interest in obtaining information about us or our products and services, participate in activities on the website, or contact us.</p>
+    <p>The personal information that we collect depends on the context of your interactions with us and the website, the choices you make, and the products and features you use. The personal information we collect may include the following:</p>
+    <ul>
+        <li>Name and Contact Data: We collect your first and last name, email address, postal address, phone number, and other similar contact data.</li>
+        <li>Credentials: We collect passwords, password hints, and similar security information used for authentication and account access.</li>
+    </ul>
+
+    <h2>How We Use Your Information</h2>
+    <p>We use the information we collect or receive:</p>
+    <ul>
+        <li>To facilitate account creation and logon process.</li>
+        <li>To send you marketing and promotional communications.</li>
+        <li>To send administrative information to you.</li>
+        <li>To fulfill and manage your orders.</li>
+        <li>To post testimonials.</li>
+        <li>To request feedback.</li>
+        <li>To protect our services.</li>
+        <li>To enforce our terms, conditions, and policies.</li>
+        <li>To respond to legal requests and prevent harm.</li>
+        <li>To manage user accounts.</li>
+        <li>To deliver services to the user.</li>
+        <li>To respond to user inquiries/offer support to users.</li>
+    </ul>
+
+    <h2>Sharing Your Information</h2>
+    <p>We do not share, sell, rent, or trade any of your information with third parties for their promotional purposes.</p>
+    <p>We may process or share your data that we hold based on the following legal basis:</p>
+    <ul>
+        <li>Consent: We may process your data if you have given us specific consent to use your personal information for a specific purpose.</li>
+        <li>Legitimate Interests: We may process your data when it is reasonably necessary to achieve our legitimate business interests.</li>
+        <li>Performance of a Contract: Where we have entered into a contract with you, we may process your personal information to fulfill the terms of our contract.</li>
+        <li>Legal Obligations: We may disclose your information where we are legally required to do so in order to comply with applicable law, governmental requests, a judicial proceeding, court order, or legal process.</li>
+        <li>Vital Interests: We may disclose your information where we believe it is necessary to investigate, prevent, or take action regarding potential violations of our policies, suspected fraud, situations involving potential threats to the safety of any person, and illegal activities, or as evidence in litigation in which we are involved.</li>
+    </ul>
+
+    <h2>Cookies and Other Tracking Technologies</h2>
+    <p>We may use cookies and similar tracking technologies to access or store information. Specific information about how we use such technologies and how you can refuse certain cookies is set out in our Cookie Policy.</p>
+
+    <h2>Data Security</h2>
+    <p>We have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, please also remember that we cannot guarantee that the internet itself is 100% secure. Although we will do our best to protect your personal information, transmission of personal information to and from our website is at your own risk. You should only access the services within a secure environment.</p>
+
+    <h2>Retention of Your Information</h2>
+    <p>We will only keep your personal information for as long as it is necessary for the purposes set out in this privacy policy unless a longer retention period is required or permitted by law (such as tax, accounting, or other legal requirements). When we have no ongoing legitimate business need to process your personal information, we will either delete or anonymize such information, or, if this is not possible (for example, because your personal information has been stored in backup archives), then we will securely store your personal information and isolate it from any further processing until deletion is possible.</p>
+
+    <h2>Your Privacy Rights</h2>
+    <p>In some regions, you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; and (iv) if applicable, to data portability. In certain circumstances, you may also have the right to object to the processing of your personal information. To make such a request, please use the contact details provided below. We will consider and act upon any request in accordance with applicable data protection laws.</p>
+
+    <h2>Contact Us</h2>
+    <p>If you have questions or comments about this privacy policy, you may <a href="https://humanitarians.ai/#contact">Contact Us</a></p>
+    
+    <h2>Changes to This Privacy Policy</h2>
+    <p>We may update this privacy policy from time to time in order to reflect, for example, changes to our practices or for other operational, legal, or regulatory reasons. We will notify you of any changes by posting the new privacy policy on this page. You are advised to review this privacy policy periodically for any changes. Changes to this privacy policy are effective when they are posted on this page.</p>
+   
+      
+          </span>
+          
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="background" style="background-image:url(https://humanitarians.ai/assets/img/background/img-55.png)"></div>
+</section>
+
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+<!-- Compressed Scripts -->
+<script src="js/slides.min.js?62360" type="text/javascript"></script>
+<script src="js/custom_3XQxsH2p.js?p=dRrnKuF3&rnd=637376"></script>  
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sidebarTrigger = document.querySelector('.sidebarTrigger');
+    const navigation = document.querySelector('.navigation.default');
+    const overlay = document.querySelector('.overlay');
+
+    sidebarTrigger.addEventListener('click', function() {
+      navigation.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+
+    overlay.addEventListener('click', function() {
+      navigation.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+  });
+</script>
+<script>
+    // Trigger modals on image and name click
+    $('img[data-toggle="modal"], h4[data-toggle="modal"]').on('click', function() {
+      var target = $(this).data('target');
+      $(target).modal('show');
+    });
+
+    // AI for Good tab navigation
+    $('.aiforgood-tabs a').on('click', function(event) {
+      event.preventDefault();
+      $('.aiforgood-tabs a').removeClass('active');
+      $('.aiforgood-content').removeClass('active');
+      $(this).addClass('active');
+      $($(this).attr('data-target')).addClass('active');
+    });
+  
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sidebarTrigger = document.querySelector('.sidebarTrigger');
+    const navigation = document.querySelector('.navigation.default');
+    const overlay = document.querySelector('.overlay');
+
+    sidebarTrigger.addEventListener('click', function() {
+      navigation.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+
+    overlay.addEventListener('click', function() {
+      navigation.classList.remove('open');
+      overlay.classList.remove('open');
+    });
+
+    document.addEventListener('click', function(event) {
+      const isClickInside = navigation.contains(event.target) || sidebarTrigger.contains(event.target);
+      if (!isClickInside) {
+        navigation.classList.remove('open');
+        overlay.classList.remove('open');
+      }
+    });
+  });
+</script>
+<script>
+  document.addEventListener('click', function(event) {
+    const navbar = document.querySelector('.navbar-collapse');
+    if (!navbar.contains(event.target)) {
+      $('.navbar-collapse').collapse('hide');
+    }
+  });
+</script>
+ 
+<script>
+  document.getElementById('contact-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    var form = e.target;
+    var data = new FormData(form);
+    
+    // Show loading screen
+    document.getElementById('loading-screen').style.display = 'block';
+    
+    fetch('https://script.google.com/macros/s/AKfycbxwioRh9zWBDVv2YEuiKxmDmajw-BLktDoADghaHOQ4Nc6ANjcw990f3IR_Gby0MAUO6Q/exec', {
+      method: 'POST',
+      body: data
+    })
+    .then(response => response.json())
+    .then(result => {
+      // Hide loading screen
+      document.getElementById('loading-screen').style.display = 'none';
+
+      if (result.result === 'success') {
+        alert('Your message has been sent successfully!');
+        form.reset();
+      } else {
+        alert('There was an error sending your message.');
+      }
+    })
+    .catch(error => {
+      // Hide loading screen
+      document.getElementById('loading-screen').style.display = 'none';
+
+      console.error('Error:', error);
+      alert('There was an error sending your message.');
+    });
+  });
+</script>
+<script>
+  // Ensure the DOM is fully loaded before running the script
+  document.addEventListener('DOMContentLoaded', function() {
+    // Select all tabs and tab contents
+    const tabs = document.querySelectorAll('.aiforgood-tabs .nav-link');
+    const tabContents = document.querySelectorAll('.aiforgood-content .tab-pane');
+
+    // Function to deactivate all tabs and contents
+    function deactivateAllTabs() {
+      tabs.forEach(tab => tab.classList.remove('active'));
+      tabContents.forEach(content => content.classList.remove('show', 'active'));
+    }
+
+    // Add click event listeners to all tabs
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default link behavior
+
+        // Deactivate all tabs and contents
+        deactivateAllTabs();
+
+        // Activate the clicked tab and corresponding content
+        this.classList.add('active');
+        const targetContent = document.querySelector(this.getAttribute('href'));
+        targetContent.classList.add('show', 'active');
+      });
+    });
+  });
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1S4QGRW8CD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1S4QGRW8CD');
+</script>
+</body>
+</html>

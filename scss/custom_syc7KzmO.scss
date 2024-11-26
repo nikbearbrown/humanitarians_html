@@ -1,0 +1,73 @@
+/* 
+Compile this file to css/custom_syc7KzmO.css using any SCSS preprocessor. 
+More information here: https://slides.gitbook.io/manual/scss
+*/
+
+@import "mixins.scss"; 
+@import "variables.scss";
+@import "variables-custom.scss";
+
+/* Slide 26 (#3) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-26-d2b7439a"] */
+.slide[data-cid="slide-26-d2b7439a"]{
+  .icon-26 {
+    margin-right: 4px;
+  }
+  .app-26 {
+    width: 70px;
+    position: absolute;
+    left: 0;
+  }
+  .text-26 {
+    margin-left: 95px;
+    margin-top: 35px;
+  }
+  @include media($tablet, min) {
+    .text-26 {
+      max-width: 360px;
+    }
+  }
+  .cell-26 {
+    margin-top: 22px;
+  }
+  @include media($tablet, min) {
+    .cell-26 {
+      padding-bottom: 40px;
+    }
+  }
+}
+
+/* Slide 101 (#4) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-101-ad4ec9c9"] */
+.slide[data-cid="slide-101-ad4ec9c9"]{
+  .social-101:hover{
+    opacity: 1 !important;
+  }
+}
+
+/* Slide 112 (#5) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-112-73bbacff"] */
+.scroll .slide[data-cid="slide-112-73bbacff"].slide-112,
+.scroll .slide[data-cid="slide-112-73bbacff"].slide-112 .container {
+  min-height: 100vh;
+}
+.slide[data-cid="slide-112-73bbacff"]{
+  @media(min-width: #{$tablet}) AND (max-width:#{$desktop}) {
+    &.slide-112 .wrap{
+      padding:50px;
+    }
+  }
+  @include media($tablet, max) {
+    &.slide-112 .wrap {
+      width: 100%;
+      display: table;
+    }
+    .poster-112{
+      position:static;
+      height:50vh;
+      background-size:contain;
+      background-repeat:no-repeat;
+      background-position:0 0;
+    }
+  }
+}

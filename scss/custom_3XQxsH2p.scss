@@ -1,0 +1,203 @@
+/* 
+Compile this file to css/custom_3XQxsH2p.css using any SCSS preprocessor. 
+More information here: https://slides.gitbook.io/manual/scss
+*/
+
+@import "mixins.scss"; 
+@import "variables.scss";
+@import "variables-custom.scss";
+
+/* Slide 13 (#1) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-13-392328c6"] */
+.slide[data-cid="slide-13-392328c6"]{
+  form input[type="text"].input-13,
+  form input[type="name"].input-13,
+  form input[type="email"].input-13 {
+    max-width: 300px;
+  }
+}
+
+/* Slide 46 (#3) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-46-f5f26847"] */
+.slide[data-cid="slide-46-f5f26847"]{
+  @include media($phablet, max) {
+    .box-46 {
+      margin-bottom: 30px;
+    }
+  }
+  &.whiteSlide .box-46 .shadow {
+    box-shadow: none;
+  }
+}
+
+/* Slide 47 (#4) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-47-d8e69917"] */
+.slide[data-cid="slide-47-d8e69917"]{
+  .flex-47 .material-icons {
+    margin-bottom: 15px;
+    margin-top: 15px;
+    font-size: 36px;
+  }
+}
+
+/* Slide 48 (#6) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-48-406bbbf5"] */
+.slide[data-cid="slide-48-406bbbf5"]{
+  .flex-48 .material-icons {
+    margin-bottom: 30px;
+    margin-top: 15px;
+    font-size: 72px;
+  }
+}
+
+/* Slide 96 (#7) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-96-1b5a60c4"] */
+.slide[data-cid="slide-96-1b5a60c4"]{
+  .music-96{
+    .player {
+      &.pause{
+        .play{display:block;}
+        .pause{display:none;}
+      }
+      .play{display:none;}
+      .pause{display:block;}
+      .playpause {
+        display:inline-flex;
+        justify-content:center;
+        align-items:center;
+        flex-shrink:0;
+        width:27px;
+        height:27px;
+        cursor: pointer;
+        box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.101421), 0px 1px 2px rgba(0, 0, 0, 0.101421);
+        img{
+          width:13px;
+          height:13px;
+        }
+      }
+      .trackinfo{
+        display:flex;
+        justify-content:space-between;
+        align-items:baseline;
+      }
+      .scrubber {
+        margin-top:17px;
+        .bar {
+          position:relative;
+          border-bottom:1px solid rgba(#ffffff,0.3);
+          height: 3px;
+          border-radius: 2px;
+          cursor: pointer;
+          transition:background-color 0.2s;
+          &:hover{
+            background:rgba(#ffffff,0.5);
+          }
+        }
+        .played {
+          position:absolute;
+          left:0;
+          top:0;
+          bottom:-1px;
+          background: #ffffff;
+          border-radius: 2px;
+        }
+      }
+    }
+  }
+  &.whiteSlide .music-96 .scrubber {
+    .bar {
+      border-bottom: 1px solid rgba(#202020,.2);
+    }
+    .played {
+      background: rgba(#202020,.5);
+    }
+  }
+}
+
+/* Slide 141 (#8) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-141-d1e18e53"] */
+.slide[data-cid="slide-141-d1e18e53"]{
+  .box-141-center{
+    @include media($phablet, max) {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+  .box-141-right{
+    @include media($tablet, min) {
+      margin-top:-100px;
+    }
+  }
+}
+
+/* Slide 168 (#9) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-168-7acff123"] */
+.slide[data-cid="slide-168-7acff123"]{
+  .img-168{
+    max-width:70%;
+    @include media($phablet, max) {
+      left:unset !important;
+      right:0;
+    }
+  }
+}
+
+/* Slide 170 (#12) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-170-f8ccd1c5"] */
+.slide[data-cid="slide-170-f8ccd1c5"]{
+  .poster-170{
+    transition:.15s;
+  }
+  .box-170{
+    min-height:380px;
+    &:hover{
+      opacity:1;
+      .poster-170{
+        opacity:0.3 !important;
+      }
+    }
+  }
+  .btn-170{
+    line-height: 31px;
+    padding: 0 12px;
+  }
+}
+
+/* Slide 62 (#14) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-62-585958d8"] */
+.slide[data-cid="slide-62-585958d8"]{
+  .flex-62 .material-icons {
+    margin-bottom: 10px;
+    margin-top: 15px;
+    font-size: 36px;
+  }
+  @include media($tablet, min) {
+    img.macbook-62 {
+      max-width: none;
+      float: left;
+      margin-left: 50px;
+    }
+  }
+}
+
+/* Slide 68 (#17) */
+/* To restrict styles to the current slide, panel, or example use .slide[data-cid="slide-68-382ef26c"] */
+.slide[data-cid="slide-68-382ef26c"]{
+  .flex-68 a {
+    display: inline-block;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    opacity: 0.9;
+    transition: opacity 0.1s ease-in, transform 0.15s cubic-bezier(0.5, 0, 0.25, 2.5);
+    &:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+  &.whiteSlide .tintLogos {
+    filter: brightness(0.2);
+  }
+  &:not(.whiteSlide) .tintLogos {
+    filter: brightness(1.3);
+  }
+}

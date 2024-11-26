@@ -1071,16 +1071,16 @@ svg {
 
 //.whiteSlide[class*="fade"] .content { background: rgba(255,255,255,0.85); } // OLD stuff
 .whiteSlide{
-	&.fade .content { background: rgba($default-white-color,0.6); } /*default*/
-	&.fade-1 .content { background: rgba($default-white-color,0.1); }
-	&.fade-2 .content { background: rgba($default-white-color,0.2); }
-	&.fade-3 .content { background: rgba($default-white-color,0.3); }
-	&.fade-4 .content { background: rgba($default-white-color,0.4); }
-	&.fade-5 .content { background: rgba($default-white-color,0.5); }
-	&.fade-6 .content { background: rgba($default-white-color,0.6); }
-	&.fade-7 .content { background: rgba($default-white-color,0.7); }
-	&.fade-8 .content { background: rgba($default-white-color,0.8); }
-	&.fade-9 .content { background: rgba($default-white-color,0.9); }
+	.fade .content { background: rgba($default-white-color,0.6); } /*default*/
+	.fade-1 .content { background: rgba($default-white-color,0.1); }
+	.fade-2 .content { background: rgba($default-white-color,0.2); }
+	.fade-3 .content { background: rgba($default-white-color,0.3); }
+	.fade-4 .content { background: rgba($default-white-color,0.4); }
+	.fade-5 .content { background: rgba($default-white-color,0.5); }
+	.fade-6 .content { background: rgba($default-white-color,0.6); }
+	.fade-7 .content { background: rgba($default-white-color,0.7); }
+	.fade-8 .content { background: rgba($default-white-color,0.8); }
+	.fade-9 .content { background: rgba($default-white-color,0.9); }
 }
 
 .container {

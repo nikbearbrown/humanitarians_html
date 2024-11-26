@@ -1938,7 +1938,7 @@ $(document).ready(function() { "use strict";
   }
 
   // Hide on .close Click
-  $(document).on('click', '.popup [data-popup-action="close"], .popup .close', function (e){
+  $('.popup [data-popup-action="close"]').on('click', function(){
     hidePopup($(this).parents('.popup').data('popup-id'));
   });
 
