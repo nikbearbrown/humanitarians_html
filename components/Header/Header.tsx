@@ -14,11 +14,12 @@ export default function Header() {
   const pathname = usePathname()
 
   const navigation = [
-    { name: "Projects", href: "/projects" },
-    { name: "Solutions", href: "/services" },
-    { name: "About", href: "/about" },
-    { name: "Donate", href: "/donate" },
-    { name: "Contact", href: "/contact" },
+    { name: "Fellows", href: "/fellows" },
+    { name: "Solution", href: "/services" },
+    { name: "Lyrical Literacy", href: "/lyrical-literacy" },
+    { name: "Botspeak", href: "/botspeak" },
+    { name: "About Us", href: "/about" },
+    { name: "Contact Us", href: "/contact" },
   ]
 
   return (
