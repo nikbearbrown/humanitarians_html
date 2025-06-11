@@ -1,29 +1,30 @@
-import type React from "react"
+import type { Metadata } from "next"
+import type { ReactNode } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google"
 import Header from "@/components/Header/Header"
 import Footer from "@/components/Footer/Footer"
 import "./globals.css"
-import type { Metadata } from "next"
+import { cn } from "@/lib/utils"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Humanitarians AI",
   description: "Using AI for social good",
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="humanitarians-ai-theme">
-          <div className="flex min-h-screen flex-col">
+      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <div className="relative flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
             <Footer />
