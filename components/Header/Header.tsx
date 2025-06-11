@@ -7,6 +7,7 @@ import { Moon, Sun, Menu, X } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import ThemeToggle from "@/components/ThemeToggle"
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -24,7 +25,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
-      <div className="container mx-auto flex h-16 items-center justify-between">
+      <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-xl">HUMANITARIANS AI</span>
@@ -46,32 +47,22 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link href="https://www.linkedin.com/" className="hidden md:block text-sm font-medium">
-            LinkedIn
+          <Link href="https://www.youtube.com/@NikBearBrown/playlists">
+            <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
+              Youtube
+            </Button>
+          </Link>
+          <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd">
+            <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
+              Spotify
+            </Button>
           </Link>
           <Link href="/donate">
             <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
               Donate
             </Button>
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1 mr-2"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          >
-            {theme === "dark" ? (
-              <>
-                <Sun className="h-4 w-4" />
-                <span className="hidden sm:inline">Light</span>
-              </>
-            ) : (
-              <>
-                <Moon className="h-4 w-4" />
-                <span className="hidden sm:inline">Dark</span>
-              </>
-            )}
-          </Button>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"
@@ -103,8 +94,11 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Link href="https://www.linkedin.com/" className="text-base font-medium">
-                LinkedIn
+              <Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-base font-medium">
+                YouTube
+              </Link>
+              <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">
+                Spotify
               </Link>
               <Link href="/donate" className="mt-4">
                 <Button className="w-full bg-black text-white hover:bg-gray-800">Donate</Button>
