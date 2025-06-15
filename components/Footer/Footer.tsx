@@ -117,25 +117,12 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* Projects */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Projects</h3>
-              <ul className="space-y-2">
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">INTELLIGENT AI BOOKS</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">PROJECT DEWEY</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">THE SHANNON PROJECT</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">PROJECT TAPESTRY</Link></li>
-              </ul>
-            </div>
-
             {/* Resources */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Resources</h3>
               <ul className="space-y-2">
-                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link href="/news" className="text-muted-foreground hover:text-foreground transition-colors">News</Link></li>
-                <li><Link href="/events" className="text-muted-foreground hover:text-foreground transition-colors">Events</Link></li>
-                <li><Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Media</Link></li>
+                <li><Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
+                <li><Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
               </ul>
             </div>
 
@@ -143,16 +130,13 @@ export default function Footer() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Get Involved</h3>
               <ul className="space-y-2">
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">VOLUNTEER/MENTOR</Link></li>
-                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">DONATE</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">SUBSCRIBE</Link></li>
-                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">CONTACT US</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Volunteer/Mentor</Link></li>
+                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
+                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
               </ul>
             </div>
-          </div>
 
-          {/* Links Sections - Second Row */}
-          <div className="md:col-span-8 md:col-start-5">
             {/* Legal & Privacy */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Legal & Privacy</h3>
