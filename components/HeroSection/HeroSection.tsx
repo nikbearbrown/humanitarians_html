@@ -1,5 +1,6 @@
 import Image from "next/image"
-import Link from "next/link"
+import PrimaryButton from "@/components/ui/primary-button"
+import SecondaryButton from "@/components/ui/secondary-button"
 
 export default function HeroSection() {
   return (
@@ -17,18 +18,12 @@ export default function HeroSection() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <Link
-                href="/projects"
-                className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
+              <PrimaryButton href="/projects">
                 Our Projects
-              </Link>
-              <Link
-                href="/contact"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
+              </PrimaryButton>
+              <SecondaryButton href="/contact">
                 Contact Us
-              </Link>
+              </SecondaryButton>
             </div>
           </div>
           <div className="flex items-center justify-center">

@@ -1,4 +1,4 @@
-import Link from "next/link"
+import SecondaryButton from "@/components/ui/secondary-button"
 
 export default function WhatWeDo() {
   return (
@@ -14,12 +14,9 @@ export default function WhatWeDo() {
               </p>
             </div>
             <div>
-              <Link
-                href="/services"
-                className="inline-flex h-10 items-center justify-center rounded-md border border-white bg-transparent px-8 text-sm font-medium text-white shadow transition-colors hover:bg-white hover:text-black focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              >
+              <SecondaryButton href="/services">
                 Learn More
-              </Link>
+              </SecondaryButton>
             </div>
           </div>
         </div>

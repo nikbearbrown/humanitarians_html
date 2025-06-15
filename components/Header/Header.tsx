@@ -3,14 +3,14 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Moon, Sun, Menu, X } from "lucide-react"
-import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ThemeToggle from "@/components/ThemeToggle"
 
+const baseButtonStyles = "inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
+
 export default function Header() {
-  const { theme, setTheme } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
 
@@ -24,7 +24,7 @@ export default function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
@@ -46,32 +46,32 @@ export default function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href="https://www.youtube.com/@NikBearBrown/playlists">
-            <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
-              Youtube
-            </Button>
-          </Link>
-          <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd">
-            <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
-              Spotify
-            </Button>
-          </Link>
-          <Link href="/donate">
-            <Button variant="default" className="hidden md:inline-flex bg-black text-white hover:bg-gray-800">
-              Donate
-            </Button>
-          </Link>
+        <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="https://www.youtube.com/@NikBearBrown/playlists">
+              <button className={cn(baseButtonStyles, headerButtonStyles)}>
+                Youtube
+              </button>
+            </Link>
+            <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd">
+              <button className={cn(baseButtonStyles, headerButtonStyles)}>
+                Spotify
+              </button>
+            </Link>
+            <Link href="/donate">
+              <button className={cn(baseButtonStyles, headerButtonStyles)}>
+                Donate
+              </button>
+            </Link>
+          </div>
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
             aria-label="Toggle menu"
-            className="md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -94,15 +94,19 @@ export default function Header() {
                   {item.name}
                 </Link>
               ))}
-              <Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-base font-medium">
-                YouTube
-              </Link>
-              <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">
-                Spotify
-              </Link>
-              <Link href="/donate" className="mt-4">
-                <Button className="w-full bg-black text-white hover:bg-gray-800">Donate</Button>
-              </Link>
+              <div className="flex flex-col gap-4 mt-4">
+                <Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-base font-medium">
+                  YouTube
+                </Link>
+                <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">
+                  Spotify
+                </Link>
+                <Link href="/donate" className="mt-2">
+                  <button className={cn(baseButtonStyles, headerButtonStyles, "w-full")}>
+                    Donate
+                  </button>
+                </Link>
+              </div>
             </nav>
           </div>
         </div>
