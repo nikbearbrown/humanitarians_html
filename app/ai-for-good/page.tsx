@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-export default function ServicesPage() {
+export default function AIForGoodPage() {
   const services = [
     {
       title: "AI Research",
@@ -42,7 +42,7 @@ export default function ServicesPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Our Services</h1>
+        <h1 className="text-4xl font-bold mb-8">AI for Good</h1>
 
         <p className="text-lg mb-12">
           Humanitarians AI offers a range of services focused on developing and implementing ethical AI solutions for
@@ -59,16 +59,16 @@ export default function ServicesPage() {
           ))}
         </div>
 
-        <div className="bg-gray-100 p-8 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Need a Custom Solution?</h2>
-          <p className="mb-6">
+        <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Need a Custom Solution?</h2>
+          <p className="mb-6 text-gray-700 dark:text-gray-300">
             Our team can work with you to develop tailored AI solutions for your specific needs and challenges.
           </p>
-          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block">
+          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
             Contact Us
           </Link>
         </div>
       </div>
     </div>
   )
-}
+} 

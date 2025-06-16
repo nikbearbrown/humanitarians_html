@@ -14,7 +14,7 @@ export default function WhatWeDo() {
               </p>
             </div>
             <div>
-              <SecondaryButton href="/services">
+              <SecondaryButton href="/ai-for-good">
                 Learn More
               </SecondaryButton>
             </div>

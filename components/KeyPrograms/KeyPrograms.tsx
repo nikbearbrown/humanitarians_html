@@ -8,7 +8,7 @@ export default function KeyPrograms() {
       description:
         "Join our community of AI researchers and developers working on humanitarian projects. Get mentorship, resources, and support to build impactful AI solutions.",
       icon: <Book className="h-10 w-10" />,
-      link: "/programs/Fellows",
+      link: "/fellows",
     },
     {
       title: "LYRICAL LITERACY",
@@ -18,11 +18,11 @@ export default function KeyPrograms() {
       link: "/lyrical-literacy",
     },
     {
-      title: "AI FOR GOOD SOFTWARE",
+      title: "AI FOR GOOD",
       description:
         "Developing and deploying AI-powered tools for real-world social impact with an emphasis on inclusivity and accessibility.",
       icon: <Code className="h-10 w-10" />,
-      link: "/programs/Software",
+      link: "/ai-for-good",
     },
     {
       title: "BOTSPEAK",
