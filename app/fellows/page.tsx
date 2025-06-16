@@ -15,12 +15,12 @@ export default function FellowsPage() {
           Join our community of AI researchers and developers working on humanitarian projects. Get mentorship, resources, and support to build impactful AI solutions.
         </p>
 
-        <div className="bg-gray-100 p-8 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">Interested in Joining Our Organization?</h2>
-          <p className="mb-6">
+        <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg">
+          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Interested in Joining Our Organization?</h2>
+          <p className="mb-6 text-gray-700 dark:text-gray-300">
             We're always looking for passionate individuals who want to make a difference through AI. Whether you're a researcher, developer, or enthusiast, we'd love to hear from you.
           </p>
-          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block">
+          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
             Contact Us
           </Link>
         </div>

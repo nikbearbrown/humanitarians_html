@@ -1,4 +1,6 @@
 import Link from "next/link"
+import PrimaryButton from "@/components/ui/primary-button"
+import SecondaryButton from "@/components/ui/secondary-button"
 
 export default function AboutPage() {
   return (
@@ -48,12 +50,12 @@ export default function AboutPage() {
             underserved communities.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/donate" className="bg-black text-white px-6 py-3 rounded-md font-medium">
+            <PrimaryButton href="/donate">
               Donate Now
-            </Link>
-            <Link href="/contact" className="border border-black px-6 py-3 rounded-md font-medium">
+            </PrimaryButton>
+            <SecondaryButton href="/contact">
               Contact Us
-            </Link>
+            </SecondaryButton>
           </div>
         </div>
       </div>

@@ -1,8 +1,13 @@
+"use client"
+
 import Link from "next/link"
+import Image from "next/image"
+import { useTheme } from "next-themes"
 import ThemeToggle from "@/components/ThemeToggle"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { theme } = useTheme()
 
   return (
     <footer className="w-full border-t bg-background">
@@ -12,7 +17,13 @@ export default function Footer() {
           <div className="md:col-span-4">
             <div className="max-w-sm">
               <Link href="/" className="flex items-center space-x-2">
-                <span className="font-bold text-xl">HUMANITARIANS AI</span>
+                <Image
+                  src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
+                  alt="HUMANITARIANS AI"
+                  width={300}
+                  height={67}
+                  className="h-16 w-auto"
+                />
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
                 Humanitarians AI Incorporated
@@ -112,19 +123,8 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li><Link href="/programs/Fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows Program</Link></li>
                 <li><Link href="/lyrical-literacy" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</Link></li>
-                <li><Link href="/programs/Software" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good Software</Link></li>
+                <li><Link href="/ai-for-good" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good</Link></li>
                 <li><Link href="/botspeak" className="text-muted-foreground hover:text-foreground transition-colors">BotSpeak</Link></li>
-              </ul>
-            </div>
-
-            {/* Projects */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Projects</h3>
-              <ul className="space-y-2">
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">INTELLIGENT AI BOOKS</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">PROJECT DEWEY</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">THE SHANNON PROJECT</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">PROJECT TAPESTRY</Link></li>
               </ul>
             </div>
 
@@ -132,10 +132,8 @@ export default function Footer() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Resources</h3>
               <ul className="space-y-2">
-                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
-                <li><Link href="/news" className="text-muted-foreground hover:text-foreground transition-colors">News</Link></li>
-                <li><Link href="/events" className="text-muted-foreground hover:text-foreground transition-colors">Events</Link></li>
-                <li><Link href="/media" className="text-muted-foreground hover:text-foreground transition-colors">Media</Link></li>
+                <li><Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
+                <li><Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
               </ul>
             </div>
 
@@ -143,23 +141,20 @@ export default function Footer() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Get Involved</h3>
               <ul className="space-y-2">
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">VOLUNTEER/MENTOR</Link></li>
-                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">DONATE</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">SUBSCRIBE</Link></li>
-                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">CONTACT US</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Volunteer/Mentor</Link></li>
+                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
+                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
               </ul>
             </div>
-          </div>
 
-          {/* Links Sections - Second Row */}
-          <div className="md:col-span-8 md:col-start-5">
             {/* Legal & Privacy */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Legal & Privacy</h3>
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
-                <li><Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/privacy#cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>

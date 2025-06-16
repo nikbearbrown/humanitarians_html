@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
+import PrimaryButton from "@/components/ui/primary-button"
+import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
   title: "Lyrical Literacy - Humanitarians AI",
@@ -79,30 +81,18 @@ export default function LyricalLiteracyPage() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Involved</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <Link 
-                href="/contact" 
-                className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800"
-              >
+              <PrimaryButton href="/contact">
                 Contact Us
-              </Link>
-              <Link 
-                href="/donate" 
-                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-              >
+              </PrimaryButton>
+              <SecondaryButton href="/donate">
                 Support the Project
-              </Link>
-              <Link 
-                href="/programs/lyrical-literacy/learn-more" 
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-              >
+              </SecondaryButton>
+              <PrimaryButton href="/programs/lyrical-literacy/learn-more">
                 Learn More
-              </Link>
-              <Link 
-                href="/programs/lyrical-literacy/explore" 
-                className="inline-flex h-10 items-center justify-center rounded-md border border-primary px-8 text-sm font-medium text-primary shadow-sm transition-colors hover:bg-primary/10"
-              >
+              </PrimaryButton>
+              <SecondaryButton href="/programs/lyrical-literacy/explore">
                 Explore Project
-              </Link>
+              </SecondaryButton>
             </div>
           </section>
         </div>

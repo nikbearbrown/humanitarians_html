@@ -1,4 +1,5 @@
-import Link from "next/link"
+import PrimaryButton from "@/components/ui/primary-button"
+import SecondaryButton from "@/components/ui/secondary-button"
 
 export default function DonateSection() {
   return (
@@ -13,24 +14,15 @@ export default function DonateSection() {
             underserved communities.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link
-              href="/donate"
-              className="inline-flex h-10 items-center justify-center rounded-md bg-black px-8 text-sm font-medium text-white shadow transition-colors hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
+            <PrimaryButton href="/donate">
               DONATE NOW
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
+            </PrimaryButton>
+            <SecondaryButton href="/contact">
               VOLUNTEER
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
+            </SecondaryButton>
+            <SecondaryButton href="/contact">
               SUBSCRIBE
-            </Link>
+            </SecondaryButton>
           </div>
         </div>
       </div>
