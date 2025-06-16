@@ -1,8 +1,13 @@
+"use client"
+
 import Link from "next/link"
+import Image from "next/image"
+import { useTheme } from "next-themes"
 import ThemeToggle from "@/components/ThemeToggle"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { theme } = useTheme()
 
   return (
     <footer className="w-full border-t bg-background">
@@ -12,7 +17,13 @@ export default function Footer() {
           <div className="md:col-span-4">
             <div className="max-w-sm">
               <Link href="/" className="flex items-center space-x-2">
-                <span className="font-bold text-xl">HUMANITARIANS AI</span>
+                <Image
+                  src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
+                  alt="HUMANITARIANS AI"
+                  width={300}
+                  height={67}
+                  className="h-16 w-auto"
+                />
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
                 Humanitarians AI Incorporated
@@ -143,7 +154,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
-                <li><Link href="/cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/privacy#cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>
