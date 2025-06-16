@@ -20,8 +20,8 @@ export default function DonateSection() {
             <SecondaryButton href="/contact">
               VOLUNTEER
             </SecondaryButton>
-            <SecondaryButton href="/contact">
-              SUBSCRIBE
+            <SecondaryButton href="https://www.youtube.com/@NikBearBrown/playlists">
+              YOUTUBE
             </SecondaryButton>
           </div>
         </div>
