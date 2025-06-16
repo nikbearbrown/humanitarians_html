@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Cookies and Other Tracking Technologies</h2>
+            <h2 id="cookies" className="text-2xl font-semibold mb-4">Cookies and Other Tracking Technologies</h2>
             <p>
               We may use cookies and similar tracking technologies to access or store information. Specific information about how we use 
               such technologies and how you can refuse certain cookies is set out in our{' '}

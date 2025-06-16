@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ThemeToggle from "@/components/ThemeToggle"
+import { useTheme } from "next-themes"
 
 const baseButtonStyles = "inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
@@ -13,6 +15,7 @@ const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:bo
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const { theme } = useTheme()
 
   const navigation = [
     { name: "Fellows", href: "/fellows" },
@@ -28,7 +31,13 @@ export default function Header() {
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="font-bold text-xl">HUMANITARIANS AI</span>
+            <Image
+              src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
+              alt="HUMANITARIANS AI"
+              width={180}
+              height={40}
+              className="h-8 w-auto"
+            />
           </Link>
           <nav className="hidden md:flex gap-6">
             {navigation.map((item) => (
