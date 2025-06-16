@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -16,6 +16,23 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const { theme } = useTheme()
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
 
   const navigation = [
     { name: "Fellows", href: "/fellows" },
@@ -34,12 +51,12 @@ export default function Header() {
             <Image
               src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
               alt="HUMANITARIANS AI"
-              width={180}
-              height={40}
-              className="h-8 w-auto"
+              width={240}
+              height={53}
+              className="h-12 w-auto"
             />
           </Link>
-          <nav className="hidden md:flex gap-6">
+          <nav className="hidden lg:flex gap-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -56,7 +73,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <Link href="https://www.youtube.com/@NikBearBrown/playlists">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Youtube
@@ -75,7 +92,7 @@ export default function Header() {
           </div>
           <ThemeToggle />
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring lg:hidden"
             aria-label="Toggle menu"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
@@ -86,9 +103,12 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" />
-          <div className="fixed inset-x-0 top-16 z-50 mt-px bg-background border-b p-6 shadow-lg">
+        <div className="lg:hidden">
+          <div 
+            className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <div ref={menuRef} className="fixed inset-x-0 top-16 z-50 mt-px bg-background border-b p-6 shadow-lg">
             <nav className="flex flex-col space-y-4">
               {navigation.map((item) => (
                 <Link
