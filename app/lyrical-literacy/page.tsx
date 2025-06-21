@@ -17,8 +17,7 @@ export default function LyricalLiteracyPage() {
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Lyrical Literacy</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Empowering youth through the transformative power of music and poetry, fostering creativity and self-expression. (or)
-            An innovative program that combines AI with creative writing and music to enhance literacy skills.
+            Empowering youth through the transformative power of music and poetry, fostering creativity and self-expression. An innovative program that combines AI with creative writing and music to enhance literacy skills.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -38,12 +37,10 @@ export default function LyricalLiteracyPage() {
             <h2 className="text-3xl font-bold mb-6">About the Project</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Lyrical Literacy is a pioneering initiative from Humanitarians AI that harnesses artificial intelligence to enhance cognitive and language development through music. This research-based program explores the powerful intersection of neuroscience, music, and education to create personalized learning experiences for diverse populations.
               </p>
               <p>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                At the heart of Lyrical Literacy is the understanding that music engages more brain regions simultaneously than almost any other human activity, providing multimodal learning experiences that target specific cognitive and linguistic skills while maintaining high engagement levels.
               </p>
             </div>
           </section>
@@ -52,27 +49,27 @@ export default function LyricalLiteracyPage() {
             <h2 className="text-3xl font-bold mb-6">Key Features</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">AI-Powered Learning</h3>
+                <h3 className="text-xl font-bold mb-3">AI-Generated Musical Content</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Custom-created songs tailored to individual learning objectives, cultural contexts, and developmental needs that leverage the power of music to enhance memory formation and retention.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Creative Writing</h3>
+                <h3 className="text-xl font-bold mb-3">Creative Storytelling</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
-                </p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Music Integration</h3>
-                <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Interactive storybooks with accompanying musical elements and audiobooks that incorporate rhythmic and melodic components, supporting both literacy development and creative expression.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
                 <h3 className="text-xl font-bold mb-3">Personalized Learning</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  AI algorithms that adapt content based on learning progress, preferences, and specific developmental goals, creating customized learning paths for each individual.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Music Integration</h3>
+                <p className="text-muted-foreground">
+                  Materials designed for diverse populations, including those with learning differences, language barriers, or neurodevelopmental conditions, making education more accessible and engaging for all learners.
                 </p>
               </div>
             </div>
@@ -87,7 +84,7 @@ export default function LyricalLiteracyPage() {
               <SecondaryButton href="/donate">
                 Support the Project
               </SecondaryButton>
-              <PrimaryButton href="/programs/lyrical-literacy/learn-more">
+              <PrimaryButton href="/programs/lyrical-literacy/lyrical-literacy-details">
                 Learn More
               </PrimaryButton>
               <SecondaryButton href="/programs/lyrical-literacy/explore">
