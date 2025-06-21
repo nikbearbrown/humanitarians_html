@@ -152,7 +152,8 @@ export default function Footer() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Get Involved</h3>
               <ul className="space-y-2">
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Volunteer/Mentor</Link></li>
+                <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows</Link></li>
+                <li><Link href="/mentor" className="text-muted-foreground hover:text-foreground transition-colors">Mentor</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
                 <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
                 <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
@@ -164,8 +165,8 @@ export default function Footer() {
               <h3 className="text-lg font-semibold">Legal & Privacy</h3>
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
                 <li><Link href="/privacy#cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
