@@ -14,9 +14,14 @@ const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:bo
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const { theme } = useTheme()
   const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,13 +53,17 @@ export default function Header() {
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
-              alt="HUMANITARIANS AI"
-              width={240}
-              height={53}
-              className="h-12 w-auto"
-            />
+            {mounted ? (
+              <Image
+                src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
+                alt="HUMANITARIANS AI"
+                width={240}
+                height={53}
+                className="h-12 w-auto"
+              />
+            ) : (
+              <div className="h-12 w-60 bg-muted animate-pulse rounded" />
+            )}
           </Link>
           <nav className="hidden lg:flex gap-6">
             {navigation.map((item) => (
