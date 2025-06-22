@@ -154,7 +154,7 @@ export default function BotspeakDetailsPage() {
                   Back to Overview
                 </SecondaryButton>
               </Link>
-              <PrimaryButton href="https://www.youtube.com/@NikBearBrown/playlists">
+              <PrimaryButton href="https://www.youtube.com/@humanitariansai">
                 Watch on YouTube
               </PrimaryButton>
             </div>

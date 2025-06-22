@@ -83,7 +83,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="https://www.youtube.com/@NikBearBrown/playlists">
+            <Link href="https://www.youtube.com/@humanitariansai">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Youtube
               </button>
@@ -133,7 +133,7 @@ export default function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-4 mt-4">
-                <Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-base font-medium">
+                <Link href="https://www.youtube.com/@humanitariansai" className="text-base font-medium">
                   YouTube
                 </Link>
                 <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">

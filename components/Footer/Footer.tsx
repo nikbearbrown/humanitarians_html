@@ -41,6 +41,60 @@ export default function Footer() {
                 <br />A 501(c)(3) nonprofit organization
               </p>
               <div className="mt-6 flex space-x-4 items-center">
+                <Link href="https://www.youtube.com/@humanitariansai" className="text-sm hover:text-primary transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="inline-block"
+                  >
+                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/>
+                    <path d="m10 15 5-3-5-3z"/>
+                  </svg>
+                </Link>
+                <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-sm hover:text-primary transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="inline-block"
+                  >
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14.5c1.5 1 4 1 5.5 0"/>
+                    <path d="M8 11c2 1 5 1 7 0"/>
+                    <path d="M8.5 7.5c2.5 1 6.5 1 9 0"/>
+                  </svg>
+                </Link>
+                <Link href="#" className="text-sm hover:text-primary transition-colors">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="inline-block"
+                  >
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                    <rect width="4" height="12" x="2" y="9" />
+                    <circle cx="4" cy="4" r="2" />
+                  </svg>
+                </Link>
                 <Link href="mailto:abc@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -71,42 +125,6 @@ export default function Footer() {
                     strokeLinejoin="round"
                     className="inline-block"
                   >
-                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                    <rect width="4" height="12" x="2" y="9" />
-                    <circle cx="4" cy="4" r="2" />
-                  </svg>
-                </Link>
-                <Link href="#" className="text-sm hover:text-primary transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="inline-block"
-                  >
-                    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
-                    <path d="M12 2v20" />
-                    <path d="M2 12h20" />
-                  </svg>
-                </Link>
-                <Link href="#" className="text-sm hover:text-primary transition-colors">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="inline-block"
-                  >
                     <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                   </svg>
                 </Link>
@@ -122,7 +140,7 @@ export default function Footer() {
               <h3 className="text-lg font-semibold">Company</h3>
               <ul className="space-y-2">
                 <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
-                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</Link></li>
+                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
                 <li><Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">Careers</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
               </ul>
@@ -143,7 +161,7 @@ export default function Footer() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Resources</h3>
               <ul className="space-y-2">
-                <li><Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
+                <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
                 <li><Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
               </ul>
             </div>
