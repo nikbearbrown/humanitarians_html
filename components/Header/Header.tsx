@@ -88,7 +88,7 @@ export default function Header() {
                 Youtube
               </button>
             </Link>
-            <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd">
+            <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Spotify
               </button>
@@ -136,7 +136,7 @@ export default function Header() {
                 <Link href="https://www.youtube.com/@humanitariansai" className="text-base font-medium">
                   YouTube
                 </Link>
-                <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">
+                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
                   Spotify
                 </Link>
                 <Link href="/donate" className="mt-2">

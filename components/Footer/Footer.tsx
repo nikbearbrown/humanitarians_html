@@ -58,7 +58,7 @@ export default function Footer() {
                     <path d="m10 15 5-3-5-3z"/>
                   </svg>
                 </Link>
-                <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-sm hover:text-primary transition-colors">
+                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-sm hover:text-primary transition-colors">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -162,7 +162,7 @@ export default function Footer() {
               <h3 className="text-lg font-semibold">Resources</h3>
               <ul className="space-y-2">
                 <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
-                <li><Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
+                <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
               </ul>
             </div>
 
