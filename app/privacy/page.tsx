@@ -161,6 +161,18 @@ export default function PrivacyPolicyPage() {
             </p>
           </section>
         </div>
+
+        {/* Navigation */}
+        <div className="mt-12 pt-8 border-t">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <Link href="/terms-of-service" className="text-primary hover:underline">
+              ← Terms of Service
+            </Link>
+            <Link href="/contact" className="text-primary hover:underline">
+              Contact Us →
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

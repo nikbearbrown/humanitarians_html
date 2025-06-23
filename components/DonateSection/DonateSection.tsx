@@ -20,9 +20,9 @@ export default function DonateSection() {
             <SecondaryButton href="/contact">
               VOLUNTEER
             </SecondaryButton>
-            <SecondaryButton href="/contact">
-              SUBSCRIBE
-            </SecondaryButton>
+                          <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+                YOUTUBE
+              </SecondaryButton>
           </div>
         </div>
       </div>

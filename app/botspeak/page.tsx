@@ -17,7 +17,7 @@ export default function BotspeakPage() {
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Botspeak</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Exploring the fascinating world of AI through hands-on projects and in-depth demos—no rules, just curiosity-driven innovation.
+            Empowering individuals through the transformative power of AI fluency, fostering effective human-AI collaboration. An innovative program that combines theoretical frameworks with practical skills to enhance your ability to work with AI systems.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -37,41 +37,39 @@ export default function BotspeakPage() {
             <h2 className="text-3xl font-bold mb-6">About the Project</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                Botspeak is a comprehensive AI fluency framework that transforms you from an AI tourist into a fluent native. Through our YouTube series, books, and articles, we cultivate your ability to think alongside AI, distributing cognitive tasks strategically, communicating intentions clearly, evaluating outputs critically, and using these powerful tools responsibly.
               </p>
               <p>
-                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                Led by Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, our show-and-tell approach demonstrates these skills through practical AI project development, giving you both theoretical understanding and hands-on experience.
               </p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Project Highlights</h2>
+            <h2 className="text-3xl font-bold mb-6">Key Features</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Interactive Demos</h3>
+                <h3 className="text-xl font-bold mb-3">Cognitive Skills Development</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Learn essential task decomposition techniques, develop accurate mental models of AI capabilities, and master metacognitive monitoring to evaluate and adjust your interaction strategies based on results.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Hands-on Learning</h3>
+                <h3 className="text-xl font-bold mb-3">Communication Mastery</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Perfect the art of precise language, contextual framing, and iterative refinement to craft prompts with minimal ambiguity and clear intent that consistently produce superior results.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Innovation Focus</h3>
+                <h3 className="text-xl font-bold mb-3">Critical Thinking Framework</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Gain systematic approaches for output evaluation, source triangulation to verify factual claims, and bias recognition skills to identify skewed perspectives in both prompts and responses.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Community Driven</h3>
+                <h3 className="text-xl font-bold mb-3">Ethical Reasoning Capabilities</h3>
                 <p className="text-muted-foreground">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+                  Develop sophisticated reasoning around responsibility attribution, privacy boundary management, and impact assessment to ensure responsible and effective use of AI technologies.
                 </p>
               </div>
             </div>
@@ -86,7 +84,7 @@ export default function BotspeakPage() {
               <SecondaryButton href="/donate">
                 Support the Project
               </SecondaryButton>
-              <PrimaryButton href="/programs/botspeak/learn-more">
+              <PrimaryButton href="/programs/botspeak/botspeak-details">
                 Learn More
               </PrimaryButton>
               <SecondaryButton href="/programs/botspeak/explore">

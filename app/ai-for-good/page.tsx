@@ -1,72 +1,97 @@
+import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
+import PrimaryButton from "@/components/ui/primary-button"
+import SecondaryButton from "@/components/ui/secondary-button"
+
+export const metadata: Metadata = {
+  title: "AI for Good - Humanitarians AI",
+  description: "Leveraging artificial intelligence to address global challenges through cutting-edge research and innovative software solutions",
+}
 
 export default function AIForGoodPage() {
-  const services = [
-    {
-      title: "AI Research",
-      description:
-        "Our research team explores cutting-edge AI technologies with a focus on ethical implementation and social impact.",
-      icon: "🧠",
-    },
-    {
-      title: "AI for Good Software",
-      description:
-        "Developing and deploying AI-powered tools for real-world social impact with an emphasis on inclusivity and accessibility.",
-      icon: "💻",
-    },
-    {
-      title: "Fellows Program",
-      description:
-        "Supporting the next generation of AI researchers and practitioners committed to using technology for social good.",
-      icon: "📚",
-    },
-    {
-      title: "Entrepreneurship",
-      description:
-        "Fostering innovation and supporting AI startups focused on social impact and ethical technology development.",
-      icon: "🚀",
-    },
-    {
-      title: "Education & Training",
-      description:
-        "Providing resources and training to help organizations implement AI solutions ethically and effectively.",
-      icon: "🎓",
-    },
-    {
-      title: "Consulting",
-      description: "Expert guidance on ethical AI implementation, policy development, and strategic planning.",
-      icon: "📋",
-    },
-  ]
-
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">AI for Good</h1>
-
-        <p className="text-lg mb-12">
-          Humanitarians AI offers a range of services focused on developing and implementing ethical AI solutions for
-          real-world challenges.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {services.map((service, index) => (
-            <div key={index} className="border p-6 rounded-lg">
-              <div className="text-4xl mb-4">{service.icon}</div>
-              <h3 className="text-xl font-bold mb-2">{service.title}</h3>
-              <p>{service.description}</p>
-            </div>
-          ))}
+        {/* Hero Section */}
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">AI for Good</h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            Leveraging artificial intelligence to address global challenges through cutting-edge research and innovative software solutions. A comprehensive program that combines rigorous academic exploration with practical applications to create positive social impact and ensure AI benefits humanity.
+          </p>
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/mbZblv-8ueI?si=Tci2Y-9H19kh95hX"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
         </div>
 
-        <div className="bg-gray-100 dark:bg-gray-800 p-8 rounded-lg">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Need a Custom Solution?</h2>
-          <p className="mb-6 text-gray-700 dark:text-gray-300">
-            Our team can work with you to develop tailored AI solutions for your specific needs and challenges.
-          </p>
-          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-            Contact Us
-          </Link>
+        {/* Main Content */}
+        <div className="grid gap-12">
+          <section>
+            <h2 className="text-3xl font-bold mb-6">About the Project</h2>
+            <div className="prose prose-lg dark:prose-invert">
+              <p>
+                AI for Good combines our research and software development initiatives to create meaningful impact. Through research, we promote transparency, fairness, and accountability in AI systems. Through software development, we deploy practical solutions that tackle real-world problems.
+              </p>
+              <p>
+                This dual approach ensures we not only advance ethical AI theory but also create tangible applications that demonstrate AI's potential for positive social change.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Key Features</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">AI Research</h3>
+                <p className="text-muted-foreground">
+                  We conduct and support research projects aimed at promoting transparency, fairness, and accountability in AI systems. Our research initiatives explore solutions that align with responsible AI development, addressing issues such as bias mitigation, explainability, and equitable access to technology.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">AI for Good Software</h3>
+                <p className="text-muted-foreground">
+                  We develop and deploy software solutions that harness AI to tackle real-world problems, emphasizing inclusivity and accessibility. These programs reflect our unwavering commitment to leveraging AI for positive social impact and ensuring that the benefits of AI technology are accessible to all.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Responsible AI Innovation</h3>
+                <p className="text-muted-foreground">
+                  We develop frameworks and methodologies that ensure AI systems are designed with ethical considerations at their core, promoting human values like fairness, transparency, and privacy while minimizing potential harms from algorithmic decision-making.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Educational Resources</h3>
+                <p className="text-muted-foreground">
+                  We create accessible learning materials that help diverse stakeholders understand AI capabilities, limitations, and ethical implications, bridging knowledge gaps between technical experts and the communities impacted by AI technologies.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Get Involved</h2>
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              <PrimaryButton href="/contact">
+                Contact Us
+              </PrimaryButton>
+              <SecondaryButton href="/donate">
+                Support the Project
+              </SecondaryButton>
+              <PrimaryButton href="/programs/ai-for-good/ai-for-good-details">
+                Learn More
+              </PrimaryButton>
+              <SecondaryButton href="/programs/ai-for-good/explore">
+                Explore Projects
+              </SecondaryButton>
+            </div>
+          </section>
         </div>
       </div>
     </div>

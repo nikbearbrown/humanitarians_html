@@ -14,9 +14,14 @@ const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:bo
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const { theme } = useTheme()
   const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,13 +53,17 @@ export default function Header() {
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            <Image
-              src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
-              alt="HUMANITARIANS AI"
-              width={240}
-              height={53}
-              className="h-12 w-auto"
-            />
+            {mounted ? (
+              <Image
+                src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
+                alt="HUMANITARIANS AI"
+                width={240}
+                height={53}
+                className="h-12 w-auto"
+              />
+            ) : (
+              <div className="h-12 w-60 bg-muted animate-pulse rounded" />
+            )}
           </Link>
           <nav className="hidden lg:flex gap-6">
             {navigation.map((item) => (
@@ -74,12 +83,12 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="https://www.youtube.com/@NikBearBrown/playlists">
+            <Link href="https://www.youtube.com/@humanitariansai">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Youtube
               </button>
             </Link>
-            <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd">
+            <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Spotify
               </button>
@@ -124,10 +133,10 @@ export default function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-4 mt-4">
-                <Link href="https://www.youtube.com/@NikBearBrown/playlists" className="text-base font-medium">
+                <Link href="https://www.youtube.com/@humanitariansai" className="text-base font-medium">
                   YouTube
                 </Link>
-                <Link href="https://open.spotify.com/artist/0DvPivuUahW7J5cy3agcGd" className="text-base font-medium">
+                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
                   Spotify
                 </Link>
                 <Link href="/donate" className="mt-2">
