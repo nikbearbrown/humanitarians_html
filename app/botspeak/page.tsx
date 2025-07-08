@@ -121,6 +121,36 @@ export default function BotspeakPage() {
     <p className="mt-6">
       While AI technology evolves rapidly, the core challenges of human-AI collaboration remain consistent. Botspeak provides lasting cognitive tools rather than temporary techniques, helping you develop the skills necessary to thrive in a future where human-AI collaboration becomes the new literacy for the age of artificial intelligence.
     </p>
+    
+    <p className="mt-4">
+      The Botspeak lessons are primarily given as YouTube videos, but in person and Zoom workshops are available upon request.
+    </p>
+    
+    <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
+      <a 
+        href="https://www.youtube.com/@humanitariansai" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-primary hover:underline"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
+          <path d="m10 15 5-3-5-3z"></path>
+        </svg>
+        YouTube: @humanitariansai
+      </a>
+      
+      <a 
+        href="mailto:info@humanitarians.ai"
+        className="flex items-center gap-2 text-primary hover:underline"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+        </svg>
+        Email: info@humanitarians.ai
+      </a>
+    </div>
   </div>
 </section>
 
