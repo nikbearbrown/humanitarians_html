@@ -33,17 +33,96 @@ export default function BotspeakPage() {
 
         {/* Main Content */}
         <div className="grid gap-12">
-          <section>
-            <h2 className="text-3xl font-bold mb-6">About the Project</h2>
-            <div className="prose prose-lg dark:prose-invert">
-              <p>
-                Botspeak is a comprehensive AI fluency framework that transforms you from an AI tourist into a fluent native. Through our YouTube series, books, and articles, we cultivate your ability to think alongside AI, distributing cognitive tasks strategically, communicating intentions clearly, evaluating outputs critically, and using these powerful tools responsibly.
-              </p>
-              <p>
-                Led by Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, our show-and-tell approach demonstrates these skills through practical AI project development, giving you both theoretical understanding and hands-on experience.
-              </p>
-            </div>
-          </section>
+<section>
+  <h2 className="text-3xl font-bold mb-6">About the Project</h2>
+  <div className="prose prose-lg dark:prose-invert">
+    <p>
+      Botspeak is a comprehensive AI fluency framework that transforms you from an AI tourist into a fluent native. Through our YouTube series, books, and articles, we cultivate your ability to think alongside AI, distributing cognitive tasks strategically, communicating intentions clearly, evaluating outputs critically, and using these powerful tools responsibly.
+    </p>
+    
+    <p>
+      Led by Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, our show-and-tell approach demonstrates these skills through practical AI project development, giving you both theoretical understanding and hands-on experience.
+    </p>
+    
+    <h3 className="text-xl font-bold mt-6 mb-3">The Nine Pillars of Botspeak</h3>
+    
+    <p>
+      Our framework is built on nine essential pillars that will remain relevant as AI technology continues to evolve:
+    </p>
+    
+    <div className="grid md:grid-cols-2 gap-4 mt-4">
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">1. Strategic Delegation</h4>
+        <p className="text-sm">Thoughtfully distributing tasks between human and AI based on comparative strengths.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">2. Effective Communication</h4>
+        <p className="text-sm">Crafting precise prompts with clear intent and context for optimal AI response.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">3. Critical Evaluation</h4>
+        <p className="text-sm">Systematically assessing AI outputs for accuracy and bias through multiple sources.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">4. Technical Understanding</h4>
+        <p className="text-sm">Applying appropriate prompt patterns and understanding model behavior.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">5. Ethical Reasoning</h4>
+        <p className="text-sm">Maintaining accountability and managing privacy boundaries in AI collaboration.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">6. Stochastic Reasoning</h4>
+        <p className="text-sm">Understanding the probabilistic nature of AI outputs and embracing variability.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">7. Learning by Doing</h4>
+        <p className="text-sm">Building intuition through deliberate practice and systematic analysis.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">8. Rapid Prototyping</h4>
+        <p className="text-sm">Accelerating ideation through quick cycles of AI-assisted generation and refinement.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg md:col-span-2 flex justify-center">
+        <div className="p-4 border rounded-lg max-w-md">
+          <h4 className="font-bold">9. Theoretical Foundations</h4>
+          <p className="text-sm">Understanding the science behind AI systems and recognizing their fundamental epistemological boundaries.</p>
+        </div>
+      </div>
+    </div>
+    
+    <h3 className="text-xl font-bold mt-6 mb-3">Three Modes of Interaction</h3>
+    
+    <div className="grid md:grid-cols-3 gap-4 mt-4">
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">Automation</h4>
+        <p className="text-sm">AI performs specific tasks based on explicit human instructions.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">Augmentation</h4>
+        <p className="text-sm">Humans and AI collaborate as thinking partners, each contributing unique strengths.</p>
+      </div>
+      
+      <div className="p-4 border rounded-lg">
+        <h4 className="font-bold">Agency</h4>
+        <p className="text-sm">AI works independently within parameters established by humans.</p>
+      </div>
+    </div>
+    
+    <p className="mt-6">
+      While AI technology evolves rapidly, the core challenges of human-AI collaboration remain consistent. Botspeak provides lasting cognitive tools rather than temporary techniques, helping you develop the skills necessary to thrive in a future where human-AI collaboration becomes the new literacy for the age of artificial intelligence.
+    </p>
+  </div>
+</section>
 
           <section>
             <h2 className="text-3xl font-bold mb-6">Key Features</h2>
