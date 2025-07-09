@@ -29,7 +29,7 @@ export default function HeroSection() {
             <div className="relative w-full aspect-video">
               <iframe
                 className="absolute top-0 left-0 w-full h-full rounded-md"
-                src="https://www.youtube.com/embed/mbZblv-8ueI?si=Tci2Y-9H19kh95hX"
+                src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV"
                 title="Humanitarians AI Introduction"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
