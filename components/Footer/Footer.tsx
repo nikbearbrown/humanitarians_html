@@ -204,8 +204,9 @@ export default function Footer() {
             </p>
           </div>
         </div>
- {/* Ad Sense Complience */}
-        <div className="mt-8 pt-6 border-t">
+
+{/* Ad Grants Compliance */}
+<div className="mt-8 pt-6 border-t">
   <div className="max-w-3xl mx-auto text-center">
     <p className="text-sm text-muted-foreground">
       All images featured on this website are either taken by Humanitarians AI photographers or AI-generated 
@@ -217,11 +218,20 @@ export default function Footer() {
   </div>
 </div>
 
-        {/* Copyright */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          &copy; 2023 - {currentYear} Humanitarians AI. All rights reserved.
-        </div>
-      </div>
+{/* Contact Information & Transparency */}
+<div className="mt-6 text-center">
+  <p className="text-sm text-muted-foreground">
+    <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
+  </p>
+  <p className="mt-2 text-sm text-muted-foreground">
+    Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 100% of your contribution goes toward our AI for Good initiatives.
+  </p>
+</div>
+
+{/* Copyright */}
+<div className="mt-8 text-center text-sm text-muted-foreground">
+  &copy; 2023 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
+</div>        
     </footer>
   )
 }
