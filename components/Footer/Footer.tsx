@@ -38,7 +38,8 @@ export default function Footer() {
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
                 Humanitarians AI Incorporated
-                <br />A 501(c)(3) nonprofit organization
+                <br />A 501(c)(3) nonprofit organization operating fully remote
+                <br />State ID: 001846362 | EIN: 33-1984805 | E-Verify: 331683101
               </p>
               <div className="mt-6 flex space-x-4 items-center">
                 <Link href="https://www.youtube.com/@humanitariansai" className="text-sm hover:text-primary transition-colors">
@@ -226,7 +227,8 @@ export default function Footer() {
             <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 100% of your contribution goes toward our AI for Good initiatives.
+            Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 
+            100% of all donations support our direct operational costs, including program expenses, legal fees, and staff salaries to advance our mission.
           </p>
         </div>
 
