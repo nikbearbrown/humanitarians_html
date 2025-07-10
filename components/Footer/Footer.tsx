@@ -230,7 +230,7 @@ export default function Footer() {
 
 {/* Copyright */}
 <div className="mt-8 text-center text-sm text-muted-foreground">
-  &copy; 2023 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
+  &copy; 2024 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
 </div>        
     </footer>
   )
