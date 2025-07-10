@@ -223,7 +223,7 @@ export default function Footer() {
         {/* Contact Information & Transparency */}
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
-            <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:aihumanitarians@gmail.com" className="text-primary hover:underline">aihumanitarians@gmail.com</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
+            <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 100% of your contribution goes toward our AI for Good initiatives.
@@ -232,7 +232,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          &copy; 2023 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
+          &copy; 2024 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
         </div>
       </div>
     </footer>
