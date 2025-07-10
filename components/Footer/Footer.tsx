@@ -204,6 +204,18 @@ export default function Footer() {
             </p>
           </div>
         </div>
+ {/* Ad Sense Complience */}
+        <div className="mt-8 pt-6 border-t">
+  <div className="max-w-3xl mx-auto text-center">
+    <p className="text-sm text-muted-foreground">
+      All images featured on this website are either taken by Humanitarians AI photographers or AI-generated 
+      specifically for our organization. We maintain proper documentation for all visual and written content 
+      as required by Google Ad Grants Policy. Humanitarians AI respects intellectual property rights and does 
+      not use copyrighted materials without appropriate permission or licensing. For questions regarding our 
+      content or to request permission to use our materials, please <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
+    </p>
+  </div>
+</div>
 
         {/* Copyright */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
