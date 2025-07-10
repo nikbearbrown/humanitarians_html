@@ -77,7 +77,7 @@ export default function Footer() {
                     <path d="M8.5 7.5c2.5 1 6.5 1 9 0"/>
                   </svg>
                 </Link>
-                <Link href="#" className="text-sm hover:text-primary transition-colors">
+                <Link href="https://www.linkedin.com/company/105696953/" className="text-sm hover:text-primary transition-colors">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -95,7 +95,7 @@ export default function Footer() {
                     <circle cx="4" cy="4" r="2" />
                   </svg>
                 </Link>
-                <Link href="mailto:abc@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
+                <Link href="mailto:info@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -112,7 +112,7 @@ export default function Footer() {
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
                 </Link>
-                <Link href="#" className="text-sm hover:text-primary transition-colors">
+                <Link href="https://twitter.com/humanitariansai" className="text-sm hover:text-primary transition-colors">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -163,6 +163,7 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
                 <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
+                <li><Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-muted-foreground hover:text-foreground transition-colors">Apple Music</Link></li>
               </ul>
             </div>
 
@@ -173,7 +174,7 @@ export default function Footer() {
                 <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows</Link></li>
                 <li><Link href="/mentor" className="text-muted-foreground hover:text-foreground transition-colors">Mentor</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
+                <li><Link href="/subscribe" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
                 <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
               </ul>
             </div>
@@ -185,6 +186,7 @@ export default function Footer() {
                 <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/privacy#cookies" className="text-muted-foreground hover:text-foreground transition-colors">Cookie Policy</Link></li>
                 <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link></li>
+                <li><Link href="/compliance" className="text-muted-foreground hover:text-foreground transition-colors">Ad Grants Compliance</Link></li>
               </ul>
             </div>
           </div>
@@ -205,33 +207,34 @@ export default function Footer() {
           </div>
         </div>
 
-{/* Ad Grants Compliance */}
-<div className="mt-8 pt-6 border-t">
-  <div className="max-w-3xl mx-auto text-center">
-    <p className="text-sm text-muted-foreground">
-      All images featured on this website are either taken by Humanitarians AI photographers or AI-generated 
-      specifically for our organization. We maintain proper documentation for all visual and written content 
-      as required by Google Ad Grants Policy. Humanitarians AI respects intellectual property rights and does 
-      not use copyrighted materials without appropriate permission or licensing. For questions regarding our 
-      content or to request permission to use our materials, please <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
-    </p>
-  </div>
-</div>
+        {/* Ad Grants Compliance */}
+        <div className="mt-8 pt-6 border-t">
+          <div className="max-w-3xl mx-auto text-center">
+            <p className="text-sm text-muted-foreground">
+              All images featured on this website are either taken by Humanitarians AI photographers or AI-generated 
+              specifically for our organization. We maintain proper documentation for all visual and written content 
+              as required by Google Ad Grants Policy. Humanitarians AI respects intellectual property rights and does 
+              not use copyrighted materials without appropriate permission or licensing. For questions regarding our 
+              content or to request permission to use our materials, please <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
+            </p>
+          </div>
+        </div>
 
-{/* Contact Information & Transparency */}
-<div className="mt-6 text-center">
-  <p className="text-sm text-muted-foreground">
-    <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
-  </p>
-  <p className="mt-2 text-sm text-muted-foreground">
-    Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 100% of your contribution goes toward our AI for Good initiatives.
-  </p>
-</div>
+        {/* Contact Information & Transparency */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:aihumanitarians@gmail.com" className="text-primary hover:underline">aihumanitarians@gmail.com</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 100% of your contribution goes toward our AI for Good initiatives.
+          </p>
+        </div>
 
-{/* Copyright */}
-<div className="mt-8 text-center text-sm text-muted-foreground">
-  &copy; 2024 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
-</div>        
+        {/* Copyright */}
+        <div className="mt-8 text-center text-sm text-muted-foreground">
+          &copy; 2023 - {currentYear} Humanitarians AI. All rights reserved. | <Link href="/compliance" className="text-primary hover:underline">Ad Grants Compliance</Link>
+        </div>
+      </div>
     </footer>
   )
 }
