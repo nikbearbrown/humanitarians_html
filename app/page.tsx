@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+      <section className="w-full py-8 md:py-16 lg:py-20 xl:py-24">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="grid gap-6 lg:grid-cols-3 lg:gap-12 xl:grid-cols-3">
             <div className="flex flex-col justify-center space-y-4 lg:col-span-1">
