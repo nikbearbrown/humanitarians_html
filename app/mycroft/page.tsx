@@ -179,12 +179,6 @@ export default function MycroftPage() {
               <SecondaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB_nThkcMlBVf4Y6QLB9Bi3K">
                 Mycroft YouTube
               </SecondaryButton>
-              <PrimaryButton href="/programs/mycroft/mycroft-details">
-                Learn More
-              </PrimaryButton>
-              <SecondaryButton href="/programs/mycroft/explore">
-                Explore Project
-              </SecondaryButton>
             </div>
           </section>
         </div>
