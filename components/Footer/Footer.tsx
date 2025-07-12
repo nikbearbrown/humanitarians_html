@@ -39,7 +39,7 @@ export default function Footer() {
               <p className="mt-4 text-sm text-muted-foreground">
                 Humanitarians AI Incorporated
                 <br />A 501(c)(3) nonprofit organization operating fully remote
-                <br />State ID: 001846362 | EIN: 33-1984805 | E-Verify: 331683101
+                <br />State ID: 001846362 | EIN: 33-1984805
               </p>
               <div className="mt-6 flex space-x-4 items-center">
                 <Link href="https://www.youtube.com/@humanitariansai" className="text-sm hover:text-primary transition-colors">
@@ -142,7 +142,6 @@ export default function Footer() {
               <ul className="space-y-2">
                 <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
                 <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
-                <li><Link href="/careers" className="text-muted-foreground hover:text-foreground transition-colors">Careers</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
               </ul>
             </div>
@@ -175,8 +174,7 @@ export default function Footer() {
                 <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows</Link></li>
                 <li><Link href="/mentor" className="text-muted-foreground hover:text-foreground transition-colors">Mentor</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
-                <li><Link href="/subscribe" className="text-muted-foreground hover:text-foreground transition-colors">Subscribe</Link></li>
-                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
+                <li><Link href="mailto:info@humanitarians.ai" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
               </ul>
             </div>
 
@@ -216,7 +214,7 @@ export default function Footer() {
               specifically for our organization. We maintain proper documentation for all visual and written content 
               as required by Google Ad Grants Policy. Humanitarians AI respects intellectual property rights and does 
               not use copyrighted materials without appropriate permission or licensing. For questions regarding our 
-              content or to request permission to use our materials, please <Link href="/contact" className="text-primary hover:underline">contact us</Link>.
+              content or to request permission to use our materials, please <Link href="mailto:info@humanitarians.ai" className="text-primary hover:underline">contact us</Link>.
             </p>
           </div>
         </div>
@@ -224,7 +222,7 @@ export default function Footer() {
         {/* Contact Information & Transparency */}
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
-            <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a> | <a href="tel:246-049-5147" className="text-primary hover:underline">246-049-5147</a>
+            <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a>
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 
