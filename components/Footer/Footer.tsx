@@ -172,7 +172,7 @@ export default function Footer() {
               <h3 className="text-lg font-semibold">Get Involved</h3>
               <ul className="space-y-2">
                 <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows</Link></li>
-                <li><Link href="/mentor" className="text-muted-foreground hover:text-foreground transition-colors">Mentor</Link></li>
+                <li><Link href="/mentors" className="text-muted-foreground hover:text-foreground transition-colors">Mentors</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
                 <li><Link href="mailto:info@humanitarians.ai" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
               </ul>

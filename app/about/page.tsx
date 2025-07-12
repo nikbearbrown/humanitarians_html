@@ -111,14 +111,14 @@ export default function AboutPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Nik Bear Brown */}
                 <div className="p-6 border rounded-lg text-center">
-                  <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div>
+                  {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Nik Bear Brown</h3>
                   <p className="text-muted-foreground">Founder/Chief Executive Officer</p>
                 </div>
 
                 {/* Nina Harris */}
                 <div className="p-6 border rounded-lg text-center">
-                  <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div>
+                  {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Nina Harris</h3>
                   <p className="text-muted-foreground">Founder/Chief Creative Officer</p>
                 </div>
@@ -127,14 +127,14 @@ export default function AboutPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Megha Patel */}
                 <div className="p-6 border rounded-lg text-center">
-                  <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div>
+                  {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Megha Patel</h3>
                   <p className="text-muted-foreground">Founder</p>
                 </div>
 
                 {/* Robert Cole Harris */}
                 <div className="p-6 border rounded-lg text-center">
-                  <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div>
+                  {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Robert Cole Harris</h3>
                   <p className="text-muted-foreground">Director/Human Resources</p>
                 </div>
@@ -189,7 +189,7 @@ export default function AboutPage() {
               <SecondaryButton href="/contact">
                 Contact Us
               </SecondaryButton>
-              <SecondaryButton href="/mentor">
+              <SecondaryButton href="/mentors">
                 Become a Mentor
               </SecondaryButton>
             </div>
