@@ -17,8 +17,8 @@ export default function HeroSection() {
               </p>
             </div>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
-              <PrimaryButton href="/projects">
-                Our Projects
+              <PrimaryButton href="/about">
+                About Us
               </PrimaryButton>
               <SecondaryButton href="/contact">
                 Contact Us

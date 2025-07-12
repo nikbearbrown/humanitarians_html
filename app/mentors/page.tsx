@@ -4,7 +4,7 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
-  title: "Mentor Guidelines - Humanitarians AI",
+  title: "Mentors Guidelines - Humanitarians AI",
   description: "Comprehensive guidelines for mentors working with OPT Fellows at Humanitarians AI, a 501(c)(3) nonprofit organization",
 }
 
@@ -14,7 +14,7 @@ export default function MentorPage() {
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Mentor Guidelines</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Mentors Guidelines</h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
             Guidelines for mentors working with OPT Fellows at Humanitarians AI. As a 501(c)(3) nonprofit, we provide valuable practical training opportunities for international students while advancing our mission of using AI for social good.
           </p>

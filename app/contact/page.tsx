@@ -139,7 +139,7 @@ export default function ContactPage() {
                 <SecondaryButton href="mailto:info@humanitarians.ai?subject=Partnership Inquiry">
                   Partnership Inquiry
                 </SecondaryButton>
-                <SecondaryButton href="/mentor">
+                <SecondaryButton href="/mentors">
                   Mentor Guidelines
                 </SecondaryButton>
               </div>
@@ -182,7 +182,7 @@ export default function ContactPage() {
                   <PrimaryButton href="mailto:info@humanitarians.ai" className="text-xs px-3 py-1">
                     Email Info
                   </PrimaryButton>
-                  <SecondaryButton href="/mentor" className="text-xs px-3 py-1">
+                  <SecondaryButton href="/mentors" className="text-xs px-3 py-1">
                     Mentor Info
                   </SecondaryButton>
                 </div>
