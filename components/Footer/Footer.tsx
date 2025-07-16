@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="container px-4 md:px-6 mx-auto py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* Company Info Section */}
-          <div className="md:col-span-4">
+          <div className="md:col-span-3">
             <div className="max-w-sm">
               <Link href="/" className="flex items-center space-x-2">
                 {mounted ? (
@@ -38,7 +38,7 @@ export default function Footer() {
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
                 Humanitarians AI Incorporated
-                <br />A 501(c)(3) nonprofit organization operating fully remote
+                <br />A 501(c)(3) nonprofit organization
                 <br />State ID: 001846362 | EIN: 33-1984805
               </p>
               <div className="mt-6 flex space-x-4 items-center">
@@ -135,7 +135,7 @@ export default function Footer() {
           </div>
 
           {/* Links Sections - First Row */}
-          <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-5 gap-8">
+          <div className="md:col-span-9 grid grid-cols-1 md:grid-cols-6 gap-8">
             {/* Company */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Company</h3>
@@ -143,6 +143,16 @@ export default function Footer() {
                 <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
                 <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
                 <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
+              </ul>
+            </div>
+
+            {/* Projects - New Column */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Projects</h3>
+              <ul className="space-y-2">
+                <li><Link href="/madison" className="text-muted-foreground hover:text-foreground transition-colors">Madison</Link></li>
+                <li><Link href="/mycroft" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</Link></li>
+                <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
               </ul>
             </div>
 
