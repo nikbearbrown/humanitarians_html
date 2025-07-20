@@ -205,9 +205,9 @@ export default function ContactPage() {
                              <div className="p-6 border rounded-lg text-center">
                  <h3 className="text-lg font-bold mb-3">GitHub Projects</h3>
                  <p className="text-sm text-muted-foreground mb-4">Explore our open-source work</p>
-                 <SecondaryButton href="https://github.com/nikbearbrown/Humanitarians_AI">
-                   View GitHub
-                 </SecondaryButton>
+<SecondaryButton href="https://github.com/Humanitariansai/">
+  View GitHub
+</SecondaryButton>
                </div>
               
               <div className="p-6 border rounded-lg text-center">
