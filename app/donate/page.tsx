@@ -13,7 +13,6 @@ export default function DonatePage() {
             healthcare, nonprofits, and the arts.
           </p>
         </div>
-
         {/* Primary Donation Options - Card Layout */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {/* GoFundMe Card */}
@@ -30,7 +29,6 @@ export default function DonatePage() {
               </div>
             </div>
           </div>
-
           {/* PayPal Card */}
           <div className="border rounded-lg p-8 bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
             <div className="text-center space-y-6">
@@ -46,7 +44,6 @@ export default function DonatePage() {
             </div>
           </div>
         </div>
-
         {/* Additional Support Options */}
         <div className="mt-16 bg-gray-100 dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">Other Ways to Support</h2>
@@ -56,14 +53,26 @@ export default function DonatePage() {
               <p className="mb-4 text-muted-foreground">
                 Partner with us to support our mission and demonstrate your commitment to ethical AI.
               </p>
-              <Button variant="outline" className="dark:border-gray-700">Learn More</Button>
+              <Button 
+                variant="outline" 
+                className="dark:border-gray-700"
+                onClick={() => window.location.href = "mailto:info@humanitarins.ai"}
+              >
+                Learn More
+              </Button>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2">Volunteer</h3>
               <p className="mb-4 text-muted-foreground">
                 Contribute your skills and time to help us develop AI solutions for social good.
               </p>
-              <Button variant="outline" className="dark:border-gray-700">Get Involved</Button>
+              <Button 
+                variant="outline" 
+                className="dark:border-gray-700"
+                onClick={() => window.location.href = "https://www.humanitarians.ai/fellows"}
+              >
+                Get Involved
+              </Button>
             </div>
           </div>
         </div>
