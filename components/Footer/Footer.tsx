@@ -163,7 +163,7 @@ export default function Footer() {
            <div className="space-y-4">
              <h3 className="text-lg font-semibold">Programs</h3>
              <ul className="space-y-2">
-               <li><Link href="/fellows-program" className="text-muted-foreground hover:text-foreground transition-colors">Fellows Program</Link></li>
+               <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows Program</Link></li>
                <li><Link href="/lyrical-literacy" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</Link></li>
                <li><Link href="/ai-for-good" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good</Link></li>
                <li><Link href="/botspeak" className="text-muted-foreground hover:text-foreground transition-colors">BotSpeak</Link></li>
