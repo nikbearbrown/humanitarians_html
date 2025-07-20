@@ -22,7 +22,7 @@ export default function LyricalLiteracyPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/juYjI3cncug?si=ei44HdIgJONs2N-_"
+              src="https://www.youtube.com/embed/videoseries?si=EXHOsuACAVlICiu3&amp;list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -175,11 +175,11 @@ export default function LyricalLiteracyPage() {
               <SecondaryButton href="/donate">
                 Support the Project
               </SecondaryButton>
-              <PrimaryButton href="/programs/lyrical-literacy/lyrical-literacy-details">
-                Learn More
+              <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
+                Lyrical Literacy YouTube
               </PrimaryButton>
-              <SecondaryButton href="/programs/lyrical-literacy/explore">
-                Explore Project
+              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
+                GitHub Repository
               </SecondaryButton>
             </div>
           </section>
@@ -187,4 +187,4 @@ export default function LyricalLiteracyPage() {
       </div>
     </div>
   )
-} 
+}
