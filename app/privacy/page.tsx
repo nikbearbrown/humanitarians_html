@@ -79,7 +79,7 @@ export default function PrivacyPolicyPage() {
             <p>
               We may use cookies and similar tracking technologies to access or store information. Specific information about how we use 
               such technologies and how you can refuse certain cookies is set out in our{' '}
-              <Link href="/cookies" className="text-primary hover:underline">Cookie Policy</Link>.
+              <Link href="/privacy#cookies" className="text-primary hover:underline">Cookie Policy</Link>.
             </p>
           </section>
 
