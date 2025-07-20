@@ -154,6 +154,7 @@ export default function Footer() {
                <li><Link href="/mycroft" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</Link></li>
                <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
                <li><Link href="/northeastern" className="text-muted-foreground hover:text-foreground transition-colors">Northeastern</Link></li>
+               <li><Link href="/dayhoff" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
              </ul>
            </div>
