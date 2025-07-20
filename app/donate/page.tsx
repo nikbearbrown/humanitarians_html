@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button"
 import GoFundMeWidget from "@/components/GoFundMeWidget"
 import PayPalDonateButton from "@/components/PayPalDonateButton"
 import Link from "next/link"
-
 export default function DonatePage() {
   return (
     <div className="container mx-auto px-4 py-12">
@@ -54,7 +53,7 @@ export default function DonatePage() {
               <p className="mb-4 text-muted-foreground">
                 Partner with us to support our mission and demonstrate your commitment to ethical AI.
               </p>
-              <Link href="mailto:info@humanitarins.ai">
+              <Link href="mailto:info@humanitarians.ai">
                 <Button variant="outline" className="dark:border-gray-700">
                   Learn More
                 </Button>
