@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import GoFundMeWidget from "@/components/GoFundMeWidget"
 import PayPalDonateButton from "@/components/PayPalDonateButton"
+import Link from "next/link"
 
 export default function DonatePage() {
   return (
@@ -53,26 +54,22 @@ export default function DonatePage() {
               <p className="mb-4 text-muted-foreground">
                 Partner with us to support our mission and demonstrate your commitment to ethical AI.
               </p>
-              <Button 
-                variant="outline" 
-                className="dark:border-gray-700"
-                onClick={() => window.location.href = "mailto:info@humanitarins.ai"}
-              >
-                Learn More
-              </Button>
+              <Link href="mailto:info@humanitarins.ai">
+                <Button variant="outline" className="dark:border-gray-700">
+                  Learn More
+                </Button>
+              </Link>
             </div>
             <div>
               <h3 className="text-xl font-bold mb-2">Volunteer</h3>
               <p className="mb-4 text-muted-foreground">
                 Contribute your skills and time to help us develop AI solutions for social good.
               </p>
-              <Button 
-                variant="outline" 
-                className="dark:border-gray-700"
-                onClick={() => window.location.href = "https://www.humanitarians.ai/fellows"}
-              >
-                Get Involved
-              </Button>
+              <Link href="https://www.humanitarians.ai/fellows">
+                <Button variant="outline" className="dark:border-gray-700">
+                  Get Involved
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
