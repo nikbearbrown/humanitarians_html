@@ -78,7 +78,7 @@ export default function MentorPage() {
                   <div>
                     <h4 className="font-semibold mb-2">Monitor Documentation</h4>
                     <ul className="text-sm space-y-1 ml-4">
-                      <li>• Regularly review the fellow's documentation on GitHub as described at: <Link href="https://github.com/nikbearbrown/Humanitarians_AI/tree/main/Fellows" className="text-primary hover:underline">GitHub Fellows Directory</Link></li>
+                      <li>• Regularly review the fellow's documentation on GitHub as described at: <Link href="https://github.com/Humanitariansai/Fellows" className="text-primary hover:underline">GitHub Fellows Directory</Link></li>
                       <li>• Promptly inform Humanitarians AI if a fellow is not properly documenting their work</li>
                       <li>• Ensure fellows understand the importance of documentation for OPT compliance</li>
                     </ul>
@@ -362,7 +362,7 @@ export default function MentorPage() {
               <SecondaryButton href="/contact">
                 Contact Us
               </SecondaryButton>
-              <PrimaryButton href="https://github.com/nikbearbrown/Humanitarians_AI/tree/main/Fellows">
+              <PrimaryButton href="https://github.com/Humanitariansai/Fellows">
                 View Fellows GitHub
               </PrimaryButton>
             </div>
@@ -371,4 +371,4 @@ export default function MentorPage() {
       </div>
     </div>
   )
-} 
+}
