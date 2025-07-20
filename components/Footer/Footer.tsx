@@ -150,12 +150,12 @@ export default function Footer() {
            <div className="space-y-4">
              <h3 className="text-lg font-semibold">Projects</h3>
              <ul className="space-y-2">
+               <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
+               <li><Link href="/dayhoff" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
                <li><Link href="/madison" className="text-muted-foreground hover:text-foreground transition-colors">Madison</Link></li>
                <li><Link href="/mycroft" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</Link></li>
-               <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
                <li><Link href="/northeastern" className="text-muted-foreground hover:text-foreground transition-colors">Northeastern</Link></li>
-               <li><Link href="/dayhoff" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
-               <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
+               <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
              </ul>
            </div>
 
