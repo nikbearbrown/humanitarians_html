@@ -15,162 +15,162 @@ export default function ProjectsPage() {
     {
       id: "aiskunkworks",
       title: "AI Skunkworks",
-      description: "An experimental lab for rapid AI innovation and prototyping.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      githubUrl: "https://github.com/Humanitariansai/AISkunkworks",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "AI Skunkworks is our experimental innovation lab focused on rapid prototyping of novel AI applications. This initiative brings together researchers, engineers, and domain experts to tackle complex challenges through creative AI solutions.",
+      description: "A distinctive experiential learning community at Northeastern University that bridges theoretical knowledge and practical application in artificial intelligence. Through our \"Learn AI by Doing AI\" philosophy, students develop real-world AI expertise while building impressive portfolios before graduation.",
+      videoId: "WKW12dO9NOc?si=2C7ylVc1ICxhvrT4",
+      githubUrl: "https://github.com/Humanitariansai/AI_Skunkworks",
+      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB8Cie-7oBFA6UlRBN4q7hmG",
+      fullDescription: "AI Skunkworks at Northeastern University is a distinctive experiential learning community that bridges theoretical knowledge and practical application in artificial intelligence. Unlike Humanitarians AI which works with graduates, AI Skunkworks enables current students to \"Code for a Cause\" and \"Learn AI by Doing AI\" through extracurricular and summer work on real-world projects.",
       keyFeatures: [
         {
-          title: "Rapid Prototyping",
-          description: "Accelerated development cycles for quick validation of AI concepts and approaches."
+          title: "Learning by Doing",
+          description: "Students gain expertise by working on authentic AI projects with real-world applications rather than just theoretical exercises."
         },
         {
-          title: "Cross-Disciplinary Collaboration",
-          description: "Bringing together experts from diverse fields to tackle complex problems."
+          title: "Trust but Verify",
+          description: "We encourage critical thinking and rigorous validation of AI solutions through systematic testing and evaluation."
         },
         {
-          title: "Open Innovation",
-          description: "Transparent development with shared learnings and open-source components."
+          title: "Try It",
+          description: "We create a safe space for experimentation, innovation, and productive failure where students can learn from both successes and mistakes."
         },
         {
-          title: "Impact Assessment",
-          description: "Rigorous evaluation of social and ethical implications of AI innovations."
+          title: "Cross-Disciplinary Integration",
+          description: "We bring together students from Computer Science, Arts, Business, Life Sciences, and Humanities to tackle meaningful challenges across domains."
         }
       ]
     },
     {
       id: "madison",
       title: "Madison",
-      description: "An open-source, agent-based AI marketing intelligence framework designed to transform branding, marketing, and advertising.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      description: "An open-source, agent-based AI marketing intelligence framework designed to transform branding, marketing, and advertising. Madison organizes specialized AI agents that collaborate under an orchestration layer to deliver cohesive, data-driven marketing solutions.",
+      videoId: "videoseries?si=L8wvKwPE_F37cgiD&amp;list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
       githubUrl: "https://github.com/Humanitariansai/Madison",
       youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
       fullDescription: "Madison (informally known as \"Mads and Madison\") is an open-source, agent-based AI marketing intelligence framework that integrates specialized AI agents to deliver comprehensive marketing solutions. The framework maps projects to agent layers, details core technologies, and outlines implementation strategies for data-driven marketing. This experimental project emphasizes collaborative learning and innovation, allowing marketers to build tailored solutions for branding, customer experience, content creation, and market research through an integrated agent ecosystem.",
       keyFeatures: [
         {
-          title: "Agent Orchestration",
-          description: "Coordinates all agents through cross-project validation, dynamic resource allocation, and pattern recognition across the marketing ecosystem."
+          title: "Intelligence Agents",
+          description: "Gather and analyze data to provide actionable insights into market dynamics and consumer sentiment through reputation monitoring and trend analysis."
         },
         {
-          title: "Open Source Framework",
-          description: "Transparent, collaborative development model that enables customization and integration with existing marketing technology stacks."
+          title: "Content Agents",
+          description: "Create, optimize, and distribute marketing materials across channels with consistent brand voice and multi-platform adaptation."
         },
         {
-          title: "Real-Time Intelligence",
-          description: "Continuous monitoring of market dynamics, social sentiment, and competitive landscapes with automated report generation."
+          title: "Research Agents",
+          description: "Process data to uncover customer insights through automated survey analysis and synthetic persona development."
         },
         {
-          title: "Scalable Architecture",
-          description: "Supports cloud, on-premises, or hybrid deployment with API-based integration and human-in-the-loop validation."
+          title: "Experience Agents",
+          description: "Enhance customer interactions through AI concierge systems and customer journey transformation."
         }
       ]
     },
     {
       id: "dayhoff",
       title: "Dayhoff",
-      description: "A bioinformatics platform leveraging AI for genomic analysis and protein structure prediction.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      description: "An open-source, agent-based AI bioinformatics framework for computational biology, epidemiology, and public health. Named after pioneering scientist Margaret Belle Dayhoff, this framework orchestrates specialized AI agents to deliver cohesive, data-driven solutions for biological and health sciences.",
+      videoId: "videoseries?si=caS7A9UMCFewuuRB&amp;list=PLgOGgHS58rB-sBjm4oEfMfFXcYZf89IDo",
       githubUrl: "https://github.com/Humanitariansai/Dayhoff",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "Dayhoff is our cutting-edge bioinformatics platform that uses advanced AI models to accelerate genomic analysis and protein structure prediction. Named after Margaret Oakley Dayhoff, a pioneer in applying computational methods to biochemistry, this project aims to democratize access to powerful bioinformatics tools.",
+      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-sBjm4oEfMfFXcYZf89IDo&si=caS7A9UMCFewuuRB",
+      fullDescription: "The Dayhoff framework (inspired by Margaret Belle Dayhoff, the pioneer in bioinformatics) is an open-source platform for AI-powered biological and public health intelligence. This experimental project creates an ecosystem of specialized agents orchestrated by a central coordination layer to tackle complex challenges in biology, epidemiology, and public health.",
       keyFeatures: [
         {
-          title: "Protein Structure Prediction",
-          description: "Advanced deep learning models for accurate 3D protein structure prediction from amino acid sequences."
+          title: "Genomic Analysis Agents",
+          description: "Process and interpret genetic sequences, identify patterns, and predict structural and functional properties of biomolecules."
         },
         {
-          title: "Genomic Analysis Pipeline",
-          description: "Streamlined workflows for processing and analyzing large genomic datasets with minimal computational overhead."
+          title: "Epidemiological Agents",
+          description: "Track disease spread, analyze transmission patterns, and model potential interventions for public health crises."
         },
         {
-          title: "Interactive Visualization",
-          description: "Intuitive interfaces for exploring protein structures and genomic relationships."
+          title: "Clinical Intelligence Agents",
+          description: "Analyze medical literature, patient data, and treatment outcomes to identify effective health interventions."
         },
         {
-          title: "Collaborative Research Platform",
-          description: "Tools for teams to collaboratively analyze and annotate biological data across institutions."
+          title: "Molecular Modeling Agents",
+          description: "Simulate protein folding, drug interactions, and molecular dynamics to accelerate discovery processes."
         }
       ]
     },
     {
       id: "mycroft",
       title: "Mycroft",
-      description: "An AI-powered research assistant for academic and scientific discovery.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      githubUrl: "https://github.com/Humanitariansai/Mycroft",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "Mycroft serves as an intelligent research assistant designed to accelerate scientific discovery through advanced AI capabilities. This system helps researchers navigate vast scientific literature, identify patterns across disciplines, and generate hypotheses based on existing knowledge.",
+      description: "An open source educational experiment in AI-powered investment intelligence. Named after Sherlock Holmes's enigmatic elder brother, the Mycroft framework explores how a ecosystem of specialized agents might work in concert to analyze the AI sector while implementing disciplined investment strategies.",
+      videoId: "1H0hsBU_foA?si=lrMunwT8GKiX8f6S",
+      githubUrl: "https://github.com/nikbearbrown/Mycroft",
+      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB_nThkcMlBVf4Y6QLB9Bi3K",
+      fullDescription: "The Mycroft framework represents an educational experiment in AI-powered investment intelligence. With its tagline \"Using AI to Invest in AI,\" this open-source platform explores how a ecosystem of specialized agents might work in concert to analyze the rapidly evolving artificial intelligence sector while implementing disciplined investment strategies.",
       keyFeatures: [
         {
-          title: "Literature Analysis",
-          description: "Semantic processing of scientific papers to extract key findings, methodologies, and connections."
+          title: "Analytical Agents",
+          description: "Gathering, processing, and interpreting vast amounts of information about AI companies and their competitive landscape."
         },
         {
-          title: "Cross-Disciplinary Connections",
-          description: "Identification of non-obvious relationships between research areas and findings."
+          title: "Portfolio Agents",
+          description: "Testing approaches to transform knowledge into actionable investment strategies with proper diversification and risk management."
         },
         {
-          title: "Hypothesis Generation",
-          description: "AI-powered suggestion of research directions based on analysis of existing literature and data."
+          title: "Advisory Agents",
+          description: "Exploring human-AI interaction through conversational financial advising, goal-setting, and educational components."
         },
         {
-          title: "Knowledge Graph Integration",
-          description: "Visualization and navigation of interconnected research concepts and findings."
+          title: "Intelligence Agents",
+          description: "Maintaining market awareness by monitoring news, social sentiment, financial reports, and regulatory developments."
         }
       ]
     },
     {
       id: "northeastern",
-      title: "Northeastern",
-      description: "A climate modeling framework using AI to improve prediction accuracy and accessibility.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      githubUrl: "https://github.com/Humanitariansai/Northeastern",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "Northeastern is our advanced climate modeling framework that combines traditional physics-based models with machine learning to improve prediction accuracy and accessibility. This project aims to democratize climate science by making sophisticated models more computationally efficient and interpretable.",
+      title: "Northeastern & Humanitarians AI",
+      description: "\"Learn AI by Doing AI\" through our collaborative \"Code for a Cause\" projects where Northeastern University students and Humanitarians AI build impactful AI applications across education, research, and community service.",
+      videoId: "videoseries?si=dYCuV6c5VWGJeLsC&amp;list=PLgOGgHS58rB_f-rJIRNAH2RscINiV4uw3",
+      githubUrl: "https://github.com/Humanitariansai/",
+      youtubeUrl: "https://www.youtube.com/@humanitariansai",
+      fullDescription: "Northeastern University and Humanitarians AI have joined forces to create a series of innovative \"Code for a Cause\" projects where current students and recent graduates gain hands-on experience building AI applications that make a real difference in education and society.",
       keyFeatures: [
         {
-          title: "Hybrid Climate Modeling",
-          description: "Integration of physics-based models with deep learning to improve prediction accuracy while maintaining scientific validity."
+          title: "Ada: Calculus Learning Assistant",
+          description: "Provides step-by-step guidance, scaffolding, and Socratic questioning to help students understand complex calculus concepts without giving direct answers."
         },
         {
-          title: "Downscaling Engine",
-          description: "AI-powered techniques to generate high-resolution local predictions from global climate models."
+          title: "Newton: Interactive Physics Tutor",
+          description: "Enhances learning with dynamic graphs and interactive simulations, providing students with visual and hands-on ways to explore complex physics concepts."
         },
         {
-          title: "Uncertainty Quantification",
-          description: "Robust methods for assessing and communicating prediction confidence and scenario probabilities."
+          title: "Grace: Algorithms Visualization Tool",
+          description: "Simulates algorithms and incorporates interactive visualizations to help students grasp abstract algorithmic concepts more effectively."
         },
         {
-          title: "Accessible Interfaces",
-          description: "User-friendly tools for policymakers and researchers to explore climate scenarios without specialized expertise."
+          title: "CatBot: Adoption Assistant",
+          description: "Helps cats find forever homes by streamlining the adoption process, matching potential adopters with suitable cats, and promoting special needs adoption."
         }
       ]
     },
     {
       id: "popper",
-      title: "Popper",
-      description: "An AI framework for scientific hypothesis testing and experimental design optimization.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      title: "Popper Framework",
+      description: "An open-source framework for computational skepticism and AI validation. Named after philosopher Karl Popper, this framework embraces the scientific method by rigorously examining evidence both for and against AI systems.",
+      videoId: "videoseries?si=jDMnuKG_W6_6l1Rh&list=PLgOGgHS58rB-_qAesCOzXfu1394C8G4v_",
       githubUrl: "https://github.com/Humanitariansai/Popper",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "Named after philosopher of science Karl Popper, this project develops AI systems to assist in the formulation, testing, and refinement of scientific hypotheses. Popper helps researchers design optimal experiments, analyze results, and iterate on theories based on empirical evidence.",
+      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB-_qAesCOzXfu1394C8G4v_",
+      fullDescription: "The Popper framework is an open-source platform for systematic AI validation and computational skepticism. Rather than claiming models are \"correct,\" Popper establishes a systematic approach to identifying strengths, weaknesses, biases, and inconsistencies in AI systems through an ecosystem of specialized validation agents orchestrated by a central verification layer.",
       keyFeatures: [
         {
-          title: "Hypothesis Formalization",
-          description: "Tools to express scientific hypotheses in structured, testable formats with clear predictions."
+          title: "Balanced Evidence Assessment",
+          description: "Methodically gather and evaluate evidence both supporting and challenging AI systems."
         },
         {
-          title: "Experimental Design Optimization",
-          description: "AI-powered suggestions for experimental protocols that maximize information gain while minimizing resources."
+          title: "Conjecture and Refutation",
+          description: "Propose potential strengths and weaknesses, then test them systematically."
         },
         {
-          title: "Bayesian Analysis Framework",
-          description: "Robust statistical methods for updating confidence in hypotheses based on experimental results."
+          title: "Critical Rationalism",
+          description: "Subject all claims to rigorous scrutiny, regardless of source or confidence."
         },
         {
-          title: "Reproducibility Engine",
-          description: "Systems to ensure complete documentation of methods, data, and analysis for transparent, reproducible science."
+          title: "Scientific Skepticism",
+          description: "Embrace doubt as the path to reliable knowledge while recognizing corroborating evidence."
         }
       ]
     }
