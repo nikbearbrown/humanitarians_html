@@ -13,6 +13,33 @@ export default function ProjectsPage() {
   // Projects data array - each object represents a project
   const projects = [
     {
+      id: "ai-for-good",
+      title: "AI for Good",
+      description: "An initiative focused on applying artificial intelligence technologies to address humanitarian challenges and promote positive social impact across various domains.",
+      videoId: "videoseries?si=L8wvKwPE_F37cgiD&amp;list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      githubUrl: "https://github.com/Humanitariansai/AI-for-Good",
+      youtubeUrl: "https://www.youtube.com/@humanitariansai",
+      fullDescription: "AI for Good is our flagship initiative that harnesses the power of artificial intelligence to address pressing humanitarian challenges. This program spans multiple domains including healthcare, education, environmental conservation, and disaster response, with a focus on creating sustainable and accessible solutions for underserved communities.",
+      keyFeatures: [
+        {
+          title: "Collaborative Problem-Solving",
+          description: "Bringing together technologists, domain experts, and community stakeholders to co-create effective AI solutions."
+        },
+        {
+          title: "Ethical AI Development",
+          description: "Prioritizing fairness, transparency, and accountability in all projects to ensure AI benefits everyone."
+        },
+        {
+          title: "Community-Centered Design",
+          description: "Developing solutions based on deep understanding of community needs and contexts."
+        },
+        {
+          title: "Knowledge Sharing",
+          description: "Creating open resources and education materials to democratize access to AI for social impact."
+        }
+      ]
+    },
+    {
       id: "aiskunkworks",
       title: "AI Skunkworks",
       description: "A distinctive experiential learning community at Northeastern University that bridges theoretical knowledge and practical application in artificial intelligence. Through our \"Learn AI by Doing AI\" philosophy, students develop real-world AI expertise while building impressive portfolios before graduation.",
@@ -40,29 +67,29 @@ export default function ProjectsPage() {
       ]
     },
     {
-      id: "madison",
-      title: "Madison",
-      description: "An open-source, agent-based AI marketing intelligence framework designed to transform branding, marketing, and advertising. Madison organizes specialized AI agents that collaborate under an orchestration layer to deliver cohesive, data-driven marketing solutions.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&amp;list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      githubUrl: "https://github.com/Humanitariansai/Madison",
-      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      fullDescription: "Madison (informally known as \"Mads and Madison\") is an open-source, agent-based AI marketing intelligence framework that integrates specialized AI agents to deliver comprehensive marketing solutions. The framework maps projects to agent layers, details core technologies, and outlines implementation strategies for data-driven marketing. This experimental project emphasizes collaborative learning and innovation, allowing marketers to build tailored solutions for branding, customer experience, content creation, and market research through an integrated agent ecosystem.",
+      id: "botspeak",
+      title: "Botspeak",
+      description: "Empowering individuals through the transformative power of AI fluency, fostering effective human-AI collaboration. An innovative program that combines theoretical frameworks with practical skills to enhance your ability to work with AI systems.",
+      videoId: "LeZpm76Eszc?si=_PwdhcxEHn_tBs-V",
+      githubUrl: "https://github.com/Humanitariansai/Botspeak",
+      youtubeUrl: "https://www.youtube.com/@humanitariansai",
+      fullDescription: "Botspeak is a comprehensive AI fluency framework that transforms you from an AI tourist into a fluent native. Through our YouTube series, books, and articles, we cultivate your ability to think alongside AI, distributing cognitive tasks strategically, communicating intentions clearly, evaluating outputs critically, and using these powerful tools responsibly.",
       keyFeatures: [
         {
-          title: "Intelligence Agents",
-          description: "Gather and analyze data to provide actionable insights into market dynamics and consumer sentiment through reputation monitoring and trend analysis."
+          title: "Strategic Delegation",
+          description: "Thoughtfully distributing tasks between human and AI based on comparative strengths."
         },
         {
-          title: "Content Agents",
-          description: "Create, optimize, and distribute marketing materials across channels with consistent brand voice and multi-platform adaptation."
+          title: "Effective Communication",
+          description: "Crafting precise prompts with clear intent and context for optimal AI response."
         },
         {
-          title: "Research Agents",
-          description: "Process data to uncover customer insights through automated survey analysis and synthetic persona development."
+          title: "Critical Evaluation",
+          description: "Systematically assessing AI outputs for accuracy and bias through multiple sources."
         },
         {
-          title: "Experience Agents",
-          description: "Enhance customer interactions through AI concierge systems and customer journey transformation."
+          title: "Ethical Reasoning",
+          description: "Maintaining accountability and managing privacy boundaries in AI collaboration."
         }
       ]
     },
@@ -90,6 +117,60 @@ export default function ProjectsPage() {
         {
           title: "Molecular Modeling Agents",
           description: "Simulate protein folding, drug interactions, and molecular dynamics to accelerate discovery processes."
+        }
+      ]
+    },
+    {
+      id: "lyrical-literacy",
+      title: "Lyrical Literacy",
+      description: "Empowering youth through the transformative power of music and poetry, fostering creativity and self-expression. An innovative program that combines AI with creative writing and music to enhance literacy skills.",
+      videoId: "juYjI3cncug?si=WqvsOj98AZuo_B-V",
+      githubUrl: "https://github.com/Humanitariansai/Lyrical-Literacy",
+      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP",
+      fullDescription: "Lyrical Literacy is a pioneering initiative from Humanitarians AI that harnesses artificial intelligence to enhance cognitive and language development through music. This research-based program explores the powerful intersection of neuroscience, music, and education to create personalized learning experiences for diverse populations.",
+      keyFeatures: [
+        {
+          title: "AI-Generated Musical Content",
+          description: "Custom-created songs tailored to individual learning objectives, cultural contexts, and developmental needs that leverage the power of music to enhance memory formation and retention."
+        },
+        {
+          title: "Creative Storytelling",
+          description: "Interactive storybooks with accompanying musical elements and audiobooks that incorporate rhythmic and melodic components, supporting both literacy development and creative expression."
+        },
+        {
+          title: "Personalized Learning",
+          description: "AI algorithms that adapt content based on learning progress, preferences, and specific developmental goals, creating customized learning paths for each individual."
+        },
+        {
+          title: "Music Integration",
+          description: "Materials designed for diverse populations, including those with learning differences, language barriers, or neurodevelopmental conditions, making education more accessible and engaging for all learners."
+        }
+      ]
+    },
+    {
+      id: "madison",
+      title: "Madison",
+      description: "An open-source, agent-based AI marketing intelligence framework designed to transform branding, marketing, and advertising. Madison organizes specialized AI agents that collaborate under an orchestration layer to deliver cohesive, data-driven marketing solutions.",
+      videoId: "videoseries?si=L8wvKwPE_F37cgiD&amp;list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      githubUrl: "https://github.com/Humanitariansai/Madison",
+      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
+      fullDescription: "Madison (informally known as \"Mads and Madison\") is an open-source, agent-based AI marketing intelligence framework that integrates specialized AI agents to deliver comprehensive marketing solutions. The framework maps projects to agent layers, details core technologies, and outlines implementation strategies for data-driven marketing. This experimental project emphasizes collaborative learning and innovation, allowing marketers to build tailored solutions for branding, customer experience, content creation, and market research through an integrated agent ecosystem.",
+      keyFeatures: [
+        {
+          title: "Intelligence Agents",
+          description: "Gather and analyze data to provide actionable insights into market dynamics and consumer sentiment through reputation monitoring and trend analysis."
+        },
+        {
+          title: "Content Agents",
+          description: "Create, optimize, and distribute marketing materials across channels with consistent brand voice and multi-platform adaptation."
+        },
+        {
+          title: "Research Agents",
+          description: "Process data to uncover customer insights through automated survey analysis and synthetic persona development."
+        },
+        {
+          title: "Experience Agents",
+          description: "Enhance customer interactions through AI concierge systems and customer journey transformation."
         }
       ]
     },
