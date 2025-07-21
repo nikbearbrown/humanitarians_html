@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google"
 import Header from "@/components/Header/Header"
 import Footer from "@/components/Footer/Footer"
+import { Analytics } from '@vercel/analytics/react'
 import "./globals.css"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +31,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
