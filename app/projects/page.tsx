@@ -93,35 +93,33 @@ export default function ProjectsPage() {
         }
       ]
     },
-// Add this to the projects array in ProjectsPage.js
-{
-  id: "dewey",
-  title: "Dewey",
-  description: "An open-source, agent-based AI educational framework designed to transform how we learn and teach. Named after educational philosopher John Dewey, this framework orchestrates specialized AI agents to deliver personalized, interactive educational experiences across disciplines.",
-  videoId: "videoseries?si=zLM5TzprVSw2H90T&amp;list=PLgOGgHS58rB_FwoBNQrC-4FvHb9lvN3kt",
-  githubUrl: "https://github.com/Humanitariansai/Dewey",
-  youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB_FwoBNQrC-4FvHb9lvN3kt",
-  fullDescription: "The Dewey framework is an open-source platform for AI-powered educational intelligence. This experimental project creates an ecosystem of specialized educational agents orchestrated by a central coordination layer to transform learning experiences for students, educators, and professionals. Led by Professor Nik Bear Brown, PhD, MBA, this educational experiment emphasizes learning through building, inviting contributors to discover effective approaches through practical implementation.",
-  keyFeatures: [
     {
-      title: "Content Generation Agents",
-      description: "Create personalized learning materials, intelligent AI books, and dynamic educational content tailored to individual learning styles and needs."
+      id: "dewey",
+      title: "Dewey",
+      description: "An open-source, agent-based AI educational framework designed to transform how we learn and teach. Named after educational philosopher John Dewey, this framework orchestrates specialized AI agents to deliver personalized, interactive educational experiences across disciplines.",
+      videoId: "videoseries?si=zLM5TzprVSw2H90T&amp;list=PLgOGgHS58rB_FwoBNQrC-4FvHb9lvN3kt",
+      githubUrl: "https://github.com/Humanitariansai/Dewey",
+      youtubeUrl: "https://youtube.com/playlist?list=PLgOGgHS58rB_FwoBNQrC-4FvHb9lvN3kt",
+      fullDescription: "The Dewey framework is an open-source platform for AI-powered educational intelligence. This experimental project creates an ecosystem of specialized educational agents orchestrated by a central coordination layer to transform learning experiences for students, educators, and professionals. Led by Professor Nik Bear Brown, PhD, MBA, this educational experiment emphasizes learning through building, inviting contributors to discover effective approaches through practical implementation.",
+      keyFeatures: [
+        {
+          title: "Content Generation Agents",
+          description: "Create personalized learning materials, intelligent AI books, and dynamic educational content tailored to individual learning styles and needs."
+        },
+        {
+          title: "Tutorial Agents",
+          description: "Guide learners through complex topics with step-by-step explanations, Socratic questioning, and adaptive scaffolding techniques."
+        },
+        {
+          title: "Assessment Agents",
+          description: "Analyze learner performance, provide formative feedback, and adapt content difficulty based on demonstrated understanding."
+        },
+        {
+          title: "Simulation Agents",
+          description: "Create interactive learning environments, algorithm visualizations, and scientific simulations for hands-on experiential learning."
+        }
+      ]
     },
-    {
-      title: "Tutorial Agents",
-      description: "Guide learners through complex topics with step-by-step explanations, Socratic questioning, and adaptive scaffolding techniques."
-    },
-    {
-      title: "Assessment Agents",
-      description: "Analyze learner performance, provide formative feedback, and adapt content difficulty based on demonstrated understanding."
-    },
-    {
-      title: "Simulation Agents",
-      description: "Create interactive learning environments, algorithm visualizations, and scientific simulations for hands-on experiential learning."
-    }
-  ]
-},
-    
     {
       id: "lyrical-literacy",
       title: "Lyrical Literacy",
@@ -256,39 +254,35 @@ export default function ProjectsPage() {
           description: "Embrace doubt as the path to reliable knowledge while recognizing corroborating evidence."
         }
       ]
+    },
+    {
+      id: "raman-effect",
+      title: "The RAMAN Effect",
+      description: "An open-source platform revolutionizing public health through AI-enhanced Wastewater-Based Epidemiology (WBE) using Surface-Enhanced Raman Spectroscopy (SERS). This project develops sophisticated AI software capable of analyzing large volumes of spectral data to detect pathogens and pollutants with unprecedented accuracy.",
+      videoId: "3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
+      githubUrl: "https://github.com/Humanitariansai/RAMAN-Effect",
+      youtubeUrl: "https://www.youtube.com/embed/3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
+      fullDescription: "The RAMAN Effect project leverages Surface-Enhanced Raman Spectroscopy (SERS) combined with artificial intelligence to revolutionize wastewater-based epidemiology and public health monitoring. Named after Sir C. V. Raman, who discovered the Raman scattering phenomenon in 1928, this initiative aims to develop cutting-edge AI software capable of analyzing complex spectral data from wastewater samples to detect pathogens, pollutants, and substances of concern with unprecedented sensitivity and specificity.",
+      keyFeatures: [
+        {
+          title: "Spectral Data Processing",
+          description: "Advanced algorithms for cleaning, normalizing, and extracting features from raw Raman spectral data obtained from wastewater samples."
+        },
+        {
+          title: "Pattern Recognition",
+          description: "Deep learning models specifically trained to identify characteristic spectral signatures of pathogens, including viruses, bacteria, and emerging variants."
+        },
+        {
+          title: "Multi-Analyte Detection",
+          description: "Systems capable of simultaneously identifying multiple substances in complex wastewater matrices, from pharmaceuticals to pollutants and pathogens."
+        },
+        {
+          title: "Real-time Monitoring",
+          description: "Infrastructure for continuous sampling and analysis, providing near-real-time insights into community health and environmental conditions."
+        }
+      ]
     }
-  ],
-    
-{
-  id: "raman-effect",
-  title: "The RAMAN Effect",
-  description: "An open-source platform revolutionizing public health through AI-enhanced Wastewater-Based Epidemiology (WBE) using Surface-Enhanced Raman Spectroscopy (SERS). This project develops sophisticated AI software capable of analyzing large volumes of spectral data to detect pathogens and pollutants with unprecedented accuracy.",
-  videoId: "3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
-  githubUrl: "https://github.com/Humanitariansai/RAMAN-Effect",
-  youtubeUrl: "https://www.youtube.com/embed/3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
-  fullDescription: "The RAMAN Effect project leverages Surface-Enhanced Raman Spectroscopy (SERS) combined with artificial intelligence to revolutionize wastewater-based epidemiology and public health monitoring. Named after Sir C. V. Raman, who discovered the Raman scattering phenomenon in 1928, this initiative aims to develop cutting-edge AI software capable of analyzing complex spectral data from wastewater samples to detect pathogens, pollutants, and substances of concern with unprecedented sensitivity and specificity.",
-  keyFeatures: [
-    {
-      title: "Spectral Data Processing",
-      description: "Advanced algorithms for cleaning, normalizing, and extracting features from raw Raman spectral data obtained from wastewater samples."
-    },
-    {
-      title: "Pattern Recognition",
-      description: "Deep learning models specifically trained to identify characteristic spectral signatures of pathogens, including viruses, bacteria, and emerging variants."
-    },
-    {
-      title: "Multi-Analyte Detection",
-      description: "Systems capable of simultaneously identifying multiple substances in complex wastewater matrices, from pharmaceuticals to pollutants and pathogens."
-    },
-    {
-      title: "Real-time Monitoring",
-      description: "Infrastructure for continuous sampling and analysis, providing near-real-time insights into community health and environmental conditions."
-    }
-  ]
-},
-    
-    
-    ;
+  ];
 
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
