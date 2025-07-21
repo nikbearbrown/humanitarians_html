@@ -13,33 +13,6 @@ export default function ProjectsPage() {
   // Projects data array - each object represents a project
   const projects = [
     {
-      id: "ai-for-good",
-      title: "AI for Good",
-      description: "An initiative focused on applying artificial intelligence technologies to address humanitarian challenges and promote positive social impact across various domains.",
-      videoId: "videoseries?si=L8wvKwPE_F37cgiD&amp;list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51",
-      githubUrl: "https://github.com/Humanitariansai/AI-for-Good",
-      youtubeUrl: "https://www.youtube.com/@humanitariansai",
-      fullDescription: "AI for Good is our flagship initiative that harnesses the power of artificial intelligence to address pressing humanitarian challenges. This program spans multiple domains including healthcare, education, environmental conservation, and disaster response, with a focus on creating sustainable and accessible solutions for underserved communities.",
-      keyFeatures: [
-        {
-          title: "Collaborative Problem-Solving",
-          description: "Bringing together technologists, domain experts, and community stakeholders to co-create effective AI solutions."
-        },
-        {
-          title: "Ethical AI Development",
-          description: "Prioritizing fairness, transparency, and accountability in all projects to ensure AI benefits everyone."
-        },
-        {
-          title: "Community-Centered Design",
-          description: "Developing solutions based on deep understanding of community needs and contexts."
-        },
-        {
-          title: "Knowledge Sharing",
-          description: "Creating open resources and education materials to democratize access to AI for social impact."
-        }
-      ]
-    },
-    {
       id: "aiskunkworks",
       title: "AI Skunkworks",
       description: "A distinctive experiential learning community at Northeastern University that bridges theoretical knowledge and practical application in artificial intelligence. Through our \"Learn AI by Doing AI\" philosophy, students develop real-world AI expertise while building impressive portfolios before graduation.",
