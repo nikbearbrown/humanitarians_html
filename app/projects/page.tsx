@@ -257,7 +257,38 @@ export default function ProjectsPage() {
         }
       ]
     }
-  ];
+  ],
+    
+{
+  id: "raman-effect",
+  title: "The RAMAN Effect",
+  description: "An open-source platform revolutionizing public health through AI-enhanced Wastewater-Based Epidemiology (WBE) using Surface-Enhanced Raman Spectroscopy (SERS). This project develops sophisticated AI software capable of analyzing large volumes of spectral data to detect pathogens and pollutants with unprecedented accuracy.",
+  videoId: "3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
+  githubUrl: "https://github.com/Humanitariansai/RAMAN-Effect",
+  youtubeUrl: "https://www.youtube.com/embed/3DJzPobJ6V8?si=i6tq8Kr1ZJvIWmpI",
+  fullDescription: "The RAMAN Effect project leverages Surface-Enhanced Raman Spectroscopy (SERS) combined with artificial intelligence to revolutionize wastewater-based epidemiology and public health monitoring. Named after Sir C. V. Raman, who discovered the Raman scattering phenomenon in 1928, this initiative aims to develop cutting-edge AI software capable of analyzing complex spectral data from wastewater samples to detect pathogens, pollutants, and substances of concern with unprecedented sensitivity and specificity.",
+  keyFeatures: [
+    {
+      title: "Spectral Data Processing",
+      description: "Advanced algorithms for cleaning, normalizing, and extracting features from raw Raman spectral data obtained from wastewater samples."
+    },
+    {
+      title: "Pattern Recognition",
+      description: "Deep learning models specifically trained to identify characteristic spectral signatures of pathogens, including viruses, bacteria, and emerging variants."
+    },
+    {
+      title: "Multi-Analyte Detection",
+      description: "Systems capable of simultaneously identifying multiple substances in complex wastewater matrices, from pharmaceuticals to pollutants and pathogens."
+    },
+    {
+      title: "Real-time Monitoring",
+      description: "Infrastructure for continuous sampling and analysis, providing near-real-time insights into community health and environmental conditions."
+    }
+  ]
+},
+    
+    
+    ;
 
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
