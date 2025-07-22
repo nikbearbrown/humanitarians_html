@@ -514,13 +514,13 @@ export default function CompliancePage() {
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/cognitive-development" className="text-primary hover:underline">Cognitive Development</a>
                       </h4>
-                      <p className="text-sm">Focusing on brain development aspects of musical learning</p>
+                      <p className="text-sm">YouTube videos and Spotify songs designed to "exercise the brain"</p>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/music-education" className="text-primary hover:underline">Music Education Resources</a>
+                        <a href="https://www.humanitarians.ai/brain-music" className="text-primary hover:underline">Scientific Awareness</a>
                       </h4>
-                      <p className="text-sm">For teachers, home schoolers and educational institutions</p>
+                      <p className="text-sm">Public service announcements about the science behind music and cognitive development</p>
                     </div>
                   </div>
                 </div>
