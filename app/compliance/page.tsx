@@ -480,13 +480,7 @@ export default function CompliancePage() {
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/fellow-applications" className="text-primary hover:underline">Fellow Applications</a>
-                      </h4>
-                      <p className="text-sm">Targeting recent graduates seeking portfolio development opportunities</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/opt-eligible" className="text-primary hover:underline">OPT Eligible Program</a>
+                        <a href="https://www.humanitarians.ai/fellows" className="text-primary hover:underline">OPT Eligible Program</a>
                       </h4>
                       <p className="text-sm">Specifically for international students seeking practical training</p>
                     </div>
