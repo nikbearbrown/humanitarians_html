@@ -38,7 +38,6 @@ export default function CompliancePage() {
               <div className="p-6 border rounded-lg mb-6">
                 <p className="mb-2"><strong>Organization Name:</strong> Humanitarians AI Incorporated</p>
                 <p className="mb-2"><strong>Contact Email:</strong> info@humanitarians.ai</p>
-                <p className="mb-2"><strong>Phone Number:</strong> 246-049-5147</p>
                 <p className="mb-2"><strong>Website:</strong> https://www.humanitarians.ai/</p>
                 <p className="mb-2"><strong>501(c)(3) Status:</strong> Active</p>
                 <p className="mb-2"><strong>State ID:</strong> 001846362</p>
