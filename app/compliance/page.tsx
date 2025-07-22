@@ -577,7 +577,7 @@ export default function CompliancePage() {
                 Email Us
               </PrimaryButton>
               <SecondaryButton href="/contact">
-                Contact Form
+                Contact
               </SecondaryButton>
             </div>
           </section>
