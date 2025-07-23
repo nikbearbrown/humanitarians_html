@@ -201,24 +201,12 @@ export default function ConsultingPage() {
                   </p>
                 </div>
               </div>
-
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">AI-Powered Resource Allocation System</h3>
-                <div className="prose prose-lg dark:prose-invert">
-                  <p>
-                    For a humanitarian relief organization, we built a reinforcement learning system that optimized the allocation of limited resources during crisis response. The system analyzed multiple factors to suggest optimal distribution strategies.
-                  </p>
-                  <p>
-                    <strong>Results:</strong> 30% improvement in resource utilization and 15% faster response times in emergency situations.
-                  </p>
-                </div>
-              </div>
             </div>
           </section>
 
           {/* Fellowship Opportunities */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Fellowship Opportunities</h2>
+            <h2 className="text-3xl font-bold mb-6">Volunteer Fellowship Opportunities</h2>
             <div className="prose prose-lg dark:prose-invert mb-6">
               <p>
                 As a 501(c)(3) nonprofit, we provide valuable practical training opportunities for international students through our OPT Fellowship Program. Fellows work on meaningful projects while receiving mentorship from industry experts and maintaining their F-1 OPT status.
