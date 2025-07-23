@@ -40,16 +40,16 @@ export default function ScientificAwarenessPage() {
                 The scientific evidence for music's impact on brain development is overwhelming, yet this knowledge remains largely confined to academic journals and research institutions. Our Scientific Awareness initiative bridges this gap by translating complex neuroscience research into accessible, engaging content that educators, parents, policymakers, and the general public can understand and act upon.
               </p>
               
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-8 my-8 border">
+              <div className="bg-primary/5 rounded-lg p-8 my-8 border">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-blue-700 dark:text-blue-300">Did You Know?</h3>
-                    <p className="text-blue-600 dark:text-blue-400 text-sm mb-0">Music activates more areas of the brain simultaneously than any other human activity</p>
+                    <h3 className="text-xl font-bold">Did You Know?</h3>
+                    <p className="text-sm mb-0">Music activates more areas of the brain simultaneously than any other human activity</p>
                   </div>
                 </div>
                 <p className="mb-0">
@@ -63,9 +63,9 @@ export default function ScientificAwarenessPage() {
             <h2 className="text-3xl font-bold mb-6">Key Scientific Messages</h2>
             <div className="grid gap-6">
               
-              <div className="border rounded-lg p-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/10 dark:to-teal-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014.846 21H9.154a3.374 3.374 0 00-2.548-1.146l-.548-.547z" />
                     </svg>
@@ -84,9 +84,9 @@ export default function ScientificAwarenessPage() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
@@ -105,9 +105,9 @@ export default function ScientificAwarenessPage() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-6 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/10 dark:to-red-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
@@ -126,9 +126,9 @@ export default function ScientificAwarenessPage() {
                 </div>
               </div>
 
-              <div className="border rounded-lg p-6 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/10 dark:to-blue-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
@@ -153,57 +153,57 @@ export default function ScientificAwarenessPage() {
             <h2 className="text-3xl font-bold mb-6">Myth-Busting: Common Misconceptions</h2>
             <div className="space-y-6">
               
-              <div className="border rounded-lg p-6 bg-red-50 dark:bg-red-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold mb-2 text-red-700 dark:text-red-300">MYTH: "Only musically talented children benefit from music education"</h3>
+                    <h3 className="text-lg font-bold mb-2">MYTH: "Only musically talented children benefit from music education"</h3>
                     <p className="mb-3">
                       <strong>REALITY:</strong> Research consistently shows that the cognitive benefits of musical training occur regardless of innate musical ability. Even children who struggle with traditional musical skills still show enhanced brain development and academic improvements.
                     </p>
-                    <p className="text-sm italic text-red-600 dark:text-red-400">
+                    <p className="text-sm italic">
                       The key is consistent engagement, not exceptional talent. Every child's brain benefits from musical exercise.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="border rounded-lg p-6 bg-red-50 dark:bg-red-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold mb-2 text-red-700 dark:text-red-300">MYTH: "Music education takes time away from 'real' academics"</h3>
+                    <h3 className="text-lg font-bold mb-2">MYTH: "Music education takes time away from 'real' academics"</h3>
                     <p className="mb-3">
                       <strong>REALITY:</strong> Students who participate in music programs actually perform better in mathematics, reading, and science. Rather than competing with academic subjects, music education enhances the cognitive skills needed for academic success.
                     </p>
-                    <p className="text-sm italic text-red-600 dark:text-red-400">
+                    <p className="text-sm italic">
                       Music doesn't subtract from academic time—it multiplies academic potential.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="border rounded-lg p-6 bg-red-50 dark:bg-red-900/10">
+              <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold mb-2 text-red-700 dark:text-red-300">MYTH: "Passive music listening provides the same benefits as active music-making"</h3>
+                    <h3 className="text-lg font-bold mb-2">MYTH: "Passive music listening provides the same benefits as active music-making"</h3>
                     <p className="mb-3">
                       <strong>REALITY:</strong> While listening to music has some benefits, active music-making—singing, playing instruments, creating music—produces far more significant and lasting changes in brain structure and cognitive function.
                     </p>
-                    <p className="text-sm italic text-red-600 dark:text-red-400">
+                    <p className="text-sm italic">
                       The brain grows stronger through musical "exercise," not just musical "consumption."
                     </p>
                   </div>
@@ -214,7 +214,7 @@ export default function ScientificAwarenessPage() {
 
           <section>
             <h2 className="text-3xl font-bold mb-6">Join the Scientific Awareness Campaign</h2>
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8">
+            <div className="bg-black text-white rounded-lg p-8">
               <h3 className="text-2xl font-bold mb-4">Help Spread Science-Based Understanding</h3>
               <p className="text-lg mb-6 opacity-90">
                 Join our mission to make the science of music and cognitive development accessible to everyone. Whether you're an educator, parent, researcher, or simply someone who believes in the power of evidence-based practice, you can help spread awareness.
@@ -246,7 +246,7 @@ export default function ScientificAwarenessPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-4">
-                <PrimaryButton href="/donate" className="bg-white text-blue-600 hover:bg-gray-100">
+                <PrimaryButton href="/donate" className="bg-white text-black hover:bg-gray-100">
                   Donate
                 </PrimaryButton>
                 <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy" className="border-white text-white hover:bg-white/10">
