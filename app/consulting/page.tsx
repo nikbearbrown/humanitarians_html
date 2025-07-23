@@ -52,7 +52,12 @@ export default function ConsultingPage() {
               <div className="prose prose-lg dark:prose-invert">
                 <p>Dr. Brown brings exceptional credentials and practical experience to every project:</p>
                 <ul>
-                  <li>PhD in Computer Science from UCLA</li>
+                  <li>PhD in Computer Science from UCLA (GPA: 3.7)</li>
+                  <li>MS in Computer Science from UCLA (GPA: 3.7)</li>
+                  <li>MS in Finance from Northeastern University, Boston</li>
+                  <li>MBA from Northeastern University, Boston</li>
+                  <li>MS in Information Design and Visualization from Northeastern University (GPA: 3.7)</li>
+                  <li>BA in Biochemistry and Molecular Biology from University of California, Santa Cruz</li>
                   <li>Associate Teaching Professor at Northeastern University</li>
                   <li>Project Lead for AI for Education (AI4ED) initiatives</li>
                   <li>Expert in Machine Learning, Reinforcement Learning, and Prompt Engineering</li>
