@@ -144,21 +144,64 @@ export default function ConsultingPage() {
 
           {/* Case Studies */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Case Studies</h2>
+            <h2 className="text-3xl font-bold mb-6">Case Studies & Tools</h2>
             
             <div className="grid gap-8">
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Educational Chatbots for Resource-Limited Settings</h3>
+                <h3 className="text-xl font-bold mb-3">Educational AI Chatbots</h3>
                 <div className="prose prose-lg dark:prose-invert">
                   <p>
-                    We developed specialized educational chatbots for a global nonprofit working in regions with limited internet connectivity. These AI-powered tools provided educational support in multiple languages while operating with minimal computational resources.
+                    Humanitarians AI has developed a suite of specialized educational chatbots to assist students in various academic disciplines. These AI-powered tutors provide personalized guidance, step-by-step explanations, and interactive learning experiences.
                   </p>
-                  <p>
-                    <strong>Results:</strong> 40% improvement in student engagement and 25% increase in learning outcomes across pilot programs.
+                  <ul className="mt-4">
+                    <li><strong>Ada:</strong> A custom-built calculus assistant that provides scaffolding techniques and Socratic questioning.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-JMkUy05pG-ada-calculus-bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-JMkUy05pG-ada-calculus-bot</a></li>
+                    
+                    <li><strong>Newton:</strong> An interactive physics tutor with dynamic graphs and simulations to help visualize complex concepts.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-0CmbbdGsA-newton-the-physics-bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-0CmbbdGsA-newton-the-physics-bot</a></li>
+                    
+                    <li><strong>Grace:</strong> An algorithms tutor that offers interactive visualizations and simulations of complex algorithmic concepts.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-MFbqFw55p-grace-6205-the-info-6205-algorithms-tutor" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-MFbqFw55p-grace-6205-the-info-6205-algorithms-tutor</a></li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>Results:</strong> These educational chatbots have led to significant improvements in student engagement, understanding, and course completion rates at Northeastern University.
                   </p>
                 </div>
               </div>
               
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Professional AI Tools</h3>
+                <div className="prose prose-lg dark:prose-invert">
+                  <p>
+                    Humanitarians AI has created specialized AI tools to solve specific professional challenges across industries. These tools demonstrate the practical applications of AI in enhancing productivity and decision-making.
+                  </p>
+                  <ul className="mt-4">
+                    <li><strong>Synthetic Personas:</strong> Generates data-driven personas for survey research and UX testing by integrating Big Five personality traits with demographic attributes.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-67a80d375e1c819186b960f5e60f9b9d-synthetic-personas" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-67a80d375e1c819186b960f5e60f9b9d-synthetic-personas</a></li>
+                    
+                    <li><strong>Ogilvy:</strong> A witty, persuasive copywriting coach that helps craft compelling, audience-centered copy while maintaining brand voice.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-67576653c23c81919b0d7182fdfdc59e-ogilvy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-67576653c23c81919b0d7182fdfdc59e-ogilvy</a></li>
+                    
+                    <li><strong>Crafting the Perfect One-Minute Pitch:</strong> A professional assistant that guides users through creating concise, impactful business pitches in just 60 seconds.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-6763ad8feba08191bf5008cbf39aaf9a-crafting-the-perfect-one-minute-pitch" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-6763ad8feba08191bf5008cbf39aaf9a-crafting-the-perfect-one-minute-pitch</a></li>
+                    
+                    <li><strong>Sagan | GSE Writing Bot:</strong> An advanced research paper editor that analyzes academic papers and provides detailed feedback on structure, methodology, and positionality.<br /><strong>Try it:</strong> <a href="https://chatgpt.com/g/g-k8GQo2VXh-sagan-gse-writing-bot" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://chatgpt.com/g/g-k8GQo2VXh-sagan-gse-writing-bot</a></li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>Results:</strong> These professional AI tools have helped organizations streamline workflows, improve communication, and enhance decision-making across various sectors.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Nonprofit Solutions</h3>
+                <div className="prose prose-lg dark:prose-invert">
+                  <p>
+                    Humanitarians AI has developed specialized AI solutions to address social challenges and support mission-driven organizations.
+                  </p>
+                  <ul className="mt-4">
+                    <li><strong>CatBot:</strong> An AI-powered customer support chatbot for cat shelters that streamlines adoption inquiries, matches potential adopters with suitable cats, and promotes senior and special needs cat adoptions.<br /><strong>Try it:</strong> <a href="https://thecatconnection.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://thecatconnection.org/</a></li>
+                  </ul>
+                  <p className="mt-4">
+                    <strong>Results:</strong> Our nonprofit solutions have helped streamline operations, increase effectiveness, and amplify social impact for the organizations they serve.
+                  </p>
+                </div>
+              </div>
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-xl font-bold mb-3">AI-Powered Resource Allocation System</h3>
                 <div className="prose prose-lg dark:prose-invert">
@@ -223,10 +266,10 @@ export default function ConsultingPage() {
                 <PrimaryButton href="mailto:info@humanitarians.ai?subject=Consulting Inquiry">
                   Contact Us at info@humanitarians.ai
                 </PrimaryButton>
-                <SecondaryButton href="https://github.com/nikbearbrown">
+                <SecondaryButton href="https://github.com/Humanitariansai">
                   View Our GitHub
                 </SecondaryButton>
-                <SecondaryButton href="https://www.linkedin.com/in/nikbearbrown/">
+                <SecondaryButton href="https://www.linkedin.com/company/105696953/">
                   Connect on LinkedIn
                 </SecondaryButton>
               </div>
