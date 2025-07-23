@@ -233,20 +233,6 @@ export default function ConsultingPage() {
             </div>
           </section>
 
-          {/* Testimonials */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">What Our Partners Say</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-6 border rounded-lg">
-                <p className="italic mb-4">"Dr. Brown's expertise in AI education transformed how our organization approaches technology. The customized solutions they developed have had a measurable impact on our educational initiatives."</p>
-                <p className="font-semibold">— Education Director, Global Learning Initiative</p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <p className="italic mb-4">"The Humanitarians AI team provided invaluable guidance as we navigated the integration of AI into our humanitarian response systems. Their ethical approach and technical expertise were exactly what we needed."</p>
-                <p className="font-semibold">— CTO, International Relief Organization</p>
-              </div>
-            </div>
-          </section>
 
           {/* Call to Action */}
           <section>
