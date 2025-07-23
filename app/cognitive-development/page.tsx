@@ -42,7 +42,7 @@ export default function CognitiveDevelopmentPage() {
               
               <div className="grid md:grid-cols-3 gap-6 my-8">
                 <div className="p-6 bg-primary/5 rounded-lg border">
-                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-4">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014.846 21H9.154a3.374 3.374 0 00-2.548-1.146l-.548-.547z" />
                     </svg>
@@ -54,7 +54,7 @@ export default function CognitiveDevelopmentPage() {
                 </div>
                 
                 <div className="p-6 bg-primary/5 rounded-lg border">
-                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-4">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
@@ -66,7 +66,7 @@ export default function CognitiveDevelopmentPage() {
                 </div>
                 
                 <div className="p-6 bg-primary/5 rounded-lg border">
-                  <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mb-4">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
@@ -86,7 +86,7 @@ export default function CognitiveDevelopmentPage() {
               
               <div className="border rounded-lg p-8 bg-primary/5">
                 <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-amber-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M5.757 5.757a9 9 0 000 12.728M8.465 8.464a5 5 0 000 7.072M12 12h.01" />
                     </svg>
@@ -120,7 +120,7 @@ export default function CognitiveDevelopmentPage() {
 
               <div className="border rounded-lg p-8 bg-primary/5">
                 <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
@@ -154,7 +154,7 @@ export default function CognitiveDevelopmentPage() {
 
               <div className="border rounded-lg p-8 bg-primary/5">
                 <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -188,7 +188,7 @@ export default function CognitiveDevelopmentPage() {
 
               <div className="border rounded-lg p-8 bg-primary/5">
                 <div className="flex items-start gap-6">
-                  <div className="w-16 h-16 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
@@ -227,7 +227,7 @@ export default function CognitiveDevelopmentPage() {
             <div className="grid md:grid-cols-2 gap-8">
               <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
@@ -265,7 +265,7 @@ export default function CognitiveDevelopmentPage() {
 
               <div className="border rounded-lg p-6 bg-primary/5">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.779-.54 0-.36.18-.66.54-.779 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.18 1.02v-.12zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.42 1.56-.299.421-1.02.599-1.559.3z"/>
                     </svg>
