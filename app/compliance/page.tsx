@@ -493,7 +493,7 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/nonprofit-solutions" className="text-primary hover:underline">Nonprofit AI Solutions</a>
+                        <a href="https://www.humanitarians.ai/consulting" className="text-primary hover:underline">Nonprofit AI Solutions</a>
                       </h4>
                       <p className="text-sm">Targeting organizations seeking technological assistance</p>
                     </div>
