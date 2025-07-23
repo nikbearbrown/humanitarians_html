@@ -133,7 +133,7 @@ export default function GraduateAIFluencyPage() {
               </p>
               
               <p className="mt-4">
-                Graduate AI Fluency lessons are delivered through a combination of YouTube videos, interactive workshops, and peer collaboration opportunities, with special rates for recent graduates.
+                Graduate AI Fluency lessons are delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Special mentorship opportunities and peer collaboration sessions are also available for recent graduates.
               </p>
               
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
@@ -193,10 +193,11 @@ export default function GraduateAIFluencyPage() {
               </div>
             </div>
           </section>
+
           <section>
             <h2 className="text-3xl font-bold mb-6">All Lessons Available on YouTube</h2>
             <p className="text-muted-foreground mb-6">
-              All Professional AI Fluency lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
+              All Graduate AI Fluency lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
             </p>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
@@ -209,8 +210,25 @@ export default function GraduateAIFluencyPage() {
                 allowFullScreen
               />
             </div>
-          </section>          
+          </section>
 
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              <PrimaryButton href="/graduates/join">
+                Join Graduate Cohort
+              </PrimaryButton>
+              <SecondaryButton href="/graduates/scholarship">
+                Apply for Scholarship
+              </SecondaryButton>
+              <PrimaryButton href="/programs/graduate-ai-fluency/details">
+                Program Details
+              </PrimaryButton>
+              <SecondaryButton href="/programs/graduate-ai-fluency/success-stories">
+                Success Stories
+              </SecondaryButton>
+            </div>
+          </section>
         </div>
       </div>
     </div>
