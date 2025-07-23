@@ -474,7 +474,7 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/mentor-recruitment" className="text-primary hover:underline">Mentor Recruitment</a>
+                        <a href="https://www.humanitarians.ai/mentors" className="text-primary hover:underline">Mentor Recruitment</a>
                       </h4>
                       <p className="text-sm">Targeting experienced AI professionals for volunteer mentorship roles</p>
                     </div>
