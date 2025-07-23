@@ -215,17 +215,17 @@ export default function GraduateAIFluencyPage() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="/graduates/join">
-                Join Graduate Cohort
+              <PrimaryButton href="https://www.youtube.com/@humanitariansai">
+                YouTube
               </PrimaryButton>
-              <SecondaryButton href="/graduates/scholarship">
-                Apply for Scholarship
+              <SecondaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
+                Spotify
               </SecondaryButton>
-              <PrimaryButton href="/programs/graduate-ai-fluency/details">
-                Program Details
+              <PrimaryButton href="https://github.com/Humanitariansai">
+                Github
               </PrimaryButton>
-              <SecondaryButton href="/programs/graduate-ai-fluency/success-stories">
-                Success Stories
+              <SecondaryButton href="/donate">
+                Donate
               </SecondaryButton>
             </div>
           </section>
