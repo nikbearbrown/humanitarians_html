@@ -531,12 +531,6 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/ai-fluency-educators" className="text-primary hover:underline">AI Fluency for Educators</a>
-                      </h4>
-                      <p className="text-sm">For teachers and institutions integrating AI literacy</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/graduate-ai-fluency" className="text-primary hover:underline">Graduate AI Fluency</a>
                       </h4>
                       <p className="text-sm">For recent graduates learning AI communication skills</p>
