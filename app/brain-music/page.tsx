@@ -249,7 +249,7 @@ export default function ScientificAwarenessPage() {
                 <PrimaryButton href="/donate" className="bg-white text-black hover:bg-gray-100">
                   Donate
                 </PrimaryButton>
-                <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy" className="border-white text-white hover:bg-white/10">
+                <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy" className="bg-white text-black hover:bg-gray-100">
                   Lyrical Literacy Github
                 </SecondaryButton>
               </div>
