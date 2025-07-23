@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Public service announcements and educational content about the science behind music and cognitive development, promoting evidence-based understanding of musical learning",
 }
 
-export default function BrainMusicPage() {
+export default function ScientificAwarenessPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
@@ -150,168 +150,6 @@ export default function BrainMusicPage() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Educational Resources & PSAs</h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              
-              <div className="border rounded-lg overflow-hidden bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/10 dark:to-purple-900/10">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-bold">For Educators</h3>
-                  </div>
-                  <p className="mb-4">
-                    Evidence-based resources helping teachers understand and communicate the cognitive benefits of music education to students, parents, and administrators.
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                      Classroom presentation materials
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                      Parent communication guides
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                      Research summary infographics
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                      Implementation toolkits
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 pb-6">
-                  <SecondaryButton href="/resources/educators" className="w-full">
-                    Access Educator Resources
-                  </SecondaryButton>
-                </div>
-              </div>
-
-              <div className="border rounded-lg overflow-hidden bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/10 dark:to-teal-900/10">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-bold">For Parents</h3>
-                  </div>
-                  <p className="mb-4">
-                    Simple, clear explanations of how musical activities at home can support your child's cognitive development and academic success.
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                      Age-appropriate activity guides
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                      Brain development timelines
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                      Myth-busting fact sheets
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
-                      Home practice strategies
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 pb-6">
-                  <SecondaryButton href="/resources/parents" className="w-full">
-                    Access Parent Resources
-                  </SecondaryButton>
-                </div>
-              </div>
-
-              <div className="border rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/10 dark:to-orange-900/10">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-bold">For Policymakers</h3>
-                  </div>
-                  <p className="mb-4">
-                    Research briefs and policy recommendations demonstrating the economic and social benefits of investing in music education programs.
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                      Economic impact studies
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                      Public health benefits
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                      Educational equity data
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
-                      Implementation frameworks
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 pb-6">
-                  <SecondaryButton href="/resources/policy" className="w-full">
-                    Access Policy Resources
-                  </SecondaryButton>
-                </div>
-              </div>
-
-              <div className="border rounded-lg overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/10 dark:to-rose-900/10">
-                <div className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-bold">For Healthcare Providers</h3>
-                  </div>
-                  <p className="mb-4">
-                    Clinical evidence and practical guidelines for incorporating music-based interventions in therapeutic and rehabilitation settings.
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
-                      Clinical research summaries
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
-                      Treatment protocols
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
-                      Patient education materials
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
-                      Outcome measurement tools
-                    </div>
-                  </div>
-                </div>
-                <div className="px-6 pb-6">
-                  <SecondaryButton href="/resources/healthcare" className="w-full">
-                    Access Clinical Resources
-                  </SecondaryButton>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section>
             <h2 className="text-3xl font-bold mb-6">Myth-Busting: Common Misconceptions</h2>
             <div className="space-y-6">
               
@@ -408,11 +246,11 @@ export default function BrainMusicPage() {
                 </div>
               </div>
               <div className="flex flex-wrap gap-4">
-                <PrimaryButton href="/join-campaign" className="bg-white text-blue-600 hover:bg-gray-100">
-                  Become an Advocate
+                <PrimaryButton href="/donate" className="bg-white text-blue-600 hover:bg-gray-100">
+                  Donate
                 </PrimaryButton>
-                <SecondaryButton href="/resources/share" className="border-white text-white hover:bg-white/10">
-                  Get Sharing Materials
+                <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy" className="border-white text-white hover:bg-white/10">
+                  Lyrical Literacy Github
                 </SecondaryButton>
               </div>
             </div>
@@ -424,11 +262,11 @@ export default function BrainMusicPage() {
               <PrimaryButton href="https://www.youtube.com/@humanitariansai">
                 Watch Educational Videos
               </PrimaryButton>
-              <SecondaryButton href="/research">
-                Read Research Papers
+              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy/tree/main/Research">
+                Humanitarians AI Research Papers
               </SecondaryButton>
               <PrimaryButton href="/newsletter">
-                Subscribe to Updates
+                Humanitarians AI Spotify
               </PrimaryButton>
               <SecondaryButton href="/contact">
                 Contact Research Team
