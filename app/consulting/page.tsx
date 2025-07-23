@@ -59,10 +59,11 @@ export default function ConsultingPage() {
                   <li>MS in Information Design and Visualization from Northeastern University  </li>
                   <li>BA in Biochemistry and Molecular Biology from University of California, Santa Cruz</li>
                   <li>Associate Teaching Professor at Northeastern University</li>
+                  <li>Affiliate Professor at <a href="https://ai.northeastern.edu/" target="_blank" rel="noopener noreferrer">The Institute for Experiential AI - Northeastern University</a></li>                  
                   <li>Project Lead for AI for Education (AI4ED) initiatives</li>
                   <li>Expert in Machine Learning, Reinforcement Learning, and Prompt Engineering</li>
                   <li>Published researcher in computational biology and AI applications</li>
-                  <li>Collaborator with prestigious institutions including Harvard Medical School and the Broad Institute</li>
+                  <li>Collaborator and post-doc with prestigious institutions including Harvard Medical School and the Broad Institute</li>
                 </ul>
               </div>
             </div>
