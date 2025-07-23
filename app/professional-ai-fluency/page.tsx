@@ -211,7 +211,24 @@ export default function ProfessionalAIFluencyPage() {
               />
             </div>
           </section>
-
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              <PrimaryButton href="https://www.youtube.com/@humanitariansai">
+                YouTube
+              </PrimaryButton>
+              <SecondaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
+                Spotify
+              </SecondaryButton>
+              <PrimaryButton href="https://github.com/Humanitariansai">
+                Github
+              </PrimaryButton>
+              <SecondaryButton href="/donate">
+                Donate
+              </SecondaryButton>
+            </div>
+          </section>
+          
 
         </div>
       </div>
