@@ -193,6 +193,23 @@ export default function GraduateAIFluencyPage() {
               </div>
             </div>
           </section>
+          <section>
+            <h2 className="text-3xl font-bold mb-6">All Lessons Available on YouTube</h2>
+            <p className="text-muted-foreground mb-6">
+              All Professional AI Fluency lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
+            </p>
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+              <iframe 
+                className="absolute top-0 left-0 w-full h-full"
+                src="https://www.youtube.com/embed/videoseries?si=mo8K9CYzbUl2juUB&amp;list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm" 
+                title="YouTube video player" 
+                frameBorder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerPolicy="strict-origin-when-cross-origin" 
+                allowFullScreen
+              />
+            </div>
+          </section>          
 
         </div>
       </div>
