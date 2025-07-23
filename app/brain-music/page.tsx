@@ -265,7 +265,7 @@ export default function ScientificAwarenessPage() {
               <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy/tree/main/Research">
                 Humanitarians AI Research Papers
               </SecondaryButton>
-              <PrimaryButton href="/newsletter">
+              <PrimaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
                 Humanitarians AI Spotify
               </PrimaryButton>
               <SecondaryButton href="/contact">
