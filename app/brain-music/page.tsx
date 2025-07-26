@@ -22,7 +22,7 @@ export default function ScientificAwarenessPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/juYjI3cncug?si=WqvsOj98AZuo_B-V"
+              src="https://www.youtube.com/embed/1ErOpyD5Q1o?si=-KrI95UicRB3OeOP"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
