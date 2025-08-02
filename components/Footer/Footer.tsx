@@ -40,6 +40,7 @@ export default function Footer() {
                Humanitarians AI Incorporated
                <br />A 501(c)(3) nonprofit organization
                <br />State ID: 001846362 | EIN: 33-1984805
+               <br />AI for Good™
              </p>
              <div className="mt-6 flex space-x-4 items-center">
                <Link href="https://www.youtube.com/@humanitariansai" className="text-sm hover:text-primary transition-colors">
