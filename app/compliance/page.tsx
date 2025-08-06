@@ -20,6 +20,72 @@ export default function CompliancePage() {
           </p>
         </div>
 
+        {/* NEW: Critical Compliance Requirements Alert Section */}
+        <section className="mb-16 p-6 border-2 border-primary rounded-lg bg-primary/5">
+          <h2 className="text-3xl font-bold mb-6 text-primary">Critical Compliance Requirements</h2>
+          <div className="prose prose-lg dark:prose-invert">
+            <p className="font-medium">
+              To maintain our Google Ad Grants status, we actively implement and monitor the following key requirements:
+            </p>
+            
+            <div className="grid gap-4 mt-6">
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+                <h3 className="text-xl font-bold mb-2 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Campaign Structure
+                </h3>
+                <ul className="space-y-2 pl-8 list-disc">
+                  <li><strong>Active Campaigns:</strong> We maintain at least 1 active campaign with 2 ad groups, each containing 1 responsive search ad</li>
+                  <li><strong>Sitelinks:</strong> All ads include at least two sitelinks at the account, campaign, or ad group level</li>
+                  <li><strong>Conversion Tracking:</strong> We have installed and verified conversion tracking on meaningful conversion pages (not just content pages)</li>
+                  <li><strong>Bidding Strategy:</strong> All campaigns use conversion-based bidding strategies</li>
+                  <li><strong>Geotargeting:</strong> Our campaigns use specific geotargeting rather than broad targeting</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+                <h3 className="text-xl font-bold mb-2 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Keyword Quality
+                </h3>
+                <ul className="space-y-2 pl-8 list-disc">
+                  <li><strong>No Generic Keywords:</strong> We avoid using single-word or generic keywords</li>
+                  <li><strong>Quality Score Monitoring:</strong> We regularly review and pause keywords with low quality scores</li>
+                  <li><strong>Automated Rules:</strong> We have implemented automated rules to monitor and manage keyword quality</li>
+                </ul>
+              </div>
+              
+              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+                <h3 className="text-xl font-bold mb-2 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Website Compliance
+                </h3>
+                <ul className="space-y-2 pl-8 list-disc">
+                  <li><strong>Domain Ownership:</strong> We use only owned and operated domains in our ads</li>
+                  <li><strong>No AdSense:</strong> Our website does not serve ads through Google AdSense</li>
+                  <li><strong>Mission-Based Content:</strong> All content directly relates to our nonprofit mission</li>
+                  <li><strong>Clear Nonprofit Status:</strong> Our nonprofit status is clearly stated throughout the site</li>
+                  <li><strong>Organization Mission:</strong> Our mission is prominently displayed on the homepage</li>
+                  <li><strong>No Broken Links:</strong> We regularly audit and fix any broken links</li>
+                  <li><strong>No Commercial Promises:</strong> We don't make claims that promise results only after consultation, service, or purchase</li>
+                  <li><strong>Transparent Fund Usage:</strong> We clearly explain how donations directly support our mission</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-6 p-4 bg-primary/10 rounded-lg">
+              <p className="font-bold">IMPORTANT NOTE:</p>
+              <p>We strictly adhere to Google's policy of not creating ads with third-party URLs to avoid account deactivation. We exclusively use domains owned and operated by Humanitarians AI.</p>
+            </div>
+          </div>
+        </section>
+
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
@@ -227,7 +293,7 @@ export default function CompliancePage() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Contact email (info@humanitarians.ai) and contact oage link are displayed on every page.</span>
+                    <span>Contact email (info@humanitarians.ai) and contact page link are displayed on every page.</span>
                   </li>
                   <li className="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-500 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,6 +308,83 @@ export default function CompliancePage() {
                     <span>Contact information is easy to find in the website footer.</span>
                   </li>
                 </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* NEW: Active Campaign Structure Section */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Active Campaign Structure</h2>
+            <div className="prose prose-lg dark:prose-invert">
+              <p>
+                In accordance with Google Ad Grants requirements, we maintain a structured campaign approach that meets all compliance standards:
+              </p>
+              
+              <div className="p-6 border rounded-lg my-6">
+                <h3 className="text-xl font-bold mb-4">Primary Campaign: AI for Social Good</h3>
+                <p className="mb-4">This campaign focuses on our core mission of developing ethical AI solutions that address humanitarian challenges.</p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-bold mb-2">Ad Group 1: Fellowship Program</h4>
+                    <ul className="space-y-2 pl-4">
+                      <li><strong>Target Audience:</strong> Recent graduates and professionals seeking AI experience</li>
+                      <li><strong>Responsive Search Ad:</strong> Features program benefits and application details</li>
+                      <li><strong>Sitelinks:</strong> 
+                        <ul className="pl-4">
+                          <li>Apply Now</li>
+                          <li>Program Benefits</li>
+                          <li>Fellows Testimonials</li>
+                        </ul>
+                      </li>
+                      <li><strong>Conversion Goal:</strong> Fellowship application submissions</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg">
+                    <h4 className="font-bold mb-2">Ad Group 2: AI Education Resources</h4>
+                    <ul className="space-y-2 pl-4">
+                      <li><strong>Target Audience:</strong> Educators, students, and lifelong learners</li>
+                      <li><strong>Responsive Search Ad:</strong> Highlights free educational content and resources</li>
+                      <li><strong>Sitelinks:</strong> 
+                        <ul className="pl-4">
+                          <li>Free Courses</li>
+                          <li>Educational Videos</li>
+                          <li>Teaching Materials</li>
+                        </ul>
+                      </li>
+                      <li><strong>Conversion Goal:</strong> Resource downloads and course enrollments</li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <h4 className="font-bold mb-2">Campaign Settings</h4>
+                  <ul className="space-y-1">
+                    <li><strong>Bidding Strategy:</strong> Maximize Conversions (conversion-based bidding)</li>
+                    <li><strong>Geotargeting:</strong> Specific targeting to regions where our programs are most active</li>
+                    <li><strong>Keyword Quality:</strong> Only multi-word, specific keywords with good quality scores</li>
+                    <li><strong>Automated Rules:</strong> Setup to pause keywords with quality scores below 3</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <p>
+                <strong>Conversion Tracking Implementation:</strong> We have verified conversion tracking installed on meaningful action pages, not just content pages. Our primary conversion actions include:
+              </p>
+              
+              <ul className="pl-6 space-y-2 mb-6">
+                <li>Fellowship application submissions</li>
+                <li>Volunteer sign-ups</li>
+                <li>Resource downloads</li>
+                <li>Donation completions</li>
+                <li>Newsletter subscriptions</li>
+              </ul>
+              
+              <div className="p-4 border-l-4 border-primary bg-primary/5 rounded-r-lg">
+                <p>
+                  <strong>Note on Third-Party URLs:</strong> We strictly adhere to Google's policy of not creating ads with third-party URLs to avoid account deactivation. All our ads direct users exclusively to domains owned and operated by Humanitarians AI.
+                </p>
               </div>
             </div>
           </section>
