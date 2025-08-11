@@ -1,280 +1,300 @@
+"use client"
+
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
+import { useEffect, useMemo, useState } from "react"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
   title: "Scientific Awareness - Lyrical Literacy | Humanitarians AI",
-  description: "Public service announcements and educational content about the science behind music and cognitive development, promoting evidence-based understanding of musical learning",
+  description:
+    "Evidence-based, accessible content on the science of music and cognitive development. Translate neuroscience into action for educators, parents, and policymakers.",
+  alternates: { canonical: "/scientific-awareness" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    title: "Scientific Awareness - Lyrical Literacy | Humanitarians AI",
+    description:
+      "Public service announcements and educational content on how musical learning supports brain development—clear, research-backed, and practical.",
+    type: "website",
+  },
 }
 
-export default function ScientificAwarenessPage() {
+export default function ScientificAwarenessLanding() {
+  const [form, setForm] = useState({ name: "", email: "", role: "" })
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Capture gclid/utm for Google Ads attribution, if present
+  const query = useMemo(() => {
+    if (typeof window === "undefined") return new URLSearchParams()
+    return new URLSearchParams(window.location.search)
+  }, [])
+
+  const gclid = query.get("gclid") || ""
+  const utm_source = query.get("utm_source") || ""
+  const utm_campaign = query.get("utm_campaign") || ""
+  const utm_medium = query.get("utm_medium") || ""
+
+  useEffect(() => {
+    // Optional: pageview placeholder
+    // if (typeof window !== "undefined" && (window as any).gtag) {
+    //   (window as any).gtag("event", "page_view", { send_to: "AW-XXXXXXX" })
+    // }
+  }, [])
+
+  function triggerAdsConversion() {
+    // Google Ads conversion placeholder — replace with your IDs/labels
+    // if ((window as any).gtag) {
+    //   (window as any).gtag("event", "conversion", {
+    //     send_to: "AW-XXXXXXX/CONVERSION_LABEL",
+    //     value: 0,
+    //     currency: "USD",
+    //   })
+    // }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+
+    if (!form.name.trim() || !form.email.trim()) {
+      setError("Please enter your name and email.")
+      return
+    }
+    setSubmitting(true)
+    try {
+      // Replace with your submit endpoint or action
+      // await fetch("/api/lead", { method: "POST", body: JSON.stringify({ ...form, gclid, utm_source, utm_campaign, utm_medium }) })
+
+      triggerAdsConversion()
+      setSubmitted(true)
+    } catch (err) {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
-    <div className="container px-4 md:px-6 mx-auto py-12">
-      <div className="max-w-4xl mx-auto">
-        {/* Hero Section */}
-        <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Scientific Awareness</h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            Public service announcements and educational content about the science behind music and cognitive development, promoting evidence-based understanding of how musical learning transforms the brain.
+    <div className="mx-auto max-w-6xl px-4 md:px-6 py-12">
+      {/* HERO */}
+      <header className="grid gap-6 md:grid-cols-2 md:items-center mb-12">
+        <div>
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            Scientific Awareness: Evidence-Based Music & Brain Development
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            We translate neuroscience into clear, practical messages so educators, parents, and policymakers can act on
+            how musical learning supports attention, language, memory, and social connection.
           </p>
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
-            <iframe
-              className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/1ErOpyD5Q1o?si=-KrI95UicRB3OeOP"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <PrimaryButton href="#lead">
+              Get Research Updates
+            </PrimaryButton>
+            <SecondaryButton href="#resources">
+              View Resources
+            </SecondaryButton>
           </div>
         </div>
-
-        {/* Main Content */}
-        <div className="grid gap-12">
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Making Science Accessible</h2>
-            <div className="prose prose-lg dark:prose-invert">
-              <p>
-                The scientific evidence for music's impact on brain development is overwhelming, yet this knowledge remains largely confined to academic journals and research institutions. Our Scientific Awareness initiative bridges this gap by translating complex neuroscience research into accessible, engaging content that educators, parents, policymakers, and the general public can understand and act upon.
-              </p>
-              
-              <div className="bg-primary/5 rounded-lg p-8 my-8 border">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Did You Know?</h3>
-                    <p className="text-sm mb-0">Music activates more areas of the brain simultaneously than any other human activity</p>
-                  </div>
-                </div>
-                <p className="mb-0">
-                  When we sing or play music, our brains engage motor cortex, auditory processing centers, language areas, memory systems, and emotional networks all at once—creating a comprehensive "neural workout" that strengthens cognitive abilities across multiple domains.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Key Scientific Messages</h2>
-            <div className="grid gap-6">
-              
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014.846 21H9.154a3.374 3.374 0 00-2.548-1.146l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">The Brain Plasticity Message</h3>
-                    <p className="mb-4">
-                      <strong>Public Service Announcement:</strong> Musical training fundamentally rewires the brain, increasing gray matter volume and strengthening neural connections. These changes aren't just about becoming better at music—they enhance memory, attention, language skills, and academic performance.
-                    </p>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-emerald-500">
-                      <p className="text-sm mb-2"><strong>Key Research Finding:</strong></p>
-                      <p className="text-sm italic">"Children who received just 15 months of keyboard training showed significant structural brain changes in motor and auditory regions, with improvements correlating directly with enhanced cognitive abilities."</p>
-                      <p className="text-xs mt-2 text-muted-foreground">Hyde et al., 2009, Journal of Neuroscience</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">The Academic Achievement Message</h3>
-                    <p className="mb-4">
-                      <strong>Public Service Announcement:</strong> Students who participate in music programs consistently outperform their peers in reading, mathematics, and standardized tests. The benefits are especially pronounced for students from disadvantaged backgrounds, making music education a powerful tool for educational equity.
-                    </p>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-purple-500">
-                      <p className="text-sm mb-2"><strong>Key Research Finding:</strong></p>
-                      <p className="text-sm italic">"Two years of music training eliminated the achievement gap in reading between children from low-socioeconomic backgrounds and their higher-SES peers."</p>
-                      <p className="text-xs mt-2 text-muted-foreground">Slater et al., 2014, PLoS One</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">The Lifelong Benefits Message</h3>
-                    <p className="mb-4">
-                      <strong>Public Service Announcement:</strong> The cognitive benefits of musical training extend far beyond childhood. Adults who engaged in music throughout their lives show better preserved cognitive function, enhanced emotional regulation, and stronger social connections as they age.
-                    </p>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-orange-500">
-                      <p className="text-sm mb-2"><strong>Key Research Finding:</strong></p>
-                      <p className="text-sm italic">"Older adults with musical training maintained more robust neural encoding of speech sounds and showed less age-related cognitive decline compared to non-musician peers."</p>
-                      <p className="text-xs mt-2 text-muted-foreground">Parbery-Clark et al., 2012, Neurobiology of Aging</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-3">The Social Connection Message</h3>
-                    <p className="mb-4">
-                      <strong>Public Service Announcement:</strong> Group music-making isn't just fun—it's a scientifically-proven method for building empathy, reducing social anxiety, and strengthening community bonds. When people sing together, their hearts literally synchronize, and their brains release oxytocin, the "bonding hormone."
-                    </p>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border-l-4 border-cyan-500">
-                      <p className="text-sm mb-2"><strong>Key Research Finding:</strong></p>
-                      <p className="text-sm italic">"Group singing activities increased oxytocin levels and decreased cortisol, with participants reporting significantly reduced social anxiety and enhanced feelings of connection."</p>
-                      <p className="text-xs mt-2 text-muted-foreground">Keeler et al., 2015, Frontiers in Human Neuroscience</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Myth-Busting: Common Misconceptions</h2>
-            <div className="space-y-6">
-              
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-2">MYTH: "Only musically talented children benefit from music education"</h3>
-                    <p className="mb-3">
-                      <strong>REALITY:</strong> Research consistently shows that the cognitive benefits of musical training occur regardless of innate musical ability. Even children who struggle with traditional musical skills still show enhanced brain development and academic improvements.
-                    </p>
-                    <p className="text-sm italic">
-                      The key is consistent engagement, not exceptional talent. Every child's brain benefits from musical exercise.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-2">MYTH: "Music education takes time away from 'real' academics"</h3>
-                    <p className="mb-3">
-                      <strong>REALITY:</strong> Students who participate in music programs actually perform better in mathematics, reading, and science. Rather than competing with academic subjects, music education enhances the cognitive skills needed for academic success.
-                    </p>
-                    <p className="text-sm italic">
-                      Music doesn't subtract from academic time—it multiplies academic potential.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border rounded-lg p-6 bg-primary/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold mb-2">MYTH: "Passive music listening provides the same benefits as active music-making"</h3>
-                    <p className="mb-3">
-                      <strong>REALITY:</strong> While listening to music has some benefits, active music-making—singing, playing instruments, creating music—produces far more significant and lasting changes in brain structure and cognitive function.
-                    </p>
-                    <p className="text-sm italic">
-                      The brain grows stronger through musical "exercise," not just musical "consumption."
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Join the Scientific Awareness Campaign</h2>
-            <div className="bg-black text-white rounded-lg p-8">
-              <h3 className="text-2xl font-bold mb-4">Help Spread Science-Based Understanding</h3>
-              <p className="text-lg mb-6 opacity-90">
-                Join our mission to make the science of music and cognitive development accessible to everyone. Whether you're an educator, parent, researcher, or simply someone who believes in the power of evidence-based practice, you can help spread awareness.
-              </p>
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Share research-backed content</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Advocate for evidence-based policies</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Support music education funding</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>Debunk harmful myths</span>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                <PrimaryButton href="/donate" className="bg-white text-black hover:bg-gray-100">
-                  Donate
-                </PrimaryButton>
-                <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy" className="bg-white text-black hover:bg-gray-100">
-                  Lyrical Literacy Github
-                </SecondaryButton>
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Access Scientific Resources</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://www.youtube.com/@humanitariansai">
-                Watch Educational Videos
-              </PrimaryButton>
-              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy/tree/main/Research">
-                Humanitarians AI Research Papers
-              </SecondaryButton>
-              <PrimaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
-                Humanitarians AI Spotify
-              </PrimaryButton>
-              <SecondaryButton href="/contact">
-                Contact Research Team
-              </SecondaryButton>
-            </div>
-          </section>
+        <div className="rounded-xl border bg-primary/5 p-5">
+          <ul className="space-y-3 text-sm">
+            <li className="flex gap-2">
+              <span className="mt-1 inline-block h-2 w-2 rounded-full bg-black" />
+              <span>Making science accessible: concise, research-backed messages for the public.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-1 inline-block h-2 w-2 rounded-full bg-black" />
+              <span>Key themes: brain plasticity, academic support, lifelong benefits, social connection.</span>
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-1 inline-block h-2 w-2 rounded-full bg-black" />
+              <span>Take action: share content, advocate for evidence-based policies, support music education, debunk myths.</span>
+            </li>
+          </ul>
         </div>
-      </div>
+      </header>
+
+      {/* SECTION 1 — BENEFITS (FROM YOUR TEXT, CONDENSED) */}
+      <section className="mb-12" aria-labelledby="benefits">
+        <h2 id="benefits" className="text-2xl md:text-3xl font-bold mb-4">Why It Matters</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border p-5 bg-white dark:bg-gray-900">
+            <h3 className="font-semibold">Brain Plasticity</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Musical engagement activates motor, auditory, language, memory, and emotion networks—supporting cognitive growth.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5 bg-white dark:bg-gray-900">
+            <h3 className="font-semibold">Academic Support</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Programs that include active music-making align with better outcomes in language, reading, and attention.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5 bg-white dark:bg-gray-900">
+            <h3 className="font-semibold">Lifelong Benefits</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Music participation is linked with more robust neural encoding and healthier cognitive aging.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5 bg-white dark:bg-gray-900">
+            <h3 className="font-semibold">Social Connection</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Group music-making supports empathy, reduces social anxiety, and strengthens community bonds.
+            </p>
+          </div>
+        </div>
+        <div className="mt-6">
+          <SecondaryButton href="#faq">Read FAQ</SecondaryButton>
+        </div>
+      </section>
+
+      {/* SECTION 2 — LEAD FORM */}
+      <section id="lead" className="mb-12" aria-labelledby="lead-heading">
+        <div className="rounded-xl border p-6 md:p-8 bg-primary/5">
+          <h2 id="lead-heading" className="text-2xl md:text-3xl font-bold">Get Research Updates & Campaign Materials</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Join the Scientific Awareness campaign to access shareable, research-backed content on music and cognitive development.
+          </p>
+
+          {submitted ? (
+            <div className="mt-6 rounded-lg border bg-white dark:bg-gray-900 p-5">
+              <p className="font-medium">Thanks! You’re on the list.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                We’ll email materials and updates as they’re released.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={onSubmit} className="mt-6 grid gap-4 md:grid-cols-3" aria-label="Lead capture form">
+              <div className="md:col-span-1">
+                <label htmlFor="name" className="block text-sm font-medium">Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
+                  placeholder="Your name"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label htmlFor="email" className="block text-sm font-medium">Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div className="md:col-span-1">
+                <label htmlFor="role" className="block text-sm font-medium">Role (optional)</label>
+                <input
+                  id="role"
+                  name="role"
+                  type="text"
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="mt-1 w-full rounded-md border px-3 py-2 outline-none focus:ring-2"
+                  placeholder="Educator, parent, policymaker…"
+                />
+              </div>
+
+              {/* Minimal hidden attribution fields for Ads */}
+              <input type="hidden" name="gclid" value={gclid} />
+              <input type="hidden" name="utm_source" value={utm_source} />
+              <input type="hidden" name="utm_campaign" value={utm_campaign} />
+              <input type="hidden" name="utm_medium" value={utm_medium} />
+
+              <div className="md:col-span-3 flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center justify-center rounded-md bg-black px-5 py-2.5 text-white hover:bg-gray-900 disabled:opacity-60"
+                  data-ads-conversion="lead-submit"
+                  aria-label="Submit to receive research updates"
+                >
+                  {submitting ? "Submitting…" : "Get Updates"}
+                </button>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+              </div>
+
+              {/* Conversion tracking placeholders */}
+              {/* <script>
+                  // Replace AW-XXXXXXX and label with your IDs
+                  // gtag('event', 'conversion', {'send_to': 'AW-XXXXXXX/CONVERSION_LABEL'});
+                </script> */}
+            </form>
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 3 — RESOURCES (REAL LINKS FROM YOUR CONTENT) */}
+      <section id="resources" className="mb-12" aria-labelledby="resources-heading">
+        <h2 id="resources-heading" className="text-2xl md:text-3xl font-bold mb-4">Access Scientific Resources</h2>
+        <div className="flex flex-wrap gap-3">
+          <PrimaryButton href="https://www.youtube.com/@humanitariansai">Watch Educational Videos</PrimaryButton>
+          <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy/tree/main/Research">
+            Humanitarians AI Research Papers
+          </SecondaryButton>
+          <PrimaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
+            Humanitarians AI Spotify
+          </PrimaryButton>
+          <SecondaryButton href="/contact">Contact Research Team</SecondaryButton>
+          <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
+            Lyrical Literacy GitHub
+          </SecondaryButton>
+        </div>
+      </section>
+
+      {/* SECTION 4 — FAQ (ADDRESS COMMON OBJECTIONS, CONCISE) */}
+      <section id="faq" className="mb-12" aria-labelledby="faq-heading">
+        <h2 id="faq-heading" className="text-2xl md:text-3xl font-bold mb-4">FAQ</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border p-5">
+            <h3 className="font-semibold">Does this rely on passive listening?</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              No. The focus is active music-making (singing, instruments, creating) because it more strongly engages
+              attention, language, memory, and emotion networks.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5">
+            <h3 className="font-semibold">Is this only for “musically talented” kids?</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Benefits are linked to consistent engagement, not innate talent. The aim is accessible, research-backed participation.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5">
+            <h3 className="font-semibold">Does music take time from core academics?</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Active music-making supports skills used in reading, attention, and learning—complementing academic growth.
+            </p>
+          </div>
+          <div className="rounded-lg border p-5">
+            <h3 className="font-semibold">How can I help?</h3>
+            <p className="text-sm mt-1 text-muted-foreground">
+              Share research-backed messages, advocate for evidence-based policies, support music education funding, and help debunk myths.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER CTAs */}
+      <footer className="border-t pt-8">
+        <div className="flex flex-wrap gap-3">
+          <PrimaryButton href="#lead">Get Research Updates</PrimaryButton>
+          <SecondaryButton href="/donate">Donate</SecondaryButton>
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Note: Replace the inline Google Ads placeholders with your actual conversion IDs/labels in production.
+        </p>
+      </footer>
     </div>
   )
 }
