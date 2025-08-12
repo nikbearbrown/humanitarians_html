@@ -21,7 +21,7 @@ export default function BrainExerciseSongsPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/videoseries?si=lvEaqmjb6Ws26gZp&amp;list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
+              src="https://www.youtube.com/embed/krxIXJ_Damo?si=LfJLcOrAypKpExys"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
