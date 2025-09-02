@@ -119,6 +119,47 @@ export default function LullabizePage() {
               </div>
             </div>
           </section>
+          
+          {/* ===== SCIENTIFIC FOUNDATION SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Scientific Foundation</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Lullabize isn't just based on tradition—it's backed by substantial scientific research on how music affects early cognitive development:
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Neurological Benefits</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>Activates shared neural networks between music and language processing</li>
+                    <li>Strengthens neural timing mechanisms through rhythmic entrainment</li>
+                    <li>Promotes whole-brain engagement across auditory, motor, and cognitive circuits</li>
+                    <li>Creates experience-driven neuroplasticity during critical developmental periods</li>
+                  </ul>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Developmental Impact</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>Physiological regulation: Reduces heart rate, stabilizes breathing patterns</li>
+                    <li>Enhances phonological awareness and vocabulary acquisition</li>
+                    <li>Improves executive functions including attention and working memory</li>
+                    <li>Fosters secure attachment through the bonding ritual of singing</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <p>
+                Research shows that children exposed to structured musical activities demonstrate measurable advantages in language development, auditory processing, and even reading readiness. Lullabies specifically have been shown to trigger oxytocin release (the "bonding hormone"), creating a neurobiological foundation for learning while reducing stress hormones like cortisol.
+              </p>
+              
+              <p>
+                Unlike the debunked "Mozart Effect" (passive listening), Lullabize focuses on active musical engagement—the form of musical experience with the strongest evidence for cognitive benefits. By applying principles from neuroscience and developmental psychology, Lullabize creates songs designed to work with, not against, how young brains naturally process and learn from musical experiences.
+              </p>
+            </div>
+          </section>
+          
 
           {/* ===== EXAMPLE SECTION ===== */}
           <section>
