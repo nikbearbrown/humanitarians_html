@@ -14,14 +14,14 @@ export default function LullabizePage() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Lullabize: Create Simple Somgs: Musical Cognitive Development</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Lullabize: Create Simple Songs: Musical Cognitive Development</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Harness the power of lullabies and simple songs as cognitive training tools for all ages. Our specialized platform transforms text into structured musical experiences that strengthen neural pathways, enhance language processing, and improve executive function in both children and adults.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/videoseries?si=caS7A9UMCFewuuRB&amp;list=PLgOGgHS58rB-sBjm4oEfMfFXcYZf89IDo"
+              src="https://www.youtube.com/embed/bLT4xz80Ifg?si=IGewFAnFlHeBJPW1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
