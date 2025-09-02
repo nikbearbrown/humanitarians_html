@@ -14,9 +14,9 @@ export default function LullabizePage() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Lullabize: Create Gentle Lullabies</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Lullabize: Create Simple Somgs: Musical Cognitive Development</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Transform any text or idea into a soothing lullaby with our specialized tool. Perfect for parents, educators, and creators who want calming songs for children.
+            Harness the power of lullabies and simple songs as cognitive training tools for all ages. Our specialized platform transforms text into structured musical experiences that strengthen neural pathways, enhance language processing, and improve executive function in both children and adults.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
