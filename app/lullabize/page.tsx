@@ -4,19 +4,19 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
-  title: "Template Page",
-  description: "A template for creating new pages",
+  title: "Lullabize - Create Gentle Lullabies",
+  description: "Transform any text into soothing lullabies with Lullabize by Humanitarians AI",
 };
 
-export default function TemplatePage() {
+export default function LullabizePage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Template Page Title</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Lullabize: Create Gentle Lullabies</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            This is a template page that you can use as a starting point for creating new pages. It includes a hero section with a video, placeholder sections for content, and a resources section.
+            Transform any text or idea into a soothing lullaby with our specialized tool. Perfect for parents, educators, and creators who want calming songs for children.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -28,57 +28,132 @@ export default function TemplatePage() {
               allowFullScreen
             />
           </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <PrimaryButton href="https://lullabize.humanitarians.ai/">
+              Try Lullabize Now
+            </PrimaryButton>
+            <SecondaryButton href="https://chatgpt.com/g/g-68b5f1f612208191a735586516c0d264-lullabize">
+              Open in ChatGPT
+            </SecondaryButton>
+          </div>
         </div>
 
         {/* ===== MAIN CONTENT ===== */}
         <div className="grid gap-12">
-          {/* ===== PLACEHOLDER SECTION 1 ===== */}
+          {/* ===== HOW IT WORKS SECTION ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Section 1 Title</h2>
+            <h2 className="text-3xl font-bold mb-6">How Lullabize Works</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                This is a placeholder for your first section. You can replace this with actual content when creating a new page. Include paragraphs, lists, images, or any other content you need.
-              </p>
-              
-              <p>
-                You can add multiple paragraphs to provide detailed information. This template ensures consistent styling and layout across different pages.
+                Lullabize transforms your ideas or text into soothing lullabies complete with all the elements needed to create a calming bedtime experience:
               </p>
               
               <ul>
-                <li>List item one</li>
-                <li>List item two</li>
-                <li>List item three</li>
+                <li>Gentle lyrics suitable for helping children relax and sleep</li>
+                <li>Meta tags for music generation platforms (Suno/Udio compatible)</li>
+                <li>Musical style suggestions</li>
+                <li>Visual prompts to bring your lullaby to life</li>
               </ul>
+              
+              <p>Using our tool is simple:</p>
+              
+              <ol>
+                <li>Share any text or idea you want transformed</li>
+                <li>Lullabize creates a calming song with sleep-friendly elements</li>
+                <li>Get complete lyrics with music generation meta tags</li>
+                <li>Receive matching visual prompts for each section of the song</li>
+              </ol>
             </div>
           </section>
 
-          {/* ===== PLACEHOLDER SECTION 2 ===== */}
+          {/* ===== FEATURES SECTION ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Section 2 Title</h2>
+            <h2 className="text-3xl font-bold mb-6">Lullaby Features</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                This is a placeholder for your second section. You can have as many sections as needed for your content. Each section is separated with appropriate spacing.
-              </p>
-              
-              <p>
-                Consider using different content formats in different sections to keep your page visually interesting. Options include:
+                Every lullaby created with Lullabize follows proven principles for creating effective, calming songs for children:
               </p>
               
               <div className="grid md:grid-cols-2 gap-6 my-8">
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 1</h3>
-                  <p className="text-muted-foreground">
-                    This is example card content. You can use cards to present information in a visually distinct way.
-                  </p>
+                  <h3 className="text-xl font-bold mb-4">Acoustic Structure</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>Simple, smooth melodies with limited range</li>
+                    <li>Gentle "rocking" rhythm in triple meter</li>
+                    <li>Slow, steady tempo (60-80 BPM)</li>
+                    <li>Predictable patterns with high repetition</li>
+                  </ul>
                 </div>
                 
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 2</h3>
-                  <p className="text-muted-foreground">
-                    This is example card content. Cards work well for presenting related pieces of information side by side.
-                  </p>
+                  <h3 className="text-xl font-bold mb-4">Lyrical Elements</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>Themes of safety, comfort, and love</li>
+                    <li>Simple, soothing vocabulary</li>
+                    <li>Personalization options</li>
+                    <li>Gentle nonsense syllables (lu-lu, la-la)</li>
+                  </ul>
                 </div>
               </div>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Complete Package</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li>Musical style recommendations</li>
+                    <li>Structured lyrics with meta tags</li>
+                    <li>Visual prompts for illustrations</li>
+                    <li>Personalization notes</li>
+                  </ul>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Commands</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>lullabize</strong> - Transform text into a lullaby</li>
+                    <li><strong>theme</strong> - Create on a specific theme</li>
+                    <li><strong>personalize</strong> - Include a child's name</li>
+                    <li><strong>visualize</strong> - Focus on visual prompts</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ===== EXAMPLE SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Try It Yourself</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Try pasting this classic nursery rhyme and asking for a lullaby version with meta tags:
+              </p>
+              
+              <div className="bg-muted/30 p-6 rounded-lg my-4 overflow-x-auto">
+                <pre className="text-sm">
+                  <code>
+{`Can you create a poem from this with Meta tags?? Use the original lines in the poem?
+It should have at least five verses so extend the song if necessary as a related Shel Silverstein poem 
+
+Pat-a-Cake
+(often "Pat-a-cake, Pat-a-cake, Baker's Man")
+
+Pat-a-cake, pat-a-cake, baker's man,
+Bake me a cake as fast as you can;
+Pat it and prick it, and mark it with B,
+And put it in the oven for baby and me.`}
+                  </code>
+                </pre>
+              </div>
+              
+              <p>
+                Lullabize will transform this into a soothing lullaby with meta tags for music generation, complete with visual prompts and style suggestions!
+              </p>
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+              <PrimaryButton href="https://chatgpt.com/g/g-68b5f1f612208191a735586516c0d264-lullabize">
+                Try Lullabize Now
+              </PrimaryButton>
             </div>
           </section>
 
