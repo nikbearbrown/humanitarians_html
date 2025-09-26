@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Accelerate your career with AI communication skills tailored for recent graduates",
 }
 
-export default function GraduateAIFluencyPage() {
+export default function AIFluencyPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
