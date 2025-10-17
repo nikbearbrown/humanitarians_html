@@ -15,8 +15,8 @@ const SpotifyArtistDisplay: React.FC = () => {
   const ARTIST_ID = '3cj3R4pDpYQHaWx0MM2vFV'; // Your artist ID
   
   // You need these from Spotify Developer Dashboard (free account works!)
-  const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || '';
-  const CLIENT_SECRET = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET || '';
+  const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || '';
+  const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || '';
 
   // Get access token using Client Credentials Flow
   const getAccessToken = async () => {
