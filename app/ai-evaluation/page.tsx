@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: "Accelerate your career trajectory with advanced AI communication skills for mid-career professionals",
 }
 
-export default function ProfessionalAIFluencyPage() {
+export default function AIEvaluationPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
