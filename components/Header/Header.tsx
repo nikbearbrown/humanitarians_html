@@ -44,7 +44,7 @@ export default function Header() {
     { name: "AI for Good", href: "/ai-for-good" },
     { name: "Lyrical Literacy", href: "/lyrical-literacy" },
     { name: "Botspeak", href: "/botspeak" },
-    { name: "Playlist", href: "/music-player" },
+    { name: "Podcast", href: "https://podcast.humanitarians.ai" },
     { name: "About Us", href: "/about" },
     { name: "Contact Us", href: "/contact" },
   ]
