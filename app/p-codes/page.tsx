@@ -95,7 +95,9 @@ export default function Pcodes() {
               </p>
 
               {/* YouTube Video Thumbnails Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 my-6">
+              <div
+                className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
+              >
                 {YOUTUBE_PLAYLIST_DATA.map((data) => (
                   <VideoThumbnail
                     title={data.title}

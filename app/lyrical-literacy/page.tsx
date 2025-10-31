@@ -97,7 +97,6 @@ export default function LyricalLiteracyArt() {
               {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
               <div
                 className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
-                aria-label="Lyrical Literacy video thumbnails - scroll for more"
               >
                 {YOUTUBE_PLAYLIST_DATA.map((data) => (
                   <VideoThumbnail
