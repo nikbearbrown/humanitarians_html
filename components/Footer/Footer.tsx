@@ -182,6 +182,7 @@ export default function Footer() {
                <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
                <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
                <li><Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-muted-foreground hover:text-foreground transition-colors">Apple Music</Link></li>
+               <li><Link href="https://podcast.humanitarians.ai/" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy Pocast</Link></li>              
              </ul>
            </div>
 
