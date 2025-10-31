@@ -16,7 +16,7 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({ title, videoId }) => (
       <img
         src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
         alt={title}
-        className="rounded-lg w-full aspect-video object-cover transition"
+        className="rounded-lg w-full aspect-[3/4] object-cover transition"
       />
       <span className="absolute inset-0 rounded-lg bg-black/40 shadow-lg"></span>
       <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
