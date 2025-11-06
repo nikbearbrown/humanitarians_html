@@ -86,6 +86,36 @@ export default function BrainMusic() {
             </div>
           </section>
 
+          {/* ===== ACTIVE ENGAGEMENT SYSTEM SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Active Engagement System</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                <strong>A Pivotal Discovery:</strong> Our Brain Exercise Songs are part of the broader "Lyrical Literacy" project — not just a passive playlist, but an <em>active engagement system</em> designed to maximize cognitive benefits through interactive learning.
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Interactive Multimodal Experience</h3>
+                  <p className="text-muted-foreground">
+                    The Lyrical Literacy project uses AI to personalize learning paths and analyze user engagement, bridging the critical "active vs. passive" gap that research identifies as essential for cognitive development. The system includes interactive storybooks and a specialized Lyrical Literacy GPT Chatbot to enhance the learning experience.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Lullabize AI Technology</h3>
+                  <p className="text-muted-foreground">
+                    Our proprietary Lullabize AI creates new "cognitive training music" tailored to specific learning goals. This confirms that our songs are scientifically designed to be more than entertainment—they're part of a larger, interactive curriculum that adapts to each child's needs.
+                  </p>
+                </div>
+              </div>
+              
+              <p>
+                By combining AI-powered personalization with interactive elements, we've created a comprehensive system that engages multiple senses and learning pathways simultaneously. This active approach dramatically increases effectiveness compared to passive listening alone.
+              </p>
+            </div>
+          </section>
+
           {/* ===== KEY BENEFITS SECTION ===== */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Key Benefits</h2>
