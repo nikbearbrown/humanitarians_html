@@ -6,9 +6,9 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Lyrical Literacy AI Art Tools - Humanitarians AI",
+  title: "The Art of Engagement: Research Behind Lyrical Literacy Art Tools",
   description:
-    "Empowering youth through the transformative power of music and poetry",
+    "The evidence-based framework behind our AI art tools that complement music learning for cognitive development",
 };
 
 const YOUTUBE_PLAYLIST_DATA = [
@@ -29,7 +29,7 @@ const YOUTUBE_PLAYLIST_DATA = [
     videoID: "ZLw6ThxzpnQ",
   },
   {
-    title: "Lyrical Literacy AI Art Tools GPT Chatbot",
+    title: "Lyrical Literacy AI Tools GPT Chatbot",
     videoID: "Tny0pLIG9Cg",
   },
   {
@@ -45,20 +45,17 @@ export default function LullabizeArt() {
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy AI Art Tools</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">The Art of Engagement</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
-              Lyrical Literacy AI Art Tools YouTube
+              Lyrical Literacy Art Tools
             </PrimaryButton>
           </div>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Empowering youth through the transformative power of music and
-            poetry, fostering creativity and self-expression. An innovative
-            program that combines AI with creative writing and music to enhance
-            literacy skills.
+            Our research-backed framework for creating art that complements music learning, fostering cognitive development through carefully engineered visual-auditory experiences.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -75,26 +72,17 @@ export default function LullabizeArt() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">About the Project</h2>
+            <h2 className="text-3xl font-bold mb-6">The Science of Multimedia Learning</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Lyrical Literacy AI Art Tools is a pioneering initiative from Humanitarians
-                AI that harnesses artificial intelligence to enhance cognitive
-                and language development through music. This research-based
-                program explores the powerful intersection of neuroscience,
-                music, and education to create personalized learning experiences
-                for diverse populations.
+                Our research confirms that humans learn more deeply from words and pictures together than from words alone. This is because we have separate brain channels for processing visual and auditory information, as validated by Mayer's Cognitive Theory of Multimedia Learning and Paivio's Dual-Coding Theory.
               </p>
 
               <p>
-                At the heart of Lyrical Literacy AI Art Tools is the understanding that music
-                engages more brain regions simultaneously than almost any other
-                human activity, providing multimodal learning experiences that
-                target specific cognitive and linguistic skills while
-                maintaining high engagement levels.
+                Our model of combining brain exercise songs (audio) with carefully crafted visual art (video) is scientifically designed to engage both processing channels simultaneously, dramatically improving comprehension, retention, and cognitive transfer.
               </p>
 
-              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
+              {/* YouTube Video Thumbnails Grid */}
               <div
                 className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
               >
@@ -106,204 +94,209 @@ export default function LullabizeArt() {
                   />
                 ))}
               </div>
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                A Comprehensive Brain Exercise
+              
+              <h3 className="text-xl font-bold mt-10 mb-3">
+                The Coherence Principle: Resolving the Tension
               </h3>
 
               <p>
-                "Use it or lose it" is the fundamental biological principle
-                driving Lyrical Literacy AI Art Tools. Just as an athlete who trains only
-                certain muscle groups becomes physically imbalanced, a brain
-                that doesn't engage in musical activities misses crucial
-                developmental opportunities. When we sing, multiple regions of
-                our brain activate in beautiful synchrony—language centers,
-                memory networks, emotional processing areas, and motor control
-                systems all work together, creating neural connections that
-                strengthen cognitive resilience.
+                Our research uncovered a crucial nuance: the "Coherence Principle" warns that while combining audio and visuals is powerful, adding interesting but irrelevant or purely decorative elements can actually hurt learning by creating "extraneous cognitive load" — wasted mental effort.
+              </p>
+              
+              <p>
+                We've resolved this tension by designing art that serves specific cognitive purposes, not just decoration. Our framework separates art's functions into three non-competing domains:
               </p>
 
-              <div className="grid md:grid-cols-2 gap-6 my-6">
+              <div className="grid md:grid-cols-3 gap-6 my-8">
                 <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Neural Integration</h4>
+                  <h4 className="font-bold mb-2">Emotional Purpose</h4>
                   <p className="text-sm">
-                    Unlike isolated learning exercises, singing engages the
-                    whole brain in harmonious activity, strengthening
-                    connections between hemispheres and creating robust neural
-                    pathways that support broader cognitive functions.
+                    Engaging, high-quality art with an emotional appeal that solves the "first-mile problem" — getting a child to choose to engage with the content. This is supported by the "Aesthetic-Usability Effect" from HCI research.
                   </p>
                 </div>
 
                 <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Emotional Regulation</h4>
+                  <h4 className="font-bold mb-2">Pedagogical Purpose</h4>
                   <p className="text-sm">
-                    The emotional components of music provide natural gateways
-                    to developing emotional intelligence, self-regulation
-                    skills, and mindfulness practices that enhance learning
-                    capacity and retention.
+                    Characters and visual elements function as "Pedagogical Agents" that guide learning, provide feedback, and model emotions. Research shows these agents increase motivation and enhance learning outcomes.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Social Purpose</h4>
+                  <p className="text-sm">
+                    Design elements specifically created to prompt "Joint Media Engagement" — the parent-child co-use of media. Research shows children learn more, develop richer emotional vocabulary, and show improved regulation when a parent co-engages.
                   </p>
                 </div>
               </div>
-
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                Lyrical Literacy AI Art Tools Subprojects
-              </h3>
-
-              <div className="grid md:grid-cols-2 gap-6 my-6">
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Multilingual Melody</h4>
-                  <p className="text-sm">
-                    Leveraging AI to create personalized songs that facilitate
-                    language acquisition for learners of all ages, with special
-                    attention to vocabulary retention, pronunciation, and
-                    cultural context understanding.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Rhythm & Recall</h4>
-                  <p className="text-sm">
-                    A memory enhancement system that converts complex
-                    information into rhythmic patterns and melodic structures,
-                    making difficult-to-remember content more accessible and
-                    retained for longer periods.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Therapeutic Tones</h4>
-                  <p className="text-sm">
-                    Developing music-based interventions for cognitive
-                    rehabilitation, working with neurodivergent populations and
-                    those recovering from brain injuries to restore and
-                    strengthen neural pathways.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Educational Harmonies</h4>
-                  <p className="text-sm">
-                    Creating curriculum-aligned musical content that transforms
-                    traditional educational material into engaging, memorable
-                    songs that improve information retention and conceptual
-                    understanding.
-                  </p>
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                YouTube Series & Collaboration
+              
+              <h3 className="text-xl font-bold mt-10 mb-3">
+                Norman's Three Levels of Design
               </h3>
 
               <p>
-                The Lyrical Literacy AI Art Tools initiative is documented through our
-                ongoing YouTube series, where we demonstrate the science,
-                technology, and practical applications of our research. Each
-                episode showcases real-world implementations, interviews with
-                experts, and the measurable outcomes of our various subprojects.
+                Our art design framework is built on Don Norman's Three Levels of Emotional Design, providing a complete map of our user's journey:
               </p>
-
-              <p>
-                We actively seek collaborations with researchers, educators,
-                musicians, AI developers, and healthcare professionals
-                interested in exploring the potential of music and AI in
-                cognitive development. If you're passionate about the
-                intersection of music, neuroscience, and artificial
-                intelligence, we invite you to reach out and join our growing
-                community of innovators.
-              </p>
-
-              <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
-                <a
-                  href="https://www.youtube.com/@humanitariansai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
-                    <path d="m10 15 5-3-5-3z"></path>
-                  </svg>
-                  YouTube: @humanitariansai
-                </a>
-
-                <a
-                  href="mailto:info@humanitarians.ai"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                  </svg>
-                  Email: info@humanitarians.ai
-                </a>
+              
+              <div className="overflow-x-auto my-6">
+                <table className="min-w-full bg-muted/30 rounded-lg overflow-hidden">
+                  <thead className="bg-muted/70">
+                    <tr>
+                      <th className="py-3 px-4 text-left">Design Level</th>
+                      <th className="py-3 px-4 text-left">Function</th>
+                      <th className="py-3 px-4 text-left">Application</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-muted/30">
+                    <tr>
+                      <td className="py-3 px-4 font-medium">Visceral</td>
+                      <td className="py-3 px-4">Immediate, "gut feeling" appeal</td>
+                      <td className="py-3 px-4">Beautiful art gets the child "to try it"</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-medium">Behavioral</td>
+                      <td className="py-3 px-4">The "fun" of the interaction</td>
+                      <td className="py-3 px-4">Engaging, responsive design keeps them playing</td>
+                    </tr>
+                    <tr>
+                      <td className="py-3 px-4 font-medium">Reflective</td>
+                      <td className="py-3 px-4">Conscious thought and meaning</td>
+                      <td className="py-3 px-4">Creates lasting emotional bond and learning transfer</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Key Features</h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">
-                  AI-Generated Musical Content
-                </h3>
-                <p className="text-muted-foreground">
-                  Custom-created songs tailored to individual learning
-                  objectives, cultural contexts, and developmental needs that
-                  leverage the power of music to enhance memory formation and
-                  retention.
-                </p>
+            <h2 className="text-3xl font-bold mb-6">Engineering Rules for Art Creation</h2>
+            <div className="prose prose-lg dark:prose-invert">
+              <p>
+                Based on our research, we've developed specific engineering rules for creating art that complements music learning effectively:
+              </p>
+              
+              <h3 className="text-xl font-bold mt-6 mb-3">1. Rules for Reducing Extraneous Load</h3>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-6">
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Coherence Principle</h4>
+                  <p className="text-sm">
+                    All art elements must be purposeful. Every visual must pass the "coherence test": Does it directly support the learning objective, or is it purely decorative? Extraneous material competes for cognitive resources.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Signaling Principle</h4>
+                  <p className="text-sm">
+                    Use art as a "highlighter." Visual cues (animated circles, color changes, character pointing) draw the eye to critical information, helping children focus on what matters most.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Contiguity Principles</h4>
+                  <p className="text-sm">
+                    Related words and pictures must appear near each other (Spatial) and at the same time (Temporal). Separating related elements forces wasted cognitive effort searching for connections.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Redundancy Principle</h4>
+                  <p className="text-sm">
+                    Avoid presenting identical information in multiple channels simultaneously (e.g., graphics, narration, and on-screen text), which can overload the visual processing channel.
+                  </p>
+                </div>
               </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">
-                  Creative Storytelling
-                </h3>
-                <p className="text-muted-foreground">
-                  Interactive storybooks with accompanying musical elements and
-                  audiobooks that incorporate rhythmic and melodic components,
-                  supporting both literacy development and creative expression.
-                </p>
+              
+              <h3 className="text-xl font-bold mt-8 mb-3">2. Rules for Fostering Active Engagement</h3>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-6">
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Pedagogical Agents</h4>
+                  <p className="text-sm">
+                    On-screen characters must perform pedagogical functions: gesture to signal where to look, provide personalized feedback, or model emotional responses. Static, non-interactive characters violate the Coherence Principle.
+                  </p>
+                </div>
+
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Effective Gamification</h4>
+                  <p className="text-sm">
+                    Design "active" rewards that tap into Reflective Design. Instead of just a badge, rewards should be meaningful: a new virtual art component, a costume for a character, or a visual effect for their creation.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Joint Media Engagement</h4>
+                  <p className="text-sm">
+                    Design for a "shared space" that accommodates both child and parent. Create "second-screen" parent resources with conversation starters and extension activities to facilitate co-viewing.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-primary/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Multimedia Principle</h4>
+                  <p className="text-sm">
+                    Every core musical concept must be accompanied by a purposeful visual that illustrates it. This allows learners to build two mental representations (verbal and visual) and make connections between them.
+                  </p>
+                </div>
               </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">
-                  Personalized Learning
-                </h3>
-                <p className="text-muted-foreground">
-                  AI algorithms that adapt content based on learning progress,
-                  preferences, and specific developmental goals, creating
-                  customized learning paths for each individual.
-                </p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Music Integration</h3>
-                <p className="text-muted-foreground">
-                  Materials designed for diverse populations, including those
-                  with learning differences, language barriers, or
-                  neurodevelopmental conditions, making education more
-                  accessible and engaging for all learners.
-                </p>
+              
+              <h3 className="text-xl font-bold mt-8 mb-3">3. Engagement-to-Learning Flywheel</h3>
+              
+              <p>
+                Our research synthesizes into a single, actionable causal loop—a flywheel model for successful learning:
+              </p>
+              
+              <ol className="list-decimal pl-6 space-y-2 my-4">
+                <li>Visceral Design and the Aesthetic-Usability Effect provide the positive "halo" that gets a child to "try it."</li>
+                <li>This positive affect creates tolerance and persistence through the initial difficulty of learning a new skill.</li>
+                <li>This persistence allows for Active Engagement with multimodal content.</li>
+                <li>This engagement drives Neuroplasticity and "Far Transfer" effects to executive functions and language.</li>
+                <li>Pedagogical Agents and parent co-engagement ensure this active time is efficient and meaningful.</li>
+                <li>Successful learning builds mastery, which fuels the Reflective Design loop, creating an identity ("I am a musician") that drives further engagement.</li>
+              </ol>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Implementation: AI-Driven Art Generation</h2>
+            <div className="prose prose-lg dark:prose-invert">
+              <p>
+                Our research has led to specific prompt engineering frameworks for generating art that complements music learning:
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">
+                    Generating the "Visceral" Layer
+                  </h3>
+                  <p className="text-muted-foreground">
+                    We use specific emotion, mood, and lighting keywords to evoke feelings, along with color psychology principles to create aesthetically appealing visual worlds that invite engagement. Our prompts focus on creating a consistent style that appeals to children while maintaining educational value.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">
+                    Designing Pedagogical Agents
+                  </h3>
+                  <p className="text-muted-foreground">
+                    We prompt for character consistency using layout techniques like montages and storyboards. Our characters are designed to be age-appropriate, emotionally expressive, and functionally supportive of learning goals, not just decorative elements.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">
+                    Translating Lyrics to Visuals
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Our "Chain of Thought" prompting approach translates abstract lyrical concepts into concrete visual scenes. We generate storyboards that align with temporal rhythm, creating synchronized audio-visual experiences that enhance cognitive processing.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">
+                    Creating JME Activities
+                  </h3>
+                  <p className="text-muted-foreground">
+                    We prompt for "second-screen" content that facilitates parent-child interaction, including conversation starters and real-world extension activities. These prompts create a holistic learning experience that extends beyond the screen.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
@@ -313,10 +306,10 @@ export default function LullabizeArt() {
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
               <PrimaryButton href="/contact">Contact Us</PrimaryButton>
               <SecondaryButton href="/donate">
-                Support the Project
+                Support the Research
               </SecondaryButton>
               <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
-                Lyrical Literacy AI Art Tools YouTube
+                Art Tools YouTube
               </PrimaryButton>
               <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
                 GitHub Repository
