@@ -6,14 +6,14 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Lyrical Literacy - Humanitarians AI",
+  title: "Lyrical Literacy Xmas Songs - Humanitarians AI",
   description:
     "Empowering youth through the transformative power of music and poetry",
 };
 
 const YOUTUBE_PLAYLIST_DATA = [
   {
-    title: "Lyrical Literacy YouTube",
+    title: "Lyrical Literacy Xmas Songs YouTube",
     videoID: "h6dVyxjtqZ8",
   },
   {
@@ -29,7 +29,7 @@ const YOUTUBE_PLAYLIST_DATA = [
     videoID: "ZLw6ThxzpnQ",
   },
   {
-    title: "Lyrical Literacy GPT Chatbot",
+    title: "Lyrical Literacy Xmas Songs GPT Chatbot",
     videoID: "Tny0pLIG9Cg",
   },
   {
@@ -45,12 +45,12 @@ export default function Xmas() {
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy Xmas Songs</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
-              Lyrical Literacy YouTube
+              Lyrical Literacy Xmas Songs YouTube
             </PrimaryButton>
           </div>
 
@@ -78,7 +78,7 @@ export default function Xmas() {
             <h2 className="text-3xl font-bold mb-6">About the Project</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Lyrical Literacy is a pioneering initiative from Humanitarians
+                Lyrical Literacy Xmas Songs is a pioneering initiative from Humanitarians
                 AI that harnesses artificial intelligence to enhance cognitive
                 and language development through music. This research-based
                 program explores the powerful intersection of neuroscience,
@@ -87,7 +87,7 @@ export default function Xmas() {
               </p>
 
               <p>
-                At the heart of Lyrical Literacy is the understanding that music
+                At the heart of Lyrical Literacy Xmas Songs is the understanding that music
                 engages more brain regions simultaneously than almost any other
                 human activity, providing multimodal learning experiences that
                 target specific cognitive and linguistic skills while
@@ -112,7 +112,7 @@ export default function Xmas() {
 
               <p>
                 "Use it or lose it" is the fundamental biological principle
-                driving Lyrical Literacy. Just as an athlete who trains only
+                driving Lyrical Literacy Xmas Songs. Just as an athlete who trains only
                 certain muscle groups becomes physically imbalanced, a brain
                 that doesn't engage in musical activities misses crucial
                 developmental opportunities. When we sing, multiple regions of
@@ -145,7 +145,7 @@ export default function Xmas() {
               </div>
 
               <h3 className="text-xl font-bold mt-6 mb-3">
-                Lyrical Literacy Subprojects
+                Lyrical Literacy Xmas Songs Subprojects
               </h3>
 
               <div className="grid md:grid-cols-2 gap-6 my-6">
@@ -195,7 +195,7 @@ export default function Xmas() {
               </h3>
 
               <p>
-                The Lyrical Literacy initiative is documented through our
+                The Lyrical Literacy Xmas Songs initiative is documented through our
                 ongoing YouTube series, where we demonstrate the science,
                 technology, and practical applications of our research. Each
                 episode showcases real-world implementations, interviews with
@@ -316,7 +316,7 @@ export default function Xmas() {
                 Support the Project
               </SecondaryButton>
               <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
-                Lyrical Literacy YouTube
+                Lyrical Literacy Xmas Songs YouTube
               </PrimaryButton>
               <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
                 GitHub Repository
