@@ -6,9 +6,9 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Lyrical Literacy Xmas Songs - Humanitarians AI",
+  title: "Lyrical Literacy Christmas Songs - Humanitarians AI",
   description:
-    "Empowering youth through the transformative power of music and poetry",
+    "AI-powered tools for creating and enjoying Christmas music while building year-round singing habits",
 };
 
 const YOUTUBE_PLAYLIST_DATA = [
@@ -45,20 +45,17 @@ export default function Xmas() {
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy Xmas Songs</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy Christmas Songs</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
-              Lyrical Literacy Xmas Songs YouTube
+              Christmas Songs Playlist
             </PrimaryButton>
           </div>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Empowering youth through the transformative power of music and
-            poetry, fostering creativity and self-expression. An innovative
-            program that combines AI with creative writing and music to enhance
-            literacy skills.
+            Creating and enjoying Christmas music is a perfect entry point into singing and music-making. Our research shows that the holiday period offers unique advantages for initiating singing behaviors that can be maintained throughout the year. Our tools help you create, perform, and share Christmas music while building habits that last.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -75,28 +72,145 @@ export default function Xmas() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">About the Project</h2>
+            <h2 className="text-3xl font-bold mb-6">Christmas Music Tools</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Lyrical Literacy Xmas Songs is a pioneering initiative from Humanitarians
-                AI that harnesses artificial intelligence to enhance cognitive
-                and language development through music. This research-based
-                program explores the powerful intersection of neuroscience,
-                music, and education to create personalized learning experiences
-                for diverse populations.
+                The Christmas season is a unique opportunity to start singing - research shows it's the peak time for music engagement each year. Our tools help you leverage this special moment to begin a singing journey that continues year-round. Each tool is available as both an OpenAI Custom GPT and a Google Gemini Gem.
               </p>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Carol Composer</h3>
+                  <p className="text-sm mb-3">
+                    Generate original, legally safe Christmas-style songs complete with lyrics, melody, chords, and more. Outputs include lead sheets (PDF/MusicXML), MIDI, and demo audio.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
 
-              <p>
-                At the heart of Lyrical Literacy Xmas Songs is the understanding that music
-                engages more brain regions simultaneously than almost any other
-                human activity, providing multimodal learning experiences that
-                target specific cognitive and linguistic skills while
-                maintaining high engagement levels.
-              </p>
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Choir Arranger</h3>
+                  <p className="text-sm mb-3">
+                    Create multi-part voicings (SATB/SSA/TTBB), piano reductions, rehearsal tracks, and performance notes for choirs of all skill levels.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Karaoke Coach</h3>
+                  <p className="text-sm mb-3">
+                    Get real-time pitch, timing, and breath feedback plus our research-backed "Winter Sing" 10-week habit plan to maintain engagement past the holidays.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Carol-to-Evergreen Bridge</h3>
+                  <p className="text-sm mb-3">
+                    Transform holiday songs into secular/evergreen variants with new lyrics and arrangements to keep your repertoire alive year-round.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Tradition Explorer</h3>
+                  <p className="text-sm mb-3">
+                    Discover carol histories, public-domain sources, hymn meters, and harmony tricks through guided learning journeys that build musical knowledge.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Family Songbook Maker</h3>
+                  <p className="text-sm mb-3">
+                    Create beautiful lyric booklets with chord grids, capo suggestions, and QR links to practice tracks for holiday gatherings and performances.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Community Hub</h3>
+                  <p className="text-sm mb-3">
+                    Join weekly challenges, record micro-performances, and build community through our stickiness engine designed to maintain engagement past the holidays.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+                
+                <div className="p-6 bg-primary/5 rounded-lg border">
+                  <h3 className="text-xl font-bold mb-3">Rights & Risk Sentinel</h3>
+                  <p className="text-sm mb-3">
+                    Ensure legal compliance with copyright checking, melody similarity scanning, and attribution wizards for public domain works.
+                  </p>
+                  <div className="flex space-x-2">
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      OpenAI GPT
+                    </Link>
+                    <span className="text-muted">|</span>
+                    <Link href="https://www.humanitarians.ai/" className="text-primary hover:underline text-xs">
+                      Google Gemini
+                    </Link>
+                  </div>
+                </div>
+              </div>
 
-              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
+              {/* YouTube Video Thumbnails Grid */}
               <div
-                className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
+                className="grid grid-cols-3 gap-6 my-8 max-h-[500px] overflow-y-auto"
               >
                 {YOUTUBE_PLAYLIST_DATA.map((data) => (
                   <VideoThumbnail
@@ -106,221 +220,78 @@ export default function Xmas() {
                   />
                 ))}
               </div>
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                A Comprehensive Brain Exercise
-              </h3>
-
-              <p>
-                "Use it or lose it" is the fundamental biological principle
-                driving Lyrical Literacy Xmas Songs. Just as an athlete who trains only
-                certain muscle groups becomes physically imbalanced, a brain
-                that doesn't engage in musical activities misses crucial
-                developmental opportunities. When we sing, multiple regions of
-                our brain activate in beautiful synchrony—language centers,
-                memory networks, emotional processing areas, and motor control
-                systems all work together, creating neural connections that
-                strengthen cognitive resilience.
-              </p>
-
-              <div className="grid md:grid-cols-2 gap-6 my-6">
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Neural Integration</h4>
-                  <p className="text-sm">
-                    Unlike isolated learning exercises, singing engages the
-                    whole brain in harmonious activity, strengthening
-                    connections between hemispheres and creating robust neural
-                    pathways that support broader cognitive functions.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Emotional Regulation</h4>
-                  <p className="text-sm">
-                    The emotional components of music provide natural gateways
-                    to developing emotional intelligence, self-regulation
-                    skills, and mindfulness practices that enhance learning
-                    capacity and retention.
-                  </p>
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                Lyrical Literacy Xmas Songs Subprojects
-              </h3>
-
-              <div className="grid md:grid-cols-2 gap-6 my-6">
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Multilingual Melody</h4>
-                  <p className="text-sm">
-                    Leveraging AI to create personalized songs that facilitate
-                    language acquisition for learners of all ages, with special
-                    attention to vocabulary retention, pronunciation, and
-                    cultural context understanding.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Rhythm & Recall</h4>
-                  <p className="text-sm">
-                    A memory enhancement system that converts complex
-                    information into rhythmic patterns and melodic structures,
-                    making difficult-to-remember content more accessible and
-                    retained for longer periods.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Therapeutic Tones</h4>
-                  <p className="text-sm">
-                    Developing music-based interventions for cognitive
-                    rehabilitation, working with neurodivergent populations and
-                    those recovering from brain injuries to restore and
-                    strengthen neural pathways.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Educational Harmonies</h4>
-                  <p className="text-sm">
-                    Creating curriculum-aligned musical content that transforms
-                    traditional educational material into engaging, memorable
-                    songs that improve information retention and conceptual
-                    understanding.
-                  </p>
-                </div>
-              </div>
-
-              <h3 className="text-xl font-bold mt-6 mb-3">
-                YouTube Series & Collaboration
-              </h3>
-
-              <p>
-                The Lyrical Literacy Xmas Songs initiative is documented through our
-                ongoing YouTube series, where we demonstrate the science,
-                technology, and practical applications of our research. Each
-                episode showcases real-world implementations, interviews with
-                experts, and the measurable outcomes of our various subprojects.
-              </p>
-
-              <p>
-                We actively seek collaborations with researchers, educators,
-                musicians, AI developers, and healthcare professionals
-                interested in exploring the potential of music and AI in
-                cognitive development. If you're passionate about the
-                intersection of music, neuroscience, and artificial
-                intelligence, we invite you to reach out and join our growing
-                community of innovators.
-              </p>
-
-              <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
-                <a
-                  href="https://www.youtube.com/@humanitariansai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
-                    <path d="m10 15 5-3-5-3z"></path>
-                  </svg>
-                  YouTube: @humanitariansai
-                </a>
-
-                <a
-                  href="mailto:info@humanitarians.ai"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-                  </svg>
-                  Email: info@humanitarians.ai
-                </a>
-              </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Key Features</h2>
+            <h2 className="text-3xl font-bold mb-6">Why Christmas Is Special for Singing</h2>
             <div className="grid md:grid-cols-2 gap-8">
-              <div className="p-6 border rounded-lg">
+              <div className="p-6 bg-primary/5 rounded-lg border">
                 <h3 className="text-xl font-bold mb-3">
-                  AI-Generated Musical Content
+                  Fresh-Start Timing
                 </h3>
                 <p className="text-muted-foreground">
-                  Custom-created songs tailored to individual learning
-                  objectives, cultural contexts, and developmental needs that
-                  leverage the power of music to enhance memory formation and
-                  retention.
+                  The holiday season and New Year create powerful "temporal landmarks" that research shows increase goal-seeking behaviors. This makes it the perfect time to begin a singing practice that can last all year.
                 </p>
               </div>
-              <div className="p-6 border rounded-lg">
+              <div className="p-6 bg-primary/5 rounded-lg border">
                 <h3 className="text-xl font-bold mb-3">
-                  Creative Storytelling
+                  Low-Friction Entry Points
                 </h3>
                 <p className="text-muted-foreground">
-                  Interactive storybooks with accompanying musical elements and
-                  audiobooks that incorporate rhythmic and melodic components,
-                  supporting both literacy development and creative expression.
+                  Christmas services, concerts, and gatherings provide natural, low-pressure opportunities to sing. Our tools help capture this momentum and transform it into lasting habits.
                 </p>
               </div>
-              <div className="p-6 border rounded-lg">
+              <div className="p-6 bg-primary/5 rounded-lg border">
                 <h3 className="text-xl font-bold mb-3">
-                  Personalized Learning
+                  Habit Formation Window
                 </h3>
                 <p className="text-muted-foreground">
-                  AI algorithms that adapt content based on learning progress,
-                  preferences, and specific developmental goals, creating
-                  customized learning paths for each individual.
+                  Research shows it takes about 66 days to form a habit. Starting at Christmas and continuing through February aligns perfectly with this window, helping establish singing as a year-round practice.
                 </p>
               </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Music Integration</h3>
+              <div className="p-6 bg-primary/5 rounded-lg border">
+                <h3 className="text-xl font-bold mb-3">
+                  Extended Engagement
+                </h3>
                 <p className="text-muted-foreground">
-                  Materials designed for diverse populations, including those
-                  with learning differences, language barriers, or
-                  neurodevelopmental conditions, making education more
-                  accessible and engaging for all learners.
+                  Our tools create a seamless journey from Christmas carols to evergreen songs, helping maintain interest and engagement long after the holidays end.
                 </p>
               </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Get Involved</h2>
+            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
+              <p>
+                Ready to begin your Christmas music journey? Choose from our suite of tools to start creating, singing, and building habits that last. Learn more about our research on <Link href="https://www.humanitarians.ai/lullabize-research" className="text-primary hover:underline">why Christmas is the perfect time to start singing</Link>.
+              </p>
+            </div>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="/contact">Contact Us</PrimaryButton>
-              <SecondaryButton href="/donate">
-                Support the Project
+              <PrimaryButton href="https://www.humanitarians.ai/">Try Carol Composer</PrimaryButton>
+              <SecondaryButton href="https://www.humanitarians.ai/">
+                Explore All Tools
               </SecondaryButton>
               <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
-                Lyrical Literacy Xmas Songs YouTube
+                Watch Christmas Songs
               </PrimaryButton>
               <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
                 GitHub Repository
               </SecondaryButton>
+            </div>
+            
+            <div className="mt-8 text-center">
+              <h3 className="text-lg font-semibold mb-2">Contact Us</h3>
+              <p className="text-muted-foreground mb-4">For more information about our Christmas music tools</p>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                <a 
+                  href="mailto:info@humanitarians.ai"
+                  className="text-sm text-primary hover:underline"
+                >
+                  Email: info@humanitarians.ai
+                </a>
+              </div>
             </div>
           </section>
         </div>
