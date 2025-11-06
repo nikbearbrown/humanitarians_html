@@ -5,7 +5,7 @@ import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
   title: "Humanitarians AI | Brain Exercise & Language Learning Songs Research",
-  description: "The scientific foundation behind our brain exercise and language learning songs, based on extensive neuroscience research on music's impact on cognitive development",
+  description: "The Neurocognitive Foundations of Music-Based Learning. The scientific foundation behind our brain exercise and language learning songs, based on extensive neuroscience research on music's impact on cognitive development",
 };
 
 export default function BrainExerciseSongsResearch() {
@@ -14,9 +14,9 @@ export default function BrainExerciseSongsResearch() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Humanitarians AI: Brain Exercise Songs</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">The Neurocognitive Foundations of Music-Based Learning</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            <strong>Listen to our brain exercise and language learning songs</strong> available now on Spotify, Apple Music, and YouTube. Our research-based songs are specifically designed to enhance cognitive and language development in children.
+            <strong>The central premise of music-based "brain exercise" is that musical engagement is not merely a skill-acquisition-focused leisure activity but a potent driver of brain development and reorganization. This perspective is strongly supported by a deep body of neuroscientific research demonstrating that musical training in childhood has a demonstrable and positive impact on brain plasticity. Neuroimaging studies reveal significant structural and functional adaptations in the brains of individuals with musical training, validating the concept of music as a comprehensive cognitive workout. </strong>strong>
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
