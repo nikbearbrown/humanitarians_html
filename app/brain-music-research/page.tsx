@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Listen to our brain exercise and language learning songs on Spotify, Apple Music, and YouTube to enhance cognitive and language development in children",
 };
 
-export default function BrainExerciseSongs() {
+export default function BrainExerciseSongsResearch() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
