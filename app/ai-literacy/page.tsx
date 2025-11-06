@@ -6,7 +6,7 @@ import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
   title: "AI Literacy - Humanitarians AI",
-  description: "Accelerate your career with AI communication skills tailored for recent graduates",
+  description: "Master effective prompt engineering and AI communication skills through our How to Speak Bot framework",
 }
 
 export default function AILiteracy() {
@@ -37,17 +37,33 @@ export default function AILiteracy() {
             <h2 className="text-3xl font-bold mb-6">About AI Literacy</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                AI Literacy adapts the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI literacy is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
+                At Humanitarians AI, our fundamental approach to AI Literacy is mastering effective prompting and prompt engineering. We've developed the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI literacy is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
               </p>
               
               <p>
-                Under the guidance of Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, you'll learn through hands-on projects that simulate real workplace scenarios, building a portfolio that demonstrates your AI collaboration capabilities to potential employers.
+                Under the guidance of <Link href="https://www.humanitarians.ai/nikbearbrown" className="text-primary hover:underline">Dr. Nik Bear Brown</Link>, Associate Teaching Professor at Northeastern University, you'll learn through hands-on projects that simulate real workplace scenarios, building a portfolio that demonstrates your AI collaboration capabilities to potential employers.
+              </p>
+              
+              <h3 className="text-xl font-bold mt-6 mb-3">How to Speak Bot: Prompt Patterns</h3>
+              
+              <p>
+                Our flagship AI literacy resource, "How to Speak Bot: Prompt Patterns," is available as a multi-platform educational experience:
+              </p>
+              
+              <ul className="list-disc pl-6 mt-2 space-y-2">
+                <li>A comprehensive <a href="https://www.humanitarians.ai/how-to-speak-bot" className="text-primary hover:underline">web-based book</a> with interactive exercises</li>
+                <li>A Kindle e-book for on-the-go learning</li>
+                <li>A complete <a href="https://www.youtube.com/playlist?list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm" className="text-primary hover:underline">YouTube series</a> that walks through each prompt pattern</li>
+              </ul>
+              
+              <p>
+                Written by Dr. Nik Bear Brown, this resource teaches you the art and science of crafting effective prompts to communicate with AI systems, enhancing your ability to leverage artificial intelligence across various personal and professional contexts.
               </p>
               
               <h3 className="text-xl font-bold mt-6 mb-3">Why Recent Graduates Need AI Fluency</h3>
               
               <p>
-                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. AI Literacy prepares you to:
+                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. Our AI Literacy program prepares you to:
               </p>
               
               <ul className="list-disc pl-6 mt-2 space-y-2">
@@ -195,7 +211,21 @@ export default function AILiteracy() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">All Lessons Available on YouTube</h2>
+            <h2 className="text-3xl font-bold mb-6">How to Speak Bot: Prompt Patterns</h2>
+            <div className="p-6 border rounded-lg mb-6">
+              <h3 className="text-xl font-bold mb-3">About the Course</h3>
+              <p className="text-muted-foreground mb-4">
+                "How to Speak Bot: Prompt Patterns" follows the journey of Princess Prompter, Witch Wanjali, and their trio of ChatBots as they explore the magical realm of Prompt Engineering. Through a blend of storytelling and technical instruction, you'll learn to craft effective prompts for AI systems in various contexts.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <PrimaryButton href="https://www.humanitarians.ai/how-to-speak-bot">
+                  View Web Book
+                </PrimaryButton>
+                <SecondaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm">
+                  Watch on YouTube
+                </SecondaryButton>
+              </div>
+            </div>
             <p className="text-muted-foreground mb-6">
               All AI Literacy lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
             </p>
@@ -215,11 +245,11 @@ export default function AILiteracy() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube
+              <PrimaryButton href="https://www.humanitarians.ai/how-to-speak-bot">
+                Web Book
               </PrimaryButton>
-              <SecondaryButton href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
-                Spotify
+              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+                YouTube
               </SecondaryButton>
               <PrimaryButton href="https://github.com/Humanitariansai">
                 Github
