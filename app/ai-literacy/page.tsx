@@ -5,17 +5,17 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
-  title: "AI Fluency - Humanitarians AI",
+  title: "AI Literacy - Humanitarians AI",
   description: "Accelerate your career with AI communication skills tailored for recent graduates",
 }
 
-export default function AIFluency() {
+export default function AILiteracy() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">AI Fluency</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">AI Literacy</h1>
           <p className="text-xl text-muted-foreground mb-8">
             Launch your career with essential AI communication skills. Our specialized program helps recent graduates transform AI literacy into a competitive advantage in today's rapidly evolving job market.
           </p>
@@ -34,10 +34,10 @@ export default function AIFluency() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">About AI Fluency</h2>
+            <h2 className="text-3xl font-bold mb-6">About AI Literacy</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                AI Fluency adapts the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI literacy is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
+                AI Literacy adapts the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI literacy is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
               </p>
               
               <p>
@@ -47,7 +47,7 @@ export default function AIFluency() {
               <h3 className="text-xl font-bold mt-6 mb-3">Why Recent Graduates Need AI Fluency</h3>
               
               <p>
-                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. AI Fluency prepares you to:
+                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. AI Literacy prepares you to:
               </p>
               
               <ul className="list-disc pl-6 mt-2 space-y-2">
@@ -133,7 +133,7 @@ export default function AIFluency() {
               </p>
               
               <p className="mt-4">
-                AI Fluency lessons are delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Special mentorship opportunities and peer collaboration sessions are also available for recent graduates.
+                AI Literacy lessons are delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Special mentorship opportunities and peer collaboration sessions are also available for recent graduates.
               </p>
               
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
@@ -197,7 +197,7 @@ export default function AIFluency() {
           <section>
             <h2 className="text-3xl font-bold mb-6">All Lessons Available on YouTube</h2>
             <p className="text-muted-foreground mb-6">
-              All AI Fluency lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
+              All AI Literacy lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
             </p>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
