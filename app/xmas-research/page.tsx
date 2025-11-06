@@ -6,14 +6,14 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Christmas Music Research - Humanitarians AI",
+  title: "Lyrical Literacy AI Tools - Lullabize & Klee - Humanitarians AI",
   description:
-    "Evidence-based research on why Christmas is the perfect time to start singing habits and how to leverage it for year-round engagement",
+    "AI tools for creating educational songs and complementary art based on cognitive science research",
 };
 
 const YOUTUBE_PLAYLIST_DATA = [
   {
-    title: "Lyrical Literacy Christmas Songs",
+    title: "Lyrical Literacy AI Tools YouTube",
     videoID: "h6dVyxjtqZ8",
   },
   {
@@ -38,24 +38,24 @@ const YOUTUBE_PLAYLIST_DATA = [
   },
 ];
 
-export default function XmasResearch() {
+export default function LyricalLiteracyTools() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Why Christmas Starters Are Special</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy AI Tools</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
-              Christmas Songs Playlist
+              Watch on YouTube
             </PrimaryButton>
           </div>
 
           <p className="text-xl text-muted-foreground mb-8">
-            Research-backed evidence on the unique advantages of the holiday season for starting singing habits and proven strategies to maintain engagement year-round. Our findings provide practical approaches for converting seasonal participants into regular singers.
+            A powerful suite of AI tools designed to help you create music, develop singing habits, and maintain engagement year-round. Based on research in cognitive science, habit formation, and multimedia learning, our tools help transform seasonal singers into lifelong music makers.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -72,259 +72,294 @@ export default function XmasResearch() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">Research Summary: The Christmas Advantage</h2>
-            <div className="prose prose-lg dark:prose-invert">
+            <h2 className="text-3xl font-bold mb-6">Our AI Tools Suite</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                Our research confirms that the Christmas period offers unique advantages for initiating singing behaviors that can be maintained throughout the year. This "holiday window" (approximately November 1 to January 2) presents a special opportunity that program managers can leverage with evidence-based strategies.
-              </p>
-
-              <div className="grid md:grid-cols-3 gap-6 my-8">
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Fresh-Start Timing</h4>
-                  <p className="text-sm">
-                    New Year/holiday temporal landmarks measurably increase goal-seeking behaviors (gym starts, "diet" searches). Research shows this psychological "Fresh Start Effect" creates a natural opportunity to convert motivation into concrete plans.
-                  </p>
-                </div>
-
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Low-Friction On-Ramps</h4>
-                  <p className="text-sm">
-                    Christmas Eve and December services/concerts are the most-attended of the year—creating your best pipeline of episodic singers to recruit from. These events provide natural, low-pressure entry points.
-                  </p>
-                </div>
-                
-                <div className="p-5 bg-primary/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">Extended Holiday Window</h4>
-                  <p className="text-sm">
-                    Music streaming and programming now ramp up in early November, giving you a longer runway to capture interest and pre-sell January cohorts. This expanded window provides more opportunities for engagement.
-                  </p>
-                </div>
-              </div>
-              
-              <h3 className="text-xl font-bold mt-8 mb-4">What We Know About Seasonality</h3>
-              
-              <ul className="list-disc pl-6 space-y-2 mb-6">
-                <li><strong>Holiday listening expands and starts earlier:</strong> Platform analyses show Christmas music surges beginning around November 1, sustaining dominance until just after New Year's; recent years have seen earlier and larger mid-November lifts.</li>
-                <li><strong>Holiday services are peak singing times:</strong> U.S. pastors report Christmas Eve as the most-attended service, creating a natural on-ramp for episodic singers.</li>
-                <li><strong>Youth engagement spikes:</strong> UK polling found strong under-25 orchestral engagement at Christmas events—useful as a proxy for appetite to participate in seasonal music-making.</li>
-                <li><strong>Singing gear purchases increase:</strong> December peaks for karaoke machines and wireless microphones suggest more at-home or social singing starts during the holidays.</li>
-              </ul>
-              
-              <h3 className="text-xl font-bold mt-8 mb-4">Evidence for Singing Persistence</h3>
-              
-              <p>
-                While direct, longitudinal proof that new singers who begin at Christmas specifically keep singing later is still emerging, multiple studies show promising results for singing persistence in general:
+                Humanitarians AI has developed a comprehensive suite of AI tools to help people create, sing, and share music. Our tools are designed as both OpenAI GPTs and Google Gemini Gems, offering diverse capabilities to meet different needs.
               </p>
               
-              <ul className="list-disc pl-6 space-y-2 mb-6">
-                <li><strong>Choir participation is sticky:</strong> Multi-site community-choir interventions report 90–92% study retention at 6 months with measurable benefits (reduced anxiety/depression; wellbeing gains).</li>
-                <li><strong>Cognitive benefits persist:</strong> Longitudinal data show sustained cognitive enhancements with ongoing choir singing, implying continued participation.</li>
-                <li><strong>Virtuous circle exists:</strong> Current/former choristers make up a majority of choral audiences, consistent with durable engagement once people start.</li>
-              </ul>
-
-              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
-              <div
-                className="grid grid-cols-3 gap-6 my-8 max-h-[500px] overflow-y-auto"
-              >
-                {YOUTUBE_PLAYLIST_DATA.map((data) => (
-                  <VideoThumbnail
-                    title={data.title}
-                    videoId={data.videoID}
-                    key={data.videoID}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Make It Stick: 12 Evidence-Based Tactics</h2>
-            <div className="prose prose-lg dark:prose-invert">
-              <h3 className="text-xl font-bold mb-4">A. Lock in Commitment During the Holiday Moment</h3>
+              <h3 className="text-2xl font-bold mt-10 mb-5">Music Creation Tools</h3>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">1. Immediate "Next Step" Offer</h4>
-                  <p className="text-sm">
-                    At Christmas events, enroll people on the spot into an 8–10 week "Winter Sing" that starts the first full week of January. This aligns with the median habit-formation horizon (approximately 66 days).
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Lullabize: Carol Composer</h3>
+                  <p className="mb-4">
+                    Generate original, legally safe Christmas-style songs with complete lyrics, melody, chords, lead sheets, MIDI, and demo audio. Perfect for solo creators, worship leaders, teachers, and families.
                   </p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">OpenAI GPT</h4>
+                      <p className="text-sm">Create songs in various substyles from Victorian carols to pop ballads with sleigh-bell texture, with full lead sheets and audio.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">Google Gemini</h4>
+                      <p className="text-sm">Hum-to-melody capabilities let you sing your ideas and turn them into professional arrangements.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">2. Fresh-Start Pledge</h4>
-                  <p className="text-sm">
-                    Invite signers (December 26–January 2) to commit to the full run; research shows temporal-landmark pledges outperform generic sign-ups by leveraging the psychological "fresh start" effect.
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Lullabize: Choir Arranger</h3>
+                  <p className="mb-4">
+                    Create multi-part SATB/SSA/TTBB arrangements with piano reductions, solfege rehearsal tracks, pronunciation guides, and performance notes for choirs of all levels.
                   </p>
-                </div>
-                
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">3. Buddy Pairs + Reminders</h4>
-                  <p className="text-sm">
-                    Pair newcomers with a returning singer; send concise check-ins and lyric links before each session to reduce friction. Behavioral research shows cueing is key to habit formation.
-                  </p>
-                </div>
-              </div>
-              
-              <h3 className="text-xl font-bold mb-4">B. Design the January–March Arc for Early Wins</h3>
-              
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">4. Early Micro-Performance</h4>
-                  <p className="text-sm">
-                    Schedule a low-stakes showcase around week 4–5 to create mastery and belonging—predictors of persistence observed in choral impact studies.
-                  </p>
-                </div>
-                
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">5. Repertoire Pivot</h4>
-                  <p className="text-sm">
-                    Move quickly off carols to secular/evergreen songs so identity shifts from "holiday singer" to "year-round chorister." This helps prevent typecasting the activity as seasonal.
-                  </p>
-                </div>
-                
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">6. Visible Progress Markers</h4>
-                  <p className="text-sm">
-                    Use short set lists with obvious improvement between weeks 1→3→6. Documenting progress boosts self-efficacy, a retention driver in arts-health groups.
-                  </p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">OpenAI GPT</h4>
+                      <p className="text-sm">Generates arrangements with proper voice leading, tessitura checks, and breath plans optimized for printing.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">Google Gemini</h4>
+                      <p className="text-sm">Features "level slider" from beginner to advanced that alters rhythm density and divisi complexity.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold mb-4">C. Make It Feel Good (and Measurably So)</h3>
+              <h3 className="text-2xl font-bold mt-10 mb-5">Practice & Engagement Tools</h3>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">7. Wellbeing Check-Ins</h4>
-                  <p className="text-sm">
-                    Implement brief (2-3 item) check-ins every other week. Sharing aggregated results reinforces benefits that longitudinal studies repeatedly find (reduced anxiety/depression, improved wellbeing).
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Karaoke Coach</h3>
+                  <p className="mb-4">
+                    Get real-time pitch, timing, and breath feedback for home singing practice, plus a built-in "Winter Sing" 10-week habit formation plan based on behavioral science.
                   </p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">OpenAI GPT</h4>
+                      <p className="text-sm">Provides auto-transposition to your comfort key and personalized practice goals with specific targets.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">Google Gemini</h4>
+                      <p className="text-sm">Integrates with Google Calendar for fixed weekly practice sessions and tracks your progress over time.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">8. Belonging Rituals</h4>
-                  <p className="text-sm">
-                    Names at the door, small sectional circles, and post-rehearsal mingles create social connection—a key mechanism through which singing sustains itself.
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Carol-to-Evergreen Bridge</h3>
+                  <p className="mb-4">
+                    Transform seasonal songs into year-round pieces by rewriting lyrics and adjusting arrangement textures while preserving the harmonic structure and melodic appeal.
                   </p>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">OpenAI GPT</h4>
+                      <p className="text-sm">Converts thematic elements (nativity → winter light, angels → community) and reharmonizes cadences.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-lg border border-primary/20">
+                      <h4 className="font-medium mb-2">Google Gemini</h4>
+                      <p className="text-sm">Includes instrumentation changes (sleigh bells → shaker, strings → nylon guitar) for updated sound.</p>
+                      <div className="mt-3">
+                        <Link href="#" className="text-primary text-sm hover:underline">Coming Soon</Link>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold mb-4">D. Reduce Friction to Habit Automaticity</h3>
+              <h3 className="text-2xl font-bold mt-10 mb-5">Educational & Production Tools</h3>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">9. Fixed Slot + Venue</h4>
-                  <p className="text-sm">
-                    Use same weekday/time/room for all 8–10 weeks; research shows consistency accelerates automaticity in habit formation.
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Tradition Explorer</h3>
+                  <p className="mb-4">
+                    Learn carol forms, common meters, and chord progressions that define holiday music, with public-domain examples and guided creation of new works in traditional styles.
                   </p>
+                  <div className="mt-3">
+                    <Link href="#" className="text-primary hover:underline">Coming Soon</Link>
+                  </div>
                 </div>
                 
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">10. Lower Entry Barriers</h4>
-                  <p className="text-sm">
-                    No-audition policy, printed lyric packets, and learning tracks reduce cognitive load for beginners so attending feels easy during the fragile habit-formation window.
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Family Songbook Maker</h3>
+                  <p className="mb-4">
+                    Create beautifully formatted songbooks with lyrics, chord grids, capo suggestions, and QR links to practice tracks. Includes "young voices" option with enlarged fonts and simplified rhythms.
                   </p>
+                  <div className="mt-3">
+                    <Link href="#" className="text-primary hover:underline">Coming Soon</Link>
+                  </div>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold mb-4">E. Plan the Handoff to Spring</h3>
+              <h3 className="text-2xl font-bold mt-10 mb-5">Community & Safety Tools</h3>
               
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">11. Early Spring Goal</h4>
-                  <p className="text-sm">
-                    Announce the spring goal by week 3: date, theme, and one anchor piece. Having a next milestone prevents the classic post-holiday drop-off once the January program ends.
+              <div className="grid md:grid-cols-2 gap-8 my-8">
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Community Hub</h3>
+                  <p className="mb-4">
+                    Weekly challenges, leaderboards for private groups, streak reminders, and one-tap recording for micro-performances. Includes choir admin tools for attendance, part assignments, and track distribution.
                   </p>
+                  <div className="mt-3">
+                    <Link href="#" className="text-primary hover:underline">Coming Soon</Link>
+                  </div>
                 </div>
                 
-                <div className="p-5 bg-white/5 rounded-lg border">
-                  <h4 className="font-bold mb-2">12. Multiple "Singing Identities"</h4>
-                  <p className="text-sm">
-                    Alongside choir, promote monthly karaoke nights or small ensembles; research shows people who self-identify as "singers" in more than one context stick longer.
+                <div className="p-6 bg-primary/5 rounded-xl border relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 -mt-8 -mr-8 bg-primary/10 rounded-full blur-xl"></div>
+                  <h3 className="text-xl font-bold mb-3">Rights & Risk Sentinel</h3>
+                  <p className="mb-4">
+                    Ensure legal compliance with copyright checking, melody similarity scanning, attribution wizards for public domain works, and export compliance with licensing summaries.
                   </p>
+                  <div className="mt-3">
+                    <Link href="#" className="text-primary hover:underline">Coming Soon</Link>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Program Implementation Timeline</h2>
+            <h2 className="text-3xl font-bold mb-6">Seasonal to Year-Round Singing</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Our tools are designed to capitalize on the unique opportunity that the holiday season presents for initiating singing habits. Research shows that Christmas is a natural on-ramp for musical participation, and our tools help convert seasonal engagement into year-round practice.
+              </p>
+              
+              <h3 className="text-xl font-bold mt-6 mb-3">From Christmas to Spring: A Complete Journey</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-8">
+                <div className="p-5 bg-white/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">December</h4>
+                  <p className="text-sm">
+                    Generate a children's carol in G major with Carol Composer. Print a Family Songbook for a classroom concert or family gathering.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-white/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">January-March</h4>
+                  <p className="text-sm">
+                    Karaoke Coach runs a 10-week habit formation plan with weekly practice sessions, buddy pairing, and a week-5 micro-showcase recording.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-white/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">Week 3</h4>
+                  <p className="text-sm">
+                    Carol-to-Evergreen Bridge rewrites your holiday song as a secular piece with broader appeal, maintaining the melody while updating the lyrics and instrumentation.
+                  </p>
+                </div>
+                
+                <div className="p-5 bg-white/5 rounded-lg border">
+                  <h4 className="font-bold mb-2">April & Beyond</h4>
+                  <p className="text-sm">
+                    Community Hub announces Spring sing-along events. Export your evergreen arrangement, share rehearsal tracks, and continue your weekly singing practice.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Core Technologies</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-6 bg-primary/5 rounded-lg border">
+                <h3 className="text-xl font-bold mb-3">
+                  Lullabize
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Our music generation technology that creates original songs, lyrics, and arrangements based on cognitive science principles. Lullabize ensures legal safety with copyright checks and melody similarity scanning.
+                </p>
+                <PrimaryButton href="https://www.humanitarians.ai/lullabize-research">
+                  Explore the Science
+                </PrimaryButton>
+              </div>
+              
+              <div className="p-6 bg-primary/5 rounded-lg border">
+                <h3 className="text-xl font-bold mb-3">
+                  Klee
+                </h3>
+                <p className="text-muted-foreground mb-4">
+                  Named after artist Paul Klee who explored the relationship between music and visual art, Klee creates complementary visuals for educational songs using multimedia learning principles.
+                </p>
+                <PrimaryButton href="https://www.humanitarians.ai/lullabize-art">
+                  Explore the Science
+                </PrimaryButton>
+              </div>
+            </div>
+          </section>
+          
+          <section>
+            <h2 className="text-3xl font-bold mb-6">The Science Behind Our Tools</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none mb-8">
+              <p>
+                Our tools are built on solid scientific foundations in three key areas:
+              </p>
+            </div>
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <div className="p-6 bg-primary/5 rounded-lg border">
-                <h3 className="text-xl font-bold mb-3">
-                  December (Capture the Spike)
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Pre-sell "Winter Sing" at every Christmas event. Collect emails and fresh-start pledges. Promote the 8-week program starting the first full week of January.
+              <div className="p-5 bg-white/5 rounded-lg border">
+                <h4 className="font-bold mb-2">Cognitive Science</h4>
+                <p className="text-sm">
+                  Our tools leverage research on how musical training impacts brain development, particularly in areas related to executive function, language acquisition, and emotional regulation.
                 </p>
-                <ul className="list-disc pl-5 text-sm space-y-1">
-                  <li>Prepare marketing materials</li>
-                  <li>Train event staff on sign-ups</li>
-                  <li>Create pledge cards</li>
-                  <li>Set up reminder system</li>
-                </ul>
               </div>
               
-              <div className="p-6 bg-primary/5 rounded-lg border">
-                <h3 className="text-xl font-bold mb-3">
-                  January-March (10 Weeks)
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Run the fixed-night program with buddy pairs and biweekly wellbeing check-ins. Include repertoire pivot, week 5 micro-show, and week 3 spring announcement.
+              <div className="p-5 bg-white/5 rounded-lg border">
+                <h4 className="font-bold mb-2">Habit Formation</h4>
+                <p className="text-sm">
+                  Based on research showing that habits take an average of 66 days to form, our 10-week Winter Sing program aligns perfectly with the science of habit formation and leverages the "Fresh Start Effect" of the new year.
                 </p>
-                <ul className="list-disc pl-5 text-sm space-y-1">
-                  <li>Week 1: Orientation + buddies</li>
-                  <li>Week 3: Announce spring program</li>
-                  <li>Week 5: Micro-performance</li>
-                  <li>Week 8: Spring commitment</li>
-                </ul>
               </div>
               
-              <div className="p-6 bg-primary/5 rounded-lg border">
-                <h3 className="text-xl font-bold mb-3">
-                  Measure Key Metrics
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  Track attendance rate, 8-week completion percentage, showcase participation, spring sign-over rate, and wellbeing changes from week 1 to 8.
+              <div className="p-5 bg-white/5 rounded-lg border">
+                <h4 className="font-bold mb-2">Multimedia Learning</h4>
+                <p className="text-sm">
+                  Our visual and audio elements follow principles from Mayer's Cognitive Theory of Multimedia Learning and Norman's Three Levels of Design to create engaging, effective learning experiences.
                 </p>
-                <ul className="list-disc pl-5 text-sm space-y-1">
-                  <li>Weekly attendance logs</li>
-                  <li>Wellbeing scores (WHO-5)</li>
-                  <li>Program satisfaction</li>
-                  <li>Spring continuation rate</li>
-                </ul>
               </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              <PrimaryButton href="https://www.humanitarians.ai/lullabize-research">Lullabize Research</PrimaryButton>
+              <SecondaryButton href="https://www.humanitarians.ai/lullabize-art">Klee Research</SecondaryButton>
+              <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
+                YouTube Examples
+              </PrimaryButton>
+              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">GitHub Repository</SecondaryButton>
             </div>
           </section>
 
+          {/* YouTube Video Thumbnails Grid */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Research Resources</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://www.humanitarians.ai/lullabize-research">
-                Lullabize Research
-              </PrimaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/lullabize-art">
-                Klee Research
-              </SecondaryButton>
-              <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
-                Video Examples
-              </PrimaryButton>
-              <SecondaryButton href="#">
-                Implementation Guide (Coming Soon)
-              </SecondaryButton>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <h3 className="text-lg font-semibold mb-2">Connect With Us</h3>
-              <p className="text-muted-foreground mb-4">For more information about our research or to implement these strategies</p>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
-                <a 
-                  href="mailto:info@humanitarians.ai"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Email: info@humanitarians.ai
-                </a>
-              </div>
+            <h2 className="text-3xl font-bold mb-6">See Our Tools In Action</h2>
+            <div
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
+            >
+              {YOUTUBE_PLAYLIST_DATA.map((data) => (
+                <VideoThumbnail
+                  title={data.title}
+                  videoId={data.videoID}
+                  key={data.videoID}
+                />
+              ))}
             </div>
           </section>
         </div>
