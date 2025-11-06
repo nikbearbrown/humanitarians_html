@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Listen to our brain exercise and language learning songs on Spotify, Apple Music, and YouTube to enhance cognitive and language development in children",
 };
 
-export default function BrainExerciseSongs() {
+export default function BrainMusic() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
@@ -37,7 +37,7 @@ export default function BrainExerciseSongs() {
             <h2 className="text-3xl font-bold mb-6">Our Brain Exercise Songs</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-xl">
-                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms. These songs are specifically designed to enhance cognitive development in children.
+                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms and on the <a href="https://podcast.humanitarians.ai/"></a>Lyrical Literacy podcast</a>. These songs are specifically designed to enhance cognitive development in children.
               </p>
               
               <div className="bg-primary/10 p-6 rounded-lg my-6 border-l-4 border-primary">
@@ -78,6 +78,10 @@ export default function BrainExerciseSongs() {
               
               <p>
                 When you play our songs for your children, they're not just listening to music – they're engaging in a scientifically designed brain exercise that strengthens neural pathways through rhythmic patterns, melodic structures, and carefully crafted lyrics.
+              </p>
+              
+              <p className="mt-4">
+                For a deeper dive into our research methodology and the scientific studies supporting our approach, visit our <a href="https://www.humanitarians.ai/brain-music-research" className="text-primary hover:underline font-medium">Brain Music Research</a> page.
               </p>
             </div>
           </section>
