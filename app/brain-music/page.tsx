@@ -37,7 +37,7 @@ export default function BrainMusic() {
             <h2 className="text-3xl font-bold mb-6">Our Brain Exercise Songs</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-xl">
-                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms and on the <a href="https://podcast.humanitarians.ai/"></a>Lyrical Literacy podcast</a>. These songs are specifically designed to enhance cognitive development in children.
+                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms and on the <a href="https://podcast.humanitarians.ai/">Lyrical Literacy podcast</a>. These songs are specifically designed to enhance cognitive development in children.
               </p>
               
               <div className="bg-primary/10 p-6 rounded-lg my-6 border-l-4 border-primary">
