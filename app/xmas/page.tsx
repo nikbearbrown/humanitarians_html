@@ -6,7 +6,7 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Xmas - Humanitarians AI",
+  title: "Lyrical Literacy - Humanitarians AI",
   description:
     "Empowering youth through the transformative power of music and poetry",
 };
@@ -45,7 +45,7 @@ export default function Xmas() {
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Xmas</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
@@ -94,7 +94,7 @@ export default function Xmas() {
                 maintaining high engagement levels.
               </p>
 
-              {/* YouTube Video Thumbnails Grid */}
+              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
               <div
                 className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
               >
