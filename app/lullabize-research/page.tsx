@@ -38,6 +38,18 @@ const YOUTUBE_PLAYLIST_DATA = [
 
 export default function LullabizeResearch() {
   return (
+    <>
+      {/* Google tag (gtag.js) */}
+      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158" strategy="afterInteractive" />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-16992035158');
+        `}
+      </Script>
+    
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
