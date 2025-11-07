@@ -138,9 +138,9 @@ export default function GoogleAdGrantsForNonprofits() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Using Vercel for AdSense Optimized Landing Pages</h2>
+            <h2 className="text-3xl font-bold mb-6">Knowledge Sharing Initiative</h2>
             <p className="text-muted-foreground mb-6">
-              Humanitarians AI is committed to sharing our Google Ad Grants experience with other nonprofits through comprehensive educational resources. To effectively ultilize the full $10K Google Ad Grants we highly recommend Vercel and created Vercel templates and tutorials. The YouTube playlist below shows how to use Vercel for non-profits.
+              Humanitarians AI is committed to sharing our Google Ad Grants experience with other nonprofits through comprehensive educational resources.
             </p>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
@@ -201,7 +201,7 @@ export default function GoogleAdGrantsForNonprofits() {
               
               <h3 className="text-xl font-bold mt-6 mb-3">Advanced CTR Optimization Tool</h3>
               <p>
-                Professor Nik Bear Brown has created a valuable <a href="https://www.nikbearbrown.com/ctr-confidence">statistical tool<a/> to help nonprofits optimize their Google Ad Grants performance: <a href="https://www.nikbearbrown.com/ctr-confidence" target="_blank" rel="noopener noreferrer">CTR Bounds & Confidence Intervals</a>.
+                Professor Nik Bear Brown has created a valuable statistical tool to help nonprofits optimize their Google Ad Grants performance: <a href="https://www.nikbearbrown.com/ctr-confidence" target="_blank" rel="noopener noreferrer">CTR Bounds & Confidence Intervals</a>.
               </p>
               
               <p>
