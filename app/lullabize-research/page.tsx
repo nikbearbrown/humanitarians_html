@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Script from "next/script"; // Add this line
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
