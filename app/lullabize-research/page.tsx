@@ -1,6 +1,5 @@
-'use client'
-
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
 import PrimaryButton from "@/components/ui/primary-button";
