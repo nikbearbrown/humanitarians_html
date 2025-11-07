@@ -41,7 +41,7 @@ export default function GoogleAdGrantsForNonprofits() {
               </p>
               
               <p>
-                This creates the central challenge for nonprofits: <strong>How to maximize impact with a $2 CPC cap when many relevant keywords cost significantly more on the open market.</strong>
+                This creates the central challenge for nonprofits: <strong>How to maximize impact with a $2 CPC cap when many relevant keywords cost significantly more on the open market.</strong> For competitive keywords in education, technology, or health sectors, businesses often pay $10-15 per click or more, putting nonprofits at a significant disadvantage.
               </p>
               
               <h3 className="text-xl font-bold mt-6 mb-3">The Challenge by the Numbers</h3>
@@ -50,10 +50,16 @@ export default function GoogleAdGrantsForNonprofits() {
                 With a $10,000 monthly budget and a $2 maximum CPC, the theoretical maximum reach is 5,000 visitors per month. However, most nonprofits struggle to utilize even a fraction of this budget due to the bid cap limitations.
               </p>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">Humanitarians AI's Approach</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Google's Relevancy Algorithm: The Nonprofit Advantage</h3>
               
               <p>
-                At Humanitarians AI, we maintain comprehensive <a href="https://www.humanitarians.ai/compliance" target="_blank" rel="noopener noreferrer">compliance rules</a> while implementing a strategic approach to maximize our Ad Grant utilization.
+                Google's ad ranking algorithm considers both bid amount <strong>and</strong> relevancy. Since nonprofits cannot compete on price with the $2 CPC limit, they <strong>must</strong> focus on creating highly relevant content with excellent quality scores to win ad placements despite lower bids.
+              </p>
+              
+              <h3 className="text-xl font-bold mt-6 mb-3">Humanitarians AI's Compliance Approach</h3>
+              
+              <p>
+                At Humanitarians AI, we maintain comprehensive <a href="https://www.humanitarians.ai/compliance" target="_blank" rel="noopener noreferrer">compliance rules</a> that document our adherence to Google Ad Grants policies. Our compliance page covers critical requirements including campaign structure, keyword quality, website standards, and conversion tracking implementation—all essential for maintaining Ad Grant eligibility.
               </p>
             </div>
           </section>
@@ -184,8 +190,33 @@ export default function GoogleAdGrantsForNonprofits() {
                 </li>
               </ul>
               
-              <p className="mt-6">
-                The key insight remains: with strategic planning and optimization, nonprofits can effectively utilize this powerful resource despite its limitations, driving awareness, attracting volunteers, and advancing their missions.
+              <h3 className="text-xl font-bold mt-6 mb-3">Vercel-Based Landing Pages</h3>
+              <p>
+                Our Web Development playlist specifically teaches nonprofits how to create highly relevant landing pages using Vercel. This approach is crucial for Ad Grants success, as creating detailed, content-rich pages directly improves ad quality scores, helping nonprofits compete despite the $2 bid limitation.
+              </p>
+              
+              <p>
+                By creating unique landing pages for each program initiative, nonprofits can target long-tail keywords with less competition while maintaining high relevance scores in Google's ad algorithm.
+              </p>
+              
+              <h3 className="text-xl font-bold mt-6 mb-3">Advanced CTR Optimization Tool</h3>
+              <p>
+                Professor Nik Bear Brown has created a valuable statistical tool to help nonprofits optimize their Google Ad Grants performance: <a href="https://www.nikbearbrown.com/ctr-confidence" target="_blank" rel="noopener noreferrer">CTR Bounds & Confidence Intervals</a>.
+              </p>
+              
+              <p>
+                This interactive tool uses advanced statistical methods to determine when to remove underperforming keywords based on confidence intervals rather than raw CTR numbers. It helps nonprofits:
+              </p>
+              
+              <ul className="list-disc pl-6 mt-2 space-y-2">
+                <li>Determine if a low-CTR keyword is truly weak or just has insufficient data</li>
+                <li>Make statistically sound decisions about when to remove keywords</li>
+                <li>Maintain the required 5% account-wide CTR for Google Ad Grants</li>
+                <li>Balance exploration of new keywords with optimization of existing ones</li>
+              </ul>
+              
+              <p>
+                The tool calculates upper confidence bounds on keyword CTR, allowing nonprofits to make data-driven decisions: if the upper bound is below the 5% target, the keyword can be confidently removed; otherwise, it should be given more time to collect data.
               </p>
             </div>
           </section>
