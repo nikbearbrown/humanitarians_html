@@ -5,6 +5,7 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
+
 export const metadata: Metadata = {
   title: "Engineering Cognitive Transfer | Brain Exercise & Language Learning Songs Research",
   description: "A systematic framework for using generative AI to create song lyrics specifically designed for brain learning and enhanced cognitive transfer",
