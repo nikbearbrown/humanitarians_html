@@ -138,7 +138,7 @@ export default function GoogleAdGrantsForNonprofits() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Knowledge Sharing Initiative</h2>
+            <h2 className="text-3xl font-bold mb-6">Web Development for Non-Profits</h2>
             <p className="text-muted-foreground mb-6">
               Humanitarians AI is committed to sharing our Google Ad Grants experience with other nonprofits through comprehensive educational resources.
             </p>
