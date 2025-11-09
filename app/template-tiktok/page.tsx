@@ -59,19 +59,17 @@ const SAMPLE_VIDEO_DATA = [
  */
 export default function TemplateTikTok() {
   return (
-    // Container with responsive padding and centered content
     <div className="container px-4 md:px-6 mx-auto py-12">
       {/* Content wrapper with maximum width for readability */}
       <div className="max-w-4xl mx-auto">
         
-        {/* ===== HERO SECTION ===== */}
-        {/* The hero section introduces the page with a title, description, CTA button, and featured video */}
+        {/* Hero section introduces the page with title, description, CTA button, and featured video */}
         <div className="mb-16">
           {/* Title and primary CTA button, responsive layout (stacked on mobile, side-by-side on desktop) */}
           <div className="md:flex items-center mb-6">
             <h1 className="text-4xl md:text-5xl font-bold">Page Title</h1>
             <PrimaryButton
-              href="https://www.youtube.com/playlist?list=XXXXXXXXXX" // Replace with your YouTube playlist URL
+              href="https://www.youtube.com/playlist?list=XXXXXXXXXX"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
               View Full Playlist
@@ -88,7 +86,7 @@ export default function TemplateTikTok() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/XXXXXXXXXX" // Replace with your featured video ID
+              src="https://www.youtube.com/embed/XXXXXXXXXX"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -97,11 +95,10 @@ export default function TemplateTikTok() {
           </div>
         </div>
 
-        {/* ===== MAIN CONTENT SECTIONS ===== */}
+        {/* Main content sections */}
         <div className="grid gap-12">
           
-          {/* ===== ABOUT SECTION ===== */}
-          {/* This section explains the content collection with rich text and multimedia elements */}
+          {/* About section explains the content collection with rich text and multimedia elements */}
           <section>
             <h2 className="text-3xl font-bold mb-6">About This Content</h2>
             <div className="prose prose-lg dark:prose-invert">
@@ -116,13 +113,11 @@ export default function TemplateTikTok() {
                 content. Multiple paragraphs help break up information for better readability.
               </p>
 
-              {/* ===== VIDEO THUMBNAIL GRID ===== */}
-              {/* A scrollable grid of video thumbnails that link to individual videos */}
+              {/* Video thumbnail grid - scrollable grid of video thumbnails that link to individual videos */}
               <div
                 className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
               >
                 {/* Map through video data to render thumbnails */}
-                {/* The VideoThumbnail component should handle the YouTube thumbnail rendering and click behavior */}
                 {SAMPLE_VIDEO_DATA.map((data) => (
                   <VideoThumbnail
                     title={data.title}
@@ -132,8 +127,7 @@ export default function TemplateTikTok() {
                 ))}
               </div>
               
-              {/* ===== CONTENT SUBSECTIONS ===== */}
-              {/* Further organize your content with subheadings and structured information */}
+              {/* Content subsections - Further organize content with subheadings and structured information */}
               <h3 className="text-xl font-bold mt-6 mb-3">
                 First Subsection Heading
               </h3>
@@ -144,8 +138,7 @@ export default function TemplateTikTok() {
                 to the reader about this specific topic.
               </p>
 
-              {/* ===== INFO CARDS GRID ===== */}
-              {/* A two-column grid of info cards for highlighting key concepts or features */}
+              {/* Info cards grid - A two-column grid of info cards for highlighting key concepts or features */}
               <div className="grid md:grid-cols-2 gap-6 my-6">
                 <div className="p-5 bg-primary/5 rounded-lg border">
                   <h4 className="font-bold mb-2">Card Title 1</h4>
@@ -164,13 +157,12 @@ export default function TemplateTikTok() {
                 </div>
               </div>
 
-              {/* ===== SECOND SUBSECTION ===== */}
+              {/* Second subsection */}
               <h3 className="text-xl font-bold mt-6 mb-3">
                 Second Subsection Heading
               </h3>
 
-              {/* ===== FEATURE CARDS GRID ===== */}
-              {/* A two-column grid of feature cards highlighting project components or topics */}
+              {/* Feature cards grid - A two-column grid highlighting project components or topics */}
               <div className="grid md:grid-cols-2 gap-6 my-6">
                 <div className="p-5 bg-primary/5 rounded-lg border">
                   <h4 className="font-bold mb-2">Feature One</h4>
@@ -205,7 +197,7 @@ export default function TemplateTikTok() {
                 </div>
               </div>
 
-              {/* ===== COLLABORATION SECTION ===== */}
+              {/* Collaboration section */}
               <h3 className="text-xl font-bold mt-6 mb-3">
                 Collaboration & Resources
               </h3>
@@ -220,11 +212,10 @@ export default function TemplateTikTok() {
                 contribute to or benefit from your work.
               </p>
 
-              {/* ===== CONTACT LINKS ===== */}
-              {/* Social and contact links with icons */}
+              {/* Contact links - Social and contact links with icons */}
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
                 
-                  href="https://www.youtube.com/@yourchannel" // Replace with your channel URL
+                  href="https://www.youtube.com/@yourchannel"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-primary hover:underline"
@@ -249,7 +240,7 @@ export default function TemplateTikTok() {
                 </a>
 
                 
-                  href="mailto:your-email@example.com" // Replace with your email
+                  href="mailto:your-email@example.com"
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   {/* Email icon SVG */}
@@ -274,8 +265,7 @@ export default function TemplateTikTok() {
             </div>
           </section>
 
-          {/* ===== KEY FEATURES SECTION ===== */}
-          {/* A grid of feature cards highlighting the most important aspects of the content */}
+          {/* Key features section - A grid of feature cards highlighting the most important aspects */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Key Features</h2>
             <div className="grid md:grid-cols-2 gap-8">
@@ -323,8 +313,7 @@ export default function TemplateTikTok() {
             </div>
           </section>
 
-          {/* ===== CALL TO ACTION SECTION ===== */}
-          {/* Buttons for user engagement with various action options */}
+          {/* Call to action section - Buttons for user engagement with various action options */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Involved</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
@@ -333,10 +322,10 @@ export default function TemplateTikTok() {
               <SecondaryButton href="/support">
                 Support the Project
               </SecondaryButton>
-              <PrimaryButton href="https://www.youtube.com/playlist?list=XXXXXXXXXX"> {/* Replace with actual playlist */}
+              <PrimaryButton href="https://www.youtube.com/playlist?list=XXXXXXXXXX">
                 Full Video Playlist
               </PrimaryButton>
-              <SecondaryButton href="https://github.com/yourusername/repository"> {/* Replace with actual repository */}
+              <SecondaryButton href="https://github.com/yourusername/repository">
                 GitHub Repository
               </SecondaryButton>
             </div>
