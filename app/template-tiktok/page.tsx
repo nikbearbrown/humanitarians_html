@@ -5,8 +5,8 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
-  title: "AI Literacy - Humanitarians AI",
-  description: "Master effective prompt engineering and AI communication skills through our How to Speak Bot framework",
+  title: "Video Content Template", // Update with your page title
+  description: "A template for creating video-rich content pages", // Update with your description
 }
 
 export default function TemplateTikTok() {
@@ -15,14 +15,14 @@ export default function TemplateTikTok() {
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">AI Literacy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Video Content Template</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Launch your career with essential AI communication skills. Our specialized program helps recent graduates transform AI literacy into a competitive advantage in today's rapidly evolving job market.
+            Add your page description here. Explain what the content is about and why it matters to your audience. This section provides an introduction to your page.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/LeZpm76Eszc?si=_PwdhcxEHn_tBs-V"
+              src="https://www.youtube.com/embed/XXXXXXXXXX" // Replace with your featured video ID
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -34,127 +34,80 @@ export default function TemplateTikTok() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">About AI Literacy</h2>
+            {/* About Section - Primary content area for detailed information */}
+            <h2 className="text-3xl font-bold mb-6">About This Content</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                At Humanitarians AI, our fundamental approach to AI Literacy is mastering effective prompting and prompt engineering. We've developed the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI literacy is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
+                Add your main content introduction here. This area is suitable for detailed explanations about your video content, project, or series. The prose class provides optimal text formatting.
               </p>
               
               <p>
-                Under the guidance of <Link href="https://www.humanitarians.ai/nikbearbrown" className="text-primary hover:underline">Dr. Nik Bear Brown</Link>, Associate Teaching Professor at Northeastern University, you'll learn through hands-on projects that simulate real workplace scenarios, building a portfolio that demonstrates your AI collaboration capabilities to potential employers.
+                Include additional paragraphs to expand on your content. You can add links like <Link href="/your-page" className="text-primary hover:underline">this example link</Link> to reference other pages or resources.
               </p>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">How to Speak Bot: Prompt Patterns</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">First Subsection Heading</h3>
               
               <p>
-                Our flagship AI literacy resource, "How to Speak Bot: Prompt Patterns," is available as a multi-platform educational experience:
+                Add detailed information about a specific aspect of your content here. This area is perfect for breaking down complex topics into manageable sections.
               </p>
               
               <ul className="list-disc pl-6 mt-2 space-y-2">
-                <li>A comprehensive <a href="https://www.humanitarians.ai/how-to-speak-bot" className="text-primary hover:underline">web-based book</a> with interactive exercises</li>
-                <li>A Kindle e-book for on-the-go learning</li>
-                <li>A complete <a href="https://www.youtube.com/playlist?list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm" className="text-primary hover:underline">YouTube series</a> that walks through each prompt pattern</li>
+                <li>First item in your list with <a href="/example" className="text-primary hover:underline">optional link</a></li>
+                <li>Second list item with important information</li>
+                <li>Third list item explaining another key point</li>
               </ul>
               
               <p>
-                Written by Dr. Nik Bear Brown, this resource teaches you the art and science of crafting effective prompts to communicate with AI systems, enhancing your ability to leverage artificial intelligence across various personal and professional contexts.
+                Continue with more explanatory text as needed. The spacing and formatting will maintain readability for longer sections of content.
               </p>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">Why Recent Graduates Need AI Fluency</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Second Subsection Heading</h3>
               
               <p>
-                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. Our AI Literacy program prepares you to:
+                This subsection can focus on another important aspect of your content. Add your specific information here.
               </p>
               
               <ul className="list-disc pl-6 mt-2 space-y-2">
-                <li>Stand out in job interviews by demonstrating practical AI collaboration skills</li>
-                <li>Accelerate your productivity in entry-level positions through effective AI delegation</li>
-                <li>Identify opportunities for AI implementation that more experienced colleagues might miss</li>
-                <li>Navigate ethical considerations around AI use in professional settings</li>
-                <li>Adapt quickly as AI capabilities and workplace integration evolve</li>
+                <li>Key point one about this subsection</li>
+                <li>Key point two with additional details</li>
+                <li>Key point three explaining the final element</li>
               </ul>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">The Nine Pillars Applied to Career Development</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Feature Cards Section</h3>
               
+              {/* Grid of cards for displaying features or concepts */}
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">1. Strategic Delegation</h4>
-                  <p className="text-sm">Identify which tasks to automate in entry-level positions to maximize your impact.</p>
+                  <h4 className="font-bold">Card Title 1</h4>
+                  <p className="text-sm">Description for the first card. Keep content concise and focused on a single concept or feature.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">2. Effective Communication</h4>
-                  <p className="text-sm">Craft AI prompts that produce professional-quality outputs for workplace tasks.</p>
+                  <h4 className="font-bold">Card Title 2</h4>
+                  <p className="text-sm">Description for the second card. These cards work well for presenting related pieces of information.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">3. Critical Evaluation</h4>
-                  <p className="text-sm">Verify AI-generated content before incorporating it into professional deliverables.</p>
+                  <h4 className="font-bold">Card Title 3</h4>
+                  <p className="text-sm">Description for the third card. Maintain consistent length for visual balance.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">4. Technical Understanding</h4>
-                  <p className="text-sm">Explain AI capabilities and limitations to colleagues in non-technical terms.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">5. Ethical Reasoning</h4>
-                  <p className="text-sm">Navigate transparency about AI assistance in workplace contributions.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">6. Stochastic Reasoning</h4>
-                  <p className="text-sm">Determine appropriate confidence levels for different types of AI outputs.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">7. Learning by Doing</h4>
-                  <p className="text-sm">Build a portfolio of AI-assisted projects demonstrating your collaboration skills.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">8. Rapid Prototyping</h4>
-                  <p className="text-sm">Accelerate project development through AI-assisted ideation and refinement cycles.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg md:col-span-2 flex justify-center">
-                  <div className="p-4 border rounded-lg max-w-md">
-                    <h4 className="font-bold">9. Theoretical Foundations</h4>
-                    <p className="text-sm">Understand the underlying principles of AI systems to anticipate future developments.</p>
-                  </div>
+                  <h4 className="font-bold">Card Title 4</h4>
+                  <p className="text-sm">Description for the fourth card. The grid automatically adjusts for different screen sizes.</p>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">Career-Focused AI Interaction</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Final Subsection</h3>
               
-              <div className="grid md:grid-cols-3 gap-4 mt-4">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">Automation</h4>
-                  <p className="text-sm">Streamline routine tasks to focus on high-value contributions in your role.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">Augmentation</h4>
-                  <p className="text-sm">Enhance your creativity and problem-solving by collaborating with AI systems.</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-bold">Agency</h4>
-                  <p className="text-sm">Develop systems that handle ongoing processes with minimal supervision.</p>
-                </div>
-              </div>
-              
-              <p className="mt-6">
-                Our program includes specialized modules on resume enhancement, interview preparation, and workplace scenarios specifically tailored to recent graduates. You'll develop both the practical skills and the portfolio evidence to demonstrate your AI fluency to potential employers.
+              <p>
+                Conclude your main content section with final thoughts or a summary. This helps reinforce key points before moving to the next major section.
               </p>
               
-              <p className="mt-4">
-                AI Literacy lessons are delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Special mentorship opportunities and peer collaboration sessions are also available for recent graduates.
-              </p>
-              
+              {/* Contact/Social Links section */}
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
                 <a 
-                  href="https://www.youtube.com/@humanitariansai" 
+                  href="https://www.youtube.com/@yourchannel" // Replace with your actual channel
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-primary hover:underline"
@@ -163,76 +116,78 @@ export default function TemplateTikTok() {
                     <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
                     <path d="m10 15 5-3-5-3z"></path>
                   </svg>
-                  YouTube: @humanitariansai
+                  YouTube: @yourchannel
                 </a>
                 
                 <a 
-                  href="mailto:info@humanitarians.ai"
+                  href="mailto:your-email@example.com" // Replace with your actual email
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                     <rect width="20" height="16" x="2" y="4" rx="2"></rect>
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
                   </svg>
-                  Email: info@humanitarians.ai
+                  Email: your-email@example.com
                 </a>
               </div>
             </div>
           </section>
 
+          {/* Key Features Section */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Career Benefits</h2>
+            <h2 className="text-3xl font-bold mb-6">Key Features</h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Resume Differentiation</h3>
+                <h3 className="text-xl font-bold mb-3">Feature One</h3>
                 <p className="text-muted-foreground">
-                  Stand out with specialized AI collaboration skills that separate you from peers who may have similar technical qualifications but lack the ability to effectively partner with AI systems.
+                  Describe the first key feature or benefit of your content here. The muted text color creates visual hierarchy with the heading.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Productivity Acceleration</h3>
+                <h3 className="text-xl font-bold mb-3">Feature Two</h3>
                 <p className="text-muted-foreground">
-                  Accomplish more in entry-level positions by strategically delegating routine tasks to AI systems, allowing you to focus on higher-value contributions that catch management attention.
+                  Describe the second key feature or benefit. Keep descriptions concise but informative, focusing on value to the viewer.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Future-Proof Skill Set</h3>
+                <h3 className="text-xl font-bold mb-3">Feature Three</h3>
                 <p className="text-muted-foreground">
-                  Develop adaptive learning patterns that help you evolve alongside AI technology, ensuring your skills remain relevant as capabilities and workplace integration continue to advance.
+                  Describe the third key feature or benefit. The grid layout automatically adjusts based on screen size for optimal viewing.
                 </p>
               </div>
               <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Leadership Positioning</h3>
+                <h3 className="text-xl font-bold mb-3">Feature Four</h3>
                 <p className="text-muted-foreground">
-                  Become the go-to resource for AI implementation strategies within your team, creating opportunities to demonstrate leadership qualities early in your career trajectory.
+                  Describe the fourth key feature or benefit. You can add or remove cards as needed to highlight important aspects of your content.
                 </p>
               </div>
             </div>
           </section>
 
+          {/* Additional Content Section - For embedded video, course info, etc. */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">How to Speak Bot: Prompt Patterns</h2>
+            <h2 className="text-3xl font-bold mb-6">Additional Content Section</h2>
             <div className="p-6 border rounded-lg mb-6">
-              <h3 className="text-xl font-bold mb-3">About the Course</h3>
+              <h3 className="text-xl font-bold mb-3">Subsection Title</h3>
               <p className="text-muted-foreground mb-4">
-                "How to Speak Bot: Prompt Patterns" follows the journey of Princess Prompter, Witch Wanjali, and their trio of ChatBots as they explore the magical realm of Prompt Engineering. Through a blend of storytelling and technical instruction, you'll learn to craft effective prompts for AI systems in various contexts.
+                This section can be used for additional information, a course overview, product details, or any other content that deserves its own highlighted area.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <PrimaryButton href="https://www.humanitarians.ai/how-to-speak-bot">
-                  View Web Book
+                <PrimaryButton href="/primary-link">
+                  Primary Action
                 </PrimaryButton>
-                <SecondaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm">
-                  Watch on YouTube
+                <SecondaryButton href="/secondary-link">
+                  Secondary Action
                 </SecondaryButton>
               </div>
             </div>
             <p className="text-muted-foreground mb-6">
-              All AI Literacy lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
+              Add a brief description or transition text here before the embedded video or other content below.
             </p>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
                 className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/videoseries?si=mo8K9CYzbUl2juUB&amp;list=PLgOGgHS58rB94tCvBgF58PmDD4DoJonsm" 
+                src="https://www.youtube.com/embed/XXXXXXXXXX" // Replace with your video or playlist ID
                 title="YouTube video player" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -242,20 +197,21 @@ export default function TemplateTikTok() {
             </div>
           </section>
 
+          {/* Call to Action Section */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://www.humanitarians.ai/how-to-speak-bot">
-                Web Book
+              <PrimaryButton href="/primary-action">
+                Primary Action
               </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube
+              <SecondaryButton href="/secondary-action">
+                Secondary Action
               </SecondaryButton>
-              <PrimaryButton href="https://github.com/Humanitariansai">
-                Github
+              <PrimaryButton href="https://github.com/yourusername">
+                Resource Link
               </PrimaryButton>
-              <SecondaryButton href="/donate">
-                Donate
+              <SecondaryButton href="/contact">
+                Contact Us
               </SecondaryButton>
             </div>
           </section>
