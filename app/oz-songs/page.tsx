@@ -15,8 +15,14 @@ export default function OzSongs() {
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Oz Songs</h1>
+          <p className="text-xl text-muted-foreground mb-4">
+            Over the next year, Humanitarians AI will be creating "Oz Songs" - a video musical adaptation of The Wizard of Oz using a blend of human voices and AI-generated art and music. This project reimagines L. Frank Baum's classic series through contemporary musical interpretations while exploring the creative possibilities of human-AI collaboration.
+          </p>
+          <p className="text-xl text-muted-foreground mb-4">
+            This is very much a work in progress with me sharing my experience doing, mistakes included. One learns by doing, if one doesn't make mistakes it means one is not experimenting with new things.
+          </p>
           <p className="text-xl text-muted-foreground mb-8">
-            Over the next year, I'll be creating "Oz Songs" - a video musical adaptation of The Wizard of Oz using a blend of human voices (including my own) and AI-generated art and music. This project reimagines L. Frank Baum's classic series through contemporary musical interpretations while exploring the creative possibilities of human-AI collaboration.
+            Oz Songs is useful for the Lyrical Literacy project for those making music and music art and videos for education and their loved ones. I will also be putting the lessons on <a href="https://www.youtube.com/@humanitariansai" className="text-primary hover:underline">YouTube</a>, <a href="https://github.com/nikbearbrown/Oz_Songs" className="text-primary hover:underline">Github</a> and <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline">humanitarians.ai/oz-songs</a>.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -53,6 +59,62 @@ export default function OzSongs() {
                 <li>Completed songs for the first four chapters of "The Wonderful Wizard of Oz" (1900)</li>
                 <li>Developed character design prompts for key characters</li>
                 <li>Created initial music for Chapter I: The Cyclone</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* ===== CHAPTER BY CHAPTER JOURNEY ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Chapter by Chapter Journey</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Humanitarians AI will create music, art, manga, and other creative content for each chapter of The Wonderful Wizard of Oz. We'll show interested creators the complete process so they can learn to create their own adaptations. 
+              </p>
+              
+              <div className="bg-muted/50 p-6 rounded-lg mt-6">
+                <h3 className="text-xl font-bold mb-4">The Wonderful Wizard of Oz (1900) Chapters</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <ul className="text-muted-foreground">
+                    <li>Introduction</li>
+                    <li>Chapter I. The Cyclone</li>
+                    <li>Chapter II. The Council with the Munchkins</li>
+                    <li>Chapter III. How Dorothy Saved the Scarecrow</li>
+                    <li>Chapter IV. The Road Through the Forest</li>
+                    <li>Chapter V. The Rescue of the Tin Woodman</li>
+                    <li>Chapter VI. The Cowardly Lion</li>
+                    <li>Chapter VII. The Journey to the Great Oz</li>
+                    <li>Chapter VIII. The Deadly Poppy Field</li>
+                    <li>Chapter IX. The Queen of the Field Mice</li>
+                    <li>Chapter X. The Guardian of the Gates</li>
+                    <li>Chapter XI. The Emerald City of Oz</li>
+                    <li>Chapter XII. The Search for the Wicked Witch</li>
+                  </ul>
+                  <ul className="text-muted-foreground">
+                    <li>Chapter XIII. The Rescue</li>
+                    <li>Chapter XIV. The Winged Monkeys</li>
+                    <li>Chapter XV. The Discovery of Oz, the Terrible</li>
+                    <li>Chapter XVI. The Magic Art of the Great Humbug</li>
+                    <li>Chapter XVII. How the Balloon Was Launched</li>
+                    <li>Chapter XVIII. Away to the South</li>
+                    <li>Chapter XIX. Attacked by the Fighting Trees</li>
+                    <li>Chapter XX. The Dainty China Country</li>
+                    <li>Chapter XXI. The Lion Becomes the King of Beasts</li>
+                    <li>Chapter XXII. The Country of the Quadlings</li>
+                    <li>Chapter XXIII. Glinda The Good Witch Grants Dorothy's Wish</li>
+                    <li>Chapter XXIV. Home Again</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <p className="mt-6">
+                For each chapter, we'll create and document:
+              </p>
+              <ul>
+                <li>Original songs inspired by the chapter's narrative</li>
+                <li>AI-generated artwork depicting key scenes</li>
+                <li>Manga-style visual interpretations</li>
+                <li>Video adaptations combining music and visuals</li>
+                <li>Step-by-step tutorials showing how each element was created</li>
               </ul>
             </div>
           </section>
@@ -132,6 +194,12 @@ export default function OzSongs() {
               </SecondaryButton>
               <SecondaryButton href="https://github.com/nikbearbrown/Oz_Songs">
                 Code & Assets on GitHub
+              </SecondaryButton>
+              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+                Video Tutorials
+              </SecondaryButton>
+              <SecondaryButton href="https://www.humanitarians.ai/oz-songs">
+                Humanitarians AI
               </SecondaryButton>
             </div>
             
