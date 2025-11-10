@@ -22,8 +22,19 @@ export default function OzSongs() {
             This is very much a work in progress with me sharing my experience doing, mistakes included. One learns by doing, if one doesn't make mistakes it means one is not experimenting with new things.
           </p>
           <p className="text-xl text-muted-foreground mb-8">
-            Oz Songs is useful for the Lyrical Literacy project for those making music and music art and videos for education and their loved ones. I will also be putting the lessons on <a href="https://www.youtube.com/@humanitariansai" className="text-primary hover:underline">YouTube</a>, <a href="https://github.com/nikbearbrown/Oz_Songs" className="text-primary hover:underline">Github</a> and <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline">humanitarians.ai/oz-songs</a>.
+            Oz Songs is useful for the Lyrical Literacy project for those making music and music art and videos for education and their loved ones. I will also be putting the lessons on <a href="https://www.youtube.com/@humanitariansai" className="text-primary hover:underline">YouTube</a>, <a href="https://github.com/nikbearbrown/Oz_Songs" className="text-primary hover:underline">Github</a>, <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline">humanitarians.ai/oz-songs</a>, <a href="https://oz.humanitarians.ai/" className="text-primary hover:underline font-bold">Oz Songs YouTube</a>, and <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline font-bold">Oz Songs WWW</a>.
           </p>
+          
+          {/* Added prominent buttons for the new links */}
+          <div className="flex flex-wrap gap-4 mb-8">
+            <PrimaryButton href="https://oz.humanitarians.ai/">
+              Oz Songs YouTube
+            </PrimaryButton>
+            <PrimaryButton href="https://www.humanitarians.ai/oz-songs">
+              Oz Songs WWW
+            </PrimaryButton>
+          </div>
+          
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
@@ -186,6 +197,12 @@ export default function OzSongs() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Where to Follow</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+              <PrimaryButton href="https://oz.humanitarians.ai/">
+                Oz Songs YouTube
+              </PrimaryButton>
+              <PrimaryButton href="https://www.humanitarians.ai/oz-songs">
+                Oz Songs WWW
+              </PrimaryButton>
               <PrimaryButton href="https://on.soundcloud.com/aYEpHxtySnRfGn7h6">
                 Music on SoundCloud
               </PrimaryButton>
