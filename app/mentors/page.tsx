@@ -19,7 +19,6 @@ export default function MentorPage() {
             Guidelines for mentors working with OPT Fellows at Humanitarians AI. As a 501(c)(3) nonprofit, we provide valuable practical training opportunities for international students while advancing our mission of using AI for social good.
           </p>
         </div>
-
         {/* Main Content */}
         <div className="grid gap-12">
           {/* Introduction */}
@@ -41,7 +40,7 @@ export default function MentorPage() {
             <div className="prose prose-lg dark:prose-invert mb-6">
               <p>OPT fellows face specific regulatory requirements that mentors must understand:</p>
             </div>
-            
+
             <div className="grid gap-4">
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Employment Relationship</h3>
@@ -65,7 +64,7 @@ export default function MentorPage() {
           {/* Mentor Responsibilities */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Mentor Responsibilities</h2>
-            
+
             <div className="space-y-8">
               {/* Project Alignment & Educational Focus */}
               <div className="p-6 border rounded-lg">
@@ -189,7 +188,7 @@ export default function MentorPage() {
           {/* Supporting OPT Compliance */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Supporting OPT Compliance</h2>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Role Clarification</h3>
@@ -199,7 +198,7 @@ export default function MentorPage() {
                   <li>• <strong>Collaboration:</strong> Work with Humanitarians AI to ensure fellows meet all requirements</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Documentation Oversight</h3>
                 <ul className="text-sm space-y-1">
@@ -214,7 +213,7 @@ export default function MentorPage() {
           {/* Best Practices for OPT Mentorship */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Best Practices for OPT Mentorship</h2>
-            
+
             <div className="grid gap-6">
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Understand Each Fellow's Background</h3>
@@ -224,7 +223,7 @@ export default function MentorPage() {
                   <li>• Identify knowledge gaps to address</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Create Individualized Development Plans</h3>
                 <ul className="text-sm space-y-1">
@@ -233,7 +232,7 @@ export default function MentorPage() {
                   <li>• Identify specific skills to develop</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Balance Guidance and Autonomy</h3>
                 <ul className="text-sm space-y-1">
@@ -242,7 +241,7 @@ export default function MentorPage() {
                   <li>• Foster innovation while ensuring practical training objectives are met</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Facilitate Professional Development</h3>
                 <ul className="text-sm space-y-1">
@@ -251,7 +250,7 @@ export default function MentorPage() {
                   <li>• Provide feedback on professional growth</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-3">Maintain Clear Communication</h3>
                 <ul className="text-sm space-y-1">
@@ -269,7 +268,7 @@ export default function MentorPage() {
             <div className="prose prose-lg dark:prose-invert mb-6">
               <p>For unpaid positions, mentors must ensure the following to comply with Department of Labor regulations:</p>
             </div>
-            
+
             <div className="grid gap-4">
               <div className="p-4 border-l-4 border-primary bg-muted rounded-lg">
                 <p className="text-sm font-medium">Educational Focus: The experience must be primarily for the benefit of the fellow</p>
@@ -295,7 +294,7 @@ export default function MentorPage() {
           {/* Responsibilities Breakdown */}
           <section>
             <h2 className="text-3xl font-bold mb-6">Mentor & Humanitarians AI Responsibilities</h2>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-4">Mentor Responsibilities</h3>
@@ -307,7 +306,7 @@ export default function MentorPage() {
                   <li>• Focus on the fellow's educational and professional development</li>
                 </ul>
               </div>
-              
+
               <div className="p-6 border rounded-lg">
                 <h3 className="text-lg font-bold mb-4">Humanitarians AI Responsibilities</h3>
                 <div className="space-y-3">
