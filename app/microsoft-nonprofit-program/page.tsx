@@ -4,8 +4,8 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
-  title: "Template Page",
-  description: "A template for creating new pages",
+  title: "Microsoft Nonprofit Program Benefits",
+  description: "Explore Microsoft's grants, discounts, and resources for nonprofit organizations",
 };
 
 export default function MicrosoftNonprofitProgram() {
@@ -14,9 +14,9 @@ export default function MicrosoftNonprofitProgram() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Template Page Title</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Microsoft Nonprofit Program Benefits</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            This is a template page that you can use as a starting point for creating new pages. It includes a hero section with a video, placeholder sections for content, and a resources section.
+            Microsoft is committed to providing affordable, innovative cloud and AI solutions to help nonprofits tackle the world's biggest challenges. Discover how their grants, discounts, and resources can enhance your organization's impact.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -28,72 +28,105 @@ export default function MicrosoftNonprofitProgram() {
               allowFullScreen
             />
           </div>
+          <div className="flex justify-center my-6">
+            <PrimaryButton href="https://www.microsoft.com/en-us/nonprofits" target="_blank" rel="noopener noreferrer">
+              Visit Microsoft Nonprofit Program
+            </PrimaryButton>
+          </div>
         </div>
 
         {/* ===== MAIN CONTENT ===== */}
         <div className="grid gap-12">
-          {/* ===== PLACEHOLDER SECTION 1 ===== */}
+          {/* ===== FINANCIAL BENEFITS SECTION ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Section 1 Title</h2>
+            <h2 className="text-3xl font-bold mb-6">Financial Benefits</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                This is a placeholder for your first section. You can replace this with actual content when creating a new page. Include paragraphs, lists, images, or any other content you need.
-              </p>
-              
-              <p>
-                You can add multiple paragraphs to provide detailed information. This template ensures consistent styling and layout across different pages.
-              </p>
-              
-              <ul>
-                <li>List item one</li>
-                <li>List item two</li>
-                <li>List item three</li>
-              </ul>
-            </div>
-          </section>
-
-          {/* ===== PLACEHOLDER SECTION 2 ===== */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Section 2 Title</h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p>
-                This is a placeholder for your second section. You can have as many sections as needed for your content. Each section is separated with appropriate spacing.
-              </p>
-              
-              <p>
-                Consider using different content formats in different sections to keep your page visually interesting. Options include:
+                Microsoft offers significant discounts and grants to eligible nonprofit organizations, helping you access enterprise-grade technology at affordable prices.
               </p>
               
               <div className="grid md:grid-cols-2 gap-6 my-8">
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 1</h3>
+                  <h3 className="text-xl font-bold mb-4">Microsoft 365</h3>
                   <p className="text-muted-foreground">
-                    This is example card content. You can use cards to present information in a visually distinct way.
+                    Microsoft 365 Business Premium available at a <strong>75% discount</strong>, providing collaborative tools and AI features.
                   </p>
                 </div>
                 
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 2</h3>
+                  <h3 className="text-xl font-bold mb-4">Microsoft 365 Copilot</h3>
                   <p className="text-muted-foreground">
-                    This is example card content. Cards work well for presenting related pieces of information side by side.
+                    15% discount on this AI assistant for content generation, data analysis, and meeting summarization.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Azure Grant</h3>
+                  <p className="text-muted-foreground">
+                    $2,000 annual credit for cloud services to support your development work and digital infrastructure needs.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Dynamics 365</h3>
+                  <p className="text-muted-foreground">
+                    Business Central available at a <strong>60% discount</strong> for comprehensive business management solutions.
                   </p>
                 </div>
               </div>
             </div>
           </section>
 
+          {/* ===== STRATEGIC BENEFITS SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Strategic Benefits</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Beyond financial savings, Microsoft offers resources and expertise to help nonprofits leverage technology effectively.
+              </p>
+              
+              <ul>
+                <li><strong>AI Advisors:</strong> Free consultation calls specifically about leveraging AI for your mission</li>
+                <li><strong>Nonprofit Skilling:</strong> Resources to enhance your team's digital and AI capabilities</li>
+                <li><strong>Cloud Infrastructure:</strong> Azure services to support your frameworks and tools development</li>
+                <li><strong>Nonprofit Events:</strong> Access to tailored events with expert insights and networking opportunities</li>
+              </ul>
+            </div>
+          </section>
+          
+          {/* ===== POTENTIAL APPLICATIONS SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Potential Applications</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Here are some ways nonprofits can leverage Microsoft's offerings:
+              </p>
+              
+              <ul>
+                <li>Hosting education platforms and digital resources on Azure</li>
+                <li>Using Microsoft 365 and Copilot to streamline operations and content creation</li>
+                <li>Leveraging Dynamics 365 to manage your nonprofit's operations</li>
+                <li>Building AI-powered solutions to extend your organization's reach and impact</li>
+                <li>Managing volunteer coordination and program delivery</li>
+              </ul>
+            </div>
+          </section>
+
           {/* ===== RESOURCES SECTION ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Further Resources</h2>
+            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
+            <p className="text-lg mb-6">
+              Ready to explore Microsoft's nonprofit offerings? Visit their official nonprofit program page to learn more and check your organization's eligibility.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/">
-                GitHub Repository
+              <PrimaryButton href="https://www.microsoft.com/en-us/nonprofits" target="_blank" rel="noopener noreferrer">
+                Microsoft Nonprofit Program
               </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube Channel
+              <SecondaryButton href="https://www.microsoft.com/en-us/nonprofits/eligibility" target="_blank" rel="noopener noreferrer">
+                Check Eligibility
               </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/">
-                Official Website
+              <SecondaryButton href="https://www.microsoft.com/en-us/nonprofits/contact-us" target="_blank" rel="noopener noreferrer">
+                Contact Microsoft
               </SecondaryButton>
             </div>
             
