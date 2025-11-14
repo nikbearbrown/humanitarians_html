@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "Listen to our brain exercise and language learning songs on Spotify, Apple Music, and YouTube to enhance cognitive and language development in children",
 };
 
-export default function BrainExerciseSongsPage() {
+export default function BrainMusic() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
@@ -37,7 +37,7 @@ export default function BrainExerciseSongsPage() {
             <h2 className="text-3xl font-bold mb-6">Our Brain Exercise Songs</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p className="text-xl">
-                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms. These songs are specifically designed to enhance cognitive development in children.
+                <strong>Humanitarians AI has created a collection of brain exercise and language learning songs</strong> now available on all major music platforms and on the <a href="https://podcast.humanitarians.ai/">Lyrical Literacy podcast</a>. These songs are specifically designed to enhance cognitive development in children.
               </p>
               
               <div className="bg-primary/10 p-6 rounded-lg my-6 border-l-4 border-primary">
@@ -78,6 +78,40 @@ export default function BrainExerciseSongsPage() {
               
               <p>
                 When you play our songs for your children, they're not just listening to music – they're engaging in a scientifically designed brain exercise that strengthens neural pathways through rhythmic patterns, melodic structures, and carefully crafted lyrics.
+              </p>
+              
+              <p className="mt-4">
+                For a deeper dive into our research methodology and the scientific studies supporting our approach, visit our <a href="https://www.humanitarians.ai/brain-music-research" className="text-primary hover:underline font-medium">Brain Music Research</a> page.
+              </p>
+            </div>
+          </section>
+
+          {/* ===== ACTIVE ENGAGEMENT SYSTEM SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Active Engagement System</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                <strong>A Pivotal Discovery:</strong> Our Brain Exercise Songs are part of the broader "Lyrical Literacy" project — not just a passive playlist, but an <em>active engagement system</em> designed to maximize cognitive benefits through interactive learning.
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-6 my-8">
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Interactive Multimodal Experience</h3>
+                  <p className="text-muted-foreground">
+                    The Lyrical Literacy project uses AI to personalize learning paths and analyze user engagement, bridging the critical "active vs. passive" gap that research identifies as essential for cognitive development. The system includes interactive storybooks and a specialized Lyrical Literacy GPT Chatbot to enhance the learning experience.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Lullabize AI Technology</h3>
+                  <p className="text-muted-foreground">
+                    Our proprietary Lullabize AI creates new "cognitive training music" tailored to specific learning goals. This confirms that our songs are scientifically designed to be more than entertainment—they're part of a larger, interactive curriculum that adapts to each child's needs.
+                  </p>
+                </div>
+              </div>
+              
+              <p>
+                By combining AI-powered personalization with interactive elements, we've created a comprehensive system that engages multiple senses and learning pathways simultaneously. This active approach dramatically increases effectiveness compared to passive listening alone.
               </p>
             </div>
           </section>

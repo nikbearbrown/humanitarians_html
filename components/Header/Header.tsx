@@ -41,12 +41,9 @@ export default function Header() {
 
   const navigation = [
     { name: "Fellows", href: "/fellows" },
-    { name: "AI for Good", href: "/ai-for-good" },
     { name: "Lyrical Literacy", href: "/lyrical-literacy" },
     { name: "Botspeak", href: "/botspeak" },
-    { name: "Playlist", href: "/music-player" },
     { name: "About Us", href: "/about" },
-    { name: "Contact Us", href: "/contact" },
   ]
 
   return (
@@ -94,6 +91,16 @@ export default function Header() {
                 Spotify
               </button>
             </Link>
+            <Link href="https://podcast.humanitarians.ai/">
+              <button className={cn(baseButtonStyles, headerButtonStyles)}>
+                Podcast
+              </button>
+            </Link>
+            <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009">
+              <button className={cn(baseButtonStyles, headerButtonStyles)}>
+                Apple Music
+              </button>
+            </Link>
             <Link href="/donate">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Donate
@@ -139,6 +146,12 @@ export default function Header() {
                 </Link>
                 <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
                   Spotify
+                </Link>
+                <Link href="https://podcast.humanitarians.ai/" className="text-base font-medium">
+                  Podcast
+                </Link>
+                <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-base font-medium">
+                  Apple Music
                 </Link>
                 <Link href="/donate" className="mt-2">
                   <button className={cn(baseButtonStyles, headerButtonStyles, "w-full")}>

@@ -6,7 +6,7 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Lyrical Literacy - Humanitarians AI",
+  title: "Brain Cognitive Development - Humanitarians AI",
   description:
     "Empowering youth through the transformative power of music and poetry",
 };
@@ -38,14 +38,14 @@ const YOUTUBE_PLAYLIST_DATA = [
   },
 ];
 
-export default function LyricalLiteracyArt() {
+export default function BrainCognitiveDevelopment() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
-            <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy</h1>
+            <h1 className="text-4xl md:text-5xl font-bold">Brain Cognitive Development</h1>
             <PrimaryButton
               href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
@@ -94,10 +94,8 @@ export default function LyricalLiteracyArt() {
                 maintaining high engagement levels.
               </p>
 
-              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
-              <div
-                className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
-              >
+              {/* YouTube Video Thumbnails Grid */}
+              <div className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto">
                 {YOUTUBE_PLAYLIST_DATA.map((data) => (
                   <VideoThumbnail
                     title={data.title}

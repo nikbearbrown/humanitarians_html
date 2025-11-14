@@ -5,19 +5,19 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
 export const metadata: Metadata = {
-  title: "Professional AI Fluency - Humanitarians AI",
-  description: "Accelerate your career trajectory with advanced AI communication skills for mid-career professionals",
+  title: "AI Literacy Research - Humanitarians AI",
+  description: "Accelerate your career with AI communication skills tailored for recent graduates",
 }
 
-export default function ProfessionalAIFluencyPage() {
+export default function AILiteracy() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Professional AI Fluency</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">AI Literacy Research</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Transform your mid-career trajectory with advanced AI collaboration skills. Our executive-focused program helps experienced professionals leverage AI to enhance productivity, lead innovation initiatives, and position themselves for senior roles.
+            Launch your career with essential AI communication skills. Our specialized program helps recent graduates transform AI Literacy Research into a competitive advantage in today's rapidly evolving job market.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -34,106 +34,106 @@ export default function ProfessionalAIFluencyPage() {
         {/* Main Content */}
         <div className="grid gap-12">
           <section>
-            <h2 className="text-3xl font-bold mb-6">About Professional AI Fluency</h2>
+            <h2 className="text-3xl font-bold mb-6">About AI Literacy Research</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Professional AI Fluency adapts the comprehensive Botspeak framework specifically for mid-career professionals who need to integrate AI into existing workflows and lead teams through digital transformation. Our program addresses the unique challenges faced by those with established expertise who must now adapt to the rapidly evolving AI landscape.
+                AI Literacy Research adapts the comprehensive Botspeak framework specifically for recent graduates entering a job market where AI Literacy Research is increasingly valued. Our program bridges the gap between academic knowledge and practical workplace applications, giving you the competitive edge in roles that require effective human-AI collaboration.
               </p>
               
               <p>
-                Led by Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, and featuring guest sessions with industry leaders, our program balances theoretical understanding with practical implementation strategies tailored to your specific industry and role.
+                Under the guidance of Dr. Nik Bear Brown, Associate Teaching Professor at Northeastern University, you'll learn through hands-on projects that simulate real workplace scenarios, building a portfolio that demonstrates your AI collaboration capabilities to potential employers.
               </p>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">Why Mid-Career Professionals Need AI Fluency</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Why Recent Graduates Need AI Fluency</h3>
               
               <p>
-                The integration of AI into professional environments creates both opportunities and challenges for experienced professionals. Our program helps you:
+                Companies are already hiring based not just on your traditional skills but how effectively those skills complement AI systems. AI Literacy Research prepares you to:
               </p>
               
               <ul className="list-disc pl-6 mt-2 space-y-2">
-                <li>Position yourself as an AI-fluent leader capable of driving innovation initiatives</li>
-                <li>Multiply your productivity by effectively delegating appropriate tasks to AI systems</li>
-                <li>Translate between technical and non-technical stakeholders in AI implementation</li>
-                <li>Guide teams through the cultural shifts required for effective AI integration</li>
-                <li>Evaluate AI solutions with the critical thinking necessary for strategic investment</li>
+                <li>Stand out in job interviews by demonstrating practical AI collaboration skills</li>
+                <li>Accelerate your productivity in entry-level positions through effective AI delegation</li>
+                <li>Identify opportunities for AI implementation that more experienced colleagues might miss</li>
+                <li>Navigate ethical considerations around AI use in professional settings</li>
+                <li>Adapt quickly as AI capabilities and workplace integration evolve</li>
               </ul>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">The Nine Pillars Applied to Professional Advancement</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">The Nine Pillars Applied to Career Development</h3>
               
               <div className="grid md:grid-cols-2 gap-4 mt-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">1. Strategic Delegation</h4>
-                  <p className="text-sm">Identify high-leverage opportunities for AI integration within your department or organization.</p>
+                  <p className="text-sm">Identify which tasks to automate in entry-level positions to maximize your impact.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">2. Effective Communication</h4>
-                  <p className="text-sm">Master industry-specific prompting techniques that produce executive-quality deliverables.</p>
+                  <p className="text-sm">Craft AI prompts that produce professional-quality outputs for workplace tasks.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">3. Critical Evaluation</h4>
-                  <p className="text-sm">Develop frameworks for assessing AI outputs against established professional standards.</p>
+                  <p className="text-sm">Verify AI-generated content before incorporating it into professional deliverables.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">4. Technical Understanding</h4>
-                  <p className="text-sm">Gain sufficient technical knowledge to make informed decisions about AI investments.</p>
+                  <p className="text-sm">Explain AI capabilities and limitations to colleagues in non-technical terms.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">5. Ethical Reasoning</h4>
-                  <p className="text-sm">Navigate complex questions of responsibility, transparency, and accountability in professional contexts.</p>
+                  <p className="text-sm">Navigate transparency about AI assistance in workplace contributions.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">6. Stochastic Reasoning</h4>
-                  <p className="text-sm">Apply risk assessment frameworks to AI-assisted decision-making in high-stakes situations.</p>
+                  <p className="text-sm">Determine appropriate confidence levels for different types of AI outputs.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">7. Learning by Doing</h4>
-                  <p className="text-sm">Implement AI solutions for real professional challenges through our guided project methodology.</p>
+                  <p className="text-sm">Build a portfolio of AI-assisted projects demonstrating your collaboration skills.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">8. Rapid Prototyping</h4>
-                  <p className="text-sm">Accelerate innovation cycles by leveraging AI for concept development and testing.</p>
+                  <p className="text-sm">Accelerate project development through AI-assisted ideation and refinement cycles.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg md:col-span-2 flex justify-center">
                   <div className="p-4 border rounded-lg max-w-md">
                     <h4 className="font-bold">9. Theoretical Foundations</h4>
-                    <p className="text-sm">Develop sufficient understanding of AI principles to evaluate vendor claims and guide strategic planning.</p>
+                    <p className="text-sm">Understand the underlying principles of AI systems to anticipate future developments.</p>
                   </div>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold mt-6 mb-3">Leadership-Focused AI Interaction</h3>
+              <h3 className="text-xl font-bold mt-6 mb-3">Career-Focused AI Interaction</h3>
               
               <div className="grid md:grid-cols-3 gap-4 mt-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">Automation</h4>
-                  <p className="text-sm">Identify departmental workflows that can be optimized through strategic AI implementation.</p>
+                  <p className="text-sm">Streamline routine tasks to focus on high-value contributions in your role.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">Augmentation</h4>
-                  <p className="text-sm">Enhance team capabilities by developing effective human-AI collaboration methodologies.</p>
+                  <p className="text-sm">Enhance your creativity and problem-solving by collaborating with AI systems.</p>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-bold">Agency</h4>
-                  <p className="text-sm">Design governance frameworks for autonomous AI systems operating within your organization.</p>
+                  <p className="text-sm">Develop systems that handle ongoing processes with minimal supervision.</p>
                 </div>
               </div>
               
               <p className="mt-6">
-                Our program includes executive-focused modules on change management, ROI assessment for AI initiatives, and strategic communication with both technical teams and C-suite stakeholders. The curriculum is designed to accommodate busy professional schedules while delivering immediate value to your current role.
+                Our program includes specialized modules on resume enhancement, interview preparation, and workplace scenarios specifically tailored to recent graduates. You'll develop both the practical skills and the portfolio evidence to demonstrate your AI fluency to potential employers.
               </p>
               
               <p className="mt-4">
-                Professional AI Fluency is delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Corporate group rates and customized on-site training are also available for organizations seeking to develop AI fluency across leadership teams.
+                AI Literacy Research lessons are delivered through our comprehensive YouTube series, with all lessons available for free under the Botspeak playlist. Special mentorship opportunities and peer collaboration sessions are also available for recent graduates.
               </p>
               
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
@@ -165,30 +165,30 @@ export default function ProfessionalAIFluencyPage() {
           </section>
 
           <section>
-            <h2 className="text-3xl font-bold mb-6">Professional Benefits</h2>
+            <h2 className="text-3xl font-bold mb-6">Career Benefits</h2>
             <div className="grid md:grid-cols-2 gap-8">
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Resume Differentiation</h3>
+                <p className="text-muted-foreground">
+                  Stand out with specialized AI collaboration skills that separate you from peers who may have similar technical qualifications but lack the ability to effectively partner with AI systems.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Productivity Acceleration</h3>
+                <p className="text-muted-foreground">
+                  Accomplish more in entry-level positions by strategically delegating routine tasks to AI systems, allowing you to focus on higher-value contributions that catch management attention.
+                </p>
+              </div>
+              <div className="p-6 border rounded-lg">
+                <h3 className="text-xl font-bold mb-3">Future-Proof Skill Set</h3>
+                <p className="text-muted-foreground">
+                  Develop adaptive learning patterns that help you evolve alongside AI technology, ensuring your skills remain relevant as capabilities and workplace integration continue to advance.
+                </p>
+              </div>
               <div className="p-6 border rounded-lg">
                 <h3 className="text-xl font-bold mb-3">Leadership Positioning</h3>
                 <p className="text-muted-foreground">
-                  Establish yourself as the AI transformation leader within your organization, capable of bridging technical capabilities with business strategy to drive innovation initiatives.
-                </p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Time Reclamation</h3>
-                <p className="text-muted-foreground">
-                  Master advanced delegation techniques that allow you to offload appropriate tasks to AI systems, freeing your time for high-value strategic thinking and relationship building.
-                </p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Decision Advantage</h3>
-                <p className="text-muted-foreground">
-                  Develop frameworks for leveraging AI in complex decision-making scenarios, giving you access to insights and analysis capabilities beyond traditional approaches.
-                </p>
-              </div>
-              <div className="p-6 border rounded-lg">
-                <h3 className="text-xl font-bold mb-3">Strategic Vision</h3>
-                <p className="text-muted-foreground">
-                  Gain the knowledge needed to separate genuine AI innovation from hype, allowing you to guide your organization toward investments with genuine transformative potential.
+                  Become the go-to resource for AI implementation strategies within your team, creating opportunities to demonstrate leadership qualities early in your career trajectory.
                 </p>
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function ProfessionalAIFluencyPage() {
           <section>
             <h2 className="text-3xl font-bold mb-6">All Lessons Available on YouTube</h2>
             <p className="text-muted-foreground mb-6">
-              All Professional AI Fluency lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
+              All AI Literacy Research lessons are freely available on our YouTube channel under the Botspeak playlist. Subscribe to access the complete curriculum at your own pace.
             </p>
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
@@ -211,6 +211,7 @@ export default function ProfessionalAIFluencyPage() {
               />
             </div>
           </section>
+
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
@@ -228,8 +229,6 @@ export default function ProfessionalAIFluencyPage() {
               </SecondaryButton>
             </div>
           </section>
-          
-
         </div>
       </div>
     </div>
