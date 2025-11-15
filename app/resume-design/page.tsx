@@ -4,246 +4,356 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
-  title: "The Dual-Optimization Resume Strategy: Designing for ATS and Human Persuasion",
-  description: "A strategy guide for creating resumes that satisfy both legacy Applicant Tracking Systems (ATS) and modern, LLM-powered human review.",
+  title: "Template Page",
+  description: "A template for creating new pages",
 };
 
+
 export default function ResumeDesign() {
-  return (
-    <div className="container px-4 md:px-6 mx-auto py-12">
-      <div className="max-w-4xl mx-auto">
-        {/* ===== HERO SECTION ===== */}
-        <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">The Dual-Optimization Resume Strategy: Designing for ATS and Human Persuasion</h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            The era of sophisticated Applicant Tracking Systems (ATS) leveraging Large Language Models (LLMs) means these systems are increasingly capable of understanding complex, human-centric language and contextual meaning.[1, 2, 3] However, the current job market paradox—being told to create uniform, visually sterile resumes—is not a sign of technological failure across the board, but rather a reflection of market fragmentation. Many large, established companies still rely on decades-old, rule-based legacy ATS systems due to technical inertia and the high cost of migration, and these older systems catastrophically fail on complex formatting, columns, or graphics.[4, 5, 6] Furthermore, in smaller companies and startups, resumes often bypass ATS entirely for immediate, rapid human scanning.[7] Therefore, the successful strategy for a modern resume is **Strategic Minimalism**: achieving architectural sterility for technical compliance with the least capable system, while maximizing semantic sophistication for high-impact human and LLM review.
-          </p>
-        </div>
+  return (
+    <div className="container px-4 md:px-6 mx-auto py-12">
+      <div className="max-w-4xl mx-auto">
+        {/* ===== HERO SECTION ===== */}
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">The Dual-Optimization Resume Strategy</h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+            Designing for ATS Compliance and Human Persuasion in the Age of LLMs
+          </p>
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
 
-        {/* ===== STRATEGIC MINIMALISM TABLE ===== */}
-        <div className="grid gap-12">
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Strategic Minimalism: Dual-Optimization Tactics</h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <div className="overflow-x-auto">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Element</th>
-                      <th>ATS Compliance (Minimum Standard)</th>
-                      <th>Human/LLM Impact (Maximum Persuasion)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>**Layout**</td>
-                      <td>Single-column structure (safest choice) [7, 9]</td>
-                      <td>Clear use of white space and simple, linear flow [6, 19]</td>
-                    </tr>
-                    <tr>
-                      <td>**Fonts**</td>
-                      <td>Standard, widely-used fonts (Arial, Calibri, Times New Roman) [14, 18]</td>
-                      <td>Sans-serif fonts (Calibri, Arial) are preferred for optimal digital screen readability [17, 19]</td>
-                    </tr>
-                    <tr>
-                      <td>**Content Structure**</td>
-                      <td>Standard headings (e.g., Work Experience, Education, Skills) [10, 14]</td>
-                      <td>Utilize the CAR/STAR framework (Challenge, Action, Result) for bullet points [22]</td>
-                    </tr>
-                    <tr>
-                      <td>**Language**</td>
-                      <td>Integrate specific keywords naturally for high semantic matching [13, 15]</td>
-                      <td>Start points with strong action verbs and eliminate passive voice (e.g., "Responsible for...") [23, 24]</td>
-                    </tr>
-                    <tr>
-                      <td>**Metrics**</td>
-                      <td>Consistent date format (MM/YYYY) and unambiguous terms [8, 10]</td>
-                      <td>Quantify achievements ($, %, time saved, scale of projects/teams) [25]</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
+        {/* ===== MAIN CONTENT ===== */}
+        <div className="grid gap-12">
+          {/* ===== ABSTRACT ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Abstract: Strategic Minimalism</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                The debate over resume design is often framed incorrectly. Modern Large Language Models possess sophisticated natural language processing capabilities and can easily read well-designed, visually compelling resumes. The real challenge isn't technological capability—it's market fragmentation and organizational inertia.
+              </p>
+              
+              <p className="mb-4">
+                Large corporations frequently operate decades-old Applicant Tracking Systems (ATS) due to technical debt, migration costs, and institutional resistance to change. These legacy systems rely on rigid rule-based parsing that fails catastrophically when encountering complex layouts, multiple columns, or creative formatting. Conversely, startups and small companies often skip ATS entirely, relying on human reviewers who scan resumes in seconds, seeking immediate visual clarity and quantifiable impact.
+              </p>
+              
+              <p className="mb-4">
+                This reality demands a strategy of <strong>Strategic Minimalism</strong>: architecturally simple resumes with semantically sophisticated content. Before investing effort in resume optimization, research the target company's recruitment infrastructure. Large enterprises with established HR departments likely use legacy ATS requiring strict compliance. Startups, small businesses, and creative agencies may prioritize human readability and visual appeal over parsing compatibility.
+              </p>
+              
+              <p className="mb-4">
+                The optimal approach balances both requirements through design choices that satisfy technical parsing requirements while maximizing human persuasion. This dual-optimization strategy ensures your resume succeeds regardless of whether it's first evaluated by a 1990s-era parser, a state-of-the-art LLM, or a human recruiter with 15 seconds to make a decision.
+              </p>
+            </div>
+          </section>
 
+          {/* ===== STRATEGIC MINIMALISM TABLE ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Strategic Minimalism: Design Choices That Satisfy Both Humans and Systems</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-300 p-3 text-left font-bold">Design Element</th>
+                    <th className="border border-gray-300 p-3 text-left font-bold">Strategic Choice</th>
+                    <th className="border border-gray-300 p-3 text-left font-bold">Why It Works for ATS</th>
+                    <th className="border border-gray-300 p-3 text-left font-bold">Why It Works for Humans</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-semibold">Layout</td>
+                    <td className="border border-gray-300 p-3">Single-column, vertical flow</td>
+                    <td className="border border-gray-300 p-3">Ensures sequential, top-to-bottom parsing without data scrambling</td>
+                    <td className="border border-gray-300 p-3">Natural reading order; clean, uncluttered visual hierarchy</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-semibold">Typography</td>
+                    <td className="border border-gray-300 p-3">Calibri, Arial, Helvetica (11-12pt body)</td>
+                    <td className="border border-gray-300 p-3">Universal compatibility; renders correctly across all systems</td>
+                    <td className="border border-gray-300 p-3">Optimized for screen reading; professional appearance; excellent legibility</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-semibold">Section Headers</td>
+                    <td className="border border-gray-300 p-3">Standard labels: Work Experience, Education, Skills</td>
+                    <td className="border border-gray-300 p-3">Matches ATS recognition rules for instant categorization</td>
+                    <td className="border border-gray-300 p-3">Clear, scannable structure; recruiters find information instantly</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-semibold">Formatting</td>
+                    <td className="border border-gray-300 p-3">Minimal bold (headings/titles only), standard bullets</td>
+                    <td className="border border-gray-300 p-3">Avoids parsing errors from complex styling</td>
+                    <td className="border border-gray-300 p-3">Emphasizes key information without visual clutter</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-semibold">Dates</td>
+                    <td className="border border-gray-300 p-3">Consistent format (Month, Year or MM/YYYY)</td>
+                    <td className="border border-gray-300 p-3">Builds accurate chronological timeline</td>
+                    <td className="border border-gray-300 p-3">Easy to scan career progression at a glance</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-semibold">Content Structure</td>
+                    <td className="border border-gray-300 p-3">Action verbs + quantified results (CAR framework)</td>
+                    <td className="border border-gray-300 p-3">Provides rich semantic data for LLM scoring and skill inference</td>
+                    <td className="border border-gray-300 p-3">Demonstrates impact immediately; proves ROI with concrete metrics</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 p-3 font-semibold">White Space</td>
+                    <td className="border border-gray-300 p-3">Consistent spacing between sections; uncrowded layout</td>
+                    <td className="border border-gray-300 p-3">Clear boundaries for parsing algorithms</td>
+                    <td className="border border-gray-300 p-3">Reduces cognitive load; improves readability and scannability</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="border border-gray-300 p-3 font-semibold">File Format</td>
+                    <td className="border border-gray-300 p-3">.docx or PDF (Standard export)</td>
+                    <td className="border border-gray-300 p-3">Preserves text layer for accurate extraction</td>
+                    <td className="border border-gray-300 p-3">Professional standard; maintains formatting across devices</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-sm text-gray-600">
+              These design choices represent the intersection of technical compliance and human persuasion—where simplicity becomes strategic advantage.
+            </p>
+          </section>
 
-          {/* ===== FULL SUPPORT DETAIL - SECTION 1 (Technology & Architecture) ===== */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">I. Architectural Blueprint and The Technology Landscape</h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p>
-                Understanding the underlying technology gap is critical for justifying the required architectural constraints and content strategies. The hiring technology ecosystem is sharply divided between outdated systems reliant on rigid rules and newer platforms powered by deep learning.
-              </p>
+          {/* ===== DETAILED SECTIONS ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Understanding the Technology Landscape</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                The hiring technology ecosystem is sharply divided between outdated systems reliant on rigid rules and newer platforms powered by deep learning. Understanding this technology gap is critical for making informed strategic choices.
+              </p>
 
-              <h3>The Legacy Constraint: Rule-Based Parsing Failures</h3>
-              <p>
-                Traditional ATS platforms operate based on fixed rules, expecting data to reside in specific locations and formats. These systems often rely on basic text extraction or Optical Character Recognition (OCR) to map words into predefined fields (e.g., Job Title, Date Started, Company Name).[6] This architectural rigidity is precisely why simple formatting choices can lead to catastrophic failure.
-              </p>
-              <h4>Parsing Fatalities and Structural Vulnerabilities</h4>
-              <ul>
-                <li>**Layout and Data Scrambling:** Complex formatting elements are fundamentally incompatible with linear processing. Legacy ATS attempts to read documents from top-to-bottom, left-to-right. Consequently, any two-column designs, sidebars, text boxes, or embedded tables can cause information to appear in the wrong order or be completely misinterpreted.[8, 6, 9] This structural corruption often results in an immediate, zero-score rejection regardless of the candidate's qualifications.</li>
-                <li>**Ignored Visual Elements:** Images, logos, graphics, and custom icons are visual elements that disrupt the scanning process and are typically ignored entirely by traditional parsers.[8, 6, 9]</li>
-                <li>**The Header/Footer Blind Spot:** A common mistake is placing critical contact details (email, phone number) or dates in the document header or footer. Many older ATS systems are programmed to skip these areas, leading to an incomplete candidate profile.[8, 6, 10]</li>
-                <li>**Inconsistent Date Distortion:** The parsing function relies on consistent date formats to correctly build a timeline of work history. Mixing formats (e.g., "March 2023" versus "03/2023" versus "3-23") or adding extraneous details like days of the week confuses the system and distorts the candidate's employment timeline.[8, 6]</li>
-              </ul>
+              <h3 className="text-2xl font-bold mt-8 mb-4">Legacy ATS: Rule-Based Parsing Failures</h3>
+              <p className="mb-4">
+                Traditional ATS platforms operate based on fixed rules, expecting data to reside in specific locations and formats. These systems rely on basic text extraction or Optical Character Recognition (OCR) to map words into predefined fields. This architectural rigidity is why simple formatting choices can lead to catastrophic failure.
+              </p>
+              
+              <p className="font-semibold mt-6 mb-2">Common Parsing Failures:</p>
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li><strong>Layout Scrambling:</strong> Two-column designs, sidebars, or tables cause information to appear in wrong order or be misinterpreted completely</li>
+                <li><strong>Ignored Visual Elements:</strong> Images, logos, graphics, and custom icons disrupt scanning and are typically ignored</li>
+                <li><strong>Header/Footer Blind Spots:</strong> Critical contact details placed in headers/footers are often skipped entirely</li>
+                <li><strong>Date Distortion:</strong> Mixing date formats confuses timeline extraction and distorts employment history</li>
+              </ul>
 
-              <h3>The LLM Revolution: Semantic Search and Contextual Understanding</h3>
-              <p>
-                The power of modern recruitment technology, particularly systems powered by Large Language Models (LLMs), fundamentally shifts the basis of candidate evaluation. These systems move beyond the brittle, exact keyword matching of legacy systems to embrace human-level language understanding.[1, 3]
-              </p>
-              <h4>Advanced Scoring and Inference</h4>
-              <ul>
-                <li>**Beyond Exact Match:** LLMs are trained on vast datasets, enabling them to recognize synonyms and related concepts, meaning the candidate is no longer penalized for using slightly different terminology than that specified in the job description.[11, 12] The system analyzes the true essence of a candidate’s profile.[3]</li>
-                <li>**Contextual Inference:** These systems employ Skill Inference, allowing them to deduce skills and competencies based on the context of job titles and descriptions, even if those skills are not explicitly listed in a separate section.[11, 12]</li>
-                <li>**Analysis of Career Trajectory:** LLM-based parsers can recognize patterns in professional growth, effectively distinguishing a candidate who has demonstrated steady advancement in expertise from one who has remained stagnant.[2]</li>
-                <li>**Semantic Scoring:** Crucially, modern scoring mechanisms combine traditional keyword relevance with semantic similarity.[13, 14] This means that a keyword poorly defined or merely listed is scored lower than one naturally and contextually embedded within a quantified achievement statement.[15, 16]</li>
-              </ul>
+              <h3 className="text-2xl font-bold mt-8 mb-4">Modern LLM-Powered ATS: Semantic Understanding</h3>
+              <p className="mb-4">
+                Modern recruitment systems powered by Large Language Models fundamentally shift candidate evaluation from brittle keyword matching to human-level language understanding. These systems interpret meaning, context, and intent within the document.
+              </p>
+              
+              <p className="font-semibold mt-6 mb-2">Advanced Capabilities:</p>
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li><strong>Beyond Exact Match:</strong> Recognizes synonyms and related concepts—no penalty for using different terminology</li>
+                <li><strong>Skill Inference:</strong> Deduces competencies from context of job titles and descriptions</li>
+                <li><strong>Career Trajectory Analysis:</strong> Recognizes patterns in professional growth and transferable skills</li>
+                <li><strong>Semantic Scoring:</strong> Keywords naturally embedded in quantified achievement statements score higher than simple lists</li>
+              </ul>
+              
+              <p className="mt-6 mb-4">
+                The key insight: LLMs demand detailed, action-oriented narratives to maximize semantic scoring. Dense "keyword lists" perform poorly with modern systems while still risking parsing errors with legacy systems—the worst of both worlds.
+              </p>
+            </div>
+          </section>
 
-              <h3>Architectural Blueprint: The Fail-Safe Format (ATS Compliance Layer)</h3>
-              <p>
-                The following architectural specifications detail the mandatory requirements for creating a resume that guarantees high parsing accuracy across the broadest spectrum of ATS platforms. This clean structure provides the necessary technical compliance before the content layer can persuade.
-              </p>
-              <h4>Layout Mastery: The Single-Column Mandate</h4>
-              <ul>
-                <li>**Linear Structure:** A single-column layout is recognized as the "safest choice" for maximizing parsing reliability.[7, 9] This structure guarantees a sequential, top-to-bottom reading order, which is crucial for systems that process text linearly.[6]</li>
-                <li>**Avoiding Parsing Hazards:** The core document must entirely avoid complex elements that confuse linear parsing, including two-column designs, tables, embedded graphics, and sidebars.[9]</li>
-                <li>**Formatting Simplicity:** Use only standard formatting elements: standard bullet points, minimal bolding (reserved primarily for job titles or section headings), and consistent spacing.[6] Avoid placing key information in the header or footer.[8, 9, 10]</li>
-              </ul>
-              <h4>Typography and Section Integrity</h4>
-              <ul>
-                <li>**ATS-Friendly Fonts:** Stick to common, professional fonts that render reliably across all systems. The safest choices include Arial, Calibri, Helvetica, Georgia, Cambria, and Times New Roman.[17, 18] Avoid decorative, script, or custom fonts.[17]</li>
-                <li>**Sizing:** Maintain body text between 11–12 pt and section headers at 14–16 pt.[19]</li>
-                <li>**Standardized Section Headers:** Use unambiguous labels such as "Work Experience," "Education," "Skills," "Summary," and "Certifications".[8, 10, 14] Avoid creative labels, such as "My Career Journey".[6, 9]</li>
-              </ul>
-              <h4>Data Structure and File Compatibility</h4>
-              <ul>
-                <li>**Date Consistency:** Use a single standard format for all chronological entries, such as "Month, Year" (e.g., March, 2022) or MM/YYYY.[8, 19]</li>
-                <li>**File Format Strategy:** The most compatible file types are Microsoft Word documents (.docx) or PDF files.[10, 14] If submitting a PDF, it must be saved as "PDF (Standard)," not "PDF (Optimized for Print," as the latter can corrupt the underlying text layer necessary for accurate parsing.[12]</li>
-              </ul>
-          </section>
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Content Strategy: Maximizing Impact</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                Once the architecture satisfies technical demands, content must maximize scoring relevance for modern LLMs while providing compelling persuasion for human reviewers.
+              </p>
 
-          {/* ===== FULL SUPPORT DETAIL - SECTION 2 (Content & Testing) ===== */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">II. Content Strategy: Maximizing Human and Semantic Impact</h2>
-            <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p>
-                Once the architecture satisfies the technical demands of the ATS, the content must be strategically designed to maximize scoring relevance for modern LLMs and provide compelling persuasion for human reviewers.
-              </p>
+              <h3 className="text-2xl font-bold mt-8 mb-4">The CAR Framework: Challenge, Action, Result</h3>
+              <p className="mb-4">
+                Transform vague responsibilities into compelling success stories by structuring accomplishments around three elements:
+              </p>
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li><strong>Challenge:</strong> The initial problem or situation</li>
+                <li><strong>Action:</strong> The specific steps you took</li>
+                <li><strong>Result:</strong> The measurable, positive outcome</li>
+              </ul>
+              
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                <p className="font-semibold mb-1">Poor Example (Passive, Vague):</p>
+                <p className="italic">"Responsible for managing social media accounts"</p>
+              </div>
+              
+              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+                <p className="font-semibold mb-1">Strong Example (CAR Framework):</p>
+                <p className="italic">"Spearheaded Instagram strategy overhaul, implementing data-driven content calendar and engagement tactics, increasing follower growth by 340% and engagement rate by 125% over 6 months"</p>
+              </div>
 
-              <h3>The Imperative of Active Voice and Action Verbs</h3>
-              <p>
-                Effective resume writing moves beyond stating job duties to emphasizing accomplishments and impact.[16, 20]
-              </p>
-              <ul>
-                <li>**Eliminating Passivity:** Passive voice (e.g., "Management of a team") sounds detached and weakens the narrative.[26] It is mandatory to eliminate the phrase "Responsible for..." from all bullet points, as this is vague, passive, and merely recites the job description.[24]</li>
-                <li>**Action-Driven Language:** Start every bullet point with a strong, specific action verb that showcases what the candidate actively *did* or *achieved*.[27] Using verbs like *Spearheaded*, *Orchestrated*, or *Guided* conveys leadership and measurable achievement, providing richer semantic data for LLMs.[24, 27]</li>
-              </ul>
+              <h3 className="text-2xl font-bold mt-8 mb-4">Quantification: The Universal Language of Impact</h3>
+              <p className="mb-4">
+                Quantifiable metrics transform generic duties into evidence of ROI. Relevant metrics vary by role but can include:
+              </p>
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li>Revenue/profit generated or costs reduced</li>
+                <li>Time saved (e.g., reducing process time by 15%)</li>
+                <li>Scale of work (e.g., managing 500+ product images)</li>
+                <li>Scope of responsibility (e.g., overseeing 50-person department)</li>
+                <li>Performance improvements (e.g., increasing conversion rates by 12%)</li>
+              </ul>
 
-              <h3>Quantification: The Universal Language of Impact</h3>
-              <p>
-                Quantifiable metrics transform generic duties into evidence of return on investment (ROI). This structured data is crucial for scoring algorithms and provides the concrete justification human reviewers need to shortlist a candidate.[21]
-              </p>
-              <ul>
-                <li>**The Quantification Formula:** Structure accomplishments to clearly show the impact of the work using formulas such as "Accomplished X by doing Y".[21]</li>
-                <li>**Metrics for All Roles:** Relevant metrics should be tailored to the industry but can include: revenue/profit generated, costs reduced, time saved (e.g., reducing process time by 15%), quantity of work, or scale (e.g., overseeing a 500-person department).[25]</li>
-              </ul>
+              <h3 className="text-2xl font-bold mt-8 mb-4">Action Verbs: Eliminating Passivity</h3>
+              <p className="mb-4">
+                Start every bullet point with a strong action verb. Eliminate "Responsible for..." entirely—it's vague, passive, and merely recites job descriptions. Use verbs like: Spearheaded, Orchestrated, Directed, Optimized, Designed, Implemented, Launched, Generated, Reduced, Increased.
+              </p>
+            </div>
+          </section>
 
-              <h3>Structured Narrative: The CAR/STAR Framework</h3>
-              <p>
-                To ensure maximum persuasive power, accomplishments must be presented in a structured, concise narrative, optimally achieved through the Challenge, Action, Result (CAR) method.[28]
-              </p>
-              <ul>
-                <li>**Methodology Overview:** The CAR framework transforms vague responsibilities into compelling success stories.[22] It represents a concise way to structure achievements by defining the initial Challenge or problem, the specific Action taken, and the positive, measurable Result achieved.[22]</li>
-                <li>**Framework Application:** Utilizing this framework enhances clarity, effectively demonstrates problem-solving skills, and ensures that bullet points are focused on quantifiable outcomes.[22]</li>
-              </ul>
+          <section>
+            <h2 className="text-3xl font-bold mb-6">The Two-Document Strategy</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                Since the primary resume must maintain sterile architecture for technical compliance, leverage digital assets to showcase visual work and comprehensive context.
+              </p>
+              
+              <h3 className="text-2xl font-bold mt-8 mb-4">The Augmentation Principle</h3>
+              <p className="mb-4">
+                The core resume acts as the technical key that unlocks the door to the human reviewer. External digital assets provide the necessary context and aesthetic proof of skill that the resume, by necessity, must omit.
+              </p>
+              
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li><strong>LinkedIn Profile:</strong> Showcase detailed projects, portfolio links, presentations, and work samples</li>
+                <li><strong>Portfolio Website:</strong> Display visual work, case studies, and comprehensive project narratives</li>
+                <li><strong>Secure Linking:</strong> Place standard URLs in contact section (reliably parsed by ATS)</li>
+              </ul>
+              
+              <p className="mt-6 mb-4">
+                This digital augmentation reduces clutter on the core resume while satisfying the human desire for rich context and visual evidence of capability.
+              </p>
+            </div>
+          </section>
 
-              <h3>Strategic Augmentation and Testing Protocol</h3>
-              <h4>Enhancing the Candidate Profile Beyond the Resume (The Two-Document Strategy)</h4>
-              <p>
-                Since the primary resume document must maintain a sterile architecture for technical compliance, the candidate should leverage digital assets to showcase visual work, depth of detail, and comprehensive context for the human reviewer.
-              </p>
-              <ul>
-                <li>**Secure Linking:** The candidate should place standard, clearly labeled links, such as a "Portfolio" or "LinkedIn Profile," within the contact information section, as this section is reliably parsed by the ATS.[29]</li>
-                <li>**LinkedIn as Verification and Portfolio Layer:** The LinkedIn profile is widely accepted by hiring managers as a critical verification layer, used to confirm employment dates, verify listed skills, and review detailed work examples.[30] By adding portfolio links, documents, presentations, and project summaries to LinkedIn, the candidate can showcase the complex projects and visual elements that would break the primary resume’s architecture.[30]</li>
-              </ul>
-              <h4>The Essential Testing Protocol</h4>
-              <ul>
-                <li>**Proactive Compliance Check:** Utilize third-party ATS scanning tools (such as Jobscan, SkillSyncer, or MyPerfectResume's checker).[31] These tools allow the user to upload the resume alongside the target job description to validate parsing accuracy and keyword match scores.[32]</li>
-                <li>**The Plain Text Extraction Test:** Copy the entire content of the resume and paste it into a plain text editor (e.g., Notepad). If the text appears linear, sequential, and correctly ordered, it validates that the architecture has successfully avoided parsing risks like data scrambling from hidden tables or columns.</li>
-              </ul>
-          </section>
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Essential Testing Protocol</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                Never submit without validation. The testing process transforms resume creation from speculation into data-validated optimization.
+              </p>
+              
+              <h3 className="text-2xl font-bold mt-8 mb-4">Proactive Compliance Checks</h3>
+              <ul className="list-disc ml-6 space-y-2 mb-4">
+                <li><strong>ATS Scanning Tools:</strong> Use Jobscan, SkillSyncer, or MyPerfectResume's checker to validate parsing accuracy and keyword match scores</li>
+                <li><strong>Plain Text Test:</strong> Copy entire resume (Ctrl+A, Ctrl+C) and paste into plain text editor (Notepad). If text appears linear and correctly ordered, architecture is safe</li>
+                <li><strong>Multiple Device Test:</strong> Review on different screens to ensure readability across contexts</li>
+              </ul>
+            </div>
+          </section>
 
-          {/* ===== RESOURCES SECTION ===== */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Further Resources</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/">
-                GitHub Repository
-              </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube Channel
-              </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/">
-                Official Website
-              </SecondaryButton>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <h3 className="text-lg font-semibold mb-2">Connect with Humanitarians AI</h3>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
-                <a 
-                  href="https://www.linkedin.com/company/105696953/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  LinkedIn
-                </a>
-                <a 
-                  href="https://www.youtube.com/@humanitariansai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  YouTube
-                </a>
-                <a 
-                  href="https://www.humanitarians.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Website
-                </a>
-                <a 
-                  href="https://github.com/Humanitariansai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  GitHub
-                </a>
-                <a 
-                  href="https://music.apple.com/us/artist/humanitarians-ai/1781414009"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Apple Music
-                </a>
-                <a 
-                  href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Spotify
-                </a>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-    </div>
-  );
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Conclusion: The Art of Strategic Minimalism</h2>
+            <div className="prose prose-lg max-w-none">
+              <p className="mb-4">
+                The notion that modern ATS forces applicants into submitting uninspired keyword lists is technologically obsolete, yet architecturally mandatory. The challenge is not technological limitation, but market fragmentation.
+              </p>
+              
+              <p className="mb-4">
+                The successful resume is a masterpiece of Strategic Minimalism: technically safe but semantically sophisticated. Accept the constraint of clean, minimalist, single-column architecture to ensure universal compatibility. Once this compliance layer is secured, invest maximal effort into developing content that is rich, quantified, and accomplishment-focused using frameworks like CAR.
+              </p>
+              
+              <p className="font-semibold mt-6">
+                The truly standout resume is not defined by its visual complexity, but by the strategic depth and quantifiable proof of its professional claims.
+              </p>
+            </div>
+          </section>
+
+          {/* ===== RESOURCES SECTION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Further Resources</h2>
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap mb-6">
+              <a 
+                href="https://github.com/Humanitariansai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center"
+              >
+                GitHub Repository
+              </a>
+              <a 
+                href="https://www.youtube.com/@humanitariansai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-center"
+              >
+                YouTube Channel
+              </a>
+              <a 
+                href="https://www.humanitarians.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-center"
+              >
+                Official Website
+              </a>
+            </div>
+            
+            <div className="mt-8 text-center">
+              <h3 className="text-lg font-semibold mb-2">Connect with Humanitarians AI</h3>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                <a 
+                  href="https://www.linkedin.com/company/105696953/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  LinkedIn
+                </a>
+                <a 
+                  href="https://www.youtube.com/@humanitariansai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  YouTube
+                </a>
+                <a 
+                  href="https://www.humanitarians.ai/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Website
+                </a>
+                <a 
+                  href="https://github.com/Humanitariansai/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  GitHub
+                </a>
+                <a 
+                  href="https://music.apple.com/us/artist/humanitarians-ai/1781414009"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Apple Music
+                </a>
+                <a 
+                  href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Spotify
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
 }
