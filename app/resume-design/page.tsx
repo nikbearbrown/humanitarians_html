@@ -4,8 +4,8 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
-  title: "Template Page",
-  description: "A template for creating new pages",
+  title: " Strategic Minimalism",
+  description: "The  Strategic Minimalism Resume Strategy ",
 };
 
 
@@ -15,7 +15,7 @@ export default function ResumeDesign() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">The Dual-Optimization Resume Strategy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">The  Strategic Minimalism Resume Strategy</h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
             Designing for ATS Compliance and Human Persuasion in the Age of LLMs
           </p>
