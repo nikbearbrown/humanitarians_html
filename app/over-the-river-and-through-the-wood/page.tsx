@@ -6,9 +6,9 @@ import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
 
 export const metadata: Metadata = {
-  title: "Lyrical Literacy - Humanitarians AI",
+  title: "Over The River And Through The Wood - Mayfield King | Lyrical Literacy",
   description:
-    "Empowering youth through the transformative power of music and poetry",
+    "A soulful Christmas reimagining of the classic holiday song by Mayfield King, Tuzi Brown, and Prarthana Maha Brown",
 };
 
 const YOUTUBE_PLAYLIST_DATA = [
@@ -42,7 +42,215 @@ export default function OverTheRiverAndThroughTheWood() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
-        {/* Hero Section */}
+        {/* Video Section */}
+        <div className="mb-12">
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/VAfooxj1sbc?si=ZXtisZhvLLHRVgKo"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+
+        {/* Hero Section - Song Description */}
+        <div className="mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            over-the-river-and-through-the-wood
+          </h1>
+          
+          <p className="text-xl text-muted-foreground mb-8">
+            Experience the beloved holiday classic transformed through transcendent soul artistry. 
+            Mayfield King, Tuzi Brown, and Prarthana Maha Brown bring their signature blend of 
+            gospel-infused soul, lush orchestral arrangements, and crystalline vocal beauty to this 
+            timeless journey to Grandmother's house. This soulful rendition weaves Chicago soul 
+            traditions, funk rhythms, and jazz-tinged influences into a warm, mid-tempo celebration 
+            of family, faith, and holiday joy.
+          </p>
+
+          {/* Artist Links */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="p-5 bg-primary/5 rounded-lg border">
+              <h3 className="font-bold mb-3">Mayfield King</h3>
+              <div className="flex flex-col gap-2 text-sm">
+                <a 
+                  href="https://music.apple.com/gb/artist/mayfield-king/1846526759"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Apple Music
+                </a>
+                <a 
+                  href="https://open.spotify.com/artist/6vpw3aw6hEJRPHgYGrN3kX?si=_WzqjRRwSQa5AtEUEjyv4w"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Spotify
+                </a>
+                <a 
+                  href="https://mayfield.musinique.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Official Website
+                </a>
+              </div>
+            </div>
+
+            <div className="p-5 bg-primary/5 rounded-lg border">
+              <h3 className="font-bold mb-3">Tuzi Brown</h3>
+              <div className="flex flex-col gap-2 text-sm">
+                <a 
+                  href="https://music.apple.com/us/artist/tuzi-brown/1838852692"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Apple Music
+                </a>
+                <a 
+                  href="https://open.spotify.com/artist/5DvRo9Gtg5bxsUUbKQBdg6?si=cycErkToTfKhcumPnlzt2w"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Spotify
+                </a>
+                <a 
+                  href="https://tuzi.musinique.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Official Website
+                </a>
+              </div>
+            </div>
+
+            <div className="p-5 bg-primary/5 rounded-lg border">
+              <h3 className="font-bold mb-3">Prarthana Maha Brown</h3>
+              <div className="flex flex-col gap-2 text-sm">
+                <a 
+                  href="https://music.apple.com/us/artist/prarthana-maha-brown/1840725199"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Apple Music
+                </a>
+                <a 
+                  href="https://open.spotify.com/artist/1sPHt959TSCSgctMB5Xdop?si=yxPbrdEiReaofLd_N_kjAg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Spotify
+                </a>
+                <a 
+                  href="https://prarthana.musinique.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Official Website
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Song History Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold mb-6">About This Song</h2>
+          <div className="prose prose-lg dark:prose-invert">
+            <p>
+              "Over the River and Through the Wood" originated as a Thanksgiving poem written by 
+              Lydia Maria Child in 1844, titled "The New-England Boy's Song about Thanksgiving Day." 
+              The poem captured the excitement of traveling through New England's winter landscape 
+              to grandmother's house for the holiday feast. Over the decades, it became one of 
+              America's most beloved holiday songs, traditionally associated with Thanksgiving.
+            </p>
+            <p>
+              This soulful variant reimagines the classic journey through a Christmas lens, 
+              transforming the original Thanksgiving theme into a celebration of the Christmas 
+              season while maintaining the warmth and family-centered spirit of the original. 
+              The adaptation expands on Child's vivid imagery of winter travel, adding elements 
+              of Christmas tradition—carols, church bells, stockings, and Christmas trees—while 
+              preserving the timeless themes of family gathering, seasonal joy, and the journey 
+              home for the holidays.
+            </p>
+            <p>
+              Through the distinctive voices of Mayfield King, Tuzi Brown, and Prarthana Maha Brown, 
+              this version bridges historical tradition with contemporary soul artistry, offering 
+              a fresh perspective on a song that has united families across generations.
+            </p>
+          </div>
+        </section>
+
+        {/* Lyrics Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold mb-6">Lyrics</h2>
+          <div className="p-8 bg-primary/5 rounded-lg border">
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p className="mb-4">
+                Over the river and through the wood<br />
+                To Grandmother's house we go<br />
+                The sleigh is packed with gifts and cheer<br />
+                For Christmas lights are aglow
+              </p>
+              <p className="mb-4">
+                Over the river and through the wood<br />
+                The carols and songs we hear<br />
+                The melodies ring as the joy they bring<br />
+                Fills hearts with Christmas cheer
+              </p>
+              <p className="mb-4">
+                Over the river and past the trees<br />
+                The starry sky shines bright<br />
+                The warmth inside and the Yuletide tide<br />
+                Make this a holy night
+              </p>
+              <p className="mb-4">
+                Over the river and through the snow<br />
+                The holly's on the door<br />
+                We gather around where the joy abounds<br />
+                With Christmas love in store
+              </p>
+              <p className="mb-4">
+                Over the river and to the fire<br />
+                Where stockings hang with care<br />
+                With stories to tell and the midnight bell<br />
+                The Christmas spirit's there
+              </p>
+              <p className="mb-4">
+                Over the river and through the snow<br />
+                The Christmas tree stands tall<br />
+                Its twinkling lights in the frosty night<br />
+                Bring joy to one and all
+              </p>
+              <p className="mb-4">
+                Over the river, the sleigh bells ring<br />
+                Their music fills the air<br />
+                With laughter and cheer we draw ever near<br />
+                To Christmas memories fair
+              </p>
+              <p className="mb-0">
+                Over the river, the church bells chime<br />
+                Proclaiming peace tonight<br />
+                We lift up our song as we ride along<br />
+                To greet the holy light
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Lyrical Literacy Section */}
         <div className="mb-16">
           <div className="md:flex items-center mb-6">
             <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy</h1>
@@ -60,16 +268,6 @@ export default function OverTheRiverAndThroughTheWood() {
             program that combines AI with creative writing and music to enhance
             literacy skills.
           </p>
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
-            <iframe
-              className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/juYjI3cncug?si=WqvsOj98AZuo_B-V"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          </div>
         </div>
 
         {/* Main Content */}
@@ -94,7 +292,7 @@ export default function OverTheRiverAndThroughTheWood() {
                 maintaining high engagement levels.
               </p>
 
-              {/* YouTube Video Thumbnails Grid: show one row (3 items) at a time and allow vertical scrolling to reveal additional rows */}
+              {/* YouTube Video Thumbnails Grid */}
               <div
                 className="grid grid-cols-3 gap-6 my-6 max-h-[500px] overflow-y-auto"
               >
@@ -213,7 +411,7 @@ export default function OverTheRiverAndThroughTheWood() {
               </p>
 
               <div className="mt-6 flex flex-col md:flex-row gap-4 items-start">
-                <a
+                
                   href="https://www.youtube.com/@humanitariansai"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -237,7 +435,7 @@ export default function OverTheRiverAndThroughTheWood() {
                   YouTube: @humanitariansai
                 </a>
 
-                <a
+                
                   href="mailto:info@humanitarians.ai"
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
