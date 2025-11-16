@@ -29,6 +29,11 @@ export default function RootLayout({
           <div className="relative flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
+            {/* Add Spotify component above the footer */}
+            <div className="container px-4 md:px-6 mx-auto py-8">
+              <h2 className="text-2xl font-bold mb-4 text-center">Humanitarians AI Lyrical Literacy Project</h2>
+              <Spotify />
+            </div>            
             <Footer />
           </div>
         </ThemeProvider>
