@@ -35,7 +35,7 @@ export default function OverTheRiverAndThroughTheWood() {
         </div>
 
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">over-the-river-and-through-the-wood</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Over the River and Through the Wood</h1>
           
           <p className="text-xl text-muted-foreground mb-8">
             Experience the beloved holiday classic transformed through transcendent soul artistry. 
