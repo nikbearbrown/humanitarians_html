@@ -9,6 +9,9 @@ import "./globals.css"
 import { cn } from "@/lib/utils"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
+// ✅ Import your Spotify client component
+import Spotify from "@/components/Spotify" 
+
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
