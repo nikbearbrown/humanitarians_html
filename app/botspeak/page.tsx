@@ -15,7 +15,7 @@ export default function BotspeakPage() {
     <div className="container px-4 md:px-6 mx-auto py-12">
       {/* Google Analytics - only on home page */}
       <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-HQ685S9XPH"
+        src="https://www.googletagmanager.com/gtag/js?id=G-HQ685S9XPH&enablejsapi=1"
         strategy="afterInteractive"
       />
       <Script
