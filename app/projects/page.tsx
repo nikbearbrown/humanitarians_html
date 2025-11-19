@@ -18,7 +18,7 @@ export default function ProjectsPage() {
       description: "A distinctive experiential learning community at Northeastern University that bridges theoretical knowledge and practical application in artificial intelligence. Through our \"Learn AI by Doing AI\" philosophy, students develop real-world AI expertise while building impressive portfolios before graduation.",
       videoId: "WKW12dO9NOc?si=2C7ylVc1ICxhvrT4",
       githubUrl: "https://github.com/Humanitariansai/AI_Skunkworks",
-      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB8Cie-7oBFA6UlRBN4q7hmG",
+      youtubeUrl: "https://www.youtube.com/playlist?list=PLgOGgHS58rB8Cie-7oBFA6UlRBN4q7hmG?enablejsapi=1",
       fullDescription: "AI Skunkworks at Northeastern University is a distinctive experiential learning community that bridges theoretical knowledge and practical application in artificial intelligence. Unlike Humanitarians AI which works with graduates, AI Skunkworks enables current students to \"Code for a Cause\" and \"Learn AI by Doing AI\" through extracurricular and summer work on real-world projects.",
       keyFeatures: [
         {
