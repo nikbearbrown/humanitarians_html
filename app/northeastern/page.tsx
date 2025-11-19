@@ -22,7 +22,7 @@ export default function Northeastern() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/videoseries?si=dYCuV6c5VWGJeLsC&amp;list=PLgOGgHS58rB_f-rJIRNAH2RscINiV4uw3"
+              src="https://www.youtube.com/embed/videoseries?si=dYCuV6c5VWGJeLsC&amp;list=PLgOGgHS58rB_f-rJIRNAH2RscINiV4uw3&enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
