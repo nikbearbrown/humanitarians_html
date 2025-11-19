@@ -43,7 +43,7 @@ export default function Lullabize() {
   return (
     <>
       {/* Google tag (gtag.js) */}
-      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158" strategy="afterInteractive" />
+      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158&enablejsapi=1" strategy="afterInteractive" />
       <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
