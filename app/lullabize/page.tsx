@@ -43,7 +43,7 @@ export default function Lullabize() {
   return (
     <>
       {/* Google tag (gtag.js) */}
-      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158&enablejsapi=1" strategy="afterInteractive" />
+      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158" strategy="afterInteractive" />
       <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
@@ -60,7 +60,7 @@ export default function Lullabize() {
             <div className="md:flex items-center mb-6">
               <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy AI Tools</h1>
               <PrimaryButton
-                href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
+                href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP&enablejsapi=1"
                 className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
               >
                 Watch on YouTube
