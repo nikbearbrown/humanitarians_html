@@ -23,7 +23,7 @@ export default function UnrealReels() {
             <PrimaryButton href="https://chatgpt.com/g/g-691ded40c2508191be78817302f3c232-unreal-reels">
               Try Unreal Reels GPT →
             </PrimaryButton>
-            <SecondaryButton href="https://www.youtube.com/embed/2Z5hOX2NqnA?si=oSmeSmsyMySp3epm?enablejsapi=1">
+            <SecondaryButton href="https://www.youtube.com/embed/2Z5hOX2NqnA?si=p26LY3zOGRm6PR-G?enablejsapi=1">
               Watch Examples
             </SecondaryButton>
           </div>
