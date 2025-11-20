@@ -23,7 +23,7 @@ export default function UnrealReels() {
             <PrimaryButton href="https://chatgpt.com/g/g-691ded40c2508191be78817302f3c232-unreal-reels">
               Try Unreal Reels GPT →
             </PrimaryButton>
-            <SecondaryButton href="https://www.youtube.com/embed/2Z5hOX2NqnA?si=p26LY3zOGRm6PR-G?enablejsapi=1">
+            <SecondaryButton href="https://www.youtube.com/embed/videoseries?si=UUZ42UoACwOqWWVN&amp;list=PLgOGgHS58rB_kYtzyvAz6IbRexGOIZq4-">
               Watch Examples
             </SecondaryButton>
           </div>
@@ -31,7 +31,7 @@ export default function UnrealReels() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV"
+              src="https://www.youtube.com/embed/2Z5hOX2NqnA?si=p26LY3zOGRm6PR-G?enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
