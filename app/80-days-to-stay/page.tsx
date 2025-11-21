@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "A template for creating new pages",
 };
 
-export default function 80DaystoStay() {
+export default function EightyDaystoStay() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
