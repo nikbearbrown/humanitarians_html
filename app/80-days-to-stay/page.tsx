@@ -27,7 +27,7 @@ export default function EightyDaystoStay() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8 bg-muted/50">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/WKW12dO9NOc?si=2C7ylVc1ICxhvrT4&enablejsapi=1"
+              src="https://www.youtube.com/embed/p_bx-BnpPHI?si=2oISjwy-rbXIwBCL&enablejsapi=1"
               title="80 Days to Stay - Project Overview"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
