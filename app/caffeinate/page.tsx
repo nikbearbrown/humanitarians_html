@@ -23,7 +23,6 @@ export default function Caffeinate() {
             Learn how to keep your Mac from going to sleep while long Python scripts are running, using the built-in{" "}
             <code>caffeinate</code> command to tie system wakefulness to a specific process.
           </p>
-          {/* NOTE: Hero video structure kept exactly like your AIFluency page */}
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
@@ -102,3 +101,4 @@ export default function Caffeinate() {
       </div>
     </div>
   )
+}
