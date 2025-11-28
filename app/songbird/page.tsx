@@ -23,7 +23,7 @@ export default function Songbird() {
             <PrimaryButton href="https://chatgpt.com/g/g-6923f0c219988191a96930101de74440-songbird">
               Try Songbird GPT →
             </PrimaryButton>
-            <SecondaryButton href="#">
+            <SecondaryButton href="https://www.youtube.com/embed/EBGwjZfDZto?si=pXSGQKyUQhFk1Rap?enablejsapi=1">
               Watch Examples
             </SecondaryButton>
           </div>
@@ -31,7 +31,7 @@ export default function Songbird() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="#"
+              src="https://www.youtube.com/embed/EBGwjZfDZto?si=pXSGQKyUQhFk1Rap?enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
