@@ -21,7 +21,7 @@ export default function Courses() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/videoseries?si=Hpvur6wCLL34hOoD&amp;list=PLgOGgHS58rB9QhhS9hthOoiR7dkQajv2R?enablejsapi=1"
+              src="https://www.youtube.com/embed/V2J_72aOpTM?si=pbU5j-foPel0oqA0?enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
