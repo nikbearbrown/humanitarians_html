@@ -23,7 +23,7 @@ export default function Songbird() {
             <PrimaryButton href="https://chatgpt.com/g/g-6923f0c219988191a96930101de74440-songbird">
               Try Songbird GPT →
             </PrimaryButton>
-            <SecondaryButton href="https://www.youtube.com/embed/MeQ6RhJ7K0I?si=HfITqHBNcVIQSGFx?enablejsapi=1">
+            <SecondaryButton href="https://www.youtube.com/embed/MeQ6RhJ7K0I?si=xLfnLkpSeP-d2MPl?enablejsapi=1">
               Watch Examples
             </SecondaryButton>
           </div>
