@@ -16,7 +16,7 @@ export default function BrainExerciseSongsResearch() {
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">The Neurocognitive Foundations of Music-Based Learning</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            <strong>The central premise of music-based "brain exercise" is that musical engagement is not merely a skill-acquisition-focused leisure activity but a potent driver of brain development and reorganization. This perspective is strongly supported by a deep body of neuroscientific research demonstrating that musical training in childhood has a demonstrable and positive impact on brain plasticity. Neuroimaging studies reveal significant structural and functional adaptations in the brains of individuals with musical training, validating the concept of music as a comprehensive cognitive workout. </strong>strong>
+            <strong>The central premise of music-based "brain exercise" is that musical engagement is not merely a skill-acquisition-focused leisure activity but a potent driver of brain development and reorganization. This perspective is strongly supported by a deep body of neuroscientific research demonstrating that musical training in childhood has a demonstrable and positive impact on brain plasticity. Neuroimaging studies reveal significant structural and functional adaptations in the brains of individuals with musical training, validating the concept of music as a comprehensive cognitive workout.</strong>
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
