@@ -4,8 +4,8 @@ import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
 export const metadata: Metadata = {
-  title: "Template Page",
-  description: "A template for creating new pages",
+  title: "Muzak - AI Music Video Director | Humanitarians AI",
+  description: "Transform songs, lyrics, and images into cinematic music video sequences with Muzak, an AI-powered music video director that creates professional prompts for image and video generation.",
 };
 
 export default function Muzak() {
@@ -14,9 +14,9 @@ export default function Muzak() {
       <div className="max-w-4xl mx-auto">
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Template Page Title</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Muzak: AI Music Video Director</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            This is a template page that you can use as a starting point for creating new pages. It includes a hero section with a video, placeholder sections for content, and a resources section.
+            Transform songs, lyrics, and images into cinematic music video sequences for image and video generation. Muzak is your AI director that creates continuous, emotionally resonant music video prompts optimized for modern AI video tools.
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
@@ -32,68 +32,130 @@ export default function Muzak() {
 
         {/* ===== MAIN CONTENT ===== */}
         <div className="grid gap-12">
-          {/* ===== PLACEHOLDER SECTION 1 ===== */}
+          {/* ===== WHAT IS MUZAK ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Section 1 Title</h2>
+            <h2 className="text-3xl font-bold mb-6">What is Muzak?</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                This is a placeholder for your first section. You can replace this with actual content when creating a new page. Include paragraphs, lists, images, or any other content you need.
+                Muzak is an AI music video director that specializes in transforming songs, lyrics, and images into professional music video sequences. Unlike generic prompt generators, Muzak creates continuous, emotionally resonant sequences with invisible cuts and seamless camera flow—exactly what modern AI video generation tools need.
               </p>
               
               <p>
-                You can add multiple paragraphs to provide detailed information. This template ensures consistent styling and layout across different pages.
+                Built on proven cinematic principles, Muzak ensures every frame maintains visual continuity, emotional coherence, and narrative progression. Whether you're creating standard music videos, dance sequences, or experimental visual styles, Muzak handles the complex sequencing so you can focus on the creative vision.
               </p>
-              
-              <ul>
-                <li>List item one</li>
-                <li>List item two</li>
-                <li>List item three</li>
-              </ul>
             </div>
           </section>
 
-          {/* ===== PLACEHOLDER SECTION 2 ===== */}
+          {/* ===== CORE MODES ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Section 2 Title</h2>
+            <h2 className="text-3xl font-bold mb-6">Core Creative Modes</h2>
             <div className="prose prose-lg dark:prose-invert max-w-none">
               <p>
-                This is a placeholder for your second section. You can have as many sections as needed for your content. Each section is separated with appropriate spacing.
-              </p>
-              
-              <p>
-                Consider using different content formats in different sections to keep your page visually interesting. Options include:
+                Muzak offers multiple specialized modes for different music video styles, each optimized for specific creative goals:
               </p>
               
               <div className="grid md:grid-cols-2 gap-6 my-8">
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 1</h3>
+                  <h3 className="text-xl font-bold mb-4">Video Mode</h3>
                   <p className="text-muted-foreground">
-                    This is example card content. You can use cards to present information in a visually distinct way.
+                    Standard music video with artist performance, lip-sync, and emotional storytelling. Perfect for traditional music videos with seamless camera flow and mood continuity.
                   </p>
                 </div>
                 
                 <div className="p-6 bg-muted/50 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">Card Title 2</h3>
+                  <h3 className="text-xl font-bold mb-4">Dance Mode</h3>
                   <p className="text-muted-foreground">
-                    This is example card content. Cards work well for presenting related pieces of information side by side.
+                    Dance-focused sequences with consistent dancer, outfit, and environment. Camera flow preserves movement continuity while tying choreography to song emotion.
+                  </p>
+                </div>
+
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Unreal Mode</h3>
+                  <p className="text-muted-foreground">
+                    First-person flythrough with invisible camera paths. Creates immersive floating motion through the song's world without visible rigs or drones.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Colorful Mode</h3>
+                  <p className="text-muted-foreground">
+                    Hypercolor iPhone aesthetic with handheld snapshots. American/everyday environments with mythic mood and imperfect, authentic framing.
+                  </p>
+                </div>
+
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">TikTok Mode</h3>
+                  <p className="text-muted-foreground">
+                    Vertical 9:16 remixes that transform uploaded images, replacing humans with fantasy/mythical characters. Perfect for social media distribution.
+                  </p>
+                </div>
+                
+                <div className="p-6 bg-muted/50 rounded-lg">
+                  <h3 className="text-xl font-bold mb-4">Xmas Mode</h3>
+                  <p className="text-muted-foreground">
+                    Holiday-themed vertical remixes with Christmas characters (Santa, Mrs Claus, Krampus). Transforms images into festive 9:16 content.
                   </p>
                 </div>
               </div>
             </div>
           </section>
 
+          {/* ===== HOW IT WORKS ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">How Muzak Works</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Muzak uses a sophisticated sequencing system that ensures every prompt maintains continuity and emotional flow:
+              </p>
+              
+              <ul>
+                <li><strong>Sequence IDs:</strong> Every prompt starts with a sequence ID (A0, A1, A2...) for proper chronological assembly and file organization</li>
+                <li><strong>Entry/Beat/Exit:</strong> Each moment inherits context from before, delivers one clear beat, and leads naturally to what comes next</li>
+                <li><strong>Invisible Cuts:</strong> Transitions are designed so viewers never notice the cuts—just continuous flow</li>
+                <li><strong>Phone-Footage Aesthetic:</strong> Everything feels like documented real footage, not artificial CGI</li>
+                <li><strong>Story-First:</strong> Every cut pushes the narrative or emotional arc forward</li>
+              </ul>
+
+              <p>
+                Simply paste your lyrics, specify your preferred mode and style, and Muzak generates a complete sequence of production-ready prompts optimized for AI video generation tools like Runway, Pika, and others.
+              </p>
+            </div>
+          </section>
+
+          {/* ===== CUSTOMIZATION ===== */}
+          <section>
+            <h2 className="text-3xl font-bold mb-6">Customization Options</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <p>
+                Muzak offers extensive customization to match your creative vision:
+              </p>
+              
+              <ul>
+                <li><strong>Style:</strong> Set visual aesthetics (90s R&B, grunge, neon noir, retro VHS, etc.)</li>
+                <li><strong>Artist:</strong> Define performer appearance, persona, and wardrobe</li>
+                <li><strong>Location:</strong> Specify primary environment and setting</li>
+                <li><strong>Camera:</strong> Customize framing, motion, and camera behavior</li>
+                <li><strong>Mood:</strong> Set emotional tone (melancholic, triumphant, intimate, chaotic)</li>
+              </ul>
+
+              <p>
+                All customizations maintain continuity principles while adapting to your specific creative direction. You can also use the <code>remix</code> command to generate variations while keeping the established visual flow.
+              </p>
+            </div>
+          </section>
+
           {/* ===== RESOURCES SECTION ===== */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">Further Resources</h2>
+            <h2 className="text-3xl font-bold mb-6">Get Started with Muzak</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/">
-                GitHub Repository
+              <PrimaryButton href="https://chatgpt.com/g/g-YOUR-GPT-ID">
+                Try Muzak GPT
               </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube Channel
+              <SecondaryButton href="https://github.com/Humanitariansai/">
+                GitHub Repository
               </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/">
-                Official Website
+              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+                Video Tutorials
               </SecondaryButton>
             </div>
             
