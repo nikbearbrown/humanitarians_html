@@ -18,10 +18,20 @@ export default function Muzak() {
           <p className="text-xl text-muted-foreground mb-8">
             Transform songs, lyrics, and images into cinematic music video sequences for image and video generation. Muzak is your AI director that creates continuous, emotionally resonant music video prompts optimized for modern AI video tools.
           </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <PrimaryButton href="https://chatgpt.com/g/g-69334c12f01c8191b20f69e9706ac193-muzak">
+              Try Muzak GPT →
+            </PrimaryButton>
+            <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+              Watch Examples
+            </SecondaryButton>
+          </div>
+          
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/X_mGNoTMzgQ?si=g8Cq20zi1fCAdo9U?enablejsapi=1"
+              src="https://www.youtube.com/embed/7aSfwv-ovcc?si=DJKRipqUw7XFhGQ9?enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
