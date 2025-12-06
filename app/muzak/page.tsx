@@ -21,7 +21,7 @@ export default function Muzak() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/7aSfwv-ovcc?si=DJKRipqUw7XFhGQ9?enablejsapi=1"
+              src="https://www.youtube.com/embed/X_mGNoTMzgQ?si=g8Cq20zi1fCAdo9U?enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -148,7 +148,7 @@ export default function Muzak() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started with Muzak</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://chatgpt.com/g/g-YOUR-GPT-ID">
+              <PrimaryButton href="https://chatgpt.com/g/g-69334c12f01c8191b20f69e9706ac193-muzak">
                 Try Muzak GPT
               </PrimaryButton>
               <SecondaryButton href="https://github.com/Humanitariansai/">
