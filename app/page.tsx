@@ -26,11 +26,14 @@ export default function Home() {
             <div className="flex flex-col justify-center space-y-4 lg:col-span-1">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Harnessing AI for social good.
+                  Where AI Education Meets Real-World Impact
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  A 501(c)(3) nonprofit organization dedicated to developing ethical AI solutions that address real-world
-                  challenges in education, healthcare, nonprofits, and the arts.
+                  International graduates on OPT build career-ready portfolios through real AI projects. 
+                  <br>
+                  <strong>
+                    Students get jobs. Organizations get solutions. Communities get impact.
+                  </strong>
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -94,7 +97,10 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-2">FELLOWS PROGRAM</h3>
               <p className="text-muted-foreground mb-4">
-                Join our community of AI researchers and developers working on humanitarian projects. Get mentorship, resources, and support to build impactful AI solutions.
+                International graduates on OPT build career-ready portfolios through hands-on projects with real organizations. 
+                Fellows create AI tools for marketing, finance, and education; develop Lyrical Literacy content; produce public 
+                YouTube courses; and support academic research. With mentorship from industry professionals, our fellows graduate 
+                with deployed products—the proof of work that launches careers.
               </p>
               <Link href="/fellows" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
                 Learn more
@@ -108,7 +114,9 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-2">LYRICAL LITERACY</h3>
               <p className="text-muted-foreground mb-4">
-                An innovative program that combines AI with creative writing and music to enhance literacy skills. Using technology to make learning more engaging and accessible.
+                We create AI-powered songs and videos that help children learn to read and adults learn new languages. 
+                Fellows use tools like Suno and video AI to produce content combining neuroscience, music, and technology for 
+                measurable educational impact.
               </p>
               <Link href="/lyrical-literacy" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
                 Learn more
@@ -122,7 +130,9 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-2">AI FOR GOOD</h3>
               <p className="text-muted-foreground mb-4">
-                Developing and deploying AI-powered tools for real-world social impact with an emphasis on inclusivity and accessibility.
+                Real AI solutions for real organizations. Our fellows build tools in marketing, finance, and
+                intelligent textbooks for partners like Medavy AI, ArrowDx, and Bimride. Students learn by
+                shipping. Organizations get innovation without the overhead. It&#39;s AI that actually gets deployed.
               </p>
               <Link href="/ai-for-good" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
                 Learn more
@@ -136,7 +146,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold mb-2">BOTSPEAK</h3>
               <p className="text-muted-foreground mb-4">
-                Exploring the fascinating world of AI through hands-on projects and in-depth demos—no rules, just curiosity-driven innovation.
+                YouTube courses and workshops that teach everyone—from complete beginners to nonprofits—how to effectively use AI tools. 
+                Our fellows create educational content that democratizes AI knowledge, making powerful technology accessible to all.
               </p>
               <Link href="/botspeak" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
                 Learn more
@@ -150,12 +161,13 @@ export default function Home() {
       <section className="w-full py-12 md:py-24 bg-gray-100 dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-            <div className="mb-4 text-sm font-medium">JOIN OUR MISSION</div>
-            <h2 className="text-3xl font-bold tracking-tighter md:text-5xl mb-6">HELP US USE AI FOR THE GREATER GOOD</h2>
+            <h2 className="text-3xl font-bold tracking-tighter md:text-5xl mb-6">JOIN OUR MISSION</h2>
+            <div className="mb-4 text-sm font-medium">Everyone Wins</div>
             <p className="text-muted-foreground mb-8 max-w-2xl">
-              Your support helps us develop ethical AI solutions that address real-world challenges in education,
-              healthcare, nonprofits, and the arts. Join us in our mission to ensure AI benefits everyone, especially
-              underserved communities.
+              Your support helps international graduates build the portfolios that launch careers while
+              delivering real AI solutions to communities that need them. Students get jobs. Organizations get
+              tools. Kids learn through song. The public gets free AI education. Mentors shape future talent.
+              100% of donations fund the programs, mentorship, and project support that make this happen.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <PrimaryButton href="/donate">
@@ -164,8 +176,8 @@ export default function Home() {
               <SecondaryButton href="/contact">
                 VOLUNTEER
               </SecondaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YOUTUBE
+              <SecondaryButton href="/contact">
+                Contact Us
               </SecondaryButton>
             </div>
           </div>
