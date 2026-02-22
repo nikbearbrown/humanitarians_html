@@ -23,7 +23,7 @@ const substacks = [
   {
     name: "Branding & AI",
     url: "https://brandingartificialintelligence.substack.com/",
-    focus: "An "intelligent textbook" for Northeastern course INFO 7375 focused on professional positioning and technical contributions to the Madison Framework.",
+    focus: "An \u201cintelligent textbook\u201d for Northeastern course INFO 7375 focused on professional positioning and technical contributions to the Madison Framework.",
   },
   {
     name: "Dayhoff Project",
@@ -68,7 +68,7 @@ const substacks = [
   {
     name: "The Mycroft Project",
     url: "https://mycroftproject.substack.com/",
-    focus: "An educational experiment "using AI to invest in AI," utilizing specialized agents to analyze the investment landscape.",
+    focus: "An educational experiment \u201cusing AI to invest in AI,\u201d utilizing specialized agents to analyze the investment landscape.",
   },
   {
     name: "The RAMAN Effect Project",
