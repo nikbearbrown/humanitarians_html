@@ -11,7 +11,6 @@ export default function Footer() {
  const { theme } = useTheme()
  const [mounted, setMounted] = useState(false)
 
- // Avoid hydration mismatch by only rendering after mount
  useEffect(() => {
    setMounted(true)
  }, [])
@@ -44,35 +43,13 @@ export default function Footer() {
              </p>
              <div className="mt-6 flex space-x-4 items-center">
                <Link href="https://www.youtube.com/@humanitariansai" className="text-sm hover:text-primary transition-colors">
-                 <svg
-                   xmlns="http://www.w3.org/2000/svg"
-                   width="16"
-                   height="16"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="inline-block"
-                 >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/>
                    <path d="m10 15 5-3-5-3z"/>
                  </svg>
                </Link>
                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-sm hover:text-primary transition-colors">
-                 <svg
-                   xmlns="http://www.w3.org/2000/svg"
-                   width="16"
-                   height="16"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="inline-block"
-                 >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <circle cx="12" cy="12" r="10"/>
                    <path d="M8 14.5c1.5 1 4 1 5.5 0"/>
                    <path d="M8 11c2 1 5 1 7 0"/>
@@ -80,53 +57,20 @@ export default function Footer() {
                  </svg>
                </Link>
                <Link href="https://www.linkedin.com/company/105696953/" className="text-sm hover:text-primary transition-colors">
-                 <svg
-                   xmlns="http://www.w3.org/2000/svg"
-                   width="16"
-                   height="16"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="inline-block"
-                 >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
                    <rect width="4" height="12" x="2" y="9" />
                    <circle cx="4" cy="4" r="2" />
                  </svg>
                </Link>
                <Link href="mailto:info@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
-                 <svg
-                   xmlns="http://www.w3.org/2000/svg"
-                   width="16"
-                   height="16"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="inline-block"
-                 >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <rect width="20" height="16" x="2" y="4" rx="2" />
                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                  </svg>
                </Link>
                <Link href="https://twitter.com/humanitariansai" className="text-sm hover:text-primary transition-colors">
-                 <svg
-                   xmlns="http://www.w3.org/2000/svg"
-                   width="16"
-                   height="16"
-                   viewBox="0 0 24 24"
-                   fill="none"
-                   stroke="currentColor"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                   className="inline-block"
-                 >
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                  </svg>
                </Link>
@@ -135,7 +79,7 @@ export default function Footer() {
            </div>
          </div>
 
-         {/* Links Sections - First Row */}
+         {/* Links Sections */}
          <div className="md:col-span-9 grid grid-cols-1 md:grid-cols-6 gap-8">
            {/* Company */}
            <div className="space-y-4">
@@ -147,20 +91,29 @@ export default function Footer() {
              </ul>
            </div>
 
-          {/* Projects */}
+           {/* Projects */}
            <div className="space-y-4">
              <h3 className="text-lg font-semibold">Projects</h3>
              <ul className="space-y-2">
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors font-medium">All Projects</Link></li>
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
-               <li><Link href="/dayhoff" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
-               <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>              
-               <li><Link href="https://lullabize.humanitarians.ai/" className="text-muted-foreground hover:text-foreground transition-colors">Lullabize</Link></li>
-               <li><Link href="/madison" className="text-muted-foreground hover:text-foreground transition-colors">Madison</Link></li>
-               <li><Link href="/mycroft" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</Link></li>
-               <li><Link href="/northeastern" className="text-muted-foreground hover:text-foreground transition-colors">Northeastern</Link></li>
-               <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
-               <li><Link href="/raman-effect" className="text-muted-foreground hover:text-foreground transition-colors">RAMAN Effect</Link></li>              
+               <li><Link href="https://80daystostay.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
+               <li><Link href="https://boyleproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Boyle Project</Link></li>
+               <li><Link href="https://brandingartificialintelligence.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Branding & AI</Link></li>
+               <li><Link href="https://dayhoffproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
+               <li><Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Humanitarians AI</Link></li>
+               <li><Link href="https://lyricalliteracyproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</Link></li>
+               <li><Link href="https://medhavy.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Medhavy</Link></li>
+               <li><Link href="https://musinique.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</Link></li>
+               <li><Link href="https://northeasternise.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Northeastern ISE</Link></li>
+               <li><Link href="https://politicalai.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Politics & AI</Link></li>
+               <li><Link href="https://popperskepticism.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
+               <li><Link href="https://learningengineering.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">The Learning Engineer</Link></li>
+               <li><Link href="https://madisonproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">The Madison Project</Link></li>
+               <li><Link href="https://mycroftproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">The Mycroft Project</Link></li>
+               <li><Link href="https://ramaneffectwpe.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">RAMAN Effect</Link></li>
+               <li><Link href="https://wilkesproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</Link></li>
+               <li><Link href="https://zebonastic.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</Link></li>
              </ul>
            </div>
 
@@ -183,7 +136,7 @@ export default function Footer() {
                <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
                <li><Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-muted-foreground hover:text-foreground transition-colors">Apple Music</Link></li>
                <li><Link href="https://podcast.humanitarians.ai/" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy Podcast</Link></li>
-               <li><Link href="https://www.musinique.com/" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</Link></li>              
+               <li><Link href="https://www.musinique.com/" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</Link></li>
              </ul>
            </div>
 
@@ -215,13 +168,9 @@ export default function Footer() {
        <div className="mt-12 pt-8 border-t">
          <div className="max-w-3xl mx-auto text-center">
            <p className="text-sm text-muted-foreground">
-             At Humanitarians AI, we respect your
-             privacy and are committed to protecting your personal information. We collect
-             only the information necessary to provide our services. For complete details,
-             please read our{' '}
-             <Link href="/privacy" className="text-primary hover:underline">
-               full privacy policy
-             </Link>.
+             At Humanitarians AI, we respect your privacy and are committed to protecting your personal information. We collect
+             only the information necessary to provide our services. For complete details, please read our{' '}
+             <Link href="/privacy" className="text-primary hover:underline">full privacy policy</Link>.
            </p>
          </div>
        </div>
