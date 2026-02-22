@@ -9,6 +9,79 @@ export const metadata: Metadata = {
   description: "Join our global community of talented volunteers dedicated to using AI for humanitarian causes",
 }
 
+const substacks = [
+  {
+    name: "80 Days to Stay",
+    url: "https://80daystostay.substack.com/",
+    focus: "Job tools and Agentic AI designed to bring transparency and efficiency to the OPT (Optional Practical Training) job search process.",
+  },
+  {
+    name: "Boyle Project (The Boyle System)",
+    url: "https://boyleproject.substack.com/",
+    focus: "A scientific notebook approach using NotebookLM as a cognitive partner to enforce reproducibility, traceable knowledge, and method-focused documentation.",
+  },
+  {
+    name: "Branding & AI",
+    url: "https://brandingartificialintelligence.substack.com/",
+    focus: "An "intelligent textbook" for Northeastern course INFO 7375 focused on professional positioning and technical contributions to the Madison Framework.",
+  },
+  {
+    name: "Dayhoff Project",
+    url: "https://dayhoffproject.substack.com/",
+    focus: "An open-source, agent-based AI bioinformatics framework for computational biology, epidemiology, and public health.",
+  },
+  {
+    name: "Humanitarians AI",
+    url: "https://humanitariansai.substack.com/",
+    focus: "The central hub for the 501(c)(3) non-profit, providing project-based volunteer opportunities in AI development and application.",
+  },
+  {
+    name: "Lyrical Literacy Project",
+    url: "https://lyricalliteracyproject.substack.com/",
+    focus: "Exploring the neuroscience of singing and brain research to improve cognitive development and language learning.",
+  },
+  {
+    name: "Medhavy",
+    url: "https://medhavy.substack.com/",
+    focus: "An AI-powered textbook project focused on educational applications of machine learning.",
+  },
+  {
+    name: "Musinique",
+    url: "https://musinique.substack.com/",
+    focus: "Music-related content, history of record labels, and Spotify algorithm research.",
+  },
+  {
+    name: "Politics and AI",
+    url: "https://politicalai.substack.com/",
+    focus: "Data journalism and Agentic AI dedicated to increasing transparency within the political landscape.",
+  },
+  {
+    name: "The Learning Engineer",
+    url: "https://learningengineering.substack.com/",
+    focus: "Engineering approaches to learning design and educational technology.",
+  },
+  {
+    name: "The Madison Project",
+    url: "https://madisonproject.substack.com/",
+    focus: "An open-source, agentic marketing and branding framework designed for data-driven advertising and marketing intelligence.",
+  },
+  {
+    name: "The Mycroft Project",
+    url: "https://mycroftproject.substack.com/",
+    focus: "An educational experiment "using AI to invest in AI," utilizing specialized agents to analyze the investment landscape.",
+  },
+  {
+    name: "The RAMAN Effect Project",
+    url: "https://ramaneffectwpe.substack.com/",
+    focus: "Advancing public health surveillance through AI-driven spectroscopy and wastewater-based epidemiology.",
+  },
+  {
+    name: "Zebonastic",
+    url: "https://zebonastic.substack.com/",
+    focus: "Digital prompts and AI-generated creative work specifically for games and film.",
+  },
+]
+
 export default function FellowsPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
@@ -75,6 +148,30 @@ export default function FellowsPage() {
             </div>
           </section>
 
+          {/* Fellows Substack Directory */}
+          <section>
+            <h2 className="text-3xl font-bold mb-4">Fellows Substack Directory</h2>
+            <p className="text-muted-foreground mb-8">
+              Each fellow project publishes openly on Substack, creating a living record of research, progress, and impact. Explore our active publications below.
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              {substacks.map((s) => (
+                <a
+                  key={s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-5 border rounded-lg hover:border-primary transition-colors group"
+                >
+                  <h3 className="text-lg font-bold mb-2 group-hover:text-primary transition-colors">
+                    {s.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{s.focus}</p>
+                </a>
+              ))}
+            </div>
+          </section>
+
           <section>
             <h2 className="text-3xl font-bold mb-6">Join Our Community</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
@@ -96,4 +193,4 @@ export default function FellowsPage() {
       </div>
     </div>
   )
-} 
+}
