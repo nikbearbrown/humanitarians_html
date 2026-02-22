@@ -56,6 +56,11 @@ const substacks = [
     focus: "Data journalism and Agentic AI dedicated to increasing transparency within the political landscape.",
   },
   {
+    name: "Popper (Computational Skepticism)",
+    url: "https://popperskepticism.substack.com/",
+    focus: "An open-source framework for systematic AI validation and computational skepticism, emphasizing the principle of falsifiability to identify biases and inconsistencies in AI systems.",
+  },
+  {
     name: "The Learning Engineer",
     url: "https://learningengineering.substack.com/",
     focus: "Engineering approaches to learning design and educational technology.",
@@ -74,6 +79,11 @@ const substacks = [
     name: "The RAMAN Effect Project",
     url: "https://ramaneffectwpe.substack.com/",
     focus: "Advancing public health surveillance through AI-driven spectroscopy and wastewater-based epidemiology.",
+  },
+  {
+    name: "Wilkes",
+    url: "https://wilkesproject.substack.com/",
+    focus: "AI storytelling for nonprofits that translates raw field material (footage, transcripts, notes) into bespoke, published narratives in the organization\u2019s own voice to increase donor engagement.",
   },
   {
     name: "Zebonastic",
