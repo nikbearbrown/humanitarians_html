@@ -51,6 +51,11 @@ const substacks = [
     focus: "Music-related content, history of record labels, and Spotify algorithm research.",
   },
   {
+    name: "Northeastern ISE",
+    url: "https://northeasternise.substack.com/",
+    focus: "A collaborative hub where current Northeastern students and recent graduates work together on shared projects and frameworks.",
+  },
+  {
     name: "Politics and AI",
     url: "https://politicalai.substack.com/",
     focus: "Data journalism and Agentic AI dedicated to increasing transparency within the political landscape.",
