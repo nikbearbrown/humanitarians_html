@@ -4,6 +4,26 @@ import { Book, Code, Music, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import Script from 'next/script'
 
+const substacks = [
+  { name: "80 Days to Stay", url: "https://80daystostay.substack.com/" },
+  { name: "Boyle Project", url: "https://boyleproject.substack.com/" },
+  { name: "Branding & AI", url: "https://brandingartificialintelligence.substack.com/" },
+  { name: "Dayhoff Project", url: "https://dayhoffproject.substack.com/" },
+  { name: "Humanitarians AI", url: "https://humanitariansai.substack.com/" },
+  { name: "Lyrical Literacy Project", url: "https://lyricalliteracyproject.substack.com/" },
+  { name: "Medhavy", url: "https://medhavy.substack.com/" },
+  { name: "Musinique", url: "https://musinique.substack.com/" },
+  { name: "Northeastern ISE", url: "https://northeasternise.substack.com/" },
+  { name: "Politics and AI", url: "https://politicalai.substack.com/" },
+  { name: "Popper", url: "https://popperskepticism.substack.com/" },
+  { name: "The Learning Engineer", url: "https://learningengineering.substack.com/" },
+  { name: "The Madison Project", url: "https://madisonproject.substack.com/" },
+  { name: "The Mycroft Project", url: "https://mycroftproject.substack.com/" },
+  { name: "The RAMAN Effect", url: "https://ramaneffectwpe.substack.com/" },
+  { name: "Wilkes", url: "https://wilkesproject.substack.com/" },
+  { name: "Zebonastic", url: "https://zebonastic.substack.com/" },
+]
+
 export default function Home() {
   return (
     <div className="flex flex-col w-full">
@@ -19,6 +39,7 @@ export default function Home() {
           __html: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HQ685S9XPH');`,
         }}
       />
+
       {/* Hero Section */}
       <section className="w-full py-8 md:py-16 lg:py-20 xl:py-24">
         <div className="container px-4 md:px-6 mx-auto">
@@ -37,12 +58,8 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <PrimaryButton href="/about">
-                  About Us
-                </PrimaryButton>
-                <SecondaryButton href="/contact">
-                  Contact Us
-                </SecondaryButton>
+                <PrimaryButton href="/about">About Us</PrimaryButton>
+                <SecondaryButton href="/contact">Contact Us</SecondaryButton>
               </div>
             </div>
             <div className="flex items-center justify-center lg:col-span-2">
@@ -60,24 +77,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Partners Section */}
-      {/* <section className="w-full py-12 md:py-24 bg-white dark:bg-gray-800">
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tighter md:text-3xl">Companies We Work With</h2>
-            </div>
-          </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6 items-center justify-center py-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full bg-gray-200"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
-
       {/* Key Programs Section */}
       <section className="w-full py-12 md:py-24 bg-gray-50 dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
@@ -90,11 +89,8 @@ export default function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-            {/* Fellows Program */}
             <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="mb-4">
-                <Book className="h-10 w-10" />
-              </div>
+              <div className="mb-4"><Book className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">FELLOWS PROGRAM</h3>
               <p className="text-muted-foreground mb-4">
                 International graduates on OPT build career-ready portfolios through hands-on projects with real organizations. 
@@ -102,57 +98,69 @@ export default function Home() {
                 YouTube courses; and support academic research. With mentorship from industry professionals, our fellows graduate 
                 with deployed products—the proof of work that launches careers.
               </p>
-              <Link href="/fellows" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
-                Learn more
-              </Link>
+              <Link href="/fellows" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-
-            {/* Lyrical Literacy */}
             <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="mb-4">
-                <Music className="h-10 w-10" />
-              </div>
+              <div className="mb-4"><Music className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">LYRICAL LITERACY</h3>
               <p className="text-muted-foreground mb-4">
                 We create AI-powered songs and videos that help children learn to read and adults learn new languages. 
                 Fellows use tools like Suno and video AI to produce content combining neuroscience, music, and technology for 
                 measurable educational impact.
               </p>
-              <Link href="/lyrical-literacy" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
-                Learn more
-              </Link>
+              <Link href="/lyrical-literacy" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-
-            {/* AI for Good */}
             <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="mb-4">
-                <Code className="h-10 w-10" />
-              </div>
+              <div className="mb-4"><Code className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">AI FOR GOOD</h3>
               <p className="text-muted-foreground mb-4">
                 Real AI solutions for real organizations. Our fellows build tools in marketing, finance, and
                 intelligent textbooks for partners like Medavy AI, ArrowDx, and Bimride. Students learn by
                 shipping. Organizations get innovation without the overhead. It&#39;s AI that actually gets deployed.
               </p>
-              <Link href="/ai-for-good" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
-                Learn more
-              </Link>
+              <Link href="/ai-for-good" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-
-            {/* Botspeak */}
             <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
-              <div className="mb-4">
-                <MessageSquare className="h-10 w-10" />
-              </div>
+              <div className="mb-4"><MessageSquare className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">BOTSPEAK</h3>
               <p className="text-muted-foreground mb-4">
                 YouTube courses and workshops that teach everyone—from complete beginners to nonprofits—how to effectively use AI tools. 
                 Our fellows create educational content that democratizes AI knowledge, making powerful technology accessible to all.
               </p>
-              <Link href="/botspeak" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
-                Learn more
-              </Link>
+              <Link href="/botspeak" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Fellows Substack Directory Section */}
+      <section className="w-full py-12 md:py-24 bg-white dark:bg-gray-800">
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-10">
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">FELLOWS SUBSTACK DIRECTORY</h2>
+              <p className="text-muted-foreground max-w-[600px]">
+                Each fellow project publishes openly on Substack — a living record of research, progress, and impact across our initiatives.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-5xl mx-auto">
+            {substacks.map((s) => (
+              <a
+                key={s.url}
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center text-center px-3 py-3 border rounded-lg text-sm font-medium hover:border-foreground hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                {s.name}
+              </a>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/fellows" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
+              View the full Fellows Program →
+            </Link>
           </div>
         </div>
       </section>
@@ -176,8 +184,8 @@ export default function Home() {
               <SecondaryButton href="/contact">
                 VOLUNTEER
               </SecondaryButton>
-              <SecondaryButton href="/contact">
-                Contact Us
+              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
+                YOUTUBE
               </SecondaryButton>
             </div>
           </div>

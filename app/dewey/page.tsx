@@ -22,7 +22,7 @@ export default function DeweyPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/videoseries?si=zLM5TzprVSw2H90T&amp;list=PLgOGgHS58rB_FwoBNQrC-4FvHb9lvN3kt&enablejsapi=1"
+              src="https://www.youtube.com/embed/egZRNybs0Yo?si=TMyT8pXbFD4iKgT4&enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"

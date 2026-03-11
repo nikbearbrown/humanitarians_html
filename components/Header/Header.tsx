@@ -91,9 +91,9 @@ export default function Header() {
                 Spotify
               </button>
             </Link>
-            <Link href="https://podcast.humanitarians.ai/">
+            <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
-                Podcast
+                Substack
               </button>
             </Link>
             <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009">
@@ -121,7 +121,7 @@ export default function Header() {
       {/* Mobile menu */}
       {isMenuOpen && (
         <div className="lg:hidden">
-          <div 
+          <div
             className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsMenuOpen(false)}
           />
@@ -147,8 +147,8 @@ export default function Header() {
                 <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
                   Spotify
                 </Link>
-                <Link href="https://podcast.humanitarians.ai/" className="text-base font-medium">
-                  Podcast
+                <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer" className="text-base font-medium">
+                  Substack
                 </Link>
                 <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-base font-medium">
                   Apple Music
