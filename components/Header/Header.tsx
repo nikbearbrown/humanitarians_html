@@ -40,10 +40,9 @@ export default function Header() {
   }, [isMenuOpen])
 
   const navigation = [
-    { name: "Fellows", href: "/fellows" },
-    { name: "Lyrical Literacy", href: "/lyrical-literacy" },
-    { name: "Botspeak", href: "/botspeak" },
     { name: "About Us", href: "/about" },
+    { name: "Projects", href: "/projects" },
+    { name: "Fellows", href: "/fellows" }
   ]
 
   return (
@@ -86,19 +85,14 @@ export default function Header() {
                 Youtube
               </button>
             </Link>
-            <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
-              <button className={cn(baseButtonStyles, headerButtonStyles)}>
-                Spotify
-              </button>
-            </Link>
             <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Substack
               </button>
             </Link>
-            <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009">
+            <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
-                Apple Music
+                Spotify
               </button>
             </Link>
             <Link href="/donate">
@@ -144,14 +138,11 @@ export default function Header() {
                 <Link href="https://www.youtube.com/@humanitariansai" className="text-base font-medium">
                   YouTube
                 </Link>
-                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
-                  Spotify
-                </Link>
                 <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer" className="text-base font-medium">
                   Substack
                 </Link>
-                <Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-base font-medium">
-                  Apple Music
+                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
+                  Spotify
                 </Link>
                 <Link href="/donate" className="mt-2">
                   <button className={cn(baseButtonStyles, headerButtonStyles, "w-full")}>

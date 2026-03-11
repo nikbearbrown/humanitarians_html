@@ -50,8 +50,8 @@ export default function Home() {
                   Where AI Education Meets Real-World Impact
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                  International graduates on OPT build career-ready portfolios through real AI projects. 
-                  <br>
+                  A 501(c)(3) nonprofit organization dedicated to developing ethical AI solutions that address real-world challenges in education, healthcare, nonprofits, and the arts.
+                  <br />
                   <strong>
                     Students get jobs. Organizations get solutions. Communities get impact.
                   </strong>
