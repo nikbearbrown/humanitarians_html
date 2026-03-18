@@ -136,7 +136,7 @@ export default function AboutPage() {
                 <div className="p-6 border rounded-lg text-center">
                   {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Robert Cole Harris</h3>
-                  <p className="text-muted-foreground">Director/Human Resources</p>
+                  <p className="text-muted-foreground">Chief People Officer</p>
                 </div>
               </div>
             </div>
