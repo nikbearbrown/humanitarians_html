@@ -57,11 +57,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-/* Apply EB Garamond to headings when the font is available via next/font/local.
-   The font is exposed as the CSS variable --font-eb-garamond from `app/layout.tsx`. */
-@layer base {
-  h1, h2, h3 {
-    font-family: var(--font-eb-garamond), Georgia, 'Times New Roman', serif;
-  }
-}
