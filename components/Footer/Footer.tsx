@@ -69,11 +69,13 @@ export default function Footer() {
                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                  </svg>
                </Link>
+               {/* Removing Twitter Logo until it's up and running
                <Link href="https://twitter.com/humanitariansai" className="text-sm hover:text-primary transition-colors">
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                  </svg>
                </Link>
+               */}
                <ThemeToggle />
              </div>
            </div>
@@ -86,8 +88,32 @@ export default function Footer() {
              <h3 className="text-lg font-semibold">Company</h3>
              <ul className="space-y-2">
                <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
+               <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors">All Projects</Link></li>
                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
+             </ul>
+           </div>
+
+           {/* Programs */}
+           <div className="space-y-4">
+             <h3 className="text-lg font-semibold">Programs</h3>
+             <ul className="space-y-2">
+               <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows Program</Link></li>
+               <li><Link href="/mentors" className="text-muted-foreground hover:text-foreground transition-colors">Mentors</Link></li>
+               <li><Link href="/ai-for-good" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good</Link></li>
+             </ul>
+           </div>
+
+           {/* Resources */}
+           <div className="space-y-4">
+             <h3 className="text-lg font-semibold">Resources</h3>
+             <ul className="space-y-2">
+               <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
+               <li><Link href="https://humanitariansai.substack.com/" className="text-muted-foreground hover:text-foreground transition-colors">Substack</Link></li>
+               <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
+               <li><Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-muted-foreground hover:text-foreground transition-colors">Apple Music</Link></li>
+               <li><Link href="https://podcast.humanitarians.ai/" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy Podcast</Link></li>
+               <li><Link href="https://www.musinique.com/" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</Link></li>
              </ul>
            </div>
 
@@ -114,40 +140,6 @@ export default function Footer() {
                <li><Link href="https://ramaneffectwpe.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">RAMAN Effect</Link></li>
                <li><Link href="https://wilkesproject.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</Link></li>
                <li><Link href="https://zebonastic.substack.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</Link></li>
-             </ul>
-           </div>
-
-           {/* Programs */}
-           <div className="space-y-4">
-             <h3 className="text-lg font-semibold">Programs</h3>
-             <ul className="space-y-2">
-               <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows Program</Link></li>
-               <li><Link href="/lyrical-literacy" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</Link></li>
-               <li><Link href="/ai-for-good" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good</Link></li>
-               <li><Link href="/botspeak" className="text-muted-foreground hover:text-foreground transition-colors">Botspeak</Link></li>
-             </ul>
-           </div>
-
-           {/* Resources */}
-           <div className="space-y-4">
-             <h3 className="text-lg font-semibold">Resources</h3>
-             <ul className="space-y-2">
-               <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
-               <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
-               <li><Link href="https://music.apple.com/us/artist/humanitarians-ai/1781414009" className="text-muted-foreground hover:text-foreground transition-colors">Apple Music</Link></li>
-               <li><Link href="https://podcast.humanitarians.ai/" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy Podcast</Link></li>
-               <li><Link href="https://www.musinique.com/" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</Link></li>
-             </ul>
-           </div>
-
-           {/* Get Involved */}
-           <div className="space-y-4">
-             <h3 className="text-lg font-semibold">Get Involved</h3>
-             <ul className="space-y-2">
-               <li><Link href="/fellows" className="text-muted-foreground hover:text-foreground transition-colors">Fellows</Link></li>
-               <li><Link href="/mentors" className="text-muted-foreground hover:text-foreground transition-colors">Mentors</Link></li>
-               <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
-               <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
              </ul>
            </div>
 

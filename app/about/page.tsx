@@ -24,10 +24,10 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
             <div className="prose prose-lg dark:prose-invert">
               <p>
-                Humanitarians AI is a 501(c)(3) nonprofit organization dedicated to harnessing the power of artificial intelligence for social good. We advance ethical AI through mentorship and community-building, promoting transparency and responsible research while educating and supporting the next generation of AI researchers and users.
+                Humanitarians AI bridges the gap between graduate school and career-ready employment through a collaborative ecosystem. We connect international students on OPT with experienced mentors, university partners like Northeastern, and organizations including Medavy AI, ArrowDx, and Bimride. Volunteers build AI tools in marketing, finance, and intelligent textbooks for real clients; create Lyrical Literacy songs and videos that teach reading and languages; produce YouTube courses democratizing AI knowledge; and advance academic research.
               </p>
               <p>
-                We believe in creating AI solutions that benefit everyone, especially underserved communities. We actively work to bridge digital divides and ensure that AI technologies are accessible, inclusive, and representative of diverse perspectives and needs.
+                Students get portfolios with real products in business tools, educational content, public courses, and research—the proof of work that lands jobs. Partner organizations get AI solutions. Kids learn to read through song. The public gets free education. Mentors shape the next generation of AI practitioners. Universities extend their impact beyond graduation. Everyone wins: communities get solutions, students get careers, organizations get innovation, and AI gets used for actual good.
               </p>
             </div>
           </section>
@@ -136,7 +136,7 @@ export default function AboutPage() {
                 <div className="p-6 border rounded-lg text-center">
                   {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Robert Cole Harris</h3>
-                  <p className="text-muted-foreground">Director/Human Resources</p>
+                  <p className="text-muted-foreground">Chief People Officer</p>
                 </div>
               </div>
             </div>
