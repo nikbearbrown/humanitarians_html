@@ -1,8 +1,11 @@
+import { join } from 'path'
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import { scanHtmlSubdirs } from '@/lib/html-meta'
+import ReportsBrowser from './ReportsBrowser'
 
 export const metadata: Metadata = {
   title: "Fellows Program - Humanitarians AI",
@@ -97,13 +100,26 @@ const substacks = [
   },
 ]
 
+export const dynamic = 'force-dynamic'
+
 export default function FellowsPage() {
+  const reportGroups = scanHtmlSubdirs(join(process.cwd(), 'public', 'reports'))
+
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
+        {/* Reports Search */}
+        <section className="mb-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Fellow Reports</h1>
+          <p className="text-muted-foreground mb-8">
+            Browse reports and documentation from our fellows.
+          </p>
+          <ReportsBrowser groups={reportGroups} />
+        </section>
+
         {/* Hero Section */}
         <div className="mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Fellows Program</h1>
+          <h2 className="text-3xl font-bold mb-6">Fellows Program</h2>
           <p className="text-xl text-muted-foreground mb-8">
             Join our global community of talented volunteers dedicated to using AI for humanitarian causes. The Fellows Program offers hands-on experience with cutting-edge AI projects, professional development, and networking opportunities with like-minded innovators committed to positive impact.
           </p>
