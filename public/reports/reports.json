@@ -1,0 +1,56 @@
+[
+  {
+    "file": "Dewey/Irreducibly-Human-AI-Sherpa.html",
+    "title": "The AI Sherpa: A Practitioner's Guide for Experiential Learning",
+    "description": "A practitioner's guide integrating AI tools into experiential learning frameworks.",
+    "project": "Dewey"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-AImagineering.html",
+    "title": "AImagineering: The Full Design Pipeline",
+    "description": "Irreducibly Human course syllabus covering the complete AI design pipeline from concept to deployment.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Botspeak.html",
+    "title": "Botspeak: The Nine Pillars of AI Fluency",
+    "description": "Course syllabus on the nine foundational pillars for achieving fluency in AI communication.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Causal-Reasoning.html",
+    "title": "Causal Reasoning",
+    "description": "Graduate course syllabus on causal reasoning methods and their application in AI systems.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Computational Skepticism-for-AI.html",
+    "title": "Computational Skepticism for AI",
+    "description": "INFO 7375 course syllabus on applying computational skepticism to validate and audit AI systems.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Conducting-AI.html",
+    "title": "Conducting AI: The Five Supervisory Capacities",
+    "description": "Course syllabus on the five supervisory capacities needed to effectively direct AI systems.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Ethical-Play.html",
+    "title": "Ethical Play",
+    "description": "Graduate course syllabus exploring ethical frameworks through play-based AI experimentation.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Irreducibly-Human/Irreducibly-Human-Project.html",
+    "title": "Irreducibly Human: What AI Can and Can't Do",
+    "description": "Project documentation defining the boundaries and capabilities of AI within human-centered contexts.",
+    "project": "Irreducibly Human"
+  },
+  {
+    "file": "Medhavy/Irreducibly-Human-Embodied-Teaching.html",
+    "title": "Embodied Teaching",
+    "description": "Graduate course syllabus on embodied approaches to teaching with AI integration.",
+    "project": "Medhavy"
+  }
+]

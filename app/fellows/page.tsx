@@ -1,10 +1,10 @@
 import { join } from 'path'
+import { readFileSync } from 'fs'
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
-import { scanHtmlSubdirs } from '@/lib/html-meta'
 import ReportsBrowser from './ReportsBrowser'
 
 export const metadata: Metadata = {
@@ -103,7 +103,8 @@ const substacks = [
 export const dynamic = 'force-dynamic'
 
 export default function FellowsPage() {
-  const reportGroups = scanHtmlSubdirs(join(process.cwd(), 'public', 'reports'))
+  const raw = readFileSync(join(process.cwd(), 'public', 'reports', 'reports.json'), 'utf-8')
+  const reports = JSON.parse(raw)
 
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
@@ -114,7 +115,7 @@ export default function FellowsPage() {
           <p className="text-muted-foreground mb-8">
             Browse reports and documentation from our fellows.
           </p>
-          <ReportsBrowser groups={reportGroups} />
+          <ReportsBrowser reports={reports} />
         </section>
 
         {/* Hero Section */}
