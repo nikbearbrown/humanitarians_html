@@ -1,64 +1,43 @@
-import BlogCard from "@/components/BlogCard/BlogCard"
-import { blogPosts } from "@/data/blogPosts"
-import Link from "next/link"
+import { sql } from '@/lib/db'
+import type { Metadata } from 'next'
+import BlogFeed from './BlogFeed'
 
-export default function BlogPage() {
+export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Blog - Humanitarians AI',
+  description: 'Insights, updates, and stories about our work and the impact of AI for social good.',
+}
+
+export default async function BlogPage() {
+  let posts: { id: string; title: string; subtitle: string | null; slug: string; excerpt: string | null; cover_image: string | null; tags: string[] | null; published_at: string | null }[] = []
+  try {
+    posts = await sql`
+      SELECT id, title, subtitle, slug, excerpt, cover_image, tags, published_at
+      FROM blog_posts WHERE published = true
+      ORDER BY published_at DESC
+    `
+  } catch (err) {
+    try {
+      const rows = await sql`
+        SELECT id, title, subtitle, slug, excerpt, published_at
+        FROM blog_posts WHERE published = true
+        ORDER BY published_at DESC
+      `
+      posts = rows.map((r: Record<string, unknown>) => ({ ...r, cover_image: null, tags: null } as typeof posts[number]))
+    } catch (err2) {
+      console.error('[blog/page] Failed to fetch posts:', err2)
+    }
+  }
+
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">Blog</h1>
-        <p className="text-lg mb-12 max-w-3xl">
+    <div className="container px-4 md:px-6 mx-auto py-12">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tighter mb-4">Blog</h1>
+        <p className="text-muted-foreground mb-10">
           Insights, updates, and stories about our work and the impact of AI for social good.
         </p>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Latest Articles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.slice(0, 3).map((post, index) => (
-              <BlogCard key={index} post={post} />
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Education</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts
-              .filter((p) => p.category === "education")
-              .map((post, index) => (
-                <BlogCard key={index} post={post} />
-              ))}
-          </div>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Healthcare</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts
-              .filter((p) => p.category === "healthcare")
-              .map((post, index) => (
-                <BlogCard key={index} post={post} />
-              ))}
-          </div>
-        </div>
-
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-8">Social Good</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts
-              .filter((p) => p.category === "social")
-              .map((post, index) => (
-                <BlogCard key={index} post={post} />
-              ))}
-          </div>
-        </div>
-
-        <div className="text-center mt-12">
-          <p className="text-lg mb-6">Subscribe to our newsletter to stay updated with our latest articles and news.</p>
-          <Link href="/contact" className="bg-black text-white px-6 py-3 rounded-md font-medium inline-block">
-            Subscribe
-          </Link>
-        </div>
+        <BlogFeed posts={posts} />
       </div>
     </div>
   )
