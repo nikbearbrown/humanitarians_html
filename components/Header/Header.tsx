@@ -47,6 +47,7 @@ export default function Header() {
     { name: "Notes", href: "/notes" },
     { name: "Projects", href: "/projects" },
     { name: "Tools", href: "/tools" },
+    { name: "Videos", href: "/videos" },
   ]
 
   return (
