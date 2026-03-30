@@ -2,26 +2,18 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ThemeToggle from "@/components/ThemeToggle"
-import { useTheme } from "next-themes"
 
 const baseButtonStyles = "inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
-  const { theme } = useTheme()
   const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -40,12 +32,9 @@ export default function Header() {
   }, [isMenuOpen])
 
   const navigation = [
-    { name: "About Us", href: "/about" },
     { name: "Blog", href: "/blog" },
     { name: "Books", href: "/books" },
-{ name: "Fellows", href: "/fellows" },
-    { name: "Notes", href: "/notes" },
-    { name: "Projects", href: "/projects" },
+    { name: "Fellows", href: "/fellows" },
     { name: "Tools", href: "/tools" },
     { name: "Videos", href: "/videos" },
   ]
@@ -55,17 +44,7 @@ export default function Header() {
       <div className="container px-4 md:px-6 mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6 md:gap-10">
           <Link href="/" className="flex items-center space-x-2">
-            {mounted ? (
-              <Image
-                src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
-                alt="HUMANITARIANS AI"
-                width={240}
-                height={53}
-                className="h-12 w-auto"
-              />
-            ) : (
-              <div className="h-12 w-60 bg-muted animate-pulse rounded" />
-            )}
+            <span className="text-xl font-bold tracking-tighter">Humanitarians AI</span>
           </Link>
           <nav className="hidden lg:flex gap-6">
             {navigation.map((item) => (
