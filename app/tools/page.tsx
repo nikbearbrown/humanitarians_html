@@ -74,6 +74,12 @@ export default async function ToolsPage() {
           <p className="mt-4 text-sm text-muted-foreground">
             <a href="https://youtu.be/ay1TaY1Cdew?si=dVTZTDKZ1CEhO8pR" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">My Email Policy (Professor Bear)</a>
           </p>
+          <p className="mt-2 text-sm font-bold">
+            Reach out to HR <a href="mailto:hr@humanitarians.ai" className="underline hover:text-foreground">hr@humanitarians.ai</a> for OPT (Not Professor Bear)
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            <a href="https://www.humanitarians.ai/tools/Addams" className="underline hover:text-foreground">Addams — OPT Volunteer Documentation System</a> is <span className="font-bold">MANDATORY</span> weekly for current volunteers
+          </p>
         </div>
 
         <ToolsBrowser tools={allTools} filterTags={filterTags} />
