@@ -19,20 +19,32 @@ interface Tool {
 
 export default async function ToolsPage() {
   const artifactDocs = scanHtmlDir(join(process.cwd(), 'public', 'artifacts'))
-  const artifactTools: Tool[] = artifactDocs.map(doc => ({
-    id: `fs-${doc.slug}`, name: doc.title, slug: doc.slug, description: doc.description,
-    tool_type: 'artifact', claude_url: `/artifacts/${doc.filename}`, tags: doc.tags,
-  }))
 
   let dbTools: Tool[] = []
   try {
-    dbTools = await sql`SELECT * FROM tools WHERE tool_type = 'link' ORDER BY created_at DESC`
+    dbTools = await sql`SELECT * FROM tools ORDER BY created_at DESC`
   } catch (err) {
     console.error('[tools/page] Failed to fetch DB tools:', err)
   }
 
-  const slugSet = new Set(artifactTools.map(t => t.slug))
-  const linkTools = dbTools.filter(t => !slugSet.has(t.slug))
+  // Build a map of DB tools by slug for merging tags
+  const dbBySlug = new Map(dbTools.map(t => [t.slug, t]))
+
+  // Merge filesystem tags with DB tags for artifact tools
+  const artifactTools: Tool[] = artifactDocs.map(doc => {
+    const dbRecord = dbBySlug.get(doc.slug)
+    const fsTags = doc.tags || []
+    const dbTags = dbRecord?.tags || []
+    const mergedTags = Array.from(new Set([...fsTags, ...dbTags]))
+    return {
+      id: dbRecord ? dbRecord.id : `fs-${doc.slug}`,
+      name: doc.title, slug: doc.slug, description: doc.description,
+      tool_type: 'artifact' as const, claude_url: `/artifacts/${doc.filename}`, tags: mergedTags,
+    }
+  })
+
+  const usedSlugs = new Set(artifactDocs.map(d => d.slug))
+  const linkTools = dbTools.filter(t => !usedSlugs.has(t.slug))
   const allTools = [...artifactTools, ...linkTools]
 
   // Read curated filter tags from filters.json
