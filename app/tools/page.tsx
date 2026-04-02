@@ -71,6 +71,9 @@ export default async function ToolsPage() {
               <p className="text-sm font-medium">1:00 PM – 2:00 PM EST</p>
             </div>
           </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            <a href="https://youtu.be/ay1TaY1Cdew?si=dVTZTDKZ1CEhO8pR" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">My Email Policy (Professor Bear)</a>
+          </p>
         </div>
 
         <ToolsBrowser tools={allTools} filterTags={filterTags} />
