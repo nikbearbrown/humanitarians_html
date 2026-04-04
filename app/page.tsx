@@ -193,7 +193,7 @@ export default function Home() {
               <p className="text-sm italic text-muted-foreground">
                 Botspeak is the entry point. Addams documents everything above it.
               </p>
-              <Link href="/tools" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
+              <Link href="/tools/Addams" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">
                 Learn more about Addams →
               </Link>
             </div>
