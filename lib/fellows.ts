@@ -35,6 +35,45 @@ export async function getAllProjects(): Promise<Project[]> {
   return rows as unknown as Project[]
 }
 
+export async function getAllProjectsWithFellows(): Promise<ProjectWithFellows[]> {
+  const projects = await getAllProjects()
+  const result: ProjectWithFellows[] = []
+
+  for (const project of projects) {
+    const fellowRows = await sql`
+      SELECT f.id, f.name, f.slug, f.bio, f.photo_url, f.status,
+             f.joined_date, f.linkedin_url, f.employer, f.employer_role,
+             f.willing_to_be_contacted, f.created_at,
+             fp.id AS fp_id, fp.fellow_id, fp.project_id, fp.role, fp.created_at AS fp_created_at
+      FROM fellows f
+      JOIN fellow_projects fp ON fp.fellow_id = f.id
+      WHERE fp.project_id = ${project.id}
+      ORDER BY f.name ASC
+    `
+
+    const fellows: FellowWithProjects[] = fellowRows.map((row) => {
+      const r = row as Record<string, unknown>
+      const fellowProject: FellowProject = {
+        id: r.fp_id as string,
+        fellow_id: r.fellow_id as string,
+        project_id: r.project_id as string,
+        role: r.role as 'fellow' | 'pm',
+        created_at: r.fp_created_at as string,
+      }
+      return {
+        ...toPublicFellow(r),
+        email: '',
+        password_hash: '',
+        projects: [fellowProject],
+      } as FellowWithProjects
+    })
+
+    result.push({ ...project, fellows })
+  }
+
+  return result
+}
+
 export async function getProjectBySlug(slug: string): Promise<ProjectWithFellows | null> {
   const projects = await sql`
     SELECT id, name, slug, elevator_pitch, url, substack_url, active, open, created_at
