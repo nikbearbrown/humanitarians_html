@@ -199,10 +199,9 @@ export default function Home() {
             </div>
             <div className="flex flex-col items-center justify-center lg:col-span-2">
               <div className="relative w-full aspect-video">
-                {/* TODO: Replace embed URL with Addams demo video when available */}
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-md"
-                  src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV"
+                  src="https://www.youtube.com/embed/dDoXAkTZLFI?si=Jvy7xBVEIhIpZqjp"
                   title="Addams Documentation System"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
