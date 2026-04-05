@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { name: 'Substack', href: '/admin/dashboard/substack' },
   { name: 'Videos', href: '/admin/dashboard/videos' },
   { name: 'Fellows', href: '/admin/dashboard/fellows' },
+  { name: 'Projects', href: '/admin/dashboard/projects' },
 ]
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
