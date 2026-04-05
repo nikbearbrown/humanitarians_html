@@ -83,11 +83,7 @@ export default function FellowsFilter({
 
               {/* PM callout */}
               {filtered
-                .filter((f) =>
-                  f.projects.some(
-                    (fp) => fp.project_id === project.id && fp.role === "pm"
-                  )
-                )
+                .filter((f) => f.role === "pm")
                 .map((pm) => (
                   <p
                     key={pm.id}
@@ -120,9 +116,7 @@ export default function FellowsFilter({
               ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {filtered.map((fellow) => {
-                    const role = fellow.projects.find(
-                      (fp) => fp.project_id === project.id
-                    )?.role
+                    const role = fellow.role
 
                     return (
                       <div
