@@ -1,102 +1,132 @@
-import { hash, compare } from 'bcryptjs'
-import crypto from 'crypto'
+// lib/fellow-auth.ts
+// Fellow session auth — separate from admin-auth.ts.
+// Uses bcryptjs (edge-compatible) + signed HttpOnly cookie.
+// Required env variable: FELLOW_SESSION_SECRET
+// Generate with: openssl rand -base64 32
+
 import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { sql } from '@/lib/db'
 import type { Fellow } from '@/types/fellows'
 
 const COOKIE_NAME = 'fellow_session'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
+const BCRYPT_ROUNDS = 12
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS)
+}
+
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
+  return bcrypt.compare(password, hash)
+}
+
+export function generateTempPassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+  let result = ''
+  const array = new Uint8Array(16)
+  crypto.getRandomValues(array)
+  for (const byte of array) {
+    result += chars[byte % chars.length]
+  }
+  return result
+}
 
 function getSecret(): string {
-  const secret = process.env.FELLOW_SESSION_SECRET ?? process.env.ADMIN_PASSWORD
-  if (!secret) throw new Error('FELLOW_SESSION_SECRET or ADMIN_PASSWORD must be set')
+  const secret = process.env.FELLOW_SESSION_SECRET
+  if (!secret) throw new Error('FELLOW_SESSION_SECRET env variable is not set')
   return secret
 }
 
-function sign(payload: string): string {
-  return crypto
-    .createHmac('sha256', getSecret())
-    .update(payload)
-    .digest('hex')
+async function signValue(value: string): Promise<string> {
+  const secret = getSecret()
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(value)
+  )
+  return Buffer.from(signature).toString('base64')
 }
 
-function verify(payload: string, signature: string): boolean {
-  const expected = sign(payload)
+async function verifyValue(value: string, signature: string): Promise<boolean> {
+  const expected = await signValue(value)
   if (expected.length !== signature.length) return false
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
+  let result = 0
+  for (let i = 0; i < expected.length; i++) {
+    result |= expected.charCodeAt(i) ^ signature.charCodeAt(i)
+  }
+  return result === 0
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  return hash(password, 12)
-}
-
-export async function verifyPassword(password: string, passwordHash: string): Promise<boolean> {
-  return compare(password, passwordHash)
-}
-
-export async function createFellowSession(fellowId: string, res: NextResponse): Promise<void> {
-  const signature = sign(fellowId)
-  const value = `${fellowId}.${signature}`
-
-  res.cookies.set(COOKIE_NAME, value, {
+export async function createFellowSession(
+  fellowId: string,
+  res: NextResponse
+): Promise<void> {
+  const signature = await signValue(fellowId)
+  const cookieValue = `${Buffer.from(fellowId).toString('base64')}:${signature}`
+  res.cookies.set(COOKIE_NAME, cookieValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: '/',
     maxAge: COOKIE_MAX_AGE,
+    path: '/',
   })
 }
 
-export async function getFellowFromSession(req: NextRequest): Promise<Fellow | null> {
-  const cookie = req.cookies.get(COOKIE_NAME)
-  if (!cookie?.value) return null
-
-  const dotIndex = cookie.value.indexOf('.')
-  if (dotIndex === -1) return null
-
-  const fellowId = cookie.value.slice(0, dotIndex)
-  const signature = cookie.value.slice(dotIndex + 1)
-
-  if (!verify(fellowId, signature)) return null
+async function resolveFellowFromCookieValue(
+  cookieValue: string
+): Promise<Omit<Fellow, 'password_hash'> | null> {
+  const [encodedId, signature] = cookieValue.split(':')
+  if (!encodedId || !signature) return null
+  const fellowId = Buffer.from(encodedId, 'base64').toString('utf-8')
+  const valid = await verifyValue(fellowId, signature)
+  if (!valid) return null
 
   const rows = await sql`
-    SELECT id, name, slug, email, password_hash, bio, photo_url, status,
-           joined_date, linkedin_url, employer, employer_role,
-           willing_to_be_contacted, created_at
-    FROM fellows
-    WHERE id = ${fellowId}
+    SELECT id, name, slug, email, bio, photo_url, status, joined_date,
+           linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+    FROM fellows WHERE id = ${fellowId}
     LIMIT 1
   `
-
   if (rows.length === 0) return null
-  return rows[0] as unknown as Fellow
+  return rows[0] as unknown as Omit<Fellow, 'password_hash'>
 }
 
-export async function getFellowFromCookies(): Promise<Fellow | null> {
-  const { cookies: getCookies } = await import('next/headers')
-  const cookieStore = await getCookies()
-  const cookie = cookieStore.get(COOKIE_NAME)
-  if (!cookie?.value) return null
+export async function getFellowFromCookies(): Promise<
+  Omit<Fellow, 'password_hash'> | null
+> {
+  try {
+    const { cookies: getCookies } = await import('next/headers')
+    const cookieStore = await getCookies()
+    const cookie = cookieStore.get(COOKIE_NAME)
+    if (!cookie) return null
+    return resolveFellowFromCookieValue(cookie.value)
+  } catch {
+    return null
+  }
+}
 
-  const dotIndex = cookie.value.indexOf('.')
-  if (dotIndex === -1) return null
-
-  const fellowId = cookie.value.slice(0, dotIndex)
-  const signature = cookie.value.slice(dotIndex + 1)
-
-  if (!verify(fellowId, signature)) return null
-
-  const rows = await sql`
-    SELECT id, name, slug, email, password_hash, bio, photo_url, status,
-           joined_date, linkedin_url, employer, employer_role,
-           willing_to_be_contacted, created_at
-    FROM fellows
-    WHERE id = ${fellowId}
-    LIMIT 1
-  `
-
-  if (rows.length === 0) return null
-  return rows[0] as unknown as Fellow
+export async function getFellowFromSession(
+  req: NextRequest
+): Promise<Omit<Fellow, 'password_hash'> | null> {
+  try {
+    const cookie = req.cookies.get(COOKIE_NAME)
+    if (!cookie) return null
+    return resolveFellowFromCookieValue(cookie.value)
+  } catch {
+    return null
+  }
 }
 
 export function clearFellowSession(res: NextResponse): void {
@@ -104,7 +134,7 @@ export function clearFellowSession(res: NextResponse): void {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: '/',
     maxAge: 0,
+    path: '/',
   })
 }
