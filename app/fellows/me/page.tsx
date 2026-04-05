@@ -9,6 +9,18 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Linkedin } from 'lucide-react'
 
+interface ProjectOption {
+  id: string
+  name: string
+}
+
+interface ReportEntry {
+  id: string
+  project_id: string | null
+  content: string
+  created_at: string
+}
+
 interface FellowProfile {
   id: string
   name: string
@@ -55,6 +67,15 @@ export default function FellowDashboard() {
   const [pwMsg, setPwMsg] = useState('')
   const [pwError, setPwError] = useState('')
 
+  // Reports
+  const [myProjects, setMyProjects] = useState<ProjectOption[]>([])
+  const [reports, setReports] = useState<ReportEntry[]>([])
+  const [reportProjectId, setReportProjectId] = useState('')
+  const [reportContent, setReportContent] = useState('')
+  const [reportSubmitting, setReportSubmitting] = useState(false)
+  const [reportMsg, setReportMsg] = useState('')
+  const [reportError, setReportError] = useState('')
+
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -71,6 +92,10 @@ export default function FellowDashboard() {
         setEmployer(data.employer || '')
         setEmployerRole(data.employer_role || '')
         setWillingToBeContacted(data.willing_to_be_contacted)
+
+        // Load fellow's projects and reports
+        fetch('/api/fellows/me/projects').then((r) => r.json()).then(setMyProjects).catch(() => {})
+        fetch('/api/fellows/reports').then((r) => r.json()).then(setReports).catch(() => {})
       })
       .catch(() => setError('Failed to load profile'))
       .finally(() => setLoading(false))
@@ -133,6 +158,40 @@ export default function FellowDashboard() {
       setPwError(err instanceof Error ? err.message : 'Error changing password')
     } finally {
       setPwSaving(false)
+    }
+  }
+
+  async function handleSubmitReport(e: React.FormEvent) {
+    e.preventDefault()
+    setReportError('')
+    setReportMsg('')
+
+    if (reportContent.length < 100) {
+      setReportError('Report must be at least 100 characters.')
+      return
+    }
+
+    setReportSubmitting(true)
+    try {
+      const res = await fetch('/api/fellows/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: reportProjectId || null,
+          content: reportContent,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to submit report')
+      setReportMsg('Report submitted.')
+      setReportContent('')
+      setReportProjectId('')
+      // Refresh reports list
+      fetch('/api/fellows/reports').then((r) => r.json()).then(setReports).catch(() => {})
+    } catch (err) {
+      setReportError(err instanceof Error ? err.message : 'Error submitting report')
+    } finally {
+      setReportSubmitting(false)
     }
   }
 
@@ -298,6 +357,89 @@ export default function FellowDashboard() {
               </form>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Submit Report */}
+      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+        <div className="container px-4 md:px-6 mx-auto max-w-2xl">
+          <Card>
+            <CardHeader>
+              <CardTitle>Submit Report</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {reportMsg && <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-300 mb-4">{reportMsg}</div>}
+              {reportError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">{reportError}</div>}
+
+              <form onSubmit={handleSubmitReport} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="report-project">Project</Label>
+                  <select
+                    id="report-project"
+                    value={reportProjectId}
+                    onChange={(e) => setReportProjectId(e.target.value)}
+                    className="w-full rounded-md border px-3 py-2 text-sm bg-background"
+                  >
+                    <option value="">No specific project</option>
+                    {myProjects.map((p) => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="report-content">Content</Label>
+                  <textarea
+                    id="report-content"
+                    value={reportContent}
+                    onChange={(e) => setReportContent(e.target.value)}
+                    rows={10}
+                    placeholder="Paste your Addams report here. Markdown is supported."
+                    className="w-full rounded-md border px-3 py-2 text-sm bg-background resize-y font-mono"
+                  />
+                  <p className={`text-xs ${reportContent.length < 100 ? 'text-muted-foreground' : 'text-green-600 dark:text-green-400'}`}>
+                    {reportContent.length}/100 minimum characters
+                  </p>
+                </div>
+
+                <Button type="submit" disabled={reportSubmitting || reportContent.length < 100}>
+                  {reportSubmitting ? 'Submitting...' : 'Submit Report'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Past Reports */}
+          {reports.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-lg font-bold mb-4">Your Reports</h3>
+              <div className="space-y-3">
+                {reports.map((report) => {
+                  const preview = report.content.length > 60
+                    ? report.content.slice(0, 60) + '\u2026'
+                    : report.content
+                  const project = myProjects.find((p) => p.id === report.project_id)
+                  return (
+                    <div key={report.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                      <div className="flex items-center gap-2 mb-1">
+                        <time className="text-xs font-medium text-muted-foreground">
+                          {new Date(report.created_at).toLocaleDateString('en-US', {
+                            month: 'long', day: 'numeric', year: 'numeric',
+                          })}
+                        </time>
+                        {project && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                            {project.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{preview}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </div>
