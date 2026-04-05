@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import Script from "next/script"
 
 export const metadata: Metadata = {
   title: "Privacy Policy - Humanitarians AI",
@@ -10,16 +9,6 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <>
-      {/* Google tag (gtag.js) */}
-      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-16992035158" strategy="afterInteractive" />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'AW-16992035158');
-        `}
-      </Script>
       <div className="container px-4 md:px-6 mx-auto py-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>

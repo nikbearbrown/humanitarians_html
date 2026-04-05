@@ -2,7 +2,6 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 import { Book, Code, Music, MessageSquare } from "lucide-react"
 import Link from "next/link"
-import Script from 'next/script'
 
 const substacks = [
   { name: "80 Days to Stay", url: "https://80daystostay.substack.com/" },
@@ -27,19 +26,6 @@ const substacks = [
 export default function Home() {
   return (
     <div className="flex flex-col w-full">
-      {/* Google Analytics - only on home page */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-HQ685S9XPH"
-        strategy="afterInteractive"
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HQ685S9XPH');`,
-        }}
-      />
-
       {/* Hero Section */}
       <section className="w-full py-8 md:py-16 lg:py-20 xl:py-24">
         <div className="container px-4 md:px-6 mx-auto">

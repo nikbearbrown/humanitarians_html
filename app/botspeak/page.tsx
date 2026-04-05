@@ -3,7 +3,6 @@ import Image from "next/image"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
-import Script from "next/script"
 
 export const metadata: Metadata = {
   title: "Botspeak - Humanitarians AI",
@@ -13,18 +12,6 @@ export const metadata: Metadata = {
 export default function BotspeakPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
-      {/* Google Analytics - only on home page */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-HQ685S9XPH&enablejsapi=1"
-        strategy="afterInteractive"
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-HQ685S9XPH');`,
-        }}
-      />
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="mb-16">
