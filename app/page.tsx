@@ -251,6 +251,14 @@ export default function Home() {
               the design is debated. What you&apos;re looking at is the working document,
               not the finished product. That&apos;s the point.
             </p>
+            <a
+              href="https://www.irreducibly.xyz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-4 text-sm font-medium underline underline-offset-4 hover:text-foreground"
+            >
+              More on Irreducibly Human →
+            </a>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
             {COURSES.map((course) => (
