@@ -72,6 +72,33 @@ export async function getFellowFromSession(req: NextRequest): Promise<Fellow | n
   return rows[0] as unknown as Fellow
 }
 
+export async function getFellowFromCookies(): Promise<Fellow | null> {
+  const { cookies: getCookies } = await import('next/headers')
+  const cookieStore = await getCookies()
+  const cookie = cookieStore.get(COOKIE_NAME)
+  if (!cookie?.value) return null
+
+  const dotIndex = cookie.value.indexOf('.')
+  if (dotIndex === -1) return null
+
+  const fellowId = cookie.value.slice(0, dotIndex)
+  const signature = cookie.value.slice(dotIndex + 1)
+
+  if (!verify(fellowId, signature)) return null
+
+  const rows = await sql`
+    SELECT id, name, slug, email, password_hash, bio, photo_url, status,
+           joined_date, linkedin_url, employer, employer_role,
+           willing_to_be_contacted, created_at
+    FROM fellows
+    WHERE id = ${fellowId}
+    LIMIT 1
+  `
+
+  if (rows.length === 0) return null
+  return rows[0] as unknown as Fellow
+}
+
 export function clearFellowSession(res: NextResponse): void {
   res.cookies.set(COOKIE_NAME, '', {
     httpOnly: true,
