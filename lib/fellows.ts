@@ -39,7 +39,7 @@ function toPublicFellow(row: Record<string, unknown>): PublicFellow {
 
 export async function getAllProjects(): Promise<Project[]> {
   const rows = await sql`
-    SELECT id, name, slug, elevator_pitch, url, substack_url, tiers, active, open, created_at
+    SELECT id, name, slug, elevator_pitch, url, substack_url, active, open, created_at
     FROM projects
     WHERE active = true
     ORDER BY name ASC
@@ -51,7 +51,7 @@ export async function getProjectBySlug(
   slug: string
 ): Promise<ProjectWithFellows | null> {
   const projects = await sql`
-    SELECT id, name, slug, elevator_pitch, url, substack_url, tiers, active, open, created_at
+    SELECT id, name, slug, elevator_pitch, url, substack_url, active, open, created_at
     FROM projects
     WHERE slug = ${slug}
     LIMIT 1
@@ -150,7 +150,7 @@ export async function getFellowBySlug(
 
   const projectRows = await sql`
     SELECT p.id, p.name, p.slug, p.elevator_pitch, p.url, p.substack_url,
-           p.tiers, p.active, p.open, p.created_at,
+           p.active, p.open, p.created_at,
            fp.id AS fp_id, fp.role, fp.created_at AS fp_created_at
     FROM projects p
     JOIN fellow_projects fp ON fp.project_id = p.id
@@ -173,7 +173,7 @@ export async function getFellowBySlug(
         elevator_pitch: r.elevator_pitch as string,
         url: r.url as string,
         substack_url: r.substack_url as string | null,
-        tiers: r.tiers as number[],
+        tiers: (r.tiers as number[]) ?? [],
         active: r.active as boolean,
         open: r.open as boolean,
         created_at: r.created_at as string,
@@ -282,7 +282,7 @@ export async function getProjectFellowCounts(): Promise<
 
 export async function getAllProjectsAdmin(): Promise<Project[]> {
   const rows = await sql`
-    SELECT id, name, slug, elevator_pitch, url, substack_url, tiers, active, open, created_at
+    SELECT id, name, slug, elevator_pitch, url, substack_url, active, open, created_at
     FROM projects
     ORDER BY name ASC
   `
