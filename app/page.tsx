@@ -237,13 +237,19 @@ export default function Home() {
       <section className="w-full py-12 md:py-24 bg-gray-50 dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="text-center mb-12 max-w-3xl mx-auto">
-            <h2 className="text-sm font-semibold tracking-widest uppercase text-muted-foreground mb-3">
-              The Series
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-3">
+              Irreducibly Human
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Five courses, each targeting a distinct human capacity that remains
-              beyond the reach of current AI. Taken together, they form a map of
-              what makes human intelligence irreducible.
+            <p className="text-lg text-muted-foreground mb-4">
+              What AI Can and Can&apos;t Do
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              A curriculum series, production pipeline, and measurement infrastructure
+              for the cognitive capacities the AI era most urgently requires humans to
+              develop — demonstrated by the method used to build it. The argument evolves
+              through conversation with conversational AI. The curriculum takes shape as
+              the design is debated. What you&apos;re looking at is the working document,
+              not the finished product. That&apos;s the point.
             </p>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
