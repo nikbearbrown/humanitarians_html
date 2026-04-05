@@ -1,11 +1,7 @@
-import { join } from 'path'
-import { readFileSync } from 'fs'
 import type { Metadata } from "next"
-import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 import { Users, FolderOpen, DoorOpen, GraduationCap } from "lucide-react"
-import ReportsBrowser from './ReportsBrowser'
 import FellowsFilter from './FellowsFilter'
 import { getAllProjectsWithFellows } from '@/lib/fellows'
 
@@ -17,9 +13,6 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function FellowsPage() {
-  const raw = readFileSync(join(process.cwd(), 'public', 'reports', 'reports.json'), 'utf-8')
-  const reports = JSON.parse(raw)
-
   const projects = await getAllProjectsWithFellows()
 
   // Calculate stats from live data
@@ -47,14 +40,23 @@ export default async function FellowsPage() {
 
   return (
     <div className="flex flex-col w-full">
-      {/* Reports Search */}
+      {/* Hero Section */}
       <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-4xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Fellow Reports</h1>
-          <p className="text-muted-foreground mb-8">
-            Browse reports and documentation from our fellows.
+          <h1 className="text-3xl font-bold mb-6">Fellows Program</h1>
+          <p className="text-xl text-muted-foreground mb-8">
+            Join our global community of talented volunteers dedicated to using AI for humanitarian causes. The Fellows Program offers hands-on experience with cutting-edge AI projects, professional development, and networking opportunities with like-minded innovators committed to positive impact.
           </p>
-          <ReportsBrowser reports={reports} />
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/GN7yQntWJHU?si=8AjS_CU4w3MoSPJT"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
         </div>
       </section>
 
