@@ -11,84 +11,84 @@ export const metadata: Metadata = {
 const projects = [
   {
     name: "Madison",
-    url: "https://madison.humanitarians.ai",
+    slug: "madison",
     description: "Open-source agentic marketing and branding framework for data-driven advertising intelligence.",
     tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
     substackUrl: "https://madisonproject.substack.com/",
   },
   {
     name: "Mycroft",
-    url: "https://www.mycroft.biz",
+    slug: "mycroft",
     description: "Educational experiment using specialized AI agents to analyze the investment landscape.",
     tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
     substackUrl: "https://mycroftproject.substack.com/",
   },
   {
     name: "Medhavy",
-    url: "https://www.medhavy.com",
+    slug: "medhavy",
     description: "Adaptive AI-powered learning platform with multi-armed bandit pedagogy engine.",
     tiers: ["Tier 4 — Judgment", "Tier 6 — Collaborative Synthesis"],
     substackUrl: "https://medhavy.substack.com/",
   },
   {
     name: "Lyrical Literacy",
-    url: "https://www.lyricalliteracy.xyz",
+    slug: "lyrical-literacy",
     description: "AI-generated songs and videos that activate the embodied and social mechanisms of language acquisition.",
     tiers: ["Tier 2 — Embodied", "Tier 3 — Social & Ethical"],
     substackUrl: "https://lyricalliteracyproject.substack.com/",
   },
   {
     name: "Dayhoff",
-    url: "https://www.mutant.org",
+    slug: "dayhoff",
     description: "Open-source agent-based AI bioinformatics framework for computational biology and public health.",
     tiers: ["Tier 5 — Causal Reasoning", "Tier 6 — Collaborative Synthesis"],
     substackUrl: "https://dayhoffproject.substack.com/",
   },
   {
     name: "RAMAN Effect",
-    url: "https://popper.humanitarians.ai",
+    slug: "raman-effect",
     description: "AI-driven spectroscopy and wastewater-based epidemiology for public health surveillance.",
     tiers: ["Tier 5 — Causal Reasoning"],
     substackUrl: "https://ramaneffectwpe.substack.com/",
   },
   {
     name: "Popper",
-    url: "https://popper.humanitarians.ai",
+    slug: "popper",
     description: "Assertion verification system that scans claims and flags suspect ones for expert review.",
     tiers: ["Tier 4 — Judgment"],
     substackUrl: "https://popperskepticism.substack.com/",
   },
   {
     name: "Boyle",
-    url: "https://boyle.humanitarians.ai",
+    slug: "boyle",
     description: "AI-assisted documentary infrastructure for scientific reproducibility using the MVAL protocol.",
     tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
     substackUrl: "https://boyleproject.substack.com/",
   },
   {
     name: "80 Days to Stay",
-    url: "https://80days.humanitarians.ai",
+    slug: "80-days-to-stay",
     description: "Job tools and agentic AI for OPT job search transparency and efficiency.",
     tiers: ["Tier 4 — Judgment"],
     substackUrl: "https://80daystostay.substack.com/",
   },
   {
     name: "Musinique",
-    url: "https://www.musinique.com",
+    slug: "musinique",
     description: "Music research platform exploring Spotify algorithm dynamics and record label history.",
     tiers: ["Tier 5 — Causal Reasoning"],
     substackUrl: "https://musinique.substack.com/",
   },
   {
     name: "Zebonastic",
-    url: "https://www.zebonastic.com",
+    slug: "zebonastic",
     description: "AI-generated creative work and digital prompts exploring generative aesthetics.",
     tiers: ["Tier 3 — Social & Ethical"],
     substackUrl: "https://zebonastic.substack.com/",
   },
   {
     name: "Wilkes",
-    url: "https://www.wilkes.dev",
+    slug: "wilkes",
     description: "Developer portfolio verification measuring intent and decision patterns, not just syntax.",
     tiers: ["Tier 4 — Judgment"],
     substackUrl: "https://wilkesproject.substack.com/",
@@ -129,14 +129,12 @@ export default function ProjectsPage() {
                 className="border rounded-lg p-6 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow flex flex-col"
               >
                 <h3 className="text-xl font-bold mb-1">
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={`/${project.slug}`}
                     className="hover:underline"
                   >
                     {project.name}
-                  </a>
+                  </Link>
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
                   {project.description}
@@ -157,14 +155,12 @@ export default function ProjectsPage() {
                   </div>
                 </div>
                 <div className="mt-auto pt-4 flex gap-4 text-sm">
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={`/${project.slug}`}
                     className="underline underline-offset-4 hover:text-foreground"
                   >
                     Project site →
-                  </a>
+                  </Link>
                   {project.substackUrl && (
                     <a
                       href={project.substackUrl}
