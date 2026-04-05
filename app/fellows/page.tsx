@@ -93,8 +93,57 @@ export default async function FellowsPage() {
         </div>
       </section>
 
-      {/* Fellows Directory */}
+      {/* About the Program */}
       <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+        <div className="container px-4 md:px-6 mx-auto max-w-4xl">
+          <div className="grid gap-12">
+            <section>
+              <h2 className="text-3xl font-bold mb-6">About the Project</h2>
+              <div className="prose prose-lg dark:prose-invert">
+                <p>
+                  The Humanitarians AI Fellows Program connects skilled volunteers with meaningful AI projects addressing real-world challenges. Fellows contribute their expertise while gaining valuable experience, mentorship, and professional recognition.
+                </p>
+                <p>
+                  Our structured program ensures accountability through regular documentation, providing verifiable evidence of your contributions for recommendation letters and professional verification. Join our community of innovators using technology to create positive social impact through collaborative, open-source development.
+                </p>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-3xl font-bold mb-6">Key Features</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">Real-World Impact</h3>
+                  <p className="text-muted-foreground">
+                    Work on cutting-edge AI projects with direct humanitarian applications, from enhancing literacy through music to developing accessible AI interfaces for underserved communities.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">Professional Development</h3>
+                  <p className="text-muted-foreground">
+                    Build your portfolio with documented contributions, receive mentorship from industry experts, and gain valuable skills in project management, documentation, and collaborative development.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">Entrepreneurship Pathway</h3>
+                  <p className="text-muted-foreground">
+                    Explore opportunities to transform volunteer projects into commercial ventures through our dedicated Entrepreneurship Program, with support for business model development and access to potential investors.
+                  </p>
+                </div>
+                <div className="p-6 border rounded-lg">
+                  <h3 className="text-xl font-bold mb-3">Global Community</h3>
+                  <p className="text-muted-foreground">
+                    Connect with a diverse network of talented professionals committed to using AI for good, participating in team collaborations and community events that expand your professional horizons.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      {/* Fellows Directory */}
+      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <FellowsFilter projects={projects} />
         </div>
