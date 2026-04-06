@@ -75,6 +75,7 @@ middleware.ts         # Admin route protection
 - **Projects** (`app/projects/page.tsx`): Grid of fellow projects with Irreducibly Human tier badges
 - **Blog**: Dynamic routes at `/blog/[slug]`, editor at `/admin/dashboard`
 - **Tools**: Dynamic at `/tools/[slug]`, browsable at `/tools`
+- **Talks**: Static HTML presentations served from `public/talks/`; browsable at `/talks` via `TalksBrowser`; deep-links via `/talks/[...slug]`; filter tags from `public/talks/filters.json`
 - **Footer** (`components/Footer/Footer.tsx`): 6-column link grid + legal + copyright
 
 ## Irreducibly Human framework context

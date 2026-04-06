@@ -159,7 +159,7 @@ export default function BlogEditor({ post }: { post?: BlogPost }) {
           </div>
         )}
       </div>
-      <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Title" className="w-full text-4xl font-bold tracking-tighter bg-transparent border-none outline-none placeholder:text-muted-foreground/40" />
+      <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Title" className="w-full text-2xl sm:text-4xl font-bold tracking-tighter bg-transparent border-none outline-none placeholder:text-muted-foreground/40" />
       <input type="text" value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Add a subtitle..." className="w-full text-xl bg-transparent border-none outline-none placeholder:text-muted-foreground/40 italic" />
       <div>
         <Label className="text-xs text-muted-foreground mb-1 block">Byline</Label>
@@ -169,7 +169,7 @@ export default function BlogEditor({ post }: { post?: BlogPost }) {
         <Label className="text-xs text-muted-foreground">Tags (comma-separated)</Label>
         <Input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="ai, education" className="text-sm h-8" />
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <Label className="text-xs text-muted-foreground whitespace-nowrap">/blog/</Label>
         <Input value={slug} onChange={(e) => { setSlug(e.target.value); setSlugEdited(true) }} className="text-sm h-8 font-mono" placeholder="post-slug" />
       </div>
@@ -199,10 +199,10 @@ export default function BlogEditor({ post }: { post?: BlogPost }) {
       ) : (
         <div className="border rounded-md bg-background"><EditorContent editor={editor} /></div>
       )}
-      <div className="flex items-center gap-3 border-t pt-6">
-        <Button variant="outline" onClick={() => save(false)} disabled={saving}>{saving ? 'Saving\u2026' : 'Save Draft'}</Button>
-        <Button onClick={() => save(true)} disabled={saving}>{saving ? 'Publishing\u2026' : post?.published ? 'Update' : 'Publish'}</Button>
-        {post?.published && <Button variant="outline" onClick={() => save(false)} disabled={saving} className="text-destructive hover:text-destructive">Unpublish</Button>}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 border-t pt-6">
+        <Button variant="outline" onClick={() => save(false)} disabled={saving} className="w-full sm:w-auto">{saving ? 'Saving\u2026' : 'Save Draft'}</Button>
+        <Button onClick={() => save(true)} disabled={saving} className="w-full sm:w-auto">{saving ? 'Publishing\u2026' : post?.published ? 'Update' : 'Publish'}</Button>
+        {post?.published && <Button variant="outline" onClick={() => save(false)} disabled={saving} className="w-full sm:w-auto text-destructive hover:text-destructive">Unpublish</Button>}
       </div>
     </div>
   )

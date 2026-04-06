@@ -37,7 +37,7 @@ export default function BlogFeed({ posts }: { posts: Post[] }) {
           {filtered.map((post) => (
             <article key={post.id} className="py-8 first:pt-0">
               <Link href={`/blog/${post.slug}`} className="group block">
-                {post.cover_image && <img src={post.cover_image} alt="" className="w-full h-48 object-cover rounded-lg mb-4" />}
+                {post.cover_image && <img src={post.cover_image} alt="" className="hidden sm:block w-full h-48 object-cover rounded-lg mb-4" />}
                 {post.published_at && <time className="text-sm text-muted-foreground">{formatDate(post.published_at)}</time>}
                 <h2 className="text-2xl font-semibold mt-1 group-hover:underline">{post.title}</h2>
                 {post.subtitle && <p className="text-lg text-muted-foreground mt-1">{post.subtitle}</p>}

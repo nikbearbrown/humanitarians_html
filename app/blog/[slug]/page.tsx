@@ -53,7 +53,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <div className="container px-4 md:px-6 mx-auto max-w-3xl">
         <header className="mb-8">
           <Link href="/blog" className="text-sm text-muted-foreground hover:text-foreground mb-4 inline-block">← Back to Blog</Link>
-          {post.cover_image && <img src={post.cover_image} alt="" className="w-full rounded-lg mb-6 object-cover max-h-96" />}
+          {post.cover_image && <img src={post.cover_image} alt="" className="w-full rounded-lg mb-6 object-cover h-48 sm:h-80" />}
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl lg:text-5xl">{post.title}</h1>
           {post.subtitle && <p className="text-xl text-muted-foreground mt-3">{post.subtitle}</p>}
           <div className="flex items-center gap-3 mt-4 text-sm text-muted-foreground">
@@ -68,7 +68,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           )}
         </header>
 
-        <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-foreground prose-a:underline prose-img:rounded-lg">
+        <div className="prose prose-neutral dark:prose-invert max-w-none text-base leading-[1.7] prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-foreground prose-a:underline prose-img:rounded-lg overflow-x-hidden">
           <BlogVizHydrator html={post.content || ''} />
         </div>
 
@@ -77,9 +77,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         )}
 
         {(prevPost || nextPost) && (
-          <nav className="mt-12 pt-8 border-t flex justify-between">
+          <nav className="mt-12 pt-8 border-t grid grid-cols-1 sm:grid-cols-2 gap-4">
             {prevPost ? <Link href={`/blog/${prevPost.slug}`} className="text-sm hover:underline">← {prevPost.title}</Link> : <span />}
-            {nextPost ? <Link href={`/blog/${nextPost.slug}`} className="text-sm hover:underline">{nextPost.title} →</Link> : <span />}
+            {nextPost ? <Link href={`/blog/${nextPost.slug}`} className="text-sm hover:underline sm:text-right">{nextPost.title} →</Link> : <span />}
           </nav>
         )}
       </div>
