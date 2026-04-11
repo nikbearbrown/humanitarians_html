@@ -36,7 +36,7 @@ export default async function ProjectFellows({
         {pms.map((pm) => (
           <div
             key={pm.id}
-            className="flex items-center gap-4 mb-8 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900"
+            className="flex items-center gap-4 mb-8 p-4 border rounded-lg bg-sky-faint dark:bg-gray-900"
           >
             {pm.photo_url ? (
               <img
@@ -74,7 +74,7 @@ export default async function ProjectFellows({
             {others.map((fellow) => (
               <div
                 key={fellow.id}
-                className="border rounded-lg p-5 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
+                className="border rounded-lg p-5 bg-background dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
               >
                 <div className="flex items-center gap-3 mb-3">
                   {fellow.photo_url ? (

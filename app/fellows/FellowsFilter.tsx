@@ -121,7 +121,7 @@ export default function FellowsFilter({
                     return (
                       <div
                         key={fellow.id}
-                        className="border rounded-lg p-5 bg-white dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
+                        className="border rounded-lg p-5 bg-background dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
                       >
                         <div className="flex items-center gap-3 mb-3">
                           {/* Avatar */}
@@ -150,7 +150,7 @@ export default function FellowsFilter({
                                 </span>
                               )}
                               {fellow.status === "alumni" && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]">
                                   Alumni
                                 </span>
                               )}

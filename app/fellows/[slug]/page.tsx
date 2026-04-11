@@ -82,7 +82,7 @@ export default async function FellowProfilePage({
   return (
     <div className="flex flex-col w-full">
       {/* Profile Header */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <div className="flex items-start gap-5">
             {/* Avatar */}
@@ -106,7 +106,7 @@ export default async function FellowProfilePage({
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     fellow.status === "current"
                       ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                      : "bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]"
                   }`}
                 >
                   {fellow.status === "current" ? "Current Fellow" : "Alumni"}
@@ -159,7 +159,7 @@ export default async function FellowProfilePage({
       </section>
 
       {/* Projects Section */}
-      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold mb-6">Projects</h2>
           {fellow.projects.length === 0 ? (
@@ -174,7 +174,7 @@ export default async function FellowProfilePage({
                 return (
                   <div
                     key={fp.id}
-                    className="border rounded-lg p-5 bg-white dark:bg-gray-800"
+                    className="border rounded-lg p-5 bg-background dark:bg-gray-800"
                   >
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <a
@@ -207,7 +207,7 @@ export default async function FellowProfilePage({
       </section>
 
       {/* Reports Section */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold mb-6">Learning Reports</h2>
           {reports.length === 0 ? (
@@ -231,10 +231,10 @@ export default async function FellowProfilePage({
 
       {/* Alumni Contact Section (conditional) */}
       {fellow.status === "alumni" && fellow.willing_to_be_contacted && (
-        <section className="w-full py-12 bg-gray-50 dark:bg-gray-900">
+        <section className="w-full py-12 bg-sky-faint dark:bg-gray-900">
           <div className="container px-4 md:px-6 mx-auto max-w-3xl">
             {viewer ? (
-              <div className="border rounded-lg p-6 bg-white dark:bg-gray-800">
+              <div className="border rounded-lg p-6 bg-background dark:bg-gray-800">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
                   Open to connecting with current fellows
                 </p>

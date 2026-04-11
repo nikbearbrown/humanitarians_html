@@ -16,7 +16,7 @@ export default function DonatePage() {
         {/* Primary Donation Options - Card Layout */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {/* GoFundMe Card */}
-          <div className="border rounded-lg p-8 bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="border rounded-lg p-8 bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
             <div className="text-center space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">GoFundMe Campaign</h2>
@@ -30,7 +30,7 @@ export default function DonatePage() {
             </div>
           </div>
           {/* PayPal Card */}
-          <div className="border rounded-lg p-8 bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="border rounded-lg p-8 bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
             <div className="text-center space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Direct Donation</h2>
@@ -45,7 +45,7 @@ export default function DonatePage() {
           </div>
         </div>
         {/* Additional Support Options */}
-        <div className="mt-16 bg-gray-100 dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
+        <div className="mt-16 bg-silver dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">Other Ways to Support</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>

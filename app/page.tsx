@@ -106,7 +106,7 @@ export default function Home() {
       </section>
 
       {/* The Problem Section */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
             <div className="flex flex-col justify-center space-y-4">
@@ -124,17 +124,17 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tier 1</div>
                 <div className="text-sm text-muted-foreground mb-1">Pattern recognition, fact retrieval, syntactic correctness</div>
                 <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Machine capability: superhuman</div>
               </div>
-              <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tiers 3–6</div>
                 <div className="text-sm text-muted-foreground mb-1">Judgment, causal reasoning, ethics, collaboration</div>
                 <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: poor to absent</div>
               </div>
-              <div className="border rounded-lg p-6 bg-gray-50 dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tier 7</div>
                 <div className="text-sm text-muted-foreground mb-1">Practical wisdom under genuine stakes</div>
                 <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: absent — no stakes, no lived time</div>
@@ -145,7 +145,7 @@ export default function Home() {
       </section>
 
       {/* Key Programs Section */}
-      <section className="w-full py-12 md:py-24 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
@@ -156,7 +156,7 @@ export default function Home() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-            <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="border p-8 rounded-lg bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
               <div className="mb-4"><Book className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">FELLOWS PROGRAM</h3>
               <p className="text-muted-foreground mb-4">
@@ -164,7 +164,7 @@ export default function Home() {
               </p>
               <Link href="/fellows" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-            <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="border p-8 rounded-lg bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
               <div className="mb-4"><MessageSquare className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">BOTSPEAK: AI FLUENCY</h3>
               <p className="text-muted-foreground mb-4">
@@ -173,7 +173,7 @@ export default function Home() {
               <p className="text-sm italic text-muted-foreground mb-4">Tier 1 — necessary, not sufficient.</p>
               <Link href="/botspeak" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-            <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="border p-8 rounded-lg bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
               <div className="mb-4"><Music className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">LYRICAL LITERACY</h3>
               <p className="text-muted-foreground mb-4">
@@ -181,7 +181,7 @@ export default function Home() {
               </p>
               <Link href="/lyrical-literacy" className="text-sm font-medium underline underline-offset-4 hover:text-foreground">Learn more</Link>
             </div>
-            <div className="border p-8 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+            <div className="border p-8 rounded-lg bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
               <div className="mb-4"><Code className="h-10 w-10" /></div>
               <h3 className="text-xl font-bold mb-2">AI FOR GOOD</h3>
               <p className="text-muted-foreground mb-4">
@@ -194,7 +194,7 @@ export default function Home() {
       </section>
 
       {/* Addams Tool Section */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="grid gap-6 lg:grid-cols-3 lg:gap-12">
             <div className="flex flex-col justify-center space-y-4 lg:col-span-1">
@@ -234,7 +234,7 @@ export default function Home() {
       </section>
 
       {/* The Series Section */}
-      <section className="w-full py-12 md:py-24 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="text-center mb-12 max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-3">
@@ -264,7 +264,7 @@ export default function Home() {
             {COURSES.map((course) => (
               <div
                 key={course.title}
-                className="rounded-lg border bg-white dark:bg-gray-800 p-8 shadow-sm flex flex-col"
+                className="rounded-lg border bg-background dark:bg-gray-800 p-8 shadow-sm flex flex-col"
               >
                 <h3 className="text-lg font-bold tracking-wide mb-3">
                   {course.title}
@@ -285,7 +285,7 @@ export default function Home() {
       </section>
 
       {/* Donate Section */}
-      <section className="w-full py-12 md:py-24 bg-gray-100 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-silver dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter md:text-5xl mb-6">JOIN OUR MISSION</h2>

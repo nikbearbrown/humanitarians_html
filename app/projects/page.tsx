@@ -99,7 +99,7 @@ export default function ProjectsPage() {
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Projects</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mb-4">
@@ -120,13 +120,13 @@ export default function ProjectsPage() {
       </section>
 
       {/* Projects Grid */}
-      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
               <div
                 key={project.name}
-                className="border rounded-lg p-6 bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow flex flex-col"
+                className="border rounded-lg p-6 bg-background dark:bg-gray-800 hover:shadow-lg transition-shadow flex flex-col"
               >
                 <h3 className="text-xl font-bold mb-1">
                   <Link
@@ -147,7 +147,7 @@ export default function ProjectsPage() {
                     {project.tiers.map((tier) => (
                       <span
                         key={tier}
-                        className="text-xs px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        className="text-xs px-2 py-1 rounded-full bg-silver dark:bg-gray-700 text-dim-gray dark:text-gray-300"
                       >
                         {tier}
                       </span>
@@ -179,7 +179,7 @@ export default function ProjectsPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 bg-gray-100 dark:bg-gray-900">
+      <section className="w-full py-12 bg-silver dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">Become a Fellow</h2>

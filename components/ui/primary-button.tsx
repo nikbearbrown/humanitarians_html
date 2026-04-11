@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 const baseButtonStyles = "inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-const primaryButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
+const primaryButtonStyles = "bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string

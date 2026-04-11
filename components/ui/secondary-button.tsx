@@ -9,7 +9,7 @@ const baseButtonStyles = cva(
 )
 
 const secondaryButtonStyles = cva(
-  "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground",
+  "bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground",
   {
     variants: {
       variant: {

@@ -206,7 +206,7 @@ export default function FellowDashboard() {
   return (
     <div className="flex flex-col w-full">
       {/* Profile Preview */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold tracking-tighter">My Profile</h1>
@@ -230,7 +230,7 @@ export default function FellowDashboard() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       fellow.status === 'current'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                        : 'bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]'
                     }`}>
                       {fellow.status === 'current' ? 'Current Fellow' : 'Alumni'}
                     </span>
@@ -266,7 +266,7 @@ export default function FellowDashboard() {
       </section>
 
       {/* Edit Profile */}
-      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -361,7 +361,7 @@ export default function FellowDashboard() {
       </section>
 
       {/* Submit Report */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -420,7 +420,7 @@ export default function FellowDashboard() {
                     : report.content
                   const project = myProjects.find((p) => p.id === report.project_id)
                   return (
-                    <div key={report.id} className="border rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div key={report.id} className="border rounded-lg p-4 bg-background dark:bg-gray-800">
                       <div className="flex items-center gap-2 mb-1">
                         <time className="text-xs font-medium text-muted-foreground">
                           {new Date(report.created_at).toLocaleDateString('en-US', {

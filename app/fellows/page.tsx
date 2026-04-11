@@ -41,7 +41,7 @@ export default async function FellowsPage() {
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-4xl">
           <h1 className="text-3xl font-bold mb-6">Fellows Program</h1>
           <p className="text-xl text-muted-foreground mb-8">
@@ -61,7 +61,7 @@ export default async function FellowsPage() {
       </section>
 
       {/* Program Header */}
-      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-10">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">
@@ -76,7 +76,7 @@ export default async function FellowsPage() {
               {stats.map((s) => (
                 <div
                   key={s.label}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border bg-white dark:bg-gray-800 text-sm"
+                  className="flex items-center gap-2 px-4 py-2 rounded-full border bg-background dark:bg-gray-800 text-sm"
                 >
                   <s.icon className="w-4 h-4 text-muted-foreground" />
                   <span className="font-bold">{s.value}</span>
@@ -96,7 +96,7 @@ export default async function FellowsPage() {
       </section>
 
       {/* About the Program */}
-      <section className="w-full py-12 md:py-20 bg-white dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
         <div className="container px-4 md:px-6 mx-auto max-w-4xl">
           <div className="grid gap-12">
             <section>
@@ -145,7 +145,7 @@ export default async function FellowsPage() {
       </section>
 
       {/* Fellows Directory */}
-      <section className="w-full py-12 md:py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <FellowsFilter projects={projects} />
         </div>

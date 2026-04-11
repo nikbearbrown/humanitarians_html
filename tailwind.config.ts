@@ -11,6 +11,14 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
+  			/* HAI named palette tokens */
+  			'obsidian':  '#1B1B1B',
+  			'walnut':    '#5C3317',
+  			'blood-red': '#B52C2C',
+  			'sky-faint': '#F7FAFD',
+  			'dim-gray':  '#4A4D4F',
+  			'mist':      '#797C7F',
+  			'silver':    '#EDEDED',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import ThemeToggle from "@/components/ThemeToggle"
 
 const baseButtonStyles = "inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-const headerButtonStyles = "bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
+const headerButtonStyles = "bg-primary text-primary-foreground shadow hover:bg-primary/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
