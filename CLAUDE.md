@@ -55,14 +55,16 @@ This is the canonical palette going forward. All new pages and components must u
 
 | Token | Hex | Role | WCAG on bg |
 |---|---|---|---|
-| `obsidian` | `#1B1B1B` | primary text | 18.2:1 AAA |
-| `walnut` | `#5C3317` | primary accent (→ `bg-primary`) | 10.7:1 AAA |
-| `blood-red` | `#B52C2C` | danger/emphasis (→ `bg-destructive`) | 5.8:1 AA |
-| `sky-faint` | `#F7FAFD` | section alt bg, callouts | bg only |
-| `dim-gray` | `#4A4D4F` | secondary accent | 9.4:1 AAA |
-| `mist` | `#797C7F` | muted text (→ `text-muted-foreground`) | 4.6:1 AA |
-| `silver` | `#EDEDED` | borders, tag bg (→ `bg-secondary`, `bg-border`) | bg only |
+| `obsidian` | `#1B1B1B` | primary text | 17.22:1 AAA |
+| `walnut` | `#5C3317` | primary accent (→ `bg-primary`) | 10.82:1 AAA |
+| `blood-red` | `#B52C2C` | danger/emphasis (→ `bg-destructive`) | 6.25:1 AA |
+| `warm-clay` | `#A89068` | callout surface (→ `bg-accent`) | 3.06:1 AA large |
+| `dim-gray` | `#4A4D4F` | secondary accent | 8.52:1 AAA |
+| `mist` | `#797C7F` | muted text (→ `text-muted-foreground`) | 4.2:1 AA large |
+| `silver` | `#8F8F8F` | borders only (→ `border-silver`) | 3.23:1 AA large |
 | `pure-white` | `#FFFFFF` | page background (→ `bg-background`) | — |
+
+**Section alt bg** uses `bg-muted` (→ `--muted: 38 40% 97%`, a warm-white tint derived from warm-clay). `silver` is a mid-gray border color — do not use it as a section or badge background.
 
 CSS variables are defined in `app/globals.css`. Named Tailwind tokens (`bg-walnut`, `bg-sky-faint`, `bg-silver`, etc.) are available via `tailwind.config.ts`.
 
@@ -72,7 +74,7 @@ CSS variables are defined in `app/globals.css`. Named Tailwind tokens (`bg-walnu
 
 - **Button components**: Use `PrimaryButton` (`@/components/ui/primary-button`) and `SecondaryButton` (`@/components/ui/secondary-button`) for CTAs — both use `bg-primary` (walnut). The base shadcn `Button` (`@/components/ui/button`) uses CVA variants.
 - **Container pattern**: `<div className="container px-4 md:px-6 mx-auto">`
-- **Section pattern**: Full-width sections alternate `bg-background dark:bg-gray-800` / `bg-sky-faint dark:bg-gray-900` / `bg-silver dark:bg-gray-900`
+- **Section pattern**: Full-width sections alternate `bg-background dark:bg-gray-800` / `bg-muted dark:bg-gray-900`
 - **Grid layouts**: Typically `lg:grid-cols-3` (1+2 split for text+video) or `md:grid-cols-2` (card grids)
 - **Links**: Internal = Next.js `Link`, external = `<a>` with `target="_blank" rel="noopener noreferrer"`
 - **Path alias**: `@/*` maps to project root

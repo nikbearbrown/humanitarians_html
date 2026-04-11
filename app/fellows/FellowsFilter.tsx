@@ -150,7 +150,7 @@ export default function FellowsFilter({
                                 </span>
                               )}
                               {fellow.status === "alumni" && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200">
                                   Alumni
                                 </span>
                               )}

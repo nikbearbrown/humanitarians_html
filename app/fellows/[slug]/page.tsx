@@ -106,7 +106,7 @@ export default async function FellowProfilePage({
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     fellow.status === "current"
                       ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]"
+                      : "bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200"
                   }`}
                 >
                   {fellow.status === "current" ? "Current Fellow" : "Alumni"}
@@ -159,7 +159,7 @@ export default async function FellowProfilePage({
       </section>
 
       {/* Projects Section */}
-      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold mb-6">Projects</h2>
           {fellow.projects.length === 0 ? (
@@ -231,7 +231,7 @@ export default async function FellowProfilePage({
 
       {/* Alumni Contact Section (conditional) */}
       {fellow.status === "alumni" && fellow.willing_to_be_contacted && (
-        <section className="w-full py-12 bg-sky-faint dark:bg-gray-900">
+        <section className="w-full py-12 bg-muted dark:bg-gray-900">
           <div className="container px-4 md:px-6 mx-auto max-w-3xl">
             {viewer ? (
               <div className="border rounded-lg p-6 bg-background dark:bg-gray-800">

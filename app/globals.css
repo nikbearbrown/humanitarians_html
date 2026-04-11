@@ -5,22 +5,22 @@
 @layer base {
   :root {
     /* HAI palette — Le Monde / walnut
-     * p1 #1B1B1B  obsidian   — primary text        18.2:1 AAA
-     * p2 #5C3317  walnut     — primary accent       10.7:1 AAA
-     * p3 #B52C2C  blood-red  — danger/emphasis       5.8:1 AA
-     * p4 #F7FAFD  sky-faint  — highlight/callout     1.1:1 (bg only)
-     * p5 #4A4D4F  dim-gray   — secondary accent      9.4:1 AAA
-     * p6 #797C7F  mist       — muted text            4.6:1 AA
-     * p7 #EDEDED  silver     — borders, subtle bg    1.1:1 (bg only)
+     * p1 #1B1B1B  obsidian   — primary text        17.22:1 AAA
+     * p2 #5C3317  walnut     — primary accent       10.82:1 AAA
+     * p3 #B52C2C  blood-red  — danger/emphasis       6.25:1 AA
+     * p4 #A89068  warm-clay  — callout surface       3.06:1 AA large
+     * p5 #4A4D4F  dim-gray   — secondary accent      8.52:1 AAA
+     * p6 #797C7F  mist       — muted text            4.2:1  AA large
+     * p7 #8F8F8F  silver     — borders               3.23:1 AA large
      * p8 #FFFFFF  pure-white — page background
      */
     --hai-obsidian:  #1B1B1B;
     --hai-walnut:    #5C3317;
     --hai-blood-red: #B52C2C;
-    --hai-sky-faint: #F7FAFD;
+    --hai-warm-clay: #A89068;
     --hai-dim-gray:  #4A4D4F;
     --hai-mist:      #797C7F;
-    --hai-silver:    #EDEDED;
+    --hai-silver:    #8F8F8F;
     --hai-white:     #FFFFFF;
 
     /* shadcn/ui semantic tokens — light */
@@ -32,16 +32,16 @@
     --popover-foreground:     0 0% 11%;
     --primary:                24 60% 23%;   /* walnut      */
     --primary-foreground:     0 0% 100%;
-    --secondary:              0 0% 93%;     /* silver      */
+    --secondary:              38 40% 97%;   /* warm-white tint — section alt bg */
     --secondary-foreground:   0 0% 11%;
-    --muted:                  211 59% 98%;  /* sky-faint   */
+    --muted:                  38 40% 97%;   /* warm-white tint — section alt bg */
     --muted-foreground:       211 2% 49%;   /* mist        */
-    --accent:                 211 59% 98%;  /* sky-faint   */
-    --accent-foreground:      0 0% 11%;
+    --accent:                 38 27% 53%;   /* warm-clay   */
+    --accent-foreground:      0 0% 11%;     /* obsidian (4.9:1 on warm-clay) */
     --destructive:            0 61% 44%;    /* blood-red   */
     --destructive-foreground: 0 0% 100%;
-    --border:                 0 0% 93%;     /* silver      */
-    --input:                  0 0% 93%;
+    --border:                 0 0% 56%;     /* silver #8F8F8F */
+    --input:                  0 0% 56%;
     --ring:                   24 60% 23%;   /* walnut      */
     --radius:                 0.5rem;
   }
@@ -59,12 +59,12 @@
     --secondary-foreground:   0 0% 96%;
     --muted:                  204 4% 17%;
     --muted-foreground:       211 3% 63%;
-    --accent:                 204 4% 17%;
+    --accent:                 38 22% 32%;   /* muted warm-clay for dark */
     --accent-foreground:      0 0% 96%;
     --destructive:            0 55% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border:                 204 4% 20%;
-    --input:                  204 4% 20%;
+    --border:                 204 4% 30%;
+    --input:                  204 4% 30%;
     --ring:                   24 55% 48%;
   }
 }

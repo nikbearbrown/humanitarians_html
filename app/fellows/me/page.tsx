@@ -230,7 +230,7 @@ export default function FellowDashboard() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       fellow.status === 'current'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-silver text-[#5C3317] dark:bg-gray-700 dark:text-[#D4A47A]'
+                        : 'bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200'
                     }`}>
                       {fellow.status === 'current' ? 'Current Fellow' : 'Alumni'}
                     </span>
@@ -266,7 +266,7 @@ export default function FellowDashboard() {
       </section>
 
       {/* Edit Profile */}
-      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <Card>
             <CardHeader>

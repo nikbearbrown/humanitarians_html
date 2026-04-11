@@ -124,17 +124,17 @@ export default function Home() {
               </p>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-muted dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tier 1</div>
                 <div className="text-sm text-muted-foreground mb-1">Pattern recognition, fact retrieval, syntactic correctness</div>
                 <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Machine capability: superhuman</div>
               </div>
-              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-muted dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tiers 3–6</div>
                 <div className="text-sm text-muted-foreground mb-1">Judgment, causal reasoning, ethics, collaboration</div>
                 <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: poor to absent</div>
               </div>
-              <div className="border rounded-lg p-6 bg-sky-faint dark:bg-gray-900">
+              <div className="border rounded-lg p-6 bg-muted dark:bg-gray-900">
                 <div className="text-2xl font-bold mb-1">Tier 7</div>
                 <div className="text-sm text-muted-foreground mb-1">Practical wisdom under genuine stakes</div>
                 <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: absent — no stakes, no lived time</div>
@@ -145,7 +145,7 @@ export default function Home() {
       </section>
 
       {/* Key Programs Section */}
-      <section className="w-full py-12 md:py-24 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
@@ -234,7 +234,7 @@ export default function Home() {
       </section>
 
       {/* The Series Section */}
-      <section className="w-full py-12 md:py-24 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="text-center mb-12 max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-3">
@@ -285,7 +285,7 @@ export default function Home() {
       </section>
 
       {/* Donate Section */}
-      <section className="w-full py-12 md:py-24 bg-silver dark:bg-gray-900">
+      <section className="w-full py-12 md:py-24 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold tracking-tighter md:text-5xl mb-6">JOIN OUR MISSION</h2>

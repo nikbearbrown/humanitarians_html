@@ -45,7 +45,7 @@ export default function DonatePage() {
           </div>
         </div>
         {/* Additional Support Options */}
-        <div className="mt-16 bg-silver dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
+        <div className="mt-16 bg-muted dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">Other Ways to Support</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>

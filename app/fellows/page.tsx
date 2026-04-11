@@ -61,7 +61,7 @@ export default async function FellowsPage() {
       </section>
 
       {/* Program Header */}
-      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="max-w-3xl mx-auto text-center mb-10">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">
@@ -145,7 +145,7 @@ export default async function FellowsPage() {
       </section>
 
       {/* Fellows Directory */}
-      <section className="w-full py-12 md:py-20 bg-sky-faint dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
         <div className="container px-4 md:px-6 mx-auto">
           <FellowsFilter projects={projects} />
         </div>
