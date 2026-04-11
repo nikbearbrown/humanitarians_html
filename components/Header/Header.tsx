@@ -33,6 +33,7 @@ export default function Header() {
 
   const navigation = [
     { name: "Blog", href: "/blog" },
+    { name: "Courses", href: "/courses" },
     { name: "Fellows", href: "/fellows" },
     { name: "Projects", href: "/projects" },
     { name: "Talks", href: "/talks" },

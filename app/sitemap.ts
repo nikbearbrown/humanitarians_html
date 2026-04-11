@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next'
 import { neon } from '@neondatabase/serverless'
+import path from 'path'
+import { scanCourses } from '@/lib/courses'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.humanitarians.ai'
 
@@ -23,6 +25,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/terms-of-service`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ]
+
+  // Course pages (filesystem-based)
+  const courses = scanCourses(path.join(process.cwd(), 'public/courses'))
+  for (const course of courses) {
+    entries.push({
+      url: `${BASE_URL}/courses/${course.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    })
+  }
 
   try {
     const db = neon(process.env.DATABASE_URL!)
