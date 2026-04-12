@@ -198,6 +198,48 @@
     /* ── REGION FILTER ───────────────────────────────────────── */
     .region-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
+    /* ── CHART EXPLAINER ─────────────────────────────────────── */
+    .chart-explainer {
+      margin-top: 2rem;
+      border-top: 1px solid var(--p7);
+      padding-top: 1.5rem;
+      animation: fadeUp 0.5s ease-out both 0.4s;
+    }
+
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem 3rem;
+      max-width: 110ch;
+    }
+
+    @media (max-width: 760px) {
+      .explainer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+
+    .explainer-block h3 {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--p2);
+      margin-bottom: 0.65rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--p7);
+    }
+
+    .explainer-block p {
+      font-size: clamp(11px, 1.05vw, 13px);
+      font-weight: 400;
+      line-height: 1.85;
+      color: var(--p5);
+    }
+
+    .explainer-block p strong {
+      color: var(--p1);
+      font-weight: 800;
+    }
+
     /* ── NAV DOTS ────────────────────────────────────────────── */
     .nav-dots {
       position: fixed;
@@ -283,6 +325,14 @@
     }
 
     footer p { font-size: 11px; color: var(--p6); line-height: 1.9; }
+
+    footer a {
+      color: var(--p6);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    footer a:hover { color: var(--p2); }
   </style>
 </head>
 <body>
@@ -346,6 +396,21 @@
     <button class="btn" id="audio-toggle" tabindex="0" aria-label="Play narration">▶ narration</button>
   </div>
   <p class="zoom-hint">Scroll to zoom · Drag to pan · Hover dots for details · 1 dot = 1 branch</p>
+
+  <!-- ── EXPLANATORY TEXT ─────────────────────────────────── -->
+  <div class="chart-explainer">
+    <div class="explainer-grid">
+      <div class="explainer-block">
+        <h3>// About Dot Maps</h3>
+        <p>A <strong>Dot Map</strong> (Point Distribution Map) encodes the precise geographic location of each discrete observation as an equally-sized dot plotted over a geographic base layer. Unlike a choropleth map — which aggregates data by administrative boundary and encodes totals as fill colour — the dot map preserves the <strong>exact spatial coordinates</strong> of every individual entity. The primary perceptual mechanism is <strong>preattentive density detection</strong>: clusters of dots register as regions of high concentration before conscious counting begins, while sparse areas read as low concentration. Two variants exist. In a <strong>one-to-one map</strong>, each dot is a single real-world object. In a <strong>one-to-many map</strong>, each dot represents a count (e.g., 1 dot = 100 residents). This is a one-to-one map: every dot is one confirmed library branch at a real coordinate.</p>
+      </div>
+      <div class="explainer-block">
+        <h3>// About This Example</h3>
+        <p>This map plots confirmed <strong>public library branch locations</strong> across the contiguous United States. Each walnut-coloured dot represents one physical branch location with a recorded name, city, and state. The spatial pattern that emerges is striking: library density is highest across the <strong>Northeast corridor</strong> from Boston to Washington D.C., and across the <strong>Great Lakes region</strong> including Ohio, Michigan, and Illinois — reflecting historical settlement density and robust civic funding traditions. The <strong>interior West</strong> — Nevada, Wyoming, Montana, and the Dakotas — shows sparse coverage, a direct consequence of low population density and vast geographic area per resident. Use the <strong>region filter buttons</strong> to isolate and compare density across the four Census Bureau regions. <strong>Scroll to zoom</strong> into any dense cluster to resolve individual branches that appear merged at full extent.</p>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <!-- ── SLIDE 2 — LEARN ──────────────────────────────────────── -->
@@ -367,9 +432,7 @@
     <div class="learn-block">
       <h2>Anatomy of the encoding</h2>
       <svg class="anatomy-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" aria-label="Dot map anatomy diagram showing clustered and sparse regions">
-        <!-- Background pseudo-map -->
         <rect x="10" y="10" width="260" height="160" fill="#F7FAFD" stroke="#EDEDED" stroke-width="1" rx="2"/>
-        <!-- Cluster region -->
         <circle cx="80"  cy="60"  r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="92"  cy="55"  r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="71"  cy="70"  r="4" fill="#5C3317" opacity="0.85"/>
@@ -380,17 +443,14 @@
         <circle cx="108" cy="70"  r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="65"  cy="58"  r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="104" cy="50"  r="4" fill="#5C3317" opacity="0.85"/>
-        <!-- Sparse region -->
         <circle cx="180" cy="80"  r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="220" cy="110" r="4" fill="#5C3317" opacity="0.85"/>
         <circle cx="195" cy="130" r="4" fill="#5C3317" opacity="0.85"/>
-        <!-- Labels -->
         <text x="85"  y="105" font-family="JetBrains Mono,monospace" font-size="9" fill="#5C3317" text-anchor="middle" font-weight="600">HIGH DENSITY</text>
         <text x="85"  y="116" font-family="JetBrains Mono,monospace" font-size="8" fill="#797C7F" text-anchor="middle">clustered dots →</text>
         <text x="85"  y="125" font-family="JetBrains Mono,monospace" font-size="8" fill="#797C7F" text-anchor="middle">pattern detected</text>
         <text x="200" cy="155" y="155" font-family="JetBrains Mono,monospace" font-size="9" fill="#797C7F" text-anchor="middle">LOW DENSITY</text>
         <text x="200" y="165" font-family="JetBrains Mono,monospace" font-size="8" fill="#797C7F" text-anchor="middle">sparse → no pattern</text>
-        <!-- 1:1 note -->
         <text x="10" y="187" font-family="JetBrains Mono,monospace" font-size="8" fill="#797C7F">1 dot = 1 branch location (one-to-one)</text>
       </svg>
     </div>
@@ -423,10 +483,16 @@
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+  <p>
+    <a href="https://nikbearbrown.com" target="_blank" rel="noopener">nikbearbrown.com</a>
+    &nbsp;·&nbsp;
+    <a href="https://boondoggling.ai" target="_blank" rel="noopener">boondoggling.ai</a>
+    &nbsp;·&nbsp;
+    <a href="https://brutalist.art" target="_blank" rel="noopener">brutalist.art</a>
+  </p>
 </footer>
 
-<audio id="page-audio" src="./dot-map/audio.mp3"></audio>
+<audio id="page-audio" src="./dot-map/slide_1.mp3"></audio>
 
 <script>
 (function () {
@@ -509,7 +575,8 @@
 
   function buildMap(usTopology, points) {
     const container = document.getElementById('map-container');
-    document.getElementById('loading').remove();
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.remove();
 
     const W = container.clientWidth  || 900;
     const H = container.clientHeight || 500;
@@ -533,7 +600,6 @@
 
     const mapGroup = svg.append('g').attr('clip-path', 'url(#map-clip)');
 
-    // ── BASE LAYER: states ────────────────────────────────────
     const states = topojson.feature(usTopology, usTopology.objects.states);
 
     mapGroup.append('g').attr('class', 'states')
@@ -545,7 +611,6 @@
         .attr('stroke', '#DADDE0')
         .attr('stroke-width', 0.6);
 
-    // State borders (slightly thicker interior borders)
     mapGroup.append('path')
       .datum(topojson.mesh(usTopology, usTopology.objects.states, (a, b) => a !== b))
       .attr('fill', 'none')
@@ -553,7 +618,6 @@
       .attr('stroke-width', 0.8)
       .attr('d', path);
 
-    // ── DOTS GROUP ────────────────────────────────────────────
     const dotsGroup = mapGroup.append('g').attr('class', 'dots');
 
     function renderDots(region) {
@@ -611,7 +675,8 @@
 
     renderDots(activeRegion);
 
-    // ── LEGEND ───────────────────────────────────────────────
+    // Remove old legend if any, then add fresh
+    container.querySelectorAll('.legend').forEach(el => el.remove());
     const legendEl = document.createElement('div');
     legendEl.className = 'legend';
     legendEl.innerHTML =
@@ -619,7 +684,6 @@
       `<span style="color:var(--p6);font-size:9px;letter-spacing:0.08em;">HOVER FOR NAME · SCROLL TO ZOOM</span>`;
     container.appendChild(legendEl);
 
-    // ── ZOOM ─────────────────────────────────────────────────
     let currentTransform = d3.zoomIdentity;
 
     const zoom = d3.zoom()
@@ -627,7 +691,6 @@
       .on('zoom', event => {
         currentTransform = event.transform;
         mapGroup.attr('transform', event.transform);
-        // Keep dots fixed-radius regardless of zoom
         dotsGroup.selectAll('circle')
           .attr('r', 3 / event.transform.k)
           .attr('stroke-width', 0.3 / event.transform.k);
@@ -639,7 +702,6 @@
       svg.transition().duration(450).call(zoom.transform, d3.zoomIdentity);
     };
 
-    // ── REGION FILTER BUTTONS ────────────────────────────────
     document.querySelectorAll('[data-region]').forEach(btn => {
       btn.addEventListener('click', function () {
         activeRegion = this.dataset.region;
@@ -649,13 +711,11 @@
         });
         this.classList.add('active');
         this.setAttribute('aria-pressed', 'true');
-        // Reset zoom then re-render
         svg.transition().duration(350).call(zoom.transform, d3.zoomIdentity)
           .on('end', () => renderDots(activeRegion));
       });
     });
 
-    // ── RESPONSIVE REDRAW ────────────────────────────────────
     let rt;
     const ro = new ResizeObserver(() => {
       clearTimeout(rt);
@@ -674,7 +734,8 @@
     document.getElementById('stat-visible').textContent = allPoints.length.toLocaleString();
     buildMap(topology, allPoints);
   }).catch(err => {
-    document.getElementById('loading').textContent = '// error loading data — check console';
+    const loadingEl = document.getElementById('loading');
+    if (loadingEl) loadingEl.textContent = '// error loading data — check console';
     console.error('Load error:', err);
   });
 

@@ -181,6 +181,77 @@
     /* ── LEGEND ─────────────────────────────────────────── */
     .legend-svg { font-family: var(--font); font-size: 10px; fill: var(--p5); }
 
+    /* ── EXPLANATION SECTION ────────────────────────────── */
+    .chart-explanation {
+      margin-top: 28px;
+      border-top: 1.5px solid var(--p7);
+      padding-top: 22px;
+      padding-bottom: 32px;
+    }
+
+    .explain-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 44px;
+      margin-bottom: 20px;
+    }
+
+    .explain-col h3 {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--p2);
+      margin-bottom: 8px; padding-bottom: 5px;
+      border-bottom: 1px solid var(--p7);
+    }
+
+    .explain-col p {
+      font-size: 12px; color: var(--p5);
+      line-height: 1.78; margin-bottom: 9px;
+    }
+    .explain-col p:last-child { margin-bottom: 0; }
+    .explain-col p strong { color: var(--p1); font-weight: 700; }
+
+    .explain-modes {
+      margin-top: 4px;
+    }
+    .explain-modes dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 5px 12px;
+      font-size: 11.5px;
+    }
+    .explain-modes dt {
+      color: var(--p2); font-weight: 700;
+      letter-spacing: 0.04em; white-space: nowrap;
+      padding-top: 1px;
+    }
+    .explain-modes dd { color: var(--p5); line-height: 1.65; }
+
+    .expl-reading {
+      border-top: 1.5px solid var(--p7);
+      padding-top: 14px;
+    }
+    .expl-reading h3 {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--p6); margin-bottom: 9px;
+    }
+    .expl-reading ul {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 40px;
+      list-style: none;
+    }
+    .expl-reading li {
+      font-size: 11.5px; line-height: 1.65;
+      color: var(--p5); padding-left: 16px;
+      position: relative;
+    }
+    .expl-reading li::before {
+      content: "//"; position: absolute; left: 0; top: 1px;
+      font-size: 9px; font-weight: 600; color: var(--p6);
+    }
+
     /* ── LEARN SLIDE ────────────────────────────────────── */
     .slide-learn { background: var(--p8); }
     .learn-block { max-width: 720px; padding-top: 8px; }
@@ -217,6 +288,21 @@
       font-family: var(--font); font-size: 10px;
       color: var(--p6); border-top: 2px solid var(--p7);
       padding: 10px 36px; line-height: 1.7;
+    }
+    footer a {
+      color: var(--p6); text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    footer a:hover { color: var(--p1); border-bottom-color: var(--p6); }
+
+    @media (max-width: 620px) {
+      .slide        { padding: 18px 18px 12px; }
+      .explain-cols { grid-template-columns: 1fr; }
+      .expl-reading ul { grid-template-columns: 1fr; }
+      .explain-modes dl { grid-template-columns: 1fr; }
+      .explain-modes dt { padding-top: 8px; }
+      footer        { padding: 10px 18px; }
     }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -260,6 +346,74 @@
     <button class="ctrl-btn" id="reset-btn" aria-label="Reset sort order">↺ reset order</button>
     <button class="ctrl-btn" id="audio-toggle" aria-label="Play narration">▶ narration</button>
   </div>
+
+  <!-- ── EXPLANATION TEXT ── -->
+  <div class="chart-explanation" aria-label="Chart type and example explanation">
+
+    <div class="explain-cols">
+
+      <div class="explain-col">
+        <h3>// About Error Bars</h3>
+        <p>
+          Error bars are a <strong>graphical enhancement</strong> layered onto a Cartesian
+          chart to add a second data dimension: the spread or uncertainty around each
+          plotted central value. The bar height encodes the group mean; the error bar's
+          length encodes how reliable or variable that mean is. Short bars signal
+          concentrated measurements with high confidence. Long bars signal dispersed values
+          where the mean is less precise. This length-as-uncertainty mapping is
+          pre-attentive — viewers read reliability differences before consciously analyzing
+          individual values.
+        </p>
+        <p>
+          The critical rule: <strong>error bars must always identify which measure they
+          encode.</strong> SD, SE, and 95% CI bars on identical data produce very different
+          lengths — an unlabelled error bar is statistically meaningless. Use the mode tabs
+          above to compare how the same data looks across all four conventions.
+        </p>
+      </div>
+
+      <div class="explain-col">
+        <h3>// The Four Error Modes</h3>
+        <div class="explain-modes">
+          <dl>
+            <dt>± SD</dt>
+            <dd>Standard Deviation — the spread of individual observations around the
+            mean. Use when the message is about population variability. SD stays
+            constant as sample size grows.</dd>
+
+            <dt>± SE</dt>
+            <dd>Standard Error (= SD ÷ √n) — how precisely the mean was estimated.
+            SE shrinks as n increases. SE bars are always shorter than SD bars — sometimes
+            misused to make results appear more precise than they are.</dd>
+
+            <dt>95% CI</dt>
+            <dd>Confidence Interval — the most honest choice for scientific communication.
+            The range in which the true population mean would fall 95% of the time if the
+            experiment were repeated. Can be asymmetric for skewed data.</dd>
+
+            <dt>Min–Max</dt>
+            <dd>The full observed span of raw data. Most conservative; most sensitive to
+            outliers. Use when you must show actual extremes, not statistical estimates.</dd>
+          </dl>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="expl-reading">
+      <h3>// Reading Guide</h3>
+      <ul>
+        <li>Bar height = group mean; error bar length = uncertainty in that mean</li>
+        <li>Shorter error bar = higher confidence in the mean / less variable data</li>
+        <li>Overlapping 95% CI bars suggest difference may not be statistically significant</li>
+        <li>Non-overlapping SD bars do NOT necessarily imply statistical significance</li>
+        <li>The cap marks the boundary of the range — no cap implies open-ended or unknown</li>
+        <li>Hover any bar or error mark for full stats: mean, SD, SE, CI, range, and n</li>
+      </ul>
+    </div>
+
+  </div>
+
 </section>
 
 <!-- ── SLIDE 2: LEARN ─────────────────────────────────────── -->
@@ -305,11 +459,17 @@
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+  <p>
+    <a href="https://frictional.xyz"    target="_blank" rel="noopener">frictional.xyz</a>
+    &nbsp;·&nbsp;
+    <a href="https://bearbrown.co"      target="_blank" rel="noopener">bearbrown.co</a>
+    &nbsp;·&nbsp;
+    <a href="https://humanitarians.ai"  target="_blank" rel="noopener">humanitarians.ai</a>
+  </p>
 </footer>
 
 <div id="tooltip"></div>
-<audio id="page-audio" src="./error-bars/audio.mp3"></audio>
+<audio id="page-audio" src="./error-bars/slide_1.mp3"></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
