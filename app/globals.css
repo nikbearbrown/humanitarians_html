@@ -15,7 +15,7 @@
      * p8 #FFFFFF  pure-white — page background
      */
     --hai-obsidian:  #1B1B1B;
-    --hai-walnut:    #5C3317;
+    --hai-crimson:   #8B0000;
     --hai-blood-red: #B52C2C;
     --hai-warm-clay: #A89068;
     --hai-dim-gray:  #4A4D4F;
@@ -30,7 +30,7 @@
     --card-foreground:        0 0% 11%;
     --popover:                0 0% 100%;
     --popover-foreground:     0 0% 11%;
-    --primary:                24 60% 23%;   /* walnut      */
+    --primary:                0 100% 27%;   /* crimson #8B0000 */
     --primary-foreground:     0 0% 100%;
     --secondary:              38 40% 97%;   /* warm-white tint — section alt bg */
     --secondary-foreground:   0 0% 11%;
@@ -42,7 +42,7 @@
     --destructive-foreground: 0 0% 100%;
     --border:                 0 0% 56%;     /* silver #8F8F8F */
     --input:                  0 0% 56%;
-    --ring:                   24 60% 23%;   /* walnut      */
+    --ring:                   0 100% 27%;   /* crimson     */
     --radius:                 0.5rem;
   }
 
@@ -53,7 +53,7 @@
     --card-foreground:        0 0% 96%;
     --popover:                204 3% 13%;
     --popover-foreground:     0 0% 96%;
-    --primary:                24 55% 48%;   /* lighter walnut for dark bg */
+    --primary:                0 75% 45%;    /* lighter crimson for dark bg */
     --primary-foreground:     0 0% 100%;
     --secondary:              204 4% 20%;
     --secondary-foreground:   0 0% 96%;
@@ -65,7 +65,7 @@
     --destructive-foreground: 0 0% 100%;
     --border:                 204 4% 30%;
     --input:                  204 4% 30%;
-    --ring:                   24 55% 48%;
+    --ring:                   0 75% 45%;
   }
 }
 

@@ -56,7 +56,7 @@ This is the canonical palette going forward. All new pages and components must u
 | Token | Hex | Role | WCAG on bg |
 |---|---|---|---|
 | `obsidian` | `#1B1B1B` | primary text | 17.22:1 AAA |
-| `walnut` | `#5C3317` | primary accent (→ `bg-primary`) | 10.82:1 AAA |
+| `crimson` | `#8B0000` | primary accent / buttons (→ `bg-primary`) | 9.9:1 AAA |
 | `blood-red` | `#B52C2C` | danger/emphasis (→ `bg-destructive`) | 6.25:1 AA |
 | `warm-clay` | `#A89068` | callout surface (→ `bg-accent`) | 3.06:1 AA large |
 | `dim-gray` | `#4A4D4F` | secondary accent | 8.52:1 AAA |

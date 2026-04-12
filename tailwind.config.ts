@@ -13,7 +13,7 @@ const config: Config = {
   		colors: {
   			/* HAI named palette tokens */
   			'obsidian':   '#1B1B1B',
-  			'walnut':     '#5C3317',
+  			'crimson':    '#8B0000',
   			'blood-red':  '#B52C2C',
   			'warm-clay':  '#A89068',
   			'dim-gray':   '#4A4D4F',
