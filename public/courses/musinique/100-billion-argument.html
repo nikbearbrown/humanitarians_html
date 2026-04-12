@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The $100 Billion Argument: How Spotify's Market Cap Makes the Absence of Measurement Indefensible</title>
+  <meta name="description" content="At a $100 billion market capitalization, Spotify has the resources to build a world-class fraud research group. A $10 million annual investment could answer the questions the external evidence demands. The absence of measurement is not a technical limitation — it is a choice. This section makes the market capitalization argument that runs through the Musinique Research Trilogy.">
+  <meta name="keywords" content="Spotify market cap, streaming fraud measurement, institutional complicity, false account disclosure, Meta comparison, HEP framework, MAU integrity, SEC disclosure, streaming fraud policy, Musinique Research Trilogy">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    /* ── PUB BAR ── */
+    .pub-bar { background: var(--bb-1); padding: 14px 32px; display: flex; align-items: center; gap: 16px; border-bottom: 2px solid var(--bb-5); }
+    .pub-name { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 900; color: var(--bb-8); letter-spacing: 0.05em; }
+    .pub-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-7); border: 1px solid rgba(200,169,110,0.4); padding: 2px 8px; border-radius: 2px; }
+    .pub-divider { width: 1px; height: 14px; background: rgba(200,169,110,0.4); }
+
+    /* ── ARTICLE HEADER ── */
+    .article-header { max-width: 760px; margin: 0 auto; padding: 64px 32px 48px; border-bottom: 1px solid var(--bb-7); }
+    .article-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--bb-5); margin-bottom: 20px; }
+    .article-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(28px, 4.5vw, 50px); font-weight: 900; line-height: 1.1; color: var(--bb-1); margin-bottom: 16px; }
+    .article-deck { font-family: 'Source Serif 4', Georgia, serif; font-size: clamp(16px, 2.2vw, 20px); color: var(--bb-2); line-height: 1.55; margin-bottom: 32px; font-style: italic; }
+    .article-byline { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .byline-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--bb-1); text-transform: uppercase; letter-spacing: 0.1em; }
+    .byline-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); }
+    .byline-divider { width: 1px; height: 14px; background: var(--bb-7); }
+
+    /* ── TOC ── */
+    .toc-wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .toc-inner { background: rgba(139,58,15,0.06); border: 1px solid var(--bb-7); border-radius: 4px; padding: 24px 28px; margin: 40px 0; }
+    .toc-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--bb-6); margin-bottom: 14px; }
+    .toc-list { list-style: none; padding-left: 0; }
+    .toc-list li { margin-bottom: 8px; }
+    .toc-list a { color: var(--bb-2); text-decoration: none; font-size: 15px; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    .toc-list a:hover { border-bottom-color: var(--bb-5); }
+    .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); margin-right: 10px; }
+
+    /* ── LAYOUT ── */
+    .article-body { max-width: 760px; margin: 0 auto; padding: 0 32px 80px; }
+    .section { padding-top: 56px; }
+    .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    /* ── TYPOGRAPHY ── */
+    h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(20px, 2.6vw, 28px); font-weight: 700; color: var(--bb-2); line-height: 1.2; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 2px solid var(--bb-7); }
+    h3 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(16px, 1.9vw, 20px); font-weight: 700; font-style: italic; color: var(--bb-1); margin: 36px 0 12px; }
+    p { margin-bottom: 22px; }
+    a { color: var(--bb-2); }
+    a:hover { color: var(--bb-5); }
+    strong { font-weight: 600; color: var(--bb-2); }
+    em { font-style: italic; }
+    ul, ol { margin: 0 0 20px; padding-left: 1.6em; }
+    li { margin-bottom: 8px; }
+
+    /* ── OPENING NUMBER ── */
+    .number-panel {
+      background: var(--bb-1);
+      border-radius: 4px;
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .number-panel-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--bb-6);
+      margin-bottom: 16px;
+    }
+
+    .number-panel-value {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 900;
+      color: var(--bb-4);
+      line-height: 1;
+      margin-bottom: 14px;
+    }
+
+    .number-panel-desc {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 15px;
+      color: rgba(240,230,208,0.75);
+      line-height: 1.7;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .number-panel-desc strong { color: var(--bb-4); }
+
+    /* ── PULL QUOTES ── */
+    .pull-quote { margin: 40px 0; padding: 0 0 0 28px; border-left: 5px solid var(--bb-5); }
+    .pull-quote p { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(18px, 2.4vw, 24px); font-style: italic; color: var(--bb-2); line-height: 1.5; margin-bottom: 0; }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 4px solid var(--bb-4); padding: 16px 20px; margin: 32px 0; background: rgba(232,160,32,0.08); border-radius: 0 4px 4px 0; }
+    .callout p { margin-bottom: 0; font-size: 16px; }
+    .callout ul { margin: 8px 0 0; padding-left: 1.4em; font-size: 15px; }
+    .callout ul li { margin-bottom: 6px; }
+    .callout-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-5); margin-bottom: 8px; }
+    .callout.alert { border-left-color: var(--bb-3); background: rgba(192,57,43,0.07); }
+    .callout.alert .callout-label { color: var(--bb-3); }
+    .callout.info { border-left-color: var(--bb-6); background: rgba(184,134,11,0.07); }
+    .callout.info .callout-label { color: var(--bb-6); }
+
+    /* ── COST COMPARISON ── */
+    .cost-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    @media (max-width: 560px) { .cost-split { grid-template-columns: 1fr; } }
+
+    .cost-pane { padding: 24px; }
+    .cost-pane:first-child { border-right: 1px solid var(--bb-7); }
+    .cost-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+    .cost-value { font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 700; line-height: 1; margin-bottom: 8px; }
+    .cost-desc { font-size: 14px; line-height: 1.55; color: var(--bb-1); }
+
+    .pane-small { background: rgba(184,134,11,0.07); }
+    .pane-small .cost-label { color: var(--bb-6); }
+    .pane-small .cost-value { color: var(--bb-6); }
+
+    .pane-large { background: rgba(192,57,43,0.07); }
+    .pane-large .cost-label { color: var(--bb-3); }
+    .pane-large .cost-value { color: var(--bb-3); }
+
+    /* ── DISCLOSURE TABLE ── */
+    .table-wrap { overflow-x: auto; margin: 32px 0; border: 1px solid var(--bb-7); border-radius: 4px; }
+    .table-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-6); padding: 12px 16px 8px; border-bottom: 1px solid var(--bb-7); background: rgba(200,169,110,0.12); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: var(--bb-2); }
+    thead th { color: var(--bb-8); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; padding: 10px 14px; text-align: left; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid rgba(200,169,110,0.35); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(200,169,110,0.08); }
+    tbody td { padding: 10px 14px; color: var(--bb-1); vertical-align: top; line-height: 1.5; }
+    .td-hi { color: var(--bb-2); font-weight: 600; }
+    .td-alert { color: var(--bb-3); font-weight: 600; }
+    .td-good { color: var(--bb-6); font-weight: 600; }
+    .td-muted { color: var(--bb-6); font-size: 13px; }
+    .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .row-spotlight { background: rgba(192,57,43,0.1) !important; }
+
+    /* ── PRECEDENT LIST ── */
+    .precedent-list { list-style: none; padding-left: 0; }
+    .precedent-list li { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--bb-7); }
+    .precedent-list li:last-child { border-bottom: none; }
+    .precedent-co { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--bb-5); flex-shrink: 0; width: 80px; padding-top: 2px; }
+    .precedent-body { font-size: 15px; line-height: 1.6; }
+
+    /* ── THESIS BOX ── */
+    .thesis-box {
+      border: 2px solid var(--bb-2);
+      border-radius: 4px;
+      padding: 28px 32px;
+      margin: 40px 0;
+      background: rgba(139,58,15,0.05);
+    }
+
+    .thesis-box-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--bb-5);
+      margin-bottom: 14px;
+    }
+
+    .thesis-box p {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(16px, 2vw, 19px);
+      line-height: 1.6;
+      color: var(--bb-1);
+      margin-bottom: 0;
+      font-style: italic;
+    }
+
+    /* ── SIGNAL LIST ── */
+    .signal-list { list-style: none; padding-left: 0; margin: 20px 0; }
+    .signal-list li {
+      display: flex;
+      gap: 14px;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+      font-size: 16px;
+      line-height: 1.55;
+      align-items: flex-start;
+    }
+    .signal-list li:last-child { border-bottom: none; }
+    .signal-icon { color: var(--bb-5); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 11px; padding-top: 3px; font-weight: 600; }
+
+    /* ── TAGS ── */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 40px; }
+    .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bb-6); border: 1px solid var(--bb-7); padding: 3px 10px; border-radius: 2px; }
+
+    /* ── FOOTER ── */
+    footer { text-align: center; padding: 32px; border-top: 1px solid var(--bb-7); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); letter-spacing: 0.06em; }
+    footer a { color: var(--bb-6); }
+
+    @media (max-width: 640px) {
+      .article-header, .toc-wrap, .article-body { padding-left: 20px; padding-right: 20px; }
+      .pub-bar { padding: 12px 20px; }
+      .number-panel { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ PUB BAR -->
+<div class="pub-bar">
+  <div class="pub-name">Musinique</div>
+  <div class="pub-divider"></div>
+  <div class="pub-tag">Research Argument</div>
+  <div class="pub-divider"></div>
+  <div class="pub-tag">Policy Section</div>
+</div>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<header class="article-header">
+  <div class="article-kicker">Market Capitalization · Institutional Incentives · Fraud Measurement</div>
+  <h1 class="article-title">The $100 Billion Argument</h1>
+  <p class="article-deck">How Spotify's market capitalization makes the absence of measurement indefensible — and why the HEP framework's external results answer the question the internal team has chosen not to ask.</p>
+  <div class="article-byline">
+    <span class="byline-name">Nik Bear Brown</span>
+    <div class="byline-divider"></div>
+    <span class="byline-meta">Musinique Research Trilogy</span>
+    <div class="byline-divider"></div>
+    <span class="byline-meta">Paper Section — Opening Context &amp; Policy Foundation</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ TOC -->
+<div class="toc-wrap">
+  <div class="toc-inner">
+    <div class="toc-label">In This Section</div>
+    <ul class="toc-list">
+      <li><a href="#number"><span class="toc-num">·</span>The Number</a></li>
+      <li><a href="#argument"><span class="toc-num">·</span>The Argument That Runs Through the Paper</a></li>
+      <li><a href="#mlteam"><span class="toc-num">·</span>The ML Team Question</a></li>
+      <li><a href="#disclosure"><span class="toc-num">·</span>The Disclosure Comparison That Makes the Argument</a></li>
+      <li><a href="#sentence"><span class="toc-num">·</span>The Sentence That Runs Through the Paper</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ BODY -->
+<main class="article-body">
+
+  <!-- ── NUMBER ── -->
+  <div class="section">
+    <span class="section-anchor" id="number"></span>
+
+    <div class="number-panel">
+      <div class="number-panel-label">Spotify Market Capitalization · Early 2026</div>
+      <div class="number-panel-value">$100B</div>
+      <div class="number-panel-desc">Trading at a trailing P/E of approximately 40 and a forward P/E of approximately 32. Over the past twelve months, market cap decreased approximately <strong>18%</strong> — from a 52-week high of $785 to a low of $405, a range encompassing the filing of the RBX class action, the Virginia RICO suit, and the departure of founder Daniel Ek.</div>
+    </div>
+
+    <p>That number — $100 billion — is the throughline for the entire structural fraud argument. Every mechanism documented in this research ultimately serves one purpose: keeping that number where it is.</p>
+  </div>
+
+  <!-- ── ARGUMENT ── -->
+  <div class="section">
+    <span class="section-anchor" id="argument"></span>
+    <h2>The Argument That Runs Through the Paper</h2>
+
+    <p>At a $100 billion market capitalization, Spotify has the resources to build a world-class fraud research group. The question the paper must ask — and answer — is why it hasn't.</p>
+
+    <p>The answer is not capability. It is incentive.</p>
+
+    <div class="callout info">
+      <div class="callout-label">What a $100 Billion Company Could Do</div>
+      <p>A fraud research operation of the kind that would actually address the problems documented in this corpus would require, roughly:</p>
+      <ul>
+        <li>10–15 senior ML researchers with expertise in anomaly detection and behavioral modeling</li>
+        <li>A dedicated data infrastructure team for longitudinal signal tracking</li>
+        <li>Independent audit capacity with no reporting line to the metrics teams whose numbers they are auditing</li>
+        <li>Public disclosure of methodology and results, consistent with Meta's quarterly false account reporting</li>
+      </ul>
+    </div>
+
+    <div class="cost-split">
+      <div class="cost-pane pane-small">
+        <div class="cost-label">Annual Cost of the Operation</div>
+        <div class="cost-value">$5–10M</div>
+        <div class="cost-desc">At market rates for senior ML research talent. Against $17 billion in annual revenue, this is a rounding error — less than 0.06% of revenue.</div>
+      </div>
+      <div class="cost-pane pane-large">
+        <div class="cost-label">Potential Market Cap Impact if Findings Are Material</div>
+        <div class="cost-value">$20B</div>
+        <div class="cost-desc">If the research group found what the external evidence suggests, MAU counts would require downward revision, ad impression inventory would shrink, and the growth narrative would compress.</div>
+      </div>
+    </div>
+
+    <div class="thesis-box">
+      <div class="thesis-box-label">Central Thesis</div>
+      <p>The absence of measurement is not a technical limitation. It is a choice. And at $100 billion, it is an informed one.</p>
+    </div>
+  </div>
+
+  <!-- ── ML TEAM ── -->
+  <div class="section">
+    <span class="section-anchor" id="mlteam"></span>
+    <h2>The ML Team Question</h2>
+
+    <p>The most careful way to frame the internal complicity question — the one that is both accurate and academically defensible — is through the lens of institutional incentives rather than individual malfeasance.</p>
+
+    <p>A Spotify ML engineer working on recommendation systems knows several things:</p>
+
+    <ul class="signal-list">
+      <li><span class="signal-icon">01</span>The behavioral signals feeding collaborative filtering show anomalies inconsistent with human listening patterns.</li>
+      <li><span class="signal-icon">02</span>The genre entropy of mood and ambient playlists is statistically inconsistent with human curation.</li>
+      <li><span class="signal-icon">03</span>The follower conversion rates for content on official editorial playlists vary by orders of magnitude across ostensibly similar artists.</li>
+      <li><span class="signal-icon">04</span>The popularity score trajectories of ghost artist content are suspiciously smooth during their critical early windows.</li>
+    </ul>
+
+    <p>They know these things because they work with the data daily. The question is not whether the signals are visible — they are obviously visible to anyone looking at the system from the inside. The question is whether looking at them carefully, naming what they indicate, and publishing the findings internally creates career risk in an organization whose stock price depends on the metrics those findings would undermine.</p>
+
+    <div class="pull-quote">
+      <p>This is the institutional complicity argument. It does not require anyone at Spotify to be actively concealing evidence of fraud. It requires only that the organizational culture rewards metrics growth and punishes threats to the metrics growth narrative.</p>
+    </div>
+
+    <p>The correct academic framing is: <strong>the incentive structure of a $100 billion company whose valuation is built on engagement metrics creates systematic pressure against accurate internal measurement of those metrics' integrity.</strong> Individual engineers and researchers operating within that structure make rational choices about which questions to ask and which questions to leave unasked.</p>
+
+    <p>This is demonstrable without making claims about any individual's intent. It is the documented behavior of organizations under analogous pressure:</p>
+
+    <ul class="precedent-list">
+      <li>
+        <div class="precedent-co">Ford Pinto</div>
+        <div class="precedent-body">Internal safety analysis existed. The cost-benefit calculation of recall vs. litigation was completed and filed. The findings were economically inconvenient. The cars shipped.</div>
+      </li>
+      <li>
+        <div class="precedent-co">Tobacco</div>
+        <div class="precedent-body">Internal research on addiction existed decades before public acknowledgment. The findings were suppressed not through conspiracy but through institutional reward structures that discouraged publication.</div>
+      </li>
+      <li>
+        <div class="precedent-co">Banking '08</div>
+        <div class="precedent-body">Internal risk models before 2008 captured the fragility of mortgage-backed securities. The models were overridden by growth pressure. In each case, internal technical capability to measure the problem existed and was not deployed at full capacity because the findings were economically inconvenient.</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── DISCLOSURE ── -->
+  <div class="section">
+    <span class="section-anchor" id="disclosure"></span>
+    <h2>The Disclosure Comparison That Makes the Argument</h2>
+
+    <p>This is the single most powerful framing for the paper's policy section, and it should appear early:</p>
+
+    <div class="table-wrap">
+      <div class="table-label">False Account Disclosure — Major Platform Comparison</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Platform</th>
+            <th>False Account Disclosure</th>
+            <th>Since</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-hi">Meta</td>
+            <td>Facebook / Instagram</td>
+            <td class="td-good">~5% of MAUs — quarterly</td>
+            <td class="td-mono">2012 IPO</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Twitter / X</td>
+            <td>Twitter</td>
+            <td class="td-good">&lt;5% of mDAU — pre-acquisition filings</td>
+            <td class="td-mono">Pre-2022</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Google</td>
+            <td>YouTube</td>
+            <td class="td-good">View validation methodology published</td>
+            <td class="td-mono">Ongoing</td>
+          </tr>
+          <tr class="row-spotlight">
+            <td class="td-alert">Spotify</td>
+            <td class="td-alert">Spotify</td>
+            <td class="td-alert">Boilerplate risk language only</td>
+            <td class="td-mono td-alert">Never</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout alert">
+      <div class="callout-label">The Symmetry That Matters</div>
+      <p>Meta's market cap when it first disclosed false account estimates: approximately <strong>$100 billion.</strong> Spotify's current market cap: approximately <strong>$100 billion.</strong> Meta made the disclosure anyway, because the SEC and institutional investors required accountability. Spotify has not reached that threshold yet — which is precisely what the RBX litigation and any subsequent SEC attention would change.</p>
+    </div>
+
+    <p>The paper's contribution is establishing, through independent methodology requiring no platform cooperation, what the internal disclosure should contain. The HEP framework is not asking Spotify to do something unprecedented. It is demonstrating that the measurement is tractable, so that the absence of internal measurement cannot be defended as technically infeasible.</p>
+  </div>
+
+  <!-- ── SENTENCE ── -->
+  <div class="section">
+    <span class="section-anchor" id="sentence"></span>
+    <h2>The Sentence That Runs Through the Paper</h2>
+
+    <p>At every structural fraud mechanism, the same observation applies:</p>
+
+    <div class="thesis-box">
+      <div class="thesis-box-label">The Structural Claim</div>
+      <p>A $100 billion company that cannot measure this problem has chosen not to. A $100 billion company that could hire researchers with the skills to build the HEP framework in six months from outside the platform, using only public API signals, has chosen not to staff the internal equivalent.</p>
+    </div>
+
+    <p>The paper demonstrates this through inversion: if an external researcher with no server logs, no account-level data, no payment records, and no internal documentation can achieve 0.97 AUC on fraud detection using seven public signals — what would the internal team achieve with access to everything?</p>
+
+    <p>The answer is: near-certainty. The anomalies are not subtle:</p>
+
+    <ul class="signal-list">
+      <li><span class="signal-icon">—</span>The Swedish production company concentration in editorial playlists is not subtle.</li>
+      <li><span class="signal-icon">—</span>The follower conversion rates two orders of magnitude below organic baseline are not subtle.</li>
+      <li><span class="signal-icon">—</span>The coordinated removal events are not subtle.</li>
+      <li><span class="signal-icon">—</span>The 23-hour daily listening accounts in the RBX filing are not subtle.</li>
+    </ul>
+
+    <div class="pull-quote">
+      <p>The absence of a formal internal finding is the finding.</p>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">Function of This Section in the Paper</div>
+      <p>This section synthesizes the market capitalization data with the structural fraud argument for use throughout the paper — as <strong>opening context</strong>, as the <strong>motivation for independent audit methodology</strong>, and as the <strong>policy section's foundation</strong>. The $100 billion number is not rhetorical emphasis. It is the evidentiary standard against which the absence of internal measurement is judged.</p>
+    </div>
+  </div>
+
+  <!-- ── TAGS ── -->
+  <div class="tag-row">
+    <span class="tag">Market Capitalization</span>
+    <span class="tag">Institutional Incentives</span>
+    <span class="tag">False Account Disclosure</span>
+    <span class="tag">HEP Framework</span>
+    <span class="tag">SEC Disclosure</span>
+    <span class="tag">MAU Integrity</span>
+    <span class="tag">Musinique Research Trilogy</span>
+    <span class="tag">Policy Section</span>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

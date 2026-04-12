@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What the Dashboard Doesn't Show: Reading the Signals Spotify Hides</title>
+  <meta name="description" content="The Spotify for Artists dashboard leads with streams and obscures save rate, skip rate, and genre coherence — the metrics that actually determine what the algorithm does next. A guide to reading beyond the scoreboard: what to track, what to calculate yourself, and why the first 14 days of a release carry disproportionate algorithmic weight.">
+  <meta name="keywords" content="Spotify for Artists, save rate, skip rate, Focus Score, Discover Weekly, Release Radar, playlist source quality, algorithmic source, dashboard analytics, music marketing, independent artists">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.8;
+    }
+
+    /* ── PUBLICATION BAR ── */
+    .pub-bar {
+      background: var(--bb-1);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 2px solid var(--bb-5);
+    }
+    .pub-name { font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 900; color: var(--bb-8); letter-spacing: 0.05em; }
+    .pub-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-7); border: 1px solid rgba(200,169,110,0.4); padding: 2px 8px; border-radius: 2px; }
+    .pub-divider { width: 1px; height: 14px; background: rgba(200,169,110,0.4); }
+
+    /* ── ARTICLE HEADER ── */
+    .article-header { max-width: 760px; margin: 0 auto; padding: 64px 32px 48px; border-bottom: 1px solid var(--bb-7); }
+    .article-kicker { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--bb-5); margin-bottom: 20px; }
+    .article-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(28px, 4.5vw, 50px); font-weight: 900; line-height: 1.1; color: var(--bb-1); margin-bottom: 20px; }
+    .article-deck { font-family: 'Source Serif 4', Georgia, serif; font-size: clamp(16px, 2.2vw, 20px); color: var(--bb-2); line-height: 1.55; margin-bottom: 32px; font-style: italic; }
+    .article-byline { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .byline-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--bb-1); text-transform: uppercase; letter-spacing: 0.1em; }
+    .byline-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); }
+    .byline-divider { width: 1px; height: 14px; background: var(--bb-7); }
+
+    /* ── TOC ── */
+    .toc-wrap { max-width: 760px; margin: 0 auto; padding: 0 32px; }
+    .toc-inner { background: rgba(139,58,15,0.06); border: 1px solid var(--bb-7); border-radius: 4px; padding: 24px 28px; margin: 40px 0; }
+    .toc-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--bb-6); margin-bottom: 14px; }
+    .toc-list { list-style: none; padding-left: 0; columns: 2; column-gap: 32px; }
+    @media (max-width: 580px) { .toc-list { columns: 1; } }
+    .toc-list li { margin-bottom: 8px; break-inside: avoid; }
+    .toc-list a { color: var(--bb-2); text-decoration: none; font-size: 14px; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+    .toc-list a:hover { border-bottom-color: var(--bb-5); }
+    .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); margin-right: 8px; }
+
+    /* ── LAYOUT ── */
+    .article-body { max-width: 760px; margin: 0 auto; padding: 0 32px 80px; }
+    .section { padding-top: 56px; }
+    .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    /* ── TYPOGRAPHY ── */
+    h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(20px, 2.6vw, 28px); font-weight: 700; color: var(--bb-2); line-height: 1.2; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 2px solid var(--bb-7); }
+    h3 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(16px, 1.9vw, 20px); font-weight: 700; font-style: italic; color: var(--bb-1); margin: 36px 0 12px; }
+    p { margin-bottom: 22px; }
+    a { color: var(--bb-2); }
+    a:hover { color: var(--bb-5); }
+    strong { font-weight: 600; color: var(--bb-2); }
+    em { font-style: italic; }
+
+    /* ── LEDE / THREAD ── */
+    .lede { font-size: clamp(18px, 2.3vw, 22px); line-height: 1.7; color: var(--bb-1); margin-bottom: 28px; font-style: italic; }
+
+    .thread-block {
+      background: rgba(26,10,0,0.05);
+      border: 1px solid var(--bb-7);
+      border-left: 4px solid var(--bb-7);
+      border-radius: 0 4px 4px 0;
+      padding: 20px 24px;
+      margin: 32px 0;
+      font-size: 16px;
+      font-style: italic;
+      line-height: 1.65;
+      color: var(--bb-1);
+    }
+
+    .thread-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-6);
+      margin-bottom: 10px;
+      font-style: normal;
+    }
+
+    /* ── PULL QUOTES ── */
+    .pull-quote { margin: 40px 0; padding: 0 0 0 28px; border-left: 5px solid var(--bb-5); }
+    .pull-quote p { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(18px, 2.4vw, 24px); font-style: italic; color: var(--bb-2); line-height: 1.5; margin-bottom: 0; }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 4px solid var(--bb-4); padding: 16px 20px; margin: 32px 0; background: rgba(232,160,32,0.08); border-radius: 0 4px 4px 0; }
+    .callout p { margin-bottom: 0; font-size: 16px; }
+    .callout-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-5); margin-bottom: 8px; }
+    .callout.alert { border-left-color: var(--bb-3); background: rgba(192,57,43,0.07); }
+    .callout.alert .callout-label { color: var(--bb-3); }
+    .callout.info { border-left-color: var(--bb-6); background: rgba(184,134,11,0.07); }
+    .callout.info .callout-label { color: var(--bb-6); }
+
+    /* ── METRIC THRESHOLDS ── */
+    .metric-card {
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    .metric-card-header {
+      background: var(--bb-2);
+      padding: 12px 20px;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .metric-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--bb-8);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .metric-card-subtitle {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: rgba(240,230,208,0.65);
+    }
+
+    .metric-band {
+      display: flex;
+      align-items: center;
+      padding: 13px 20px;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+      gap: 20px;
+    }
+
+    .metric-band:last-child { border-bottom: none; }
+
+    .metric-band-range {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 600;
+      flex-shrink: 0;
+      width: 110px;
+    }
+
+    .metric-band-label { font-size: 15px; line-height: 1.4; }
+
+    .band-danger { background: rgba(192,57,43,0.07); }
+    .band-danger .metric-band-range { color: var(--bb-3); }
+
+    .band-warn { background: rgba(212,80,10,0.05); }
+    .band-warn .metric-band-range { color: var(--bb-5); }
+
+    .band-ok { background: rgba(200,169,110,0.08); }
+    .band-ok .metric-band-range { color: var(--bb-6); }
+
+    .band-good { background: rgba(184,134,11,0.08); }
+    .band-good .metric-band-range { color: var(--bb-6); }
+
+    .band-great { background: rgba(139,58,15,0.07); }
+    .band-great .metric-band-range { color: var(--bb-2); }
+
+    /* ── CHECKLIST ── */
+    .watch-list { list-style: none; padding-left: 0; margin: 24px 0; }
+
+    .watch-item {
+      display: flex;
+      gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--bb-7);
+      align-items: flex-start;
+    }
+
+    .watch-item:last-child { border-bottom: none; }
+
+    .watch-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--bb-5);
+      flex-shrink: 0;
+      padding-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .watch-content h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--bb-2);
+      margin-bottom: 4px;
+    }
+
+    .watch-content p { margin: 0; font-size: 15px; line-height: 1.6; }
+
+    .watch-content .formula {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: rgba(26,10,0,0.06);
+      border: 1px solid var(--bb-7);
+      border-radius: 3px;
+      padding: 2px 8px;
+      color: var(--bb-2);
+      margin: 4px 0;
+    }
+
+    /* ── COMPARISON SPLIT ── */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    @media (max-width: 560px) { .comparison { grid-template-columns: 1fr; } }
+
+    .comparison-pane { padding: 24px; }
+
+    .comparison-pane:first-child { border-right: 1px solid var(--bb-7); }
+
+    .comparison-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+
+    .comparison-value {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .comparison-desc { font-size: 14px; line-height: 1.5; color: var(--bb-1); }
+
+    .pane-bad { background: rgba(192,57,43,0.06); }
+    .pane-bad .comparison-label { color: var(--bb-3); }
+    .pane-bad .comparison-value { color: var(--bb-3); }
+
+    .pane-good { background: rgba(184,134,11,0.07); }
+    .pane-good .comparison-label { color: var(--bb-6); }
+    .pane-good .comparison-value { color: var(--bb-6); }
+
+    /* ── AUTHOR BIO ── */
+    .author-bio { border-top: 2px solid var(--bb-7); padding: 32px 0 0; margin-top: 56px; }
+    .author-bio-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--bb-6); margin-bottom: 14px; }
+    .author-bio p { font-size: 15px; color: var(--bb-1); line-height: 1.65; margin-bottom: 10px; }
+    .author-bio p:last-child { margin-bottom: 0; }
+
+    /* ── TAGS ── */
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 40px; }
+    .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bb-6); border: 1px solid var(--bb-7); padding: 3px 10px; border-radius: 2px; }
+
+    /* ── FOOTER ── */
+    footer { text-align: center; padding: 32px; border-top: 1px solid var(--bb-7); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); letter-spacing: 0.06em; }
+    footer a { color: var(--bb-6); }
+
+    @media (max-width: 640px) {
+      .article-header, .toc-wrap, .article-body { padding-left: 20px; padding-right: 20px; }
+      .pub-bar { padding: 12px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ PUB BAR -->
+<div class="pub-bar">
+  <div class="pub-name">Musinique</div>
+  <div class="pub-divider"></div>
+  <div class="pub-tag">Music &amp; AI</div>
+</div>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<header class="article-header">
+  <div class="article-kicker">Spotify for Artists · Dashboard Analytics · Algorithm Behavior</div>
+  <h1 class="article-title">What the Dashboard Doesn't Show</h1>
+  <p class="article-deck">The Spotify for Artists dashboard leads with streams and obscures save rate, skip rate, and genre coherence — the metrics that actually determine what happens at your next release.</p>
+  <div class="article-byline">
+    <span class="byline-name">Nik Bear Brown</span>
+    <div class="byline-divider"></div>
+    <span class="byline-meta">Musinique</span>
+    <div class="byline-divider"></div>
+    <span class="byline-meta">Musinique Research Trilogy · Part II</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ TOC -->
+<div class="toc-wrap">
+  <div class="toc-inner">
+    <div class="toc-label">In This Piece</div>
+    <ul class="toc-list">
+      <li><a href="#thread"><span class="toc-num">·</span>The r/musicmarketing Pattern</a></li>
+      <li><a href="#save-rate"><span class="toc-num">·</span>The Number the Dashboard Leads With</a></li>
+      <li><a href="#removed"><span class="toc-num">·</span>The Metric Spotify Removed</a></li>
+      <li><a href="#skip"><span class="toc-num">·</span>The Skip Rate Problem</a></li>
+      <li><a href="#playlist"><span class="toc-num">·</span>What Playlist Source Data Reveals</a></li>
+      <li><a href="#window"><span class="toc-num">·</span>The Window You Cannot See Closing</a></li>
+      <li><a href="#discover"><span class="toc-num">·</span>The Discover Weekly Signal You Can Read</a></li>
+      <li><a href="#purpose"><span class="toc-num">·</span>What the Dashboard Is For</a></li>
+      <li><a href="#signals"><span class="toc-num">·</span>The Signals Worth Watching</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ BODY -->
+<main class="article-body">
+
+  <!-- ── LEDE ── -->
+  <div class="section">
+    <span class="section-anchor" id="thread"></span>
+
+    <div class="thread-block">
+      <div class="thread-label">r/musicmarketing · recurring post structure</div>
+      I ran a campaign. Got 8,000 streams. Landed on two playlists. Dashboard looked great. Then Discover Weekly went quiet and my next release got half the traction. What happened?
+    </div>
+
+    <p>The details change. The structure does not. The streams went up. The dashboard showed a clean curve. Something downstream went wrong and the artist has no idea why, because nothing in the dashboard told them. The thread fills with replies from other artists who experienced the same thing. Nobody has a clean explanation. The most common answer is: the algorithm is unpredictable.</p>
+
+    <div class="pull-quote">
+      <p>It is not unpredictable. It is reading signals the dashboard does not show you.</p>
+    </div>
+
+    <p>Brian Hazard has released music as Color Theory since 1994 and documents every promotional campaign in public on his blog Passive Promotion — thirty years of data, published. After a campaign that placed his synthpop alongside genuine 1980s artists on a high-follower playlist, he wrote: <em>"it likely confuses Spotify as to who my real fans are."</em> The streams had arrived. The placement looked successful on paper. But the audience that heard his music had not arrived for his genre. Their skips, their low save rate, their absence of repeat listens fed the algorithm a signal built from the wrong listeners. The streams were real. What the streams told the algorithm was not.</p>
+
+    <p>Hazard caught this because he has spent thirty years learning to read beyond the stream count. The artists posting in r/musicmarketing have the dashboard. And the dashboard did not flag the problem. It showed the streams going up and let them conclude the campaign had worked.</p>
+
+    <p>The campaign had worked, in the only sense the dashboard measures. What the dashboard does not measure is what the campaign cost.</p>
+  </div>
+
+  <!-- ── SAVE RATE ── -->
+  <div class="section">
+    <span class="section-anchor" id="save-rate"></span>
+    <h2>The Number the Dashboard Leads With</h2>
+
+    <p>The first thing you see when you open Spotify for Artists is streams. Total streams, monthly listeners, the graph going up or down. Large font, prominent placement — the visual language of a scoreboard.</p>
+
+    <p>Streams are not a bad metric. They are a real thing that happened. But they are the least predictive number in your dashboard for what happens next — and Spotify leads with them anyway, because streams are the number that most reliably goes up during a campaign and most convincingly resembles success.</p>
+
+    <p>The number that actually determines what happens next is <strong>save rate</strong>. The percentage of listeners who heard your track and decided it was worth keeping. Not just playing it through — adding it to their library, hitting the heart, deciding to return.</p>
+
+    <div class="comparison">
+      <div class="comparison-pane pane-bad">
+        <div class="comparison-label">⚠ Misleading success</div>
+        <div class="comparison-value">2%</div>
+        <div class="comparison-desc">10,000 streams · 200 saves. This track will underperform in Discover Weekly and Radio despite its apparent scale.</div>
+      </div>
+      <div class="comparison-pane pane-good">
+        <div class="comparison-label">✓ Genuine signal</div>
+        <div class="comparison-value">20%</div>
+        <div class="comparison-desc">2,000 streams · 400 saves. This track will outperform — now, in the weeks when the algorithm is deciding how to weight your music.</div>
+      </div>
+    </div>
+
+    <p>The dashboard shows you your saves as a raw number. It does not calculate your save rate. It does not tell you whether 400 saves is excellent or catastrophic without the denominator. It does not show you how your save rate has moved over time. It gives you a number and lets you decide what it means without providing the context that would let you decide correctly.</p>
+
+    <div class="metric-card">
+      <div class="metric-card-header">
+        <span class="metric-card-title">Save Rate Benchmarks</span>
+        <span class="metric-card-subtitle">Industry consensus — not displayed in the dashboard</span>
+      </div>
+      <div class="metric-band band-danger">
+        <span class="metric-band-range">Below 10%</span>
+        <span class="metric-band-label">Warning signal. Something is wrong: either with the track or the audience it reached.</span>
+      </div>
+      <div class="metric-band band-ok">
+        <span class="metric-band-range">10%–15%</span>
+        <span class="metric-band-label">Marginal. The algorithm is not learning much useful from your listeners.</span>
+      </div>
+      <div class="metric-band band-good">
+        <span class="metric-band-range">15%–20%</span>
+        <span class="metric-band-label">Healthy. Consistent engagement, reasonable algorithmic traction.</span>
+      </div>
+      <div class="metric-band band-great">
+        <span class="metric-band-range">20%–25%</span>
+        <span class="metric-band-label">Strong. The algorithm is receiving a clear signal of genuine affinity.</span>
+      </div>
+      <div class="metric-band band-great">
+        <span class="metric-band-range">Above 25%</span>
+        <span class="metric-band-label">The kind of number that triggers Discover Weekly consideration. The dashboard does not show you this threshold.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REMOVED ── -->
+  <div class="section">
+    <span class="section-anchor" id="removed"></span>
+    <h2>The Metric Spotify Removed</h2>
+
+    <p>Until recently, you could see your saves going back to 2015 with a single click. Every save, every track, across the full history of your catalog, visible in the default dashboard view.</p>
+
+    <p>Spotify changed this. They replaced the "Since 2015" default filter with "Last 12 months" across Music, Song, and Playlist tabs. Historical data going back two years is still technically accessible via a custom date range — but it requires knowing to look for it, navigating to it manually, and applying filters most artists never use. The official explanation was that Spotify was standardizing data retention to enable new analytics features. The practical effect is that the save history most artists see when they open the dashboard has been compressed from a decade to a year, and the default view shows a fraction of the picture.</p>
+
+    <div class="callout alert">
+      <div class="callout-label">The Asymmetry</div>
+      <p>The data still exists. Spotify's recommendation systems use it. The question is what the artist can see from their side of the interface — and the answer has gotten narrower.</p>
+    </div>
+
+    <p>What the default view shows: streams, monthly listeners, playlist placements, source breakdown, listener geography, age and gender demographics. These are useful. None of them tell you whether the listeners who found your music in the last three months intend to come back.</p>
+  </div>
+
+  <!-- ── SKIP ── -->
+  <div class="section">
+    <span class="section-anchor" id="skip"></span>
+    <h2>The Skip Rate Problem</h2>
+
+    <p>The dashboard does not show you skip rates.</p>
+
+    <p>Skip rate — the percentage of streams that end before the thirty-second royalty threshold — is one of the primary signals Spotify's recommendation engine uses to evaluate whether a track deserves wider placement. A high skip rate tells the algorithm that listeners who encountered this track did not want to be there. The algorithm adjusts its recommendations accordingly: sending the track to fewer people, deprioritizing it in Discover Weekly and Radio, pulling it back from the contexts where it might reach new listeners.</p>
+
+    <p>You cannot see this happening. The dashboard shows you that a stream occurred. It does not show you when in the track the listener left. The algorithm knows. You do not.</p>
+
+    <p>The only indirect signal available in the dashboard is the <strong>stream-to-listener ratio</strong> — how many times the average listener played your track. A ratio above 2.0 generally indicates that listeners came back, implying a low skip rate. A ratio below 1.2 suggests that most listeners heard it once and did not return. But the ratio is an aggregate. It cannot tell you whether the 8,000 streams in January came from fans who loved the record or from playlist listeners who skipped it three times each.</p>
+
+    <div class="callout">
+      <div class="callout-label">The Limitation</div>
+      <p>A stream-to-listener ratio of 1.4 is fine. It tells you almost nothing.</p>
+    </div>
+  </div>
+
+  <!-- ── PLAYLIST ── -->
+  <div class="section">
+    <span class="section-anchor" id="playlist"></span>
+    <h2>What the Playlist Source Data Actually Reveals</h2>
+
+    <p>The dashboard shows you which playlists your streams came from. This section is genuinely useful and almost universally misread.</p>
+
+    <p>Most artists look at the playlist column and feel good when they see their music appearing on lists with large follower counts. A placement on a 40,000-follower playlist looks like reach. What the column does not show is whether that playlist's audience has any consistent affinity for your genre — whether the people who followed it arrived for the same reason your music is there.</p>
+
+    <p>This is precisely what the <strong>Musinique Focus Score</strong> is designed to measure: the genre coherence of a playlist's audience.</p>
+
+    <div class="comparison">
+      <div class="comparison-pane pane-bad">
+        <div class="comparison-label">High followers · Low Focus Score</div>
+        <div class="comparison-value">40K / 22</div>
+        <div class="comparison-desc">Audience accumulated from multiple genre communities. Streams are real. Behavioral signals — lower saves, higher skips, minimal repeat plays — contaminate your algorithmic profile.</div>
+      </div>
+      <div class="comparison-pane pane-good">
+        <div class="comparison-label">Fewer followers · High Focus Score</div>
+        <div class="comparison-value">4K / 87</div>
+        <div class="comparison-desc">Audience chose this playlist for a specific sound. Fewer streams, right listeners. Higher saves, higher repeats, lower skips. The algorithm finds more of them.</div>
+      </div>
+    </div>
+
+    <p>The dashboard shows you the playlist name and stream count from each source. It does not show you the genre coherence of those playlists. It does not calculate the engagement quality of streams by source. It does not distinguish between a placement that built your algorithmic profile and a placement that contaminated it. It shows you streams and lets you conclude that more is better — which is the conclusion it is structured to produce.</p>
+  </div>
+
+  <!-- ── WINDOW ── -->
+  <div class="section">
+    <span class="section-anchor" id="window"></span>
+    <h2>The Window You Cannot See Closing</h2>
+
+    <p>The most consequential period in any release's life is the first two to four weeks after it goes live. This is when Spotify's recommendation systems are most actively forming their model of who the music is for. Early streams carry disproportionate weight. Early saves anchor the collaborative filtering profile. Early skips set the baseline the algorithm measures against for months.</p>
+
+    <p>The dashboard does not tell you this window exists. It does not indicate when it opens or closes. It does not mark the point at which your release's algorithmic profile has been established — after which it becomes increasingly difficult to revise through organic activity alone. It shows you streams accumulating across time with no indication that the first two weeks and the sixth week are fundamentally different in terms of what the algorithm is learning.</p>
+
+    <div class="callout alert">
+      <div class="callout-label">The Invisible Timing Problem</div>
+      <p>An artist who runs a campaign in week three, after the window has mostly closed, is spending money to generate streams that carry less algorithmic weight than the same streams would have in week one. The dashboard does not show this. It shows the streams arriving and the curve rising. The timing problem is invisible.</p>
+    </div>
+
+    <p>This is why the standard advice — pitch early, release on a Friday, submit to editorial consideration at least seven days before release — exists. The people who discovered this learned it the hard way, through campaigns that generated streams without generating algorithmic traction, then reconstructed the mechanism from the timing of the damage. The dashboard does not explain it. It does not show you a release-window countdown. It does not flag that the window you needed to fill with the right listeners is now past.</p>
+  </div>
+
+  <!-- ── DISCOVER ── -->
+  <div class="section">
+    <span class="section-anchor" id="discover"></span>
+    <h2>The Discover Weekly Signal You Can Read</h2>
+
+    <p>Discover Weekly and Release Radar placement does not appear directly in the dashboard as a health indicator. But there is a proxy you can watch.</p>
+
+    <p>Under the Sources section, Spotify categorizes stream sources including <strong>"Algorithmic"</strong> — streams that came from Discover Weekly, Release Radar, Radio, and similar recommendation systems. The percentage of your streams that arrive from algorithmic sources versus editorial playlists versus active listeners going to your profile directly tells you whether the algorithm is working for you or has stopped.</p>
+
+    <p>An artist building genuine algorithmic momentum will see the algorithmic source percentage stay stable or grow between releases. An artist whose algorithmic profile has been contaminated by genre-incoherent placement will see the algorithmic percentage drop — sometimes sharply — between the campaign period and the weeks that follow. The streams from the playlists stop. The follow-on recommendations do not materialize. The curve that looked like growth reveals itself as a spike with no base.</p>
+
+    <div class="callout info">
+      <div class="callout-label">What to Watch</div>
+      <p>Monitor the algorithmic source percentage month over month, not just during campaigns. If it is dropping between releases, the foundation is not holding. The dashboard will not tell you this explicitly. You have to read the source breakdown as a story, not a table.</p>
+    </div>
+  </div>
+
+  <!-- ── PURPOSE ── -->
+  <div class="section">
+    <span class="section-anchor" id="purpose"></span>
+    <h2>What the Dashboard Is For</h2>
+
+    <p>It is worth being precise about what Spotify for Artists is and is not.</p>
+
+    <p>It is a tool Spotify provides to artists for free. It is designed to help you understand your audience and plan your release strategy. It is also designed by a company that benefits from artists spending money on campaigns, promotion, and Spotify's own paid tools — Marquee, Showcase, Discovery Mode. The metrics it foregrounds are the ones that rise during campaigns and provide feedback that campaigns are working. The metrics it obscures or removes are the ones that would tell you whether the campaign built something durable or simply moved a number during the window when you were watching.</p>
+
+    <div class="pull-quote">
+      <p>The dashboard is not lying to you. It is showing you a true but incomplete picture in the way that a mirror angled slightly upward is showing you a true but flattering picture of the room.</p>
+    </div>
+
+    <p>An artist whose campaign generates 8,000 streams across two high-follower playlists will see a clean curve and a report that looks like success. What the dashboard will not show is whether the save rate on those streams was 6 percent — below the threshold the algorithm reads as genuine affinity. It will not flag that those playlists had Focus Scores of 19 and 24. It will not connect the genre contamination generated in the first month to the quieter algorithmic performance in month three.</p>
+
+    <p>The dashboard shows the streams. It does not show what those streams cost.</p>
+  </div>
+
+  <!-- ── SIGNALS ── -->
+  <div class="section">
+    <span class="section-anchor" id="signals"></span>
+    <h2>The Signals Worth Watching</h2>
+
+    <p>Based on everything this series has documented — the skip rate mechanism, the Focus Score data, the contamination timeline, the playlist source problem — here is what to actually track across a release cycle. Most of which the dashboard does not calculate for you.</p>
+
+    <ul class="watch-list">
+      <li class="watch-item">
+        <div class="watch-icon">01</div>
+        <div class="watch-content">
+          <h4>Save Rate — Not Raw Saves</h4>
+          <p>Divide your saves by your unique listeners for any given period. <span class="formula">saves ÷ unique listeners × 100</span> Below 10% is a warning. Above 20% is where you want to be. The dashboard gives you both numbers but does not divide them.</p>
+        </div>
+      </li>
+      <li class="watch-item">
+        <div class="watch-icon">02</div>
+        <div class="watch-content">
+          <h4>Stream-to-Listener Ratio Trend</h4>
+          <p>Not just the number itself but whether it is rising or falling between releases. A falling ratio across consecutive releases suggests your audience is becoming less engaged, not more. Rising means your listeners are returning.</p>
+        </div>
+      </li>
+      <li class="watch-item">
+        <div class="watch-icon">03</div>
+        <div class="watch-content">
+          <h4>Algorithmic Source Percentage</h4>
+          <p>What share of your streams are coming from Spotify's recommendation systems versus active listening? Watch this month over month. If it is declining between releases, the algorithm is pulling back — and the dashboard will not flag it explicitly.</p>
+        </div>
+      </li>
+      <li class="watch-item">
+        <div class="watch-icon">04</div>
+        <div class="watch-content">
+          <h4>Playlist Source Quality</h4>
+          <p>Use the Focus Score to evaluate the genre coherence of the playlists driving your streams. High follower count with low Focus Score is the combination most likely to generate contaminated signal. The dashboard will not flag this. You have to check it separately.</p>
+        </div>
+      </li>
+      <li class="watch-item">
+        <div class="watch-icon">05</div>
+        <div class="watch-content">
+          <h4>The First 14 Days Specifically</h4>
+          <p>Whatever your total campaign numbers are, look at the first two weeks in isolation. What was the save rate during that window? What was the source breakdown? The profile the algorithm built during those weeks is the one it will carry forward. The number that matters is not the final total. It is the quality of the signal generated at the moment the algorithm was most attentive.</p>
+        </div>
+      </li>
+    </ul>
+
+    <p>The dashboard is the front door of a building most of what matters happens behind. Streams are what the algorithm produced. Save rate is what the listeners decided. Skip rate is what the wrong listeners cost you. The source breakdown is the story of whether the campaign built something or just created a temporary spike that the algorithm noted and moved on from.</p>
+
+    <p>Spotify for Artists will tell you how many people heard the music. It will not tell you whether they were the right people, whether they stayed, whether they decided the music was worth keeping, or whether the algorithm learned anything useful from their presence. Those are the questions that determine what happens at your next release. The dashboard does not answer them. You have to build the habit of asking them yourself — from the numbers the dashboard shows in combination, not in isolation, and sometimes from the numbers it removed.</p>
+  </div>
+
+  <!-- ── TAGS ── -->
+  <div class="tag-row">
+    <span class="tag">Spotify for Artists</span>
+    <span class="tag">Save Rate</span>
+    <span class="tag">Skip Rate</span>
+    <span class="tag">Focus Score</span>
+    <span class="tag">Discover Weekly</span>
+    <span class="tag">Release Window</span>
+    <span class="tag">Algorithm Behavior</span>
+    <span class="tag">Music Marketing</span>
+  </div>
+
+  <!-- ── AUTHOR BIO ── -->
+  <div class="author-bio">
+    <div class="author-bio-label">About the Author</div>
+    <p><strong>Nik Bear Brown</strong> is Associate Teaching Professor of Computer Science and AI at Northeastern University and founder of Musinique LLC and Humanitarians AI (501(c)(3)).</p>
+    <p>The Musical Endogeneity research trilogy — examining Spotify's popularity score architecture, the perceptual boundary between human and AI music, and the economics of algorithmic momentum — is ongoing research conducted through Humanitarians AI. More of his work lives at <a href="https://skepticism.ai">skepticism.ai</a> and <a href="https://theorist.ai">theorist.ai</a>.</p>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

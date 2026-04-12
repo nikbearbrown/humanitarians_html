@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Velvet Sundown: Synthetic Artist Construction and the Capture of Spotify's Recommendation Graph</title>
+  <meta name="description" content="A forensic essay on the Velvet Sundown case — four fictional musicians, one AI-generated folk-country catalog, 900,000 monthly listeners, and $40. An analysis of how Synthetic Artist Construction exploits Spotify's recommendation algorithm, the genre entropy of low-signal music, and what structural reforms would actually work.">
+  <meta name="keywords" content="Velvet Sundown, Spotify algorithm, AI music fraud, synthetic artist, streaming manipulation, Discover Weekly, genre entropy, recommendation graph, Musical Endogeneity, SongDNA">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.9;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrapper {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── MASTHEAD ── */
+    .masthead {
+      border-bottom: 2px solid var(--bb-2);
+      padding: 52px 0 40px;
+      margin-bottom: 52px;
+    }
+
+    .masthead-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-5);
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    h1 {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: clamp(1.5rem, 3.5vw, 2.05rem);
+      font-weight: 700;
+      color: var(--bb-2);
+      line-height: 1.25;
+      margin-bottom: 22px;
+    }
+
+    .deck {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.05rem;
+      color: var(--bb-1);
+      line-height: 1.7;
+      border-left: 3px solid var(--bb-7);
+      padding-left: 18px;
+      margin-bottom: 0;
+    }
+
+    /* ── LEDE ── */
+    .lede {
+      margin-bottom: 56px;
+    }
+
+    .lede p {
+      margin-bottom: 18px;
+      font-size: 1.02rem;
+    }
+
+    .lede p:last-child { margin-bottom: 0; }
+
+    .lede .kicker {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--bb-5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    /* ── FACT BOX ── */
+    .fact-box {
+      background: rgba(139,58,15,0.06);
+      border: 1px solid var(--bb-7);
+      border-left: 4px solid var(--bb-2);
+      border-radius: 0 4px 4px 0;
+      padding: 24px 28px;
+      margin: 36px 0;
+    }
+
+    .fact-box .label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-5);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .fact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .fact-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fact-item .f-label {
+      font-family: 'Courier Prime', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--bb-6);
+      margin-bottom: 3px;
+    }
+
+    .fact-item .f-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--bb-2);
+    }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 60px; }
+
+    h2 {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--bb-2);
+      line-height: 1.3;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--bb-7);
+    }
+
+    p { margin-bottom: 18px; }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      background: rgba(232,160,32,0.09);
+      border-left: 4px solid var(--bb-4);
+      padding: 18px 24px;
+      margin: 32px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--bb-1);
+      margin: 0;
+      line-height: 1.75;
+    }
+
+    .callout p + p { margin-top: 10px; }
+
+    .alert {
+      background: rgba(192,57,43,0.06);
+      border-left: 4px solid var(--bb-3);
+      padding: 18px 24px;
+      margin: 32px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .alert p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--bb-1);
+      margin: 0;
+      line-height: 1.75;
+    }
+
+    .alert p + p { margin-top: 10px; }
+
+    .highlight {
+      background: rgba(139,58,15,0.06);
+      border-left: 4px solid var(--bb-2);
+      padding: 18px 24px;
+      margin: 32px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .highlight p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: var(--bb-1);
+      margin: 0;
+      line-height: 1.75;
+    }
+
+    /* ── PULL QUOTE ── */
+    .pull-quote {
+      margin: 40px 0;
+      padding: 0 0 0 28px;
+      border-left: 4px solid var(--bb-5);
+    }
+
+    .pull-quote p {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--bb-2);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ── COMPARISON TABLE ── */
+    .compare-wrap {
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 32px 0;
+    }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+    }
+
+    .compare-row:last-child { border-bottom: none; }
+
+    .compare-row.header {
+      background: var(--bb-2);
+    }
+
+    .compare-row.header span {
+      color: var(--bb-8);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 10px 16px;
+      border-right: 1px solid rgba(240,230,208,0.2);
+    }
+
+    .compare-row.header span:last-child { border-right: none; }
+
+    .compare-row:not(.header):nth-child(even) {
+      background: rgba(200,169,110,0.1);
+    }
+
+    .compare-cell {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      color: var(--bb-1);
+      padding: 10px 16px;
+      border-right: 1px solid rgba(200,169,110,0.28);
+      line-height: 1.55;
+      vertical-align: top;
+    }
+
+    .compare-cell:first-child { font-weight: 600; color: var(--bb-5); }
+    .compare-cell:last-child { border-right: none; }
+
+    /* ── SOLUTIONS ── */
+    .solutions-list {
+      list-style: none;
+      padding: 0;
+      counter-reset: sol;
+      margin: 24px 0;
+    }
+
+    .solutions-list li {
+      counter-increment: sol;
+      padding: 18px 20px 18px 56px;
+      position: relative;
+      border-bottom: 1px solid rgba(200,169,110,0.35);
+      margin: 0;
+    }
+
+    .solutions-list li:last-child { border-bottom: none; }
+
+    .solutions-list li::before {
+      content: counter(sol);
+      position: absolute;
+      left: 14px;
+      top: 20px;
+      font-family: 'Courier Prime', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--bb-5);
+      background: rgba(212,80,10,0.1);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .solutions-list li strong {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--bb-2);
+      margin-bottom: 6px;
+    }
+
+    .solutions-list li span {
+      font-size: 0.95rem;
+      line-height: 1.75;
+    }
+
+    /* ── BYLINE ── */
+    .byline-block {
+      border-top: 1px solid var(--bb-7);
+      border-bottom: 1px solid var(--bb-7);
+      padding: 20px 0;
+      margin: 56px 0 0;
+    }
+
+    .byline-block p {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--bb-6);
+      margin: 0;
+      line-height: 1.65;
+    }
+
+    .byline-block .byline-name {
+      font-weight: 600;
+      color: var(--bb-2);
+    }
+
+    .byline-block a {
+      color: var(--bb-5);
+      text-decoration: none;
+    }
+
+    .byline-block a:hover { text-decoration: underline; }
+
+    .tags {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-family: 'Courier Prime', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--bb-5);
+      background: rgba(212,80,10,0.08);
+      border: 1px solid rgba(212,80,10,0.2);
+      border-radius: 3px;
+      padding: 3px 8px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--bb-7);
+      padding: 28px 0 40px;
+      margin-top: 56px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: var(--bb-6);
+      text-align: center;
+    }
+
+    footer a { color: var(--bb-5); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .masthead { padding: 32px 0 28px; }
+      h1 { font-size: 1.4rem; }
+      .fact-grid { grid-template-columns: 1fr; }
+      .compare-row { grid-template-columns: 1fr; }
+      .compare-row.header span:nth-child(n+2) { display: none; }
+      .compare-cell:nth-child(n+2) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <span class="masthead-label">Musical Endogeneity Series · Streaming Forensics · Platform Accountability</span>
+    <h1>Velvet Sundown and the Capture of the Graph</h1>
+    <p class="deck">Four fictional musicians. One AI-generated folk-country catalog. 900,000 monthly listeners. $40. This is not a story about a platform failing to catch a fraud. It is a story about a system that caught exactly what it was designed to catch — and rewarded it.</p>
+  </header>
+
+  <!-- LEDE -->
+  <div class="lede">
+    <span class="kicker">June 2025</span>
+    <p>What appeared to be a 1970s-inflected folk-country quartet called Velvet Sundown — Gabe Farrow on vocals, Lennie West on guitar, Milo Rains on bass, Orion "Rio" Del Mar on percussion — appeared on Spotify. Within four weeks, the project had achieved over 900,000 monthly listeners and was appearing in Discover Weekly playlists across the platform. By mid-July, a third album had been released and a single called "Dust on the Wind" had crossed 2 million streams. All four band members were fictional. The music was generated by AI. The entire operation cost its creators less than $40 in subscription fees and took under an hour to produce its core assets.</p>
+    <p>The band remained on Spotify after its synthetic nature was confirmed. Spotify declined to remove the content.</p>
+    <p>There is a legal distinction, in the music industry's increasingly strained vocabulary, between an artist who is synthetic and an artist who impersonates. The first category creates from nothing: no host, no victim, no stolen face. The second attaches itself to a real identity and feeds. Platforms have built elaborate defenses against the second category. They have left the first category largely alone — partly because the technology was too crude, until recently, to generate convincing music at scale, and partly because the legal framework simply doesn't have a word for it.</p>
+  </div>
+
+  <div class="fact-box">
+    <span class="label">Velvet Sundown — Operation Profile</span>
+    <div class="fact-grid">
+      <div class="fact-item">
+        <span class="f-label">Time to First Release</span>
+        <span class="f-value">&lt; 1 hour</span>
+      </div>
+      <div class="fact-item">
+        <span class="f-label">Total Cost</span>
+        <span class="f-value">~$40</span>
+      </div>
+      <div class="fact-item">
+        <span class="f-label">Monthly Listeners (week 4)</span>
+        <span class="f-value">900,000+</span>
+      </div>
+      <div class="fact-item">
+        <span class="f-label">Streams on "Dust on the Wind"</span>
+        <span class="f-value">2,000,000+</span>
+      </div>
+      <div class="fact-item">
+        <span class="f-label">Albums Released</span>
+        <span class="f-value">3 (incl. post-exposure)</span>
+      </div>
+      <div class="fact-item">
+        <span class="f-label">Estimated Gross Royalties</span>
+        <span class="f-value">~$40,000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: ALGORITHM -->
+  <section class="section" id="algorithm">
+    <h2>What the Algorithm Was Actually Measuring</h2>
+    <p>Spotify's recommendation engine doesn't measure music. It measures behavior.</p>
+    <p>It does not measure artistic merit. It does not measure cultural resonance. It measures whether listeners save tracks, add them to playlists, play them to completion, and — critically — whether they don't skip them.</p>
+    <p>The collaborative filtering model that powers Discover Weekly is, in its essence, a similarity engine. It builds a map of listeners based on what they do, then recommends what other "similar" listeners have already done. This works well when the behavioral signals entering the system are genuine. The vulnerability is obvious in retrospect: if you can manufacture behavioral signals indistinguishable from genuine human preference, you can manufacture the recommendation itself.</p>
+
+    <div class="callout">
+      <p>Velvet Sundown's operators understood this. Aged bot accounts, calibrated to the listening patterns of 1970s folk enthusiasts, "discovered" and saved the debut during the critical two-to-four week contamination window — the period when early streaming data disproportionately shapes an artist's long-term algorithmic trajectory. Save rates were calibrated to fall within two standard deviations of genre averages: elevated enough to signal growing appeal, close enough to organic to avoid anomaly detection. The bot accounts were programmed not to skip, because the skip rate is, in the algorithm's logic, the death signal.</p>
+    </div>
+
+    <p>By the time real human listeners encountered Velvet Sundown on Discover Weekly, the momentum was already self-sustaining. Real humans, seeing a verified artist with substantial monthly listeners, assumed legitimacy. They saved the tracks. They added them to private playlists. Their genuine behavioral data entered the recommendation graph and reinforced what the bots had manufactured. The social proof cascade had begun.</p>
+  </section>
+
+  <!-- SECTION: EVOLUTION -->
+  <section class="section" id="evolution">
+    <h2>Not New — An Evolution</h2>
+    <p>The analysis of Velvet Sundown as an isolated incident misses its significance. This was not a novel fraud. It was a technical evolution from an older fraud, and the evolution matters.</p>
+
+    <div class="compare-wrap">
+      <div class="compare-row header">
+        <span>Characteristic</span>
+        <span>Profile Hijacking (Prior Generation)</span>
+        <span>Synthetic Artist Construction</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-cell">Requires Host</span>
+        <span class="compare-cell">Yes — exploits existing verified artist</span>
+        <span class="compare-cell">No — builds from vacuum</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-cell">Victim</span>
+        <span class="compare-cell">Real artist loses algorithmic momentum</span>
+        <span class="compare-cell">None identifiable — trips no filters</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-cell">Rights Exposure</span>
+        <span class="compare-cell">Impersonation claims; takedown clock starts</span>
+        <span class="compare-cell">No impersonation; no samples; no claims</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-cell">Operational Window</span>
+        <span class="compare-cell">Short — detection is eventual</span>
+        <span class="compare-cell">Indefinite — no contractual removal basis</span>
+      </div>
+      <div class="compare-row">
+        <span class="compare-cell">Economic Model</span>
+        <span class="compare-cell">Smash-and-grab; high exposure risk</span>
+        <span class="compare-cell">Portfolio strategy; near-zero marginal cost</span>
+      </div>
+    </div>
+
+    <p>The operators described Velvet Sundown as a "commissioned test" for a client interested in what the analysis calls "Psyop Marketing." The test confirmed that the algorithm's discovery mechanisms can be fully captured by synthetic entities operating within the platform's stated terms of service. At scale — hundreds of synthetic artists deployed simultaneously across multiple low-entropy genres — the arithmetic changes considerably.</p>
+
+    <div class="alert">
+      <p>The Velvet Sundown project's third album was released after the band's synthetic nature was publicly confirmed. Spotify did not remove it.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: GENRE -->
+  <section class="section" id="genre">
+    <h2>Genre as Tactical Choice</h2>
+    <p>The music was calibrated for the algorithm, not for the listener. The selection of 1970s folk-country as Velvet Sundown's genre was not aesthetic — it was operational.</p>
+    <p>The research analyzing this case describes what it calls "genre entropy" — a measure of how much listener behavior in a given genre deviates from a predictable pattern. High-entropy genres (progressive metal, avant-garde jazz) have active, picky listeners who skip frequently and whose behavior is difficult for bot nets to accurately simulate. Low-entropy genres (ambient, focus, sleep, acoustic) have passive listeners with structurally low skip rates and long listening durations — behavior that bot accounts can mimic with minimal calibration.</p>
+
+    <div class="callout">
+      <p>1970s folk-country sits in the low-entropy range. The genre relies on acoustic textures, raspy vocals, and vague nostalgic lyrics — exactly the content that AI music generation platforms have most thoroughly distilled through massive training datasets. The lo-fi production quality authentic to the genre also masks the "watery" artifacts common in AI-generated audio. The algorithm cannot hear the difference. The passive listener is not listening closely enough to notice. And the skip rate — the one behavioral signal that most reliably exposes synthetic content — is structurally suppressed by the genre's own conventions.</p>
+    </div>
+
+    <div class="pull-quote">
+      <p>The normalization of anonymous, algorithmically-optimized content in low-entropy genres was not a vulnerability external actors exploited. It was an architectural decision the platform made for its own economic reasons, and then watched external actors replicate.</p>
+    </div>
+
+    <p>The investigation into composers like Johan Röhr — who released over 2,700 songs under 656 aliases and captured 15 billion streams — suggests the deeper structural issue. The difference between Röhr's multi-alias network and Velvet Sundown is provenance, not method. Both used the same algorithmic logic. Only one of them had a licensing agreement.</p>
+  </section>
+
+  <!-- SECTION: SONGDNA -->
+  <section class="section" id="songdna">
+    <h2>What SongDNA Cannot See</h2>
+    <p>Against Synthetic Artist Construction, Spotify's SongDNA initiative is structurally blind.</p>
+    <p>The feature provides what Spotify calls "digital liner notes" — provenance information connecting tracks to collaborators, samples, and creative lineage. It is effective at catching impersonation fraud and unauthorized voice cloning, where a track falsely claims a collaboration that never happened. Against the Velvet Sundown model, it sees nothing.</p>
+    <p>Velvet Sundown does not use samples. It has no human collaborators to link to. In the SongDNA system, it simply appears as a new leaf with no connections — which is also what a genuinely new independent artist looks like. A sophisticated operator can forge the appearance of history by crediting fictional engineers or real but unverified session musicians.</p>
+
+    <div class="highlight">
+      <p>SongDNA is a provenance tool. It tracks where things came from. The Velvet Sundown problem is not about provenance — it is about whether the behavioral signals entering the recommendation graph reflect genuine human preference. Those are different questions, and the platform has, so far, built tools to answer only the first.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: VOCABULARY -->
+  <section class="section" id="vocabulary">
+    <h2>The Vocabulary We're Missing</h2>
+    <p>The case does not demonstrate that AI-generated music is fraudulent. Musinique's own constellation of ghost artists — Champa Jaan, Newton Williams Brown, Tuzi Brown, Mayfield King — is AI-assisted music produced with full disclosure, built around genuine human purpose, and grounded in documented traditions and real relationships. The AI is the production tool. The intent is human. The music serves the listener, not the platform.</p>
+    <p>The case does not demonstrate that anonymous music is fraudulent. Session musicians have released work under aliases for decades. Functional music and library music have long operated under persona names openly acknowledged as commercial conventions.</p>
+
+    <div class="alert">
+      <p>What Velvet Sundown demonstrates is something more specific: that coordinated behavioral manipulation can capture the algorithm's discovery mechanisms and route synthetic content to real listeners without their knowledge or consent, using manufactured signals to mimic organic preference. The fraud is not in the music. The fraud is in the graph. The manipulation is not of the listener's ears — it is of the system that decides what reaches their ears.</p>
+      <p>The vocabulary the platform has built — impersonation, voice cloning, unauthorized sampling — was designed to protect specific rights holders from specific harms. It does not have words for the contamination of the recommendation graph itself. Until it does, Velvet Sundown is not a violation of anything. It is a business model.</p>
+    </div>
+  </section>
+
+  <!-- SECTION: SOLUTIONS -->
+  <section class="section" id="solutions">
+    <h2>What Would Actually Work</h2>
+    <p>The research analyzing Velvet Sundown proposes three structural responses.</p>
+
+    <ol class="solutions-list">
+      <li>
+        <strong>Mandatory Provenance Identification</strong>
+        <span>A verifiable human chain connecting AI-generated content to a real decision-maker who accepts accountability for its distribution. This is not a prohibition on AI music. It is a requirement that someone sign their name to it.</span>
+      </li>
+      <li>
+        <strong>Algorithmic Entropy Analysis at the Account Level</strong>
+        <span>Detection of listening patterns structurally "too clean" to reflect human behavior. A human listener skips things. A human listener has inconsistent session lengths. A human listener sometimes pauses mid-track. A bot net calibrated to mimic genre averages will be consistent in ways humans are not. Detection requires looking at account-level behavioral distribution rather than track-level metrics — a different kind of surveillance infrastructure than the one platforms currently operate.</span>
+      </li>
+      <li>
+        <strong>Democratized Takedown Rights for Independent Artists</strong>
+        <span>Rights for artists who can demonstrate "aesthetic theft" — cases where synthetic entities have clearly harvested a niche artist's specific identity and sonic territory for displacement in the genre they helped build. The Breaking Rust case, where an AI project topped the Billboard Country Digital Song Sales chart and a real artist filed claims alleging harm to his livelihood, illustrates the gap. The existing framework protects Drake's voice from being cloned. It does not protect a working independent artist from being algorithmically displaced by a synthetic entity that absorbed their aesthetic for $40 and an afternoon.</span>
+      </li>
+    </ol>
+
+    <div class="highlight">
+      <p>None of these solutions are simple. All of them require platforms to accept accountability for their recommendation infrastructure that they have not yet accepted. The algorithm is not a neutral surface on which music competes. It is an active curation mechanism. Velvet Sundown is the demonstration that this mechanism can be purchased, at scale, for the cost of an AI subscription.</p>
+    </div>
+  </section>
+
+  <!-- CODA -->
+  <section class="section" id="coda">
+    <h2>Coda</h2>
+    <p>The band is still on Spotify. The third album is still generating royalties. The operators described the project as a commissioned test.</p>
+    <p>Someone commissioned it. That someone has the results.</p>
+  </section>
+
+  <!-- BYLINE -->
+  <div class="byline-block">
+    <p><span class="byline-name">Nik Bear Brown</span> is Associate Teaching Professor of Computer Science and AI at Northeastern University and founder of Musinique LLC and Humanitarians AI (501(c)(3)). The Musical Endogeneity research trilogy — examining Spotify's popularity score architecture, the perceptual boundary between human and AI music, and the economics of algorithmic momentum — is ongoing research conducted through Humanitarians AI. More of his work lives at <a href="https://skepticism.ai" target="_blank" rel="noopener">skepticism.ai</a> and <a href="https://theorist.ai" target="_blank" rel="noopener">theorist.ai</a>.</p>
+    <div class="tags">
+      <span class="tag">Velvet Sundown</span>
+      <span class="tag">Spotify Algorithm</span>
+      <span class="tag">AI Music</span>
+      <span class="tag">Streaming Fraud</span>
+      <span class="tag">Music Industry</span>
+      <span class="tag">Musical Endogeneity</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

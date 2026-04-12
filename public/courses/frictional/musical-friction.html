@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Measuring Musical Friction: A Probabilistic Framework for Detecting Graph Contamination in Music Streaming Platforms</title>
+  <meta name="description" content="The Human Engagement Probability (HEP) framework — a probabilistic methodology for detecting recommendation graph contamination in music streaming platforms using only public API signals. Defines seven observable friction components and combines them into a Bayesian posterior. Validated against 40 confirmed ghost artists. Achieves 0.97 AUC composite. Designed as an independent audit tool requiring no platform cooperation.">
+  <meta name="keywords" content="HEP framework, streaming fraud, recommendation graph contamination, ghost artists, music platform economics, algorithmic accountability, bot detection, Bayesian inference, Spotify audit, follower conversion rate, coordinated removal score, genre entropy">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.78;
+    }
+
+    /* ── HEADER ── */
+    .paper-header { background: var(--bb-1); padding: 56px 0 48px; border-bottom: 3px solid var(--bb-2); }
+    .paper-header-inner { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+    .paper-series { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--bb-7); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .paper-series span { color: var(--bb-4); }
+    .series-sep { color: rgba(200,169,110,0.3); }
+
+    .paper-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(20px, 3.2vw, 36px); font-weight: 900; line-height: 1.15; color: var(--bb-8); margin-bottom: 20px; max-width: 760px; }
+
+    .paper-meta { margin-bottom: 28px; }
+    .paper-author { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--bb-4); font-weight: 600; margin-bottom: 6px; }
+    .paper-affiliation { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-7); line-height: 1.7; }
+    .paper-status { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .status-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bb-7); border: 1px solid rgba(200,169,110,0.35); padding: 3px 10px; border-radius: 2px; }
+
+    /* ── TOC ── */
+    .toc-wrap { background: rgba(139,58,15,0.12); border: 1px solid rgba(200,169,110,0.4); border-radius: 4px; padding: 24px 28px; margin: 40px 0 0; }
+    .toc-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--bb-6); margin-bottom: 14px; }
+    .toc-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 32px; }
+    @media (max-width: 580px) { .toc-grid { grid-template-columns: 1fr; } }
+    .toc-group { margin-bottom: 12px; }
+    .toc-group-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bb-5); margin-bottom: 4px; }
+    .toc-links { display: flex; flex-direction: column; gap: 3px; }
+    .toc-links a { color: var(--bb-8); text-decoration: none; font-size: 13px; opacity: 0.8; transition: opacity 0.15s; }
+    .toc-links a:hover { opacity: 1; color: var(--bb-4); }
+
+    /* ── LAYOUT ── */
+    .paper-body { max-width: 900px; margin: 0 auto; padding: 0 32px 80px; }
+    .paper-section { padding-top: 60px; }
+    .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    /* ── SECTION HEADINGS ── */
+    h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(17px, 2.4vw, 23px); font-weight: 700; color: var(--bb-2); line-height: 1.2; padding-bottom: 9px; border-bottom: 2px solid var(--bb-7); margin-bottom: 8px; }
+    .section-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--bb-6); margin-right: 10px; }
+    h3 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(14px, 1.7vw, 17px); font-weight: 700; font-style: italic; color: var(--bb-1); margin: 30px 0 9px; }
+
+    p { margin-bottom: 18px; }
+    a { color: var(--bb-2); }
+    a:hover { color: var(--bb-5); }
+    strong { font-weight: 600; color: var(--bb-2); }
+    em { font-style: italic; }
+    ul, ol { margin: 0 0 16px; padding-left: 1.6em; }
+    li { margin-bottom: 6px; }
+
+    /* ── ABSTRACT ── */
+    .abstract-block { margin-top: 48px; background: var(--bb-1); border-radius: 4px; padding: 30px 34px; }
+    .abstract-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--bb-4); margin-bottom: 12px; }
+    .abstract-block p { color: rgba(240,230,208,0.88); font-size: 15px; line-height: 1.8; margin-bottom: 12px; }
+    .abstract-block p:last-child { margin-bottom: 0; }
+    .abstract-block strong { color: var(--bb-4); }
+    .keywords { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-7); margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(200,169,110,0.25); line-height: 1.7; }
+    .keywords strong { color: var(--bb-5); }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 4px solid var(--bb-4); padding: 13px 17px; margin: 22px 0; background: rgba(232,160,32,0.08); border-radius: 0 4px 4px 0; }
+    .callout p { margin-bottom: 0; font-size: 15px; }
+    .callout-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-5); margin-bottom: 6px; }
+    .callout.alert { border-left-color: var(--bb-3); background: rgba(192,57,43,0.07); }
+    .callout.alert .callout-label { color: var(--bb-3); }
+    .callout.info { border-left-color: var(--bb-6); background: rgba(184,134,11,0.07); }
+    .callout.info .callout-label { color: var(--bb-6); }
+
+    /* ── PULL QUOTES ── */
+    .pull-quote { margin: 30px 0; padding: 0 0 0 22px; border-left: 5px solid var(--bb-5); }
+    .pull-quote p { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(15px, 1.9vw, 20px); font-style: italic; color: var(--bb-2); line-height: 1.5; margin-bottom: 0; }
+
+    /* ── FORMULA BLOCKS ── */
+    .formula-block { background: var(--bb-1); border-radius: 4px; padding: 18px 22px; margin: 18px 0; }
+    .formula-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-6); margin-bottom: 10px; }
+    .formula { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--bb-4); line-height: 2; letter-spacing: 0.03em; }
+    .formula-caption { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-7); margin-top: 10px; line-height: 1.7; }
+
+    /* ── HEP COMPONENTS ── */
+    .component { border: 1px solid var(--bb-7); border-radius: 4px; overflow: hidden; margin-bottom: 18px; }
+    .component-header { background: rgba(139,58,15,0.07); padding: 11px 16px; border-bottom: 1px solid var(--bb-7); display: flex; align-items: baseline; gap: 12px; }
+    .component-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: var(--bb-4); flex-shrink: 0; }
+    .component-name { font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 700; color: var(--bb-2); font-style: italic; }
+    .component-body { padding: 14px 16px; }
+    .component-body p { font-size: 14px; margin-bottom: 10px; }
+    .component-body p:last-child { margin-bottom: 0; }
+    .component-signals { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+    .signal { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 2px; }
+    .signal-genuine { background: rgba(184,134,11,0.12); color: var(--bb-6); border: 1px solid rgba(184,134,11,0.3); }
+    .signal-borrowed { background: rgba(192,57,43,0.09); color: var(--bb-3); border: 1px solid rgba(192,57,43,0.25); }
+    .signal-label { font-size: 9px; display: block; margin-bottom: 1px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.1em; }
+    .component-infra { margin-top: 10px; padding: 7px 10px; background: rgba(200,169,110,0.1); border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); }
+    .infra-label { color: var(--bb-5); margin-right: 6px; }
+
+    /* ── RESULTS TABLE ── */
+    .table-wrap { overflow-x: auto; margin: 20px 0; border: 1px solid var(--bb-7); border-radius: 4px; }
+    .table-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-6); padding: 10px 14px 7px; border-bottom: 1px solid var(--bb-7); background: rgba(200,169,110,0.12); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead { background: var(--bb-2); }
+    thead th { color: var(--bb-8); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; padding: 9px 14px; text-align: left; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid rgba(200,169,110,0.35); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(200,169,110,0.08); }
+    tbody td { padding: 9px 14px; color: var(--bb-1); vertical-align: top; line-height: 1.5; }
+    .td-hi { color: var(--bb-2); font-weight: 600; }
+    .td-alert { color: var(--bb-3); font-weight: 600; }
+    .td-good { color: var(--bb-6); font-weight: 600; }
+    .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .row-composite { background: rgba(139,58,15,0.1) !important; font-weight: 600; }
+
+    /* ── BAYESIAN PRIOR TABLE ── */
+    .prior-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 20px 0; }
+    .prior-tile { border: 1px solid var(--bb-7); border-radius: 4px; padding: 16px; }
+    .prior-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--bb-6); margin-bottom: 6px; }
+    .prior-value { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: var(--bb-2); line-height: 1; margin-bottom: 4px; }
+    .prior-desc { font-size: 13px; color: var(--bb-6); line-height: 1.4; }
+    .prior-tile.alert .prior-value { color: var(--bb-3); }
+    .prior-tile.hi .prior-value { color: var(--bb-6); }
+
+    /* ── CONTRIBUTIONS ── */
+    .contributions { list-style: none; padding-left: 0; margin: 18px 0; }
+    .contributions li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(200,169,110,0.3); font-size: 15px; line-height: 1.6; }
+    .contributions li:last-child { border-bottom: none; }
+    .contrib-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--bb-5); flex-shrink: 0; padding-top: 2px; }
+
+    /* ── REFERENCES ── */
+    .ref-list { list-style: none; padding-left: 0; }
+    .ref-list li { font-size: 14px; line-height: 1.65; padding: 8px 0; border-bottom: 1px solid rgba(200,169,110,0.3); }
+    .ref-list li:last-child { border-bottom: none; }
+
+    /* ── FOOTER ── */
+    footer { text-align: center; padding: 32px; border-top: 1px solid var(--bb-7); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); letter-spacing: 0.06em; }
+    footer a { color: var(--bb-6); }
+
+    @media (max-width: 640px) {
+      .paper-header-inner, .paper-body { padding-left: 20px; padding-right: 20px; }
+      .abstract-block { padding: 22px 18px; }
+      .toc-wrap { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<header class="paper-header">
+  <div class="paper-header-inner">
+    <div class="paper-series">
+      <span>Preprint</span>
+      <span class="series-sep">·</span>
+      Musinique Research Trilogy, Paper III
+      <span class="series-sep">·</span>
+      skepticism.ai · theorist.ai · musinique.substack.com
+    </div>
+
+    <h1 class="paper-title">Measuring Musical Friction: A Probabilistic Framework for Detecting Graph Contamination in Music Streaming Platforms</h1>
+
+    <div class="paper-meta">
+      <div class="paper-author">Nik Bear Brown</div>
+      <div class="paper-affiliation">
+        Associate Teaching Professor of Engineering and AI, Northeastern University<br>
+        Founder, Musinique LLC and Humanitarians AI (501(c)(3))
+      </div>
+      <div class="paper-status">
+        <span class="status-tag">Preprint</span>
+        <span class="status-tag">Not Peer Reviewed</span>
+        <span class="status-tag">Open Methodology</span>
+        <span class="status-tag">HEP Framework</span>
+        <span class="status-tag">No Platform Cooperation Required</span>
+      </div>
+    </div>
+
+    <div class="toc-wrap">
+      <div class="toc-label">Paper Navigation</div>
+      <div class="toc-grid">
+        <div>
+          <div class="toc-group">
+            <div class="toc-group-label">Framing</div>
+            <div class="toc-links">
+              <a href="#abstract">Abstract &amp; Keywords</a>
+              <a href="#s1">1. Introduction</a>
+              <a href="#s2">2. Background and Related Work</a>
+              <a href="#s3">3. Theoretical Framework — Friction</a>
+            </div>
+          </div>
+          <div class="toc-group">
+            <div class="toc-group-label">Framework</div>
+            <div class="toc-links">
+              <a href="#s4">4. HEP Framework — Formal Specification</a>
+              <a href="#s4-components">4.2 The Seven Components</a>
+              <a href="#s4-bayes">4.3 Bayesian Combination</a>
+              <a href="#s5">5. Implementation</a>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="toc-group">
+            <div class="toc-group-label">Evidence</div>
+            <div class="toc-links">
+              <a href="#s6">6. Results</a>
+              <a href="#s6-auc">6.1 Component AUC Table</a>
+              <a href="#s6-removal">6.4 Coordinated Removal Natural Experiment</a>
+              <a href="#s7">7. The Arms Race Problem</a>
+            </div>
+          </div>
+          <div class="toc-group">
+            <div class="toc-group-label">Discussion &amp; Back Matter</div>
+            <div class="toc-links">
+              <a href="#s8">8. Discussion</a>
+              <a href="#s9">9. Conclusion</a>
+              <a href="#refs">References</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ BODY -->
+<main class="paper-body">
+
+  <!-- ── ABSTRACT ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="abstract"></span>
+    <div class="abstract-block">
+      <div class="abstract-label">Abstract</div>
+      <p>Genuine human engagement with music leaves observable friction traces — behavioral signatures that arise from the irreducible complexity of human taste, attention, and decision-making. Automated systems optimizing for royalty extraction cannot efficiently replicate these traces because doing so requires costs that scale with the sophistication of the fraud. This paper develops the <strong>Human Engagement Probability (HEP) framework</strong>, a probabilistic methodology for detecting recommendation graph contamination in music streaming platforms using only public API signals.</p>
+      <p>We define seven observable friction components — follower conversion rate, cross-platform temporal lag, playlist genre entropy, coordinated removal score, popularity score smoothness, network centrality in synthetic cliques, and survival curve shape — and combine them into a Bayesian posterior probability that the behavioral signals driving algorithmic recommendations reflect genuine human preference rather than manufactured engagement.</p>
+      <p>We validate the framework against a labeled corpus of forty confirmed ghost artists and three documented fraud cases including the Velvet Sundown synthetic artist construction. The framework achieves <strong>0.97 AUC composite</strong>. Genre entropy and coordinated removal score are individually the most informative components. The methodology functions as an independent audit tool precisely because it requires no platform cooperation — a critical property when the platform operating the recommendation system has a structural financial incentive to tolerate the contamination it measures.</p>
+      <div class="keywords"><strong>Keywords:</strong> streaming fraud · recommendation graph contamination · music platform economics · algorithmic accountability · ghost artists · bot detection · Bayesian inference · platform auditing</div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 1 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s1"></span>
+    <h2><span class="section-num">1.</span>Introduction</h2>
+
+    <div class="pull-quote" style="margin-top: 20px;">
+      <p>The fraud is not in the music. The fraud is in the graph.</p>
+    </div>
+
+    <p>This distinction marks a fundamental shift in how streaming platform manipulation should be understood. Earlier generations of streaming fraud were straightforwardly about inflating stream counts — deploying bot farms to play tracks repeatedly, crossing royalty thresholds, and extracting payments from a finite royalty pool. The current generation operates at a different level: manufacturing the behavioral signals that determine which listeners are delivered in the first place.</p>
+
+    <p>By injecting calibrated save rates, completion rates, and non-skip behavior into a track's early performance window, bad actors can capture Spotify's recommendation algorithm — causing it to route the track to real human listeners who then generate organic engagement that makes the manufactured signals self-sustaining. The algorithm is not fooled into thinking a bad track is good. It is fooled into thinking a track has already been validated by human listeners who do not exist.</p>
+
+    <div class="callout alert">
+      <div class="callout-label">The Disclosure Gap</div>
+      <p>Spotify's 751 million Monthly Active Users (FY 2025) represent the foundation of a ~$100 billion market capitalization. The platform does not independently audit these engagement metrics and does not quantify them in SEC filings — a gap that stands in stark contrast to Meta (quarterly false account estimates since 2012 IPO) and Twitter (pre-acquisition spam mDAU estimates). The SEC disclosure absence is not an oversight. It is a disclosure strategy consistent with a platform that benefits from metric ambiguity.</p>
+    </div>
+
+    <p>The paper makes four contributions:</p>
+
+    <ul class="contributions">
+      <li><span class="contrib-num">01</span>A theoretical account of friction as an empirically measurable property of human engagement with music, grounded in behavioral economics and streaming platform fraud incentive structures.</li>
+      <li><span class="contrib-num">02</span>Formal statistical definitions for the seven observable friction components comprising the HEP framework.</li>
+      <li><span class="contrib-num">03</span>A complete implementation pipeline using Spotify's public API, requiring no platform cooperation.</li>
+      <li><span class="contrib-num">04</span>Validation results using a labeled corpus of confirmed ghost artists and documented fraud cases, demonstrating 0.97 AUC and well-calibrated probability estimates.</li>
+    </ul>
+  </div>
+
+  <!-- ── SECTION 2 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s2"></span>
+    <h2><span class="section-num">2.</span>Background and Related Work</h2>
+
+    <h3>2.1 The Economics of Streaming Fraud</h3>
+
+    <p>Spotify's pro-rata royalty model creates the foundational incentive structure for streaming fraud. All subscription and advertising revenue is pooled and distributed to rights holders based on their proportional share of total monthly streams — making the streaming economy a zero-sum game with respect to royalty distribution. Industry audits have estimated global fraudulent streaming rates at approximately 10% of total activity, representing annual misallocation of $1–2 billion from the global royalty pool.</p>
+
+    <p>Discovery Mode, the platform's opt-in promotional feature, requires artists to accept a 30% royalty reduction in exchange for algorithmic promotion. For production companies operating ghost artist identities whose business model runs on volume rather than brand loyalty, this trade-off is economically optimal. For independent artists with smaller followings and tighter margins, the trade-off is structurally disadvantageous. The mechanism simultaneously accelerates ghost artist stream capture and depresses independent artist revenue share.</p>
+
+    <h3>2.2 Ghost Artists and Perfect Fit Content</h3>
+
+    <p>Prior empirical work (Brown, 2026a) analyzed forty Spotify artists with combined monthly listeners exceeding ten million and combined followers fewer than ten thousand. ISRC code tracing confirmed the majority were owned by five Swedish production companies: Firefly Entertainment AB, Lucille AB/Tombola Music, Poreniaq Disqs/Catfish Music Group, and Calm and Collected Music Publishing. One artist, Spring Euphemia, showed a follower-to-listener ratio of 0.00215 — fifty-one million plays producing 529 followers, a conversion rate one-hundredth that of unsolicited bulk email.</p>
+
+    <h3>2.3 Synthetic Artist Construction — Velvet Sundown</h3>
+
+    <p>The Velvet Sundown case (Brown, 2026b) documents a synthetic artist identity — fictional act, fabricated biography, AI-generated music — that achieved 900,000 monthly listeners within four weeks using aged bot accounts calibrated to simulate genre-appropriate listening behavior. Once manufactured signals seeded the recommendation algorithm sufficiently to attract real human listeners, the fraud became self-reinforcing without continued bot activity. The contamination window — approximately 14–28 days post-release — is the critical period during which early streaming data disproportionately shapes long-term algorithmic trajectory.</p>
+  </div>
+
+  <!-- ── SECTION 3 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s3"></span>
+    <h2><span class="section-num">3.</span>Theoretical Framework: Friction as an Empirical Property</h2>
+
+    <h3>3.1 The Friction Trace Hypothesis</h3>
+
+    <p>We define a <strong>friction trace</strong> as a behavioral signal that arises from the irreducible complexity of human decision-making and cannot be efficiently replicated by automated systems optimizing for a specific economic objective. The key word is efficiently. Any individual trace can in principle be manufactured — a bot can be programmed to save a track. The question is not whether individual traces can be faked but whether the full constellation of traces that genuine human engagement produces can be simultaneously replicated at a cost that makes the fraud economically viable.</p>
+
+    <p>Our central claim rests on three observations: (1) human engagement with music is governed by idiosyncratic, evolving taste that requires expensive behavioral modeling to simulate convincingly across multiple dimensions; (2) organic discovery is embedded in social and cross-platform context, creating temporal signatures that coordinated fraud must replicate across independent systems; (3) genuine engagement produces persistent downstream relationships — follows, repeat listens, eventual live attendance — that fraud operations optimizing for short-term royalty extraction have no incentive to replicate.</p>
+
+    <h3>3.2 The Social Proof Cascade</h3>
+
+    <p>A listener encountering a track in Discover Weekly encounters it as having already been validated by the platform's recommendation system. If the affinity signals driving that recommendation were manufactured, the listener has no way to know this. Their genuine enjoyment then generates real behavioral signals that further reinforce the track's position in the recommendation graph. Recommendation graph contamination is therefore not confined to the period of active fraud — it persists and grows through the accumulation of genuine human responses to algorithmically-manufactured recommendations.</p>
+  </div>
+
+  <!-- ── SECTION 4 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s4"></span>
+    <h2><span class="section-num">4.</span>The HEP Framework: Formal Specification</h2>
+
+    <h3>4.1 Foundational Definitions</h3>
+
+    <p>Let <em>A</em> denote an artist and <em>T</em> a track released at time <em>t₀</em>. The observation window <em>Ω = [t₀, t₀ + 28 days]</em> captures the contamination window. The recommendation graph state <em>G</em> is contaminated if a material fraction of its behavioral signals were manufactured by automated systems rather than generated by genuine human engagement.</p>
+
+    <div class="formula-block">
+      <div class="formula-title">Human Engagement Probability — Core Definition</div>
+      <div class="formula">HEP(T, A) = P(G uncontaminated | X)</div>
+      <div class="formula-caption">
+        X = (X₁, X₂, X₃, X₄, X₅, X₆, X₇) — vector of observable friction traces<br>
+        Output: continuous score in [0, 1] with credible interval via bootstrap resampling
+      </div>
+    </div>
+
+    <div class="section-anchor" id="s4-components"></div>
+    <h3>4.2 The Seven Components</h3>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₁</span>
+        <span class="component-name">Follower Conversion Rate (FCR)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₁ = F_A / L_A</div><div class="formula-caption">F_A = artist followers · L_A = monthly listeners · both observed at t₀ + 28 days</div></div>
+        <p>A human listener who genuinely enjoys music takes an active decision to follow the artist — interrupting passive listening to perform a deliberate action. Automated systems playing music for royalty extraction have no incentive to perform this action. Organic baseline: X₁ ∈ [0.05, 0.15]. Ghost artist corpus: 0.000057 (Red Ripples) to 0.00215 (Spring Euphemia) — two to three orders of magnitude below organic baseline.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>X₁ ∈ [0.05, 0.15]</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Ghost</span>X₁ &lt; 0.003 — 2–3 orders of magnitude below</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">API:</span>Artist endpoint — follower counts and popularity scores</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₂</span>
+        <span class="component-name">Cross-Platform Temporal Lag (CPTL)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₂ = t_spotify − t_external</div><div class="formula-caption">t_spotify = first Spotify popularity score movement above baseline · t_external = first detectable signal across TikTok, Twitter mention velocity, Shazam · X₂* = −∞ if no external signal detected within Ω</div></div>
+        <p>Organic discovery is embedded in social context — external signals precede or co-occur with platform engagement. Bot injection produces zero or negative lag: the platform signal appears without external precursor. Ghost artist production companies do not maintain social media presences for fabricated identities, systematically producing X₂* = −∞.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>Positive lag — external signal precedes Spotify movement</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Ghost</span>X₂* = −∞ — no external signal detected</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">Sources:</span>Twitter Academic API · Shazam public charts · TikTok sound usage counts</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₃</span>
+        <span class="component-name">Playlist Genre Entropy (PGE)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₃ = (1/k) Σ V(Pᵢ)</div><div class="formula-caption">V(Pᵢ) = mean squared distance of audio feature vectors within playlist Pᵢ · audio features: valence, energy, normalized tempo, acousticness, danceability</div></div>
+        <p>Human curators applying taste-based constraints produce low intra-playlist variance in audio feature space. Bot promotion services placing tracks to maximize stream count have no aesthetic constraint and produce high intra-playlist variance — a folk soul track appearing alongside Japanese acid jazz, ambient sleep music, and workout electronica simultaneously. The component captures not just individual playlist incoherence but the implausibility of a track's overall placement profile.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>Low X₃ — coherent sonic neighborhood</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Purchased</span>High X₃ — incompatible genre adjacency</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">API:</span>Playlist endpoint · Track audio features endpoint</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₄</span>
+        <span class="component-name">Coordinated Removal Score (CRS)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₄ = max_{Δt ∈ {1h, 6h, 24h}} |R(T, Δt) ∩ O| / |R(T, Δt)|</div><div class="formula-caption">O = operator network identified by graph clustering · R(T, Δt) = playlists removing track T within time window Δt</div></div>
+        <p>Human curation removal is asynchronous, idiosyncratic, and distributed randomly in time. Paid placement cancellation — triggered by payment failure, artist cancellation, or operator administrative decision — is synchronous across all playlists in the network because it is triggered by a single database event. A track removed from seven playlists within the same hour, across genres sharing no aesthetic relationship, is not a coincidence. It is a DELETE statement.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>Low X₄ — asynchronous, distributed removal timing</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Bot network</span>High X₄ — synchronous across operator cluster</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">Requires:</span>Multi-month timestamped playlist snapshot database · operator network detection via Louvain clustering</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₅</span>
+        <span class="component-name">Popularity Score Smoothness (PSS)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₅ = 1 / Σ_t |ρ(t+δt) − 2ρ(t) + ρ(t−δt)|</div><div class="formula-caption">ρ(t) = popularity score at time t · second-order variation captures curvature of growth trajectory</div></div>
+        <p>Organic discovery is noisy — humans discover music inconsistently, in waves driven by social sharing, sync placements, and the idiosyncratic timing of individual discovery moments. Bot injection during the contamination window produces smooth curves: calibrated accounts generating consistent daily stream counts produce popularity trajectories with low second-order variation. The rise/decay asymmetry — fast-rise with extended plateau (injected) vs. slower rise with gradual decay (organic) — is an additional diagnostic.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>Jagged, irregular spikes — stochastic discovery</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Injected</span>Smooth trajectory — calibrated daily injection</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">Requires:</span>Dense polling at 6-hour intervals during contamination window (days 0–28)</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₆</span>
+        <span class="component-name">Network Centrality in Synthetic Cliques (NCSC)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">X₆ = Σᵢ wᵢ · cᵢ(T)</div><div class="formula-caption">cᵢ(T) = proportion of playlists in operator network Oᵢ containing track T · wᵢ = contamination weight of network based on structural anomaly score</div></div>
+        <p>This component captures cases where individual track metrics appear clean in isolation but the placement pattern reveals deep embedding in a purchased network. A track at the center of multiple synthetic clusters — appearing on many playlists within a network characterized by creation date clustering, follower count uniformity, naming pattern regularity, and high genre entropy — carries a contamination signal regardless of how it performs on individual quality metrics.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>Low X₆ — absent from identified synthetic networks</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Purchased</span>High X₆ — central to multiple operator clusters</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">Requires:</span>Bipartite graph projection · Louvain community detection · structural anomaly scoring on four dimensions</div>
+      </div>
+    </div>
+
+    <div class="component">
+      <div class="component-header">
+        <span class="component-id">X₇</span>
+        <span class="component-name">Survival Curve Shape (SCS)</span>
+      </div>
+      <div class="component-body">
+        <div class="formula-block" style="margin:0 0 10px;"><div class="formula">S(t) = exp(−(t/λ)^k)</div><div class="formula-caption">Weibull survival function · k &lt; 1: decreasing hazard — organic placements becoming more stable · k &gt; 1: increasing hazard — approaching characteristic end point (billing cycle expiration)</div></div>
+        <p>The billing cycle signal formalizes a direct causal identification: payment failures are exogenous to music quality and therefore provide clean evidence of bot placement infrastructure. A statistically significant periodic component in the hazard function — monthly clustering in removal events — is the credit card signal that an artist cancelled their playlist promotion service, triggering simultaneous removal across all playlists in the operator network.</p>
+        <div class="component-signals">
+          <div class="signal signal-genuine"><span class="signal-label">Organic</span>k &lt; 1 — placements stabilize as they prove value</div>
+          <div class="signal signal-borrowed"><span class="signal-label">Bot service</span>k &gt; 1 + end-of-month periodicity (p &lt; 0.001)</div>
+        </div>
+        <div class="component-infra"><span class="infra-label">Requires:</span>Longitudinal playlist snapshot data (180+ days) · weekly polling minimum</div>
+      </div>
+    </div>
+
+    <div class="section-anchor" id="s4-bayes"></div>
+    <h3>4.3 The Bayesian Combination</h3>
+
+    <p>Individual components are not statistically independent — genre entropy and coordinated removal score are both consequences of operator network embedding; survival curve shape and coordinated removal score are both driven by billing cycle structure. These conditional dependencies are modeled explicitly in a Bayesian network.</p>
+
+    <p>Context-dependent priors from the validated corpus:</p>
+
+    <div class="prior-grid">
+      <div class="prior-tile">
+        <div class="prior-label">General tracks — all genres</div>
+        <div class="prior-value">π₀ ≈ 0.35</div>
+        <div class="prior-desc">Prior probability of recommendation graph contamination.</div>
+      </div>
+      <div class="prior-tile alert">
+        <div class="prior-label">Mood, ambient, sleep, focus</div>
+        <div class="prior-value">π₀ ≈ 0.60</div>
+        <div class="prior-desc">Platform genre architecture concentrates contamination risk in PFC program target categories.</div>
+      </div>
+      <div class="prior-tile hi">
+        <div class="prior-label">Verified biography, tour history, press</div>
+        <div class="prior-value">π₀ ≈ 0.15</div>
+        <div class="prior-desc">External verifiability substantially reduces prior contamination probability.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SECTION 5 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s5"></span>
+    <h2><span class="section-num">5.</span>Implementation</h2>
+
+    <p>The framework is implemented entirely using Spotify's public Web API, requiring no platform cooperation and no artist-level dashboard access. Primary data sources: Artist endpoint (follower counts, popularity scores, genre classifications), Track endpoint (audio features, ISRC codes, label information), Playlist endpoint (track rosters with addition timestamps, owner identifiers, follower counts), Search endpoint, and cross-platform supplementary sources (Twitter Academic API, Shazam public chart data, TikTok sound usage counts).</p>
+
+    <h3>5.1 Polling Schedule</h3>
+
+    <p>Three-tier polling architecture calibrated to the temporal dynamics of each fraud mechanism: <strong>contamination window</strong> (days 0–28): 6-hour intervals for popularity score smoothness and coordinated addition timestamps. <strong>Standard period</strong> (days 29–180): daily polling for follower conversion rate evolution, playlist membership changes, and removal events. <strong>Longitudinal period</strong> (days 181+): weekly artist/track polling with 3-day playlist polling for survival curve dataset and billing cycle periodicity testing.</p>
+
+    <h3>5.2 Operator Network Detection</h3>
+
+    <p>A bipartite graph is constructed with playlists and tracks as node sets, projected onto a playlist-playlist similarity graph where edge weight equals shared track count. Louvain community detection identifies dense clusters scored on four structural anomaly dimensions: genre entropy, creation date clustering, follower count uniformity, and naming pattern similarity. Clusters scoring high across all four dimensions are classified as synthetic operator networks with explicit probability estimates.</p>
+  </div>
+
+  <!-- ── SECTION 6 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s6"></span>
+    <h2><span class="section-num">6.</span>Results</h2>
+
+    <div class="section-anchor" id="s6-auc"></div>
+    <h3>6.1 Component Discriminative Performance</h3>
+
+    <div class="table-wrap">
+      <div class="table-label">Table 1 · ROC-AUC by Component at Optimal Threshold</div>
+      <table>
+        <thead><tr><th>Component</th><th>AUC</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="td-hi">X₁ — Follower Conversion Rate</td><td class="td-mono">0.94</td><td>Near-perfect separation at corpus extremes</td></tr>
+          <tr><td class="td-hi">X₂ — Cross-Platform Lag</td><td class="td-mono">0.88</td><td>Ghost artists produce X₂* = −∞ universally</td></tr>
+          <tr><td class="td-hi">X₃ — Genre Entropy</td><td class="td-mono">0.81</td><td>Strongest signal in mood/ambient category</td></tr>
+          <tr><td class="td-hi">X₄ — Coordinated Removal Score</td><td class="td-mono">0.89</td><td>Requires multi-month observation window</td></tr>
+          <tr><td class="td-hi">X₅ — Popularity Smoothness</td><td class="td-mono">0.76</td><td>Requires dense contamination window polling</td></tr>
+          <tr><td class="td-hi">X₆ — Network Centrality</td><td class="td-mono">0.85</td><td>Depends on network detection accuracy</td></tr>
+          <tr><td class="td-hi">X₇ — Survival Curve Shape</td><td class="td-mono">0.79</td><td>Requires longitudinal data (180+ days)</td></tr>
+          <tr class="row-composite"><td class="td-hi">HEP Composite</td><td class="td-mono td-good">0.97</td><td>Bayesian combination — substantially outperforms any individual component</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>6.2 Genre Contamination Distribution</h3>
+
+    <p>Ambient, sleep, lo-fi, focus, and peaceful piano categories show systematically lower mean HEP than active discovery genres including indie rock, folk, jazz, and experimental. This finding has a direct implication for the platform's Perfect Fit Content program: the genre categories showing lowest mean HEP are precisely the categories that prior reporting has identified as targets for ghost artist placement. The convergence of platform economic incentives, ghost artist operational targeting, and independent empirical measurement is consistent with the hypothesis that the platform's own programming decisions created the contamination environment that external bad actors subsequently exploited.</p>
+
+    <div class="section-anchor" id="s6-removal"></div>
+    <h3>6.3 The Coordinated Removal Natural Experiment</h3>
+
+    <p>Among the validation corpus, 17 instances of coordinated removal events were identified (track removed from 5+ playlists within 24 hours from a single operator network). Treatment tracks show systematically lower HEP scores in the 48-hour period preceding the removal event — providing prospective discriminative ability before the removal event confirms the synthetic placement.</p>
+
+    <div class="callout info">
+      <div class="callout-label">Billing Cycle Signal</div>
+      <p>The billing cycle periodicity test finds statistically significant clustering of removal events around end-of-month dates (days 28–31) in the confirmed synthetic network corpus: <strong>chi-square = 47.3, p &lt; 0.001, end-of-month fraction 0.31 vs. expected 0.10.</strong> No such clustering is observed in the organic control corpus (p = 0.72). Payment failures are exogenous to music quality and provide clean causal identification of bot placement infrastructure.</p>
+    </div>
+
+    <h3>6.4 Racial Displacement as Measurable Outcome</h3>
+
+    <p>Artists from documented demographic backgrounds who built the ambient, jazz, and lo-fi hip-hop genres show disproportionate representation in high-contamination playlist neighborhoods. Artists displaced from editorial playlist positions between 2019 and 2023 show playlist neighborhood HEP scores that declined by a mean of 0.23 over the displacement period. This formalizes the racial displacement observation as a measurable algorithmic harm: when contamination distributes disproportionately into genres built by artists from specific demographic backgrounds, and measurably reduces those artists' algorithmic visibility, the platform's recommendation infrastructure is producing discriminatory outcomes regardless of whether discrimination was the intent.</p>
+  </div>
+
+  <!-- ── SECTION 7 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s7"></span>
+    <h2><span class="section-num">7.</span>The Arms Race Problem</h2>
+
+    <p>A sophisticated adversary reading this paper could attempt to game the HEP framework across multiple components simultaneously. We acknowledge this directly and make two arguments.</p>
+
+    <p>First, gaming all seven components simultaneously is prohibitively costly. Each countermeasure requires additional operational complexity that must be maintained continuously. The economics of fraud operations — which depend on near-zero marginal cost per placement — become unfavorable as the cost of evading each detection dimension compounds. The composite is substantially harder to game than any individual signal, and becomes more robust as additional friction dimensions are incorporated.</p>
+
+    <p>Second, the arms race argument is not a reason to avoid publishing the methodology. It is a reason to publish it openly. A platform with financial incentives to tolerate contamination will systematically under-invest in detection. An open research community with no such incentive will not. Open-source code, labeled corpus, and published methodology means the research community controls the arms race rather than the platform.</p>
+  </div>
+
+  <!-- ── SECTION 8 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s8"></span>
+    <h2><span class="section-num">8.</span>Discussion</h2>
+
+    <h3>8.1 The Independent Audit Imperative</h3>
+
+    <p>Recommendation graph contamination in music streaming platforms cannot be reliably measured by the platforms themselves. The financial incentive structure — Wall Street growth narratives dependent on engagement metric credibility, advertising revenue dependent on active user counts, undisclosed conflicts of interest in the SEC filing record — creates systematic pressure against accurate internal measurement. The HEP framework is designed as a substitute for internal platform measurement, not a supplement to it.</p>
+
+    <h3>8.2 The Artist Protection Application</h3>
+
+    <p>An independent artist penalized for being added to bot-heavy playlists without their knowledge or consent can generate a timestamped HEP evidence report documenting structural anomalies in their playlist neighborhood, coordinated removal events affecting their track, and overall contamination probability with explicit uncertainty bounds — all from public API data, requiring no platform cooperation, providing a basis for distributor-level dispute that the current absence of documentation makes impossible.</p>
+
+    <h3>8.3 Policy Implications</h3>
+
+    <ul>
+      <li><strong>SEC disclosure reform:</strong> Require quantified bot traffic estimates from streaming platforms in annual filings, with methodology disclosure sufficient for independent verification. Meta's quarterly reporting is the operational precedent.</li>
+      <li><strong>Weighted royalty model reform:</strong> Active search streams weighted higher than algorithmically served streams. Ghost artist content — virtually all streams algorithmically served to passive listeners — would see revenue collapse. Independent artists with engaged fanbases would see relative revenue increase.</li>
+      <li><strong>Democratized takedown rights:</strong> Extending intellectual property protection to cover recommendation graph harm — artists algorithmically displaced by synthetic entities that absorbed their aesthetic and captured their discovery traffic — as a distinct injury from recorded content rights violation.</li>
+    </ul>
+  </div>
+
+  <!-- ── SECTION 9 ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="s9"></span>
+    <h2><span class="section-num">9.</span>Conclusion</h2>
+
+    <p>The recommendation algorithm is not a neutral surface on which music competes. It is an active curation mechanism whose outputs reflect the composition of the behavioral signals fed into it. When those signals are manufactured — whether by production companies operating ghost artist identities, by external bad actors constructing synthetic artists, or by paid playlist promotion services — the algorithm delivers those manufactured preferences to real human listeners as if they were authentic recommendations.</p>
+
+    <div class="pull-quote">
+      <p>The fraud is not in the music. The fraud is in the graph. The independent audit capacity the HEP framework creates is not a convenience. It is a necessity, made so by the structural impossibility of trusting a platform to accurately measure the contamination from which it financially benefits.</p>
+    </div>
+
+    <p>The ghost is still playing on someone's sleep playlist tonight. The mechanism is now documented. The question is only what we build instead.</p>
+  </div>
+
+  <!-- ── REFERENCES ── -->
+  <div class="paper-section">
+    <span class="section-anchor" id="refs"></span>
+    <h2><span class="section-num">References</span></h2>
+
+    <ul class="ref-list">
+      <li>Brown, N.B. (2026a). The Ghost in the Machine: What 40 Spotify Artists Reveal About Streaming's Invisible Fraud. <em>Musinique</em>, February 15, 2026.</li>
+      <li>Brown, N.B. (2026b). The Ghost in the Algorithm: Velvet Sundown and the New Economy of Synthetic Capture. <em>Musinique</em>, March 14, 2026.</li>
+      <li>Brown, N.B. (2026c). Spotify Engagement Integrity: An Analysis of MAU Methodology, Bot Classification, and SEC Disclosure Sufficiency. <em>Musinique</em>, March 19, 2026.</li>
+      <li>Collins v. Spotify USA Inc. et al. (2025). Class Action Complaint. United States District Court.</li>
+      <li>Pelly, L. (2024). <em>Mood Machine: The Rise of Spotify and the Costs of the Perfect Playlist.</em> Atria Books.</li>
+    </ul>
+
+    <div class="callout info" style="margin-top: 28px;">
+      <div class="callout-label">Open Methodology</div>
+      <p>The data pipeline implementation, labeled corpus, and replication code are published openly at <a href="https://musinique.substack.com">musinique.substack.com</a>. The methodology is not a secret.</p>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

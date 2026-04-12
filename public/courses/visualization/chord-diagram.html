@@ -1,386 +1,810 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  INFERENCES:
+  filename    = chord-diagram (slugified from chart type — no filename provided)
+  chart       = Non-ribbon Chord Diagram (stated explicitly)
+  message     = OCHA and UNHCR are the most connected nodes in the humanitarian
+                network — OCHA's coordination mandate drives the densest chord cluster;
+                Gov Donors are the most peripheral hub
+  palette     = hai (Humanitarians AI — walnut on white, earthy gravitas)
+  data-topic  = Humanitarian coordination network — 8 organizations, 28 connections
+  slides      = 2 (learn modifier active)
+-->
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chord Diagram — Inter-Entity Relationships</title>
-<meta name="description" content="Interactive chord diagram showing inter-relationships and shared flows between six entities, sized proportionally by connection strength.">
-<meta name="keywords" content="chord diagram, d3, relationships, flows, inter-relationships, data visualization, network">
-<meta name="author" content="Nik Bear Brown">
-<meta name="category" content="Relationships / Network Visualization">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --p1:#1B1B1B;--p2:#5C3317;--p3:#7A0000;--p4:#F7FAFD;--p5:#4A4D4F;--p6:#797C7F;--p7:#EDEDED;--p8:#FFFFFF;
-  --font:'JetBrains Mono',monospace;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;background:var(--p8);color:var(--p1);font-family:var(--font);overflow-x:hidden}
-.slides-wrapper{width:100%;scroll-snap-type:y mandatory;overflow-y:scroll;height:100vh}
-.slide{min-height:100vh;display:flex;flex-direction:column;padding:40px 48px 32px;scroll-snap-align:start;border-bottom:2px solid var(--p7)}
-.slide-meta{display:flex;align-items:center;gap:20px;margin-bottom:18px}
-.label{font-size:11px;font-weight:400;color:var(--p6);letter-spacing:.08em;text-transform:uppercase}
-.dot-nav{display:flex;gap:8px;margin-left:auto}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--p7);cursor:pointer;border:1px solid var(--p6);transition:background .2s}
-.dot.active{background:var(--p2);border-color:var(--p2)}
-.slide-title{font-size:clamp(15px,2.8vw,28px);font-weight:800;text-transform:uppercase;letter-spacing:-.02em;line-height:1.1;color:var(--p1);max-width:820px;margin-bottom:6px}
-.slide-subtitle{font-size:12px;color:var(--p5);font-weight:400;margin-bottom:24px;letter-spacing:.02em}
-.viz-container{flex:1;min-height:400px;position:relative;display:flex;align-items:center;justify-content:center}
-#tooltip{position:fixed;background:var(--p1);color:var(--p8);font-family:var(--font);font-size:12px;font-weight:600;padding:10px 14px;border:1px solid var(--p2);pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;line-height:1.7;max-width:260px}
-.controls{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
-.controls button{background:transparent;border:1px solid var(--p6);color:var(--p5);font-family:var(--font);font-size:11px;padding:6px 14px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .15s}
-.controls button:hover,.controls button.active{border-color:var(--p2);color:var(--p2)}
-.controls button.active{background:#5C331710}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--p6);margin-top:12px;align-items:center}
-.legend-swatch{width:12px;height:12px;display:inline-block;margin-right:5px;vertical-align:middle}
-.slide-learn{background:#FAFAFA}
-.learn-block{max-width:860px;columns:2;column-gap:48px}
-@media(max-width:720px){.learn-block{columns:1}.slide{padding:24px 20px}}
-.learn-block h2{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--p2);margin:24px 0 8px;break-after:avoid}
-.learn-block h2:first-child{margin-top:0}
-.learn-block p{font-size:13px;font-weight:400;color:var(--p5);line-height:1.75;break-inside:avoid}
-.framework-ref{border-left:3px solid var(--p2);padding:12px 16px;margin-top:24px;break-inside:avoid}
-.framework-ref .label{display:block;margin-bottom:6px}
-.framework-ref p{font-size:12px;font-style:italic;color:var(--p6)}
-footer{padding:20px 48px;border-top:2px solid var(--p7);font-size:11px;color:var(--p6);font-weight:400;letter-spacing:.04em;line-height:1.8}
-[tabindex="0"]:focus-visible{outline:2px solid var(--p2);outline-offset:2px}
-.chord-arc{cursor:pointer;transition:opacity .2s}
-.chord-arc:hover{opacity:.85}
-.chord-ribbon{transition:opacity .25s}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humanitarian Coordination Network — Non-Ribbon Chord Diagram</title>
+  <meta name="description" content="Non-ribbon chord diagram showing coordination strength between eight humanitarian organizations. Node position on circle; cubic Bézier curves encode relationship presence and strength.">
+  <meta name="keywords" content="chord diagram, non-ribbon chord, network visualization, relationships, D3.js, humanitarian network, coordination, data visualization, circular layout">
+  <meta name="author" content="Nik Bear Brown">
+  <meta name="category" content="Humanitarian Data / Network Analysis">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+  <style>
+    /* ============================================================
+       HAI PALETTE
+       WCAG: --p4 (#F7FAFD) and --p7 (#EDEDED) fail on white.
+       --p4 = background fills only. --p7 = borders only.
+       Text: --p1 18.2:1 AAA, --p2 10.7:1 AAA, --p5 9.4:1 AAA, --p6 4.6:1 AA
+    ============================================================ */
+    :root {
+      --p1: #1B1B1B;
+      --p2: #5C3317;
+      --p3: #B52C2C;
+      --p4: #F7FAFD;
+      --p5: #4A4D4F;
+      --p6: #797C7F;
+      --p7: #EDEDED;
+      --p8: #FFFFFF;
+      --font: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--p8);
+      color: var(--p1);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SLIDES ── */
+    .slides-wrapper {
+      display: flex; flex-direction: column;
+      width: 100%; height: 100vh;
+    }
+    .slide {
+      display: none; flex-direction: column;
+      flex: 1; min-height: 0;
+      padding: 18px 28px 6px;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; }
+    .slide-learn  { overflow-y: auto; padding-bottom: 24px; }
+
+    /* ── TYPOGRAPHY ── */
+    .label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.13em; text-transform: uppercase; color: var(--p6);
+    }
+    .slide-title {
+      font-size: clamp(11px, 1.6vw, 18px);
+      font-weight: 800; letter-spacing: -0.01em;
+      text-transform: uppercase; color: var(--p1);
+      line-height: 1.2; margin-bottom: 9px;
+    }
+    .slide-meta {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 5px;
+    }
+
+    /* ── CONTROLS ── */
+    .controls-bar {
+      display: flex; align-items: center; gap: 9px; margin-bottom: 8px;
+    }
+    .btn {
+      font-family: var(--font); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      padding: 3px 9px; background: transparent;
+      border: 1.5px solid var(--p7); color: var(--p6);
+      cursor: pointer; transition: border-color 0.18s, color 0.18s;
+    }
+    .btn:hover         { border-color: var(--p2); color: var(--p2); }
+    .btn:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+    /* ── VIZ CONTAINER ── */
+    .viz-container {
+      flex: 1; min-height: 0; position: relative; overflow: hidden;
+    }
+    #chart-svg { display: block; width: 100%; height: 100%; }
+
+    /* ── TOOLTIP ── */
+    .tooltip {
+      position: fixed; pointer-events: none;
+      background: var(--p1); color: var(--p8);
+      padding: 10px 14px; font-family: var(--font);
+      font-size: 11px; line-height: 1.8;
+      border: 1px solid var(--p2); max-width: 230px;
+      opacity: 0; transition: opacity 0.1s; z-index: 200;
+    }
+    .tooltip.visible { opacity: 1; }
+    .tt-head {
+      font-weight: 800; font-size: 12px;
+      color: var(--p4); /* #F7FAFD on #1B1B1B — 16.3:1 AAA ✓ */
+      margin-bottom: 3px; padding-bottom: 4px;
+      border-bottom: 1px solid #333;
+    }
+    .tt-sub  { font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+               text-transform: uppercase; color: #C9A878; margin-bottom: 5px; }
+    .tt-row  { color: var(--p6); }
+    .tt-val  { font-weight: 700; color: var(--p8); }
+    .tt-connections { margin-top: 5px; padding-top: 5px; border-top: 1px solid #333; }
+    .tt-conn-row { color: #A0A0A0; font-size: 10px; margin-bottom: 1px; }
+    .tt-conn-val { color: var(--p4); font-weight: 600; }
+
+    /* ── NODE ARC CURSOR ── */
+    .node-arc { cursor: pointer; }
+
+    /* ── NAV DOTS ── */
+    .slide-nav {
+      position: fixed; bottom: 47px; left: 50%;
+      transform: translateX(-50%); display: flex; gap: 8px; z-index: 100;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      border: 1.5px solid var(--p6); background: transparent;
+      cursor: pointer; padding: 0; transition: background 0.2s, border-color 0.2s;
+    }
+    .dot.active        { background: var(--p2); border-color: var(--p2); }
+    .dot:focus-visible { outline: 2px solid var(--p2); outline-offset: 3px; }
+
+    /* ── FOOTER ── */
+    footer {
+      height: 38px; border-top: 2px solid var(--p7);
+      display: flex; align-items: center;
+      justify-content: space-between; padding: 0 28px; flex-shrink: 0;
+    }
+    footer p  { font-size: 10px; color: var(--p6); letter-spacing: 0.04em; }
+    .nav-hint { font-size: 10px; color: var(--p6); letter-spacing: 0.08em; }
+
+    /* ── LEARN SLIDE ── */
+    .learn-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 18px 36px; padding-bottom: 28px;
+    }
+    .learn-block { border-left: 3px solid var(--p2); padding-left: 13px; }
+    .learn-block h2 {
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--p2); margin-bottom: 6px;
+    }
+    .learn-block p  { font-size: 11.5px; line-height: 1.8; color: var(--p5); }
+    .learn-block p strong { color: var(--p1); font-weight: 700; }
+    .learn-block code {
+      font-family: var(--font); font-size: 10px;
+      color: var(--p2); background: var(--p4); padding: 1px 4px;
+    }
+    .framework-ref {
+      grid-column: 1 / -1; background: var(--p4);
+      border: 1.5px solid var(--p7); padding: 13px 17px;
+    }
+    .framework-ref .label { display: block; color: var(--p2); margin-bottom: 6px; }
+    .framework-ref p      { font-size: 11.5px; line-height: 1.75; color: var(--p1); }
+    .framework-ref p strong { color: var(--p2); }
+    .design-decision {
+      grid-column: 1 / -1; border-top: 2px solid var(--p7); padding-top: 13px;
+    }
+    .design-decision h2 {
+      font-size: 10px; font-weight: 800;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--p6); margin-bottom: 6px;
+    }
+    .design-decision p { font-size: 11.5px; line-height: 1.8; color: var(--p5); }
+    .design-decision p strong { color: var(--p1); font-weight: 700; }
+    .design-decision code {
+      font-family: var(--font); font-size: 10px;
+      color: var(--p2); background: var(--p4); padding: 1px 4px;
+    }
+
+    @media (max-width: 700px) {
+      .learn-grid  { grid-template-columns: 1fr; }
+      .slide       { padding: 12px 14px 5px; }
+      footer       { padding: 0 14px; }
+      .slide-title { font-size: 11px; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="tooltip"></div>
+<div class="tooltip" id="tooltip" role="tooltip" aria-live="polite" aria-atomic="true"></div>
 
 <div class="slides-wrapper">
 
-<section class="slide" id="slide-01" aria-label="Chord Diagram — Inter-Entity Relationships">
-  <div class="slide-meta">
-    <span class="label">// RELATIONSHIPS</span>
-    <div class="dot-nav" role="navigation" aria-label="Slide navigation">
-      <div class="dot active" onclick="scrollToSlide(0)" tabindex="0" aria-label="Slide 1"></div>
-      <div class="dot" onclick="scrollToSlide(1)" tabindex="0" aria-label="Slide 2 — Learn panel"></div>
-    </div>
-  </div>
-  <h1 class="slide-title">Six Sectors, Every Connection — Flow Proportional to Strength</h1>
-  <p class="slide-subtitle">Hover an arc to highlight its connections &nbsp;·&nbsp; Hover a ribbon for exact flow &nbsp;·&nbsp; Arrow keys navigate sectors &nbsp;·&nbsp; Click arc to isolate</p>
-  <div class="viz-container" id="chart" role="img" aria-label="Chord diagram showing inter-relationships between six sectors: Technology, Finance, Healthcare, Energy, Education, and Policy. Arc sizes represent total outflow; ribbon widths represent bilateral flow strength."></div>
-  <div class="controls">
-    <button id="btn-reset" onclick="resetHighlight()" aria-label="Reset all highlights">Reset</button>
-    <button id="btn-sort" onclick="toggleSort()" aria-pressed="false">Sort: default</button>
-    <button id="audio-toggle" onclick="toggleAudio()" aria-label="Play narration">&#9654; narration</button>
-  </div>
-  <div class="legend" id="legend-row" style="margin-top:14px"></div>
-</section>
+  <!-- ── SLIDE 1: CHORD VISUALIZATION ── -->
+  <section class="slide active" id="slide-01"
+           aria-label="Non-ribbon chord diagram: Humanitarian coordination network">
 
-<section class="slide slide-learn" id="slide-02" aria-label="Learn Panel — Chord Diagram">
-  <div class="slide-meta">
-    <span class="label">// LEARN — Chord Diagram</span>
-    <div class="dot-nav" role="navigation" aria-label="Slide navigation">
-      <div class="dot" onclick="scrollToSlide(0)" tabindex="0" aria-label="Slide 1"></div>
-      <div class="dot active" onclick="scrollToSlide(1)" tabindex="0" aria-label="Slide 2 — Learn panel"></div>
+    <div class="slide-meta">
+      <span class="label">// HAI — HUMANITARIAN COORDINATION NETWORK · 8 NODES · 28 CONNECTIONS</span>
+      <span class="label" id="data-summary"></span>
     </div>
-  </div>
-  <div class="learn-block">
-    <h2>What this chart is</h2>
-    <p>A chord diagram encodes bilateral relationships in a circular layout. Nodes sit on the circumference as arcs; their angular width is proportional to the total flow in or out of that entity. Ribbons connecting arcs are Bézier curves whose width at each endpoint encodes the directional magnitude of the flow — how much entity A sends to entity B is read from A's end of the ribbon, and vice versa. The perceptual mechanism is area: wider ribbons carry more. Two entities with a large mutual relationship dominate the visual field, making the strongest connections impossible to miss. The encoding is inherently relational — unlike a matrix or bar chart, the chord diagram places all pairwise relationships in simultaneous view.</p>
-    <h2>Why it was chosen here</h2>
-    <p>The data presents six entities with meaningful pairwise flows and the goal is revealing which relationships dominate, which are symmetric, and which are asymmetric. A heatmap matrix could show all 36 cells, but cannot encode magnitude as intuitively as area. A network node-link diagram can show topology but loses proportional flow without cumbersome edge-weight labels. The chord diagram exploits the fact that the human visual system is excellent at judging relative area, making it possible to rank relationships at a glance. With six nodes and fifteen unique ribbons, the layout remains legible — the critical threshold. At ten or more nodes, overcrowding degrades readability and the chart should be filtered or split.</p>
-    <h2>What the alternative would break</h2>
-    <p>A directed arrow network graph — the most common naive substitute — fails to communicate proportional flow. Edge thickness can encode weight, but edges overlap, cross, and the layout algorithm has no obligation to place high-weight edges prominently. The chord diagram solves this by construction: the arc ordering and radial layout guarantee that ribbon width is always legible against the neutral interior. The other tempting alternative, a sankey diagram, is excellent for flows between sequential stages but presupposes directionality and a left-to-right narrative. When relationships are bilateral and the "stages" don't exist, a sankey imposes false structure.</p>
-    <div class="framework-ref">
-      <span class="label">// FRAMEWORK</span>
-      <p>FT Visual Vocabulary category: Part-to-whole / Relationships — "Show how individual parts relate to each other and to the whole." Abela quadrant: Relationship (two or more variables, comparing magnitude of association). The one design decision worth knowing: arc gap size (here ~2°) controls the visual separation between nodes. Too small and arcs blur together; too large and the ribbons appear disconnected from their source. Two degrees per gap is Bostock's canonical default for six-node diagrams and was retained deliberately.</p>
+
+    <h1 class="slide-title">
+      OCHA and UNHCR Are the Network's Densest Hubs —<br>
+      Chord Thickness Encodes Coordination Strength
+    </h1>
+
+    <div class="controls-bar">
+      <button class="btn" id="reset-btn"    aria-label="Reset highlight">↺ reset</button>
+      <button class="btn" id="audio-toggle" aria-label="Play narration">▶ narration</button>
+      <span class="label" style="margin-left:6px">hover node or chord to explore</span>
     </div>
-  </div>
-</section>
+
+    <div class="viz-container" id="chart-container">
+      <svg id="chart-svg" role="img" aria-labelledby="chord-title chord-desc">
+        <title id="chord-title">Non-Ribbon Chord Diagram — Humanitarian Coordination Network</title>
+        <desc id="chord-desc">
+          Eight humanitarian organizations arranged in a circle: UNHCR, WFP, UNICEF, WHO,
+          OCHA, International NGOs, Local NGOs, and Government Donors. 28 curved chords connect
+          each pair. Chord thickness and opacity encode coordination strength (0–100 scale).
+          OCHA–UNHCR (91) and OCHA–Int'l NGOs (85) are the strongest connections.
+          Local NGOs–Gov Donors (28) is the weakest.
+        </desc>
+      </svg>
+    </div>
+
+    <audio id="page-audio" src="./chord-diagram/audio.mp3" preload="none"></audio>
+
+  </section>
+
+  <!-- ── SLIDE 2: LEARN PANEL ── -->
+  <section class="slide slide-learn" id="slide-02"
+           aria-label="Learn panel: Non-ribbon chord diagram theory and design decisions">
+
+    <div class="slide-meta">
+      <span class="label">// LEARN — NON-RIBBON CHORD DIAGRAM · FT VISUAL VOCABULARY: RELATIONSHIPS</span>
+      <span class="label">ABELA QUADRANT: RELATIONSHIP</span>
+    </div>
+
+    <h1 class="slide-title">What Makes a Non-Ribbon Chord Diagram Work — And When to Use the Ribbon Version Instead</h1>
+
+    <div class="learn-grid">
+
+      <div class="learn-block">
+        <h2>What this chart is</h2>
+        <p>
+          A non-ribbon chord diagram is a <strong>circular relationship graph</strong>:
+          nodes are arranged as arc segments on the perimeter of a circle, and connections
+          are drawn as curved lines (chords) spanning the interior. The perceptual mechanism
+          is <strong>gestalt continuity</strong> — the eye follows each curve from one arc to
+          another, reading the connection as a single unit even when it crosses other chords.
+          The circular layout implies no hierarchy (all nodes are equidistant from the center)
+          and no direction (chords are symmetric). Connection strength is encoded by
+          <strong>stroke weight and opacity</strong>, both redundant encodings of the same
+          variable — accessible in both color-normal and color-deficient viewing.
+        </p>
+      </div>
+
+      <div class="learn-block">
+        <h2>Non-ribbon vs. ribbon chord</h2>
+        <p>
+          A <strong>full ribbon chord diagram</strong> fills the space between two arcs with
+          a shaped "ribbon," encoding directional flow volume: the width of the ribbon at each
+          end represents how much flows <em>from</em> that node. This is appropriate when data
+          has meaningful direction (migration, trade, financial flows) and when per-direction
+          volumes are precisely known. A <strong>non-ribbon chord diagram</strong> strips the
+          filled shape away, keeping only the connection lines. This is appropriate when
+          relationships are undirected, when the connection pattern matters more than volumes,
+          or when the filled ribbons would create false visual depth that obscures the
+          underlying topology — which is the case in this coordination network.
+        </p>
+      </div>
+
+      <div class="learn-block">
+        <h2>What the alternatives would break</h2>
+        <p>
+          A <strong>force-directed network graph</strong> would show the same relationships
+          but allows nodes to move — the viewer cannot directly compare node positions
+          across views. The circular layout here gives every node a <em>fixed, readable</em>
+          position with a labeled arc. A <strong>matrix view</strong> (heatmap of all pairs)
+          would be more precise for exact value comparison but requires the viewer to trace
+          rows and columns mentally — the chord diagram makes the relationship pattern
+          immediately visual without any matrix traversal. For dense networks
+          (all 8 nodes connected to all 7 others), the chord layout handles the
+          <strong>28 simultaneous relationships</strong> without the overlap chaos of a
+          force-directed layout.
+        </p>
+      </div>
+
+      <div class="learn-block">
+        <h2>Reading the hub pattern</h2>
+        <p>
+          A <strong>hub node</strong> in this chart is one whose arc is the starting point
+          for many thick, dark chords. OCHA and UNHCR are visually dense because their arcs
+          originate the strongest chords — thick walnut and obsidian lines radiate across
+          the circle. Government Donors and Local NGOs show thinner chords, indicating
+          weaker or fewer coordination relationships. This hub pattern is <em>impossible</em>
+          to see in a table and requires significant computation to extract from a matrix view.
+          The chord diagram makes it perceptually immediate: dense = hub, sparse = peripheral.
+          Hover any node to isolate its connections and read the strength values in the tooltip.
+        </p>
+      </div>
+
+      <div class="framework-ref">
+        <span class="label">// FRAMEWORK REFERENCE</span>
+        <p>
+          The FT Visual Vocabulary classifies this under <strong>Relationship</strong>:
+          "Show connections and flows between entities." The chord diagram is specifically
+          suited to many-to-many relationships within a <strong>bounded, enumerable set</strong>
+          of nodes — it fails for open-ended networks where the node count is large or variable.
+          Abela's framework routes here when the question is "who is connected to whom, and
+          how strongly?" Tufte's data-ink principle is honored: every chord pixel encodes
+          a relationship. The node arc segments are the only structural elements — they carry
+          identity (label and color) and provide a <strong>consistent angular reference</strong>
+          that the force-directed layout cannot offer.
+        </p>
+      </div>
+
+      <div class="design-decision">
+        <h2>// The one design decision worth knowing</h2>
+        <p>
+          <strong>Every chord uses a cubic Bézier with both control points at the
+          origin (0,0)</strong> — <code>M x1,y1 C0,0 0,0 x2,y2</code>.
+          This means all chords converge through or near the center of the circle,
+          regardless of which two nodes they connect. The geometric consequence:
+          chords between adjacent nodes (short arcs apart) curve steeply inward;
+          chords between near-opposite nodes are nearly straight through the center.
+          The visual consequence: the center of the diagram becomes a
+          <strong>focal density region</strong> — the viewer's eye is drawn there
+          precisely where the most cross-connections occur.
+          This is not an arbitrary choice. The alternative — Bézier control points
+          at fixed offsets — would produce chords that intersect at random interior
+          points, creating visual noise without the unifying center gravity.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do
+       &nbsp;·&nbsp; boondoggling.ai &nbsp;·&nbsp; irreducibly.xyz &nbsp;·&nbsp;
+       brutalist.art &nbsp;·&nbsp; bearbrown.co &nbsp;·&nbsp; frictional.xyz</p>
+    <span class="nav-hint">← → slides &nbsp;|&nbsp; esc reset</span>
+  </footer>
 
 </div>
 
-<footer>
-  <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai &nbsp;·&nbsp; irreducibly.xyz &nbsp;·&nbsp; brutalist.art &nbsp;·&nbsp; bearbrown.co &nbsp;·&nbsp; frictional.xyz</p>
-</footer>
+<nav class="slide-nav" role="navigation" aria-label="Slide navigation">
+  <button class="dot active" data-slide="0"
+          aria-label="Go to slide 1: Chord diagram" tabindex="0"></button>
+  <button class="dot"        data-slide="1"
+          aria-label="Go to slide 2: Learn panel"   tabindex="0"></button>
+</nav>
 
-<audio id="page-audio" src="./chord-diagram/audio.mp3"></audio>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
-/* ── DATA ─────────────────────────────────────────────────
-   Schema: symmetric NxN matrix. matrix[i][j] = flow from i to j.
-   Replace with real data; keep same structure.
-   Replace "names" array with your entity labels.
-─────────────────────────────────────────────────────────── */
-const names = ["Technology","Finance","Healthcare","Energy","Education","Policy"];
+'use strict';
 
-const matrix = [
-  [ 0,  28,  14,  19,  22,  11],
-  [28,   0,  32,  25,  10,  18],
-  [14,  32,   0,  12,  30,  24],
-  [19,  25,  12,   0,   8,  35],
-  [22,  10,  30,   8,   0,  20],
-  [11,  18,  24,  35,  20,   0]
-];
+// ============================================================
+//  SLIDE NAVIGATION
+// ============================================================
+const slides  = document.querySelectorAll('.slide');
+const dots    = document.querySelectorAll('.dot');
+let   current = 0;
 
-/* ── HAI PALETTE — categorical arc colors ─────────────────
-   Six distinct hues derived from palette accent roles.
-   Each node gets one color; ribbons inherit the source node's color.
-─────────────────────────────────────────────────────────── */
-const COLORS = [
-  "#5C3317",  /* walnut      — Technology  */
-  "#4A4D4F",  /* dim-gray    — Finance     */
-  "#7A0000",  /* blood-red   — Healthcare  */
-  "#797C7F",  /* mist        — Energy      */
-  "#1B1B1B",  /* obsidian    — Education   */
-  "#8C6A50",  /* warm sienna — Policy      */
-];
+function goToSlide(n) {
+  slides[current].classList.remove('active');
+  dots[current].classList.remove('active');
+  current = Math.max(0, Math.min(n, slides.length - 1));
+  slides[current].classList.add('active');
+  dots[current].classList.add('active');
+}
 
-/* ── STATE ───────────────────────────────────────────────── */
-let sortByFlow = false;
-let activeIndex = null;
+dots.forEach(d => d.addEventListener('click', () => goToSlide(+d.dataset.slide)));
 
-/* ── BUILD LEGEND ────────────────────────────────────────── */
-const legendRow = document.getElementById('legend-row');
-names.forEach((n, i) => {
-  const item = document.createElement('span');
-  item.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:pointer';
-  item.innerHTML = `<span style="width:12px;height:12px;background:${COLORS[i]};display:inline-block;flex-shrink:0"></span><span style="font-size:11px;color:var(--p5)">${n}</span>`;
-  item.onclick = () => highlightNode(i);
-  item.setAttribute('tabindex', '0');
-  item.setAttribute('aria-label', `Highlight ${n}`);
-  item.onkeydown = e => { if (e.key === 'Enter') highlightNode(i); };
-  legendRow.appendChild(item);
+document.addEventListener('keydown', e => {
+  if (['ArrowRight', 'ArrowDown'].includes(e.key)) goToSlide(current + 1);
+  if (['ArrowLeft',  'ArrowUp'  ].includes(e.key)) goToSlide(current - 1);
+  if (e.key === 'Escape') resetHighlight();
 });
 
-/* ── DRAW ─────────────────────────────────────────────────── */
-function draw() {
-  const container = document.getElementById('chart');
-  container.innerHTML = '';
-
-  const W = container.clientWidth  || 700;
-  const H = container.clientHeight || 500;
-  const size = Math.min(W, H);
-  const outerR = size * 0.42;
-  const innerR = outerR - size * 0.055;
-
-  const svg = d3.select('#chart').append('svg')
-    .attr('width', W).attr('height', H).attr('role', 'img')
-    .append('g').attr('transform', `translate(${W/2},${H/2})`);
-
-  const order = sortByFlow
-    ? d3.range(names.length).sort((a,b) => d3.sum(matrix[b]) - d3.sum(matrix[a]))
-    : d3.range(names.length);
-
-  const chord = d3.chord()
-    .padAngle(0.035)
-    .sortSubgroups(d3.descending)
-    .sortGroups(null);
-
-  const chords = chord(matrix);
-
-  const arc = d3.arc().innerRadius(innerR).outerRadius(outerR);
-  const ribbon = d3.ribbon().radius(innerR - 2);
-
-  const tip = document.getElementById('tooltip');
-
-  /* ── RIBBONS (draw first — behind arcs) ─────────────────── */
-  const ribbons = svg.append('g').selectAll('path')
-    .data(chords).join('path')
-    .attr('class', 'chord-ribbon')
-    .attr('d', ribbon)
-    .attr('fill', d => COLORS[d.source.index])
-    .attr('fill-opacity', 0.18)
-    .attr('stroke', d => COLORS[d.source.index])
-    .attr('stroke-width', 0.5)
-    .attr('stroke-opacity', 0.3)
-    .on('mousemove', function(event, d) {
-      const si = d.source.index, ti = d.target.index;
-      const sv = Math.round(d.source.value), tv = Math.round(d.target.value);
-      tip.style.opacity = '1';
-      tip.style.left  = (event.clientX + 14) + 'px';
-      tip.style.top   = (event.clientY - 10) + 'px';
-      tip.innerHTML =
-        `<strong style="color:${COLORS[si]}">${names[si]}</strong> &#8594; <strong style="color:${COLORS[ti]}">${names[ti]}</strong>: ${sv}<br>` +
-        `<strong style="color:${COLORS[ti]}">${names[ti]}</strong> &#8594; <strong style="color:${COLORS[si]}">${names[si]}</strong>: ${tv}<br>` +
-        `<span style="color:var(--p6)">Total: ${sv + tv}</span>`;
-      d3.select(this).attr('fill-opacity', 0.55).attr('stroke-opacity', 0.8);
-    })
-    .on('mouseout', function() {
-      tip.style.opacity = '0';
-      if (activeIndex === null) {
-        d3.select(this).attr('fill-opacity', 0.18).attr('stroke-opacity', 0.3);
-      }
-    });
-
-  /* entrance animation */
-  ribbons
-    .attr('fill-opacity', 0)
-    .attr('stroke-opacity', 0)
-    .transition().duration(900).delay((d, i) => 300 + i * 30).ease(d3.easeCubicOut)
-    .attr('fill-opacity', 0.18)
-    .attr('stroke-opacity', 0.3);
-
-  /* ── ARCS ───────────────────────────────────────────────── */
-  const groups = svg.append('g').selectAll('g')
-    .data(chords.groups).join('g')
-    .attr('class', 'chord-arc')
-    .attr('tabindex', 0)
-    .attr('aria-label', d => {
-      const total = Math.round(d3.sum(matrix[d.index]));
-      return `${names[d.index]}: total outflow ${total}`;
-    })
-    .on('keydown', function(event, d) {
-      if (event.key === 'Enter' || event.key === ' ') highlightNode(d.index);
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-        const nodes = svg.selectAll('.chord-arc').nodes();
-        nodes[(d.index + 1) % names.length].focus();
-      }
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-        const nodes = svg.selectAll('.chord-arc').nodes();
-        nodes[(d.index - 1 + names.length) % names.length].focus();
-      }
-    });
-
-  /* arc path */
-  groups.append('path')
-    .attr('d', arc)
-    .attr('fill', d => COLORS[d.index])
-    .attr('stroke', d => COLORS[d.index])
-    .attr('stroke-width', 0.5)
-    .attr('fill-opacity', 0)
-    .on('mousemove', function(event, d) {
-      tip.style.opacity = '1';
-      tip.style.left  = (event.clientX + 14) + 'px';
-      tip.style.top   = (event.clientY - 10) + 'px';
-      const row = matrix[d.index];
-      const outflows = row.map((v,j) => j !== d.index ? `${names[j]}: ${v}` : null).filter(Boolean).join('<br>');
-      tip.innerHTML = `<strong style="color:${COLORS[d.index]}">${names[d.index]}</strong><br>${outflows}<br><span style="color:var(--p6)">Total: ${Math.round(d3.sum(row))}</span>`;
-      if (activeIndex === null) highlightNode(d.index, true);
-    })
-    .on('mouseout', function() {
-      tip.style.opacity = '0';
-      if (activeIndex === null) resetHighlight(true);
-    })
-    .on('click', function(event, d) {
-      if (activeIndex === d.index) { activeIndex = null; resetHighlight(); }
-      else { activeIndex = d.index; highlightNode(d.index); }
-    })
-    .transition().duration(700).delay((d, i) => i * 80).ease(d3.easeCubicOut)
-    .attr('fill-opacity', 0.9);
-
-  /* tick marks on arc */
-  groups.each(function(d) {
-    const groupEl = d3.select(this);
-    const total = d3.sum(matrix[d.index]);
-    const k = (d.endAngle - d.startAngle) / total;
-    const ticks = d3.range(0, total, Math.ceil(total / 5)).map(v => ({
-      angle: v * k + d.startAngle,
-      value: v
-    }));
-    groupEl.selectAll('line.tick')
-      .data(ticks).join('line')
-      .attr('class', 'tick')
-      .attr('x1', dd => Math.sin(dd.angle) * (outerR + 4))
-      .attr('y1', dd => -Math.cos(dd.angle) * (outerR + 4))
-      .attr('x2', dd => Math.sin(dd.angle) * (outerR + 9))
-      .attr('y2', dd => -Math.cos(dd.angle) * (outerR + 9))
-      .attr('stroke', COLORS[d.index])
-      .attr('stroke-opacity', 0.4)
-      .attr('stroke-width', 0.75);
-  });
-
-  /* arc labels */
-  groups.append('text')
-    .each(function(d) { d.angle = (d.startAngle + d.endAngle) / 2; })
-    .attr('dy', '0.35em')
-    .attr('transform', d => {
-      const angle = (d.startAngle + d.endAngle) / 2;
-      const r = outerR + 18;
-      const x = Math.sin(angle) * r;
-      const y = -Math.cos(angle) * r;
-      const deg = (angle * 180 / Math.PI - 90);
-      return `translate(${x},${y}) rotate(${angle > Math.PI ? deg + 180 : deg})`;
-    })
-    .attr('text-anchor', d => {
-      const angle = (d.startAngle + d.endAngle) / 2;
-      return angle > Math.PI ? 'end' : 'start';
-    })
-    .attr('font-family', "'JetBrains Mono', monospace")
-    .attr('font-size', Math.max(9, size * 0.022) + 'px')
-    .attr('font-weight', '600')
-    .attr('fill', d => COLORS[d.index])
-    .attr('opacity', 0)
-    .text(d => names[d.index])
-    .transition().duration(600).delay((d, i) => 400 + i * 80)
-    .attr('opacity', 1);
-
-  /* expose for highlight functions */
-  window._chordSvg = svg;
-  window._chordRibbons = ribbons;
-  window._chordGroups = groups;
-}
-
-/* ── HIGHLIGHT ───────────────────────────────────────────── */
-function highlightNode(idx, transient) {
-  if (!window._chordRibbons) return;
-  window._chordRibbons
-    .attr('fill-opacity', d => (d.source.index === idx || d.target.index === idx) ? 0.65 : 0.04)
-    .attr('stroke-opacity', d => (d.source.index === idx || d.target.index === idx) ? 0.9 : 0.05);
-  window._chordGroups.selectAll('path')
-    .attr('fill-opacity', d => d.index === idx ? 1.0 : 0.35);
-  if (!transient) activeIndex = idx;
-}
-
-function resetHighlight(transient) {
-  if (!window._chordRibbons) return;
-  window._chordRibbons
-    .attr('fill-opacity', 0.18)
-    .attr('stroke-opacity', 0.3);
-  window._chordGroups.selectAll('path')
-    .attr('fill-opacity', 0.9);
-  if (!transient) activeIndex = null;
-}
-
-/* ── CONTROLS ─────────────────────────────────────────────── */
-function toggleSort() {
-  sortByFlow = !sortByFlow;
-  const btn = document.getElementById('btn-sort');
-  btn.textContent = `Sort: ${sortByFlow ? 'by flow' : 'default'}`;
-  btn.classList.toggle('active', sortByFlow);
-  btn.setAttribute('aria-pressed', sortByFlow);
-  activeIndex = null;
-  draw();
-}
-
-function toggleAudio() {
-  const audio = document.getElementById('page-audio');
-  const btn   = document.getElementById('audio-toggle');
-  if (!audio) return;
+// ============================================================
+//  AUDIO
+// ============================================================
+const audio    = document.getElementById('page-audio');
+const audioBtn = document.getElementById('audio-toggle');
+audioBtn.addEventListener('click', () => {
   if (audio.paused) {
-    audio.play().then(() => btn.innerHTML = '&#9646;&#9646; narration').catch(() => {});
+    audio.play().catch(() => {});
+    audioBtn.textContent = '⏸ narration';
+    audioBtn.setAttribute('aria-label', 'Pause narration');
   } else {
     audio.pause();
-    btn.innerHTML = '&#9654; narration';
+    audioBtn.textContent = '▶ narration';
+    audioBtn.setAttribute('aria-label', 'Play narration');
   }
-}
-
-/* ── SLIDE NAV ───────────────────────────────────────────── */
-function scrollToSlide(idx) {
-  const slides = document.querySelectorAll('.slide');
-  if (slides[idx]) slides[idx].scrollIntoView({ behavior: 'smooth' });
-}
-
-/* ── RESIZE ───────────────────────────────────────────────── */
-let rTimer;
-const ro = new ResizeObserver(() => {
-  clearTimeout(rTimer);
-  rTimer = setTimeout(() => { activeIndex = null; draw(); }, 150);
 });
-ro.observe(document.getElementById('chart'));
+audio.addEventListener('ended', () => {
+  audioBtn.textContent = '▶ narration';
+  audioBtn.setAttribute('aria-label', 'Play narration');
+});
 
-draw();
+// ============================================================
+//  TOOLTIP
+// ============================================================
+const tooltipEl = document.getElementById('tooltip');
+
+function showNodeTooltip(event, node, links) {
+  const connected = links
+    .filter(l => l.source === node.id || l.target === node.id)
+    .sort((a, b) => b.value - a.value);
+  const totalStrength = connected.reduce((s, l) => s + l.value, 0);
+  const strongest = connected[0];
+
+  tooltipEl.innerHTML = `
+    <div class="tt-head">${node.label}</div>
+    <div class="tt-sub">${node.sublabel}</div>
+    <div class="tt-row">Connections &nbsp;&nbsp;<span class="tt-val">${connected.length}</span></div>
+    <div class="tt-row">Total strength &nbsp;<span class="tt-val">${totalStrength}</span></div>
+    <div class="tt-connections">
+      ${connected.slice(0, 4).map(l => {
+        const partner = l.source === node.id ? l.target : l.source;
+        return `<div class="tt-conn-row">${partner.toUpperCase()} &nbsp;<span class="tt-conn-val">${l.value}</span></div>`;
+      }).join('')}
+      ${connected.length > 4 ? `<div class="tt-conn-row">+${connected.length - 4} more…</div>` : ''}
+    </div>
+  `;
+  moveTooltip(event);
+  tooltipEl.classList.add('visible');
+}
+
+function showLinkTooltip(event, link, nodeMap) {
+  const sNode = nodeMap.get(link.source);
+  const tNode = nodeMap.get(link.target);
+  tooltipEl.innerHTML = `
+    <div class="tt-head">${sNode?.label || link.source}</div>
+    <div class="tt-sub">↔ ${tNode?.label || link.target}</div>
+    <div class="tt-row">Coord. strength &nbsp;<span class="tt-val">${link.value} / 100</span></div>
+    <div class="tt-row">Rank &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tt-val">${link._rank} of ${link._total}</span></div>
+  `;
+  moveTooltip(event);
+  tooltipEl.classList.add('visible');
+}
+
+function moveTooltip(event) {
+  const tw = tooltipEl.offsetWidth;
+  const th = tooltipEl.offsetHeight;
+  let x = event.clientX + 14;
+  let y = event.clientY - th / 2;
+  if (x + tw > window.innerWidth  - 8) x = event.clientX - tw - 14;
+  if (y < 6)                            y = 6;
+  if (y + th > window.innerHeight - 6) y = window.innerHeight - th - 6;
+  tooltipEl.style.left = x + 'px';
+  tooltipEl.style.top  = y + 'px';
+}
+
+function hideTooltip() { tooltipEl.classList.remove('visible'); }
+
+// ============================================================
+//  HIGHLIGHT STATE
+// ============================================================
+let highlightedNode = null;
+let isHovering      = false;
+
+function highlightNode(nodeId, enrichedLinks, wScale, oScale) {
+  highlightedNode = nodeId;
+  d3.selectAll('.chord-vis').each(function(d) {
+    const connected = d.source === nodeId || d.target === nodeId;
+    d3.select(this)
+      .transition().duration(180)
+      .attr('opacity',      connected ? Math.min(0.9, oScale(d.value) * 1.7) : 0.03)
+      .attr('stroke-width', connected ? wScale(d.value) * 1.6 : wScale(d.value));
+  });
+  d3.selectAll('.node-group').each(function(d) {
+    const isTarget = d.id === nodeId;
+    const isConnected = enrichedLinks.some(l =>
+      (l.source === nodeId && l.target === d.id) ||
+      (l.target === nodeId && l.source === d.id)
+    );
+    d3.select(this).transition().duration(180)
+      .attr('opacity', isTarget ? 1 : isConnected ? 0.95 : 0.22);
+  });
+}
+
+function resetHighlight() {
+  highlightedNode = null;
+  if (isHovering) return;
+  d3.selectAll('.chord-vis').transition().duration(280)
+    .attr('opacity',      d => d._baseOpacity)
+    .attr('stroke-width', d => d._baseWidth);
+  d3.selectAll('.node-group').transition().duration(280).attr('opacity', 1);
+  hideTooltip();
+}
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  highlightedNode = null;
+  isHovering = false;
+  resetHighlight();
+});
+
+// ============================================================
+//  RENDER CHART
+// ============================================================
+const container = document.getElementById('chart-container');
+const chartSVG  = d3.select('#chart-svg');
+let   rawData   = null;
+
+function renderChart(data) {
+  chartSVG.selectAll('*').remove();
+  highlightedNode = null;
+
+  const rect    = container.getBoundingClientRect();
+  const W       = Math.max(rect.width, 400);
+  const H       = Math.max(rect.height, 300);
+  const dim     = Math.min(W, H);
+  const R       = dim / 2 - 94;   // 94px reserved for labels
+  const innerR  = R - 14;         // where chords terminate (inside the arc)
+  const arcOuter = R;
+  const arcInner = R - 13;
+
+  chartSVG.attr('width', W).attr('height', H).attr('viewBox', `0 0 ${W} ${H}`);
+
+  const g = chartSVG.append('g')
+    .attr('transform', `translate(${W / 2},${H / 2})`);
+
+  // ── NODE GEOMETRY ──
+  const n         = data.nodes.length;
+  const GAP       = 0.06;   // radians between arc segments (~3.4°)
+  const arcWidth  = (2 * Math.PI - n * GAP) / n;
+
+  data.nodes.forEach((node, i) => {
+    node._startAngle = -Math.PI / 2 + i * (arcWidth + GAP);
+    node._endAngle   = node._startAngle + arcWidth;
+    node._midAngle   = node._startAngle + arcWidth / 2;
+    node._ix         = innerR * Math.cos(node._midAngle);
+    node._iy         = innerR * Math.sin(node._midAngle);
+  });
+
+  const nodeMap = new Map(data.nodes.map(nd => [nd.id, nd]));
+
+  // ── ENRICH LINKS ──
+  const sortedLinks = [...data.links].sort((a, b) => a.value - b.value);
+  sortedLinks.forEach((l, i) => {
+    l._rank  = i + 1;
+    l._total = sortedLinks.length;
+  });
+  const enrichedLinks = data.links.map(l => ({
+    ...l,
+    sourceNode: nodeMap.get(l.source),
+    targetNode: nodeMap.get(l.target)
+  })).filter(l => l.sourceNode && l.targetNode);
+
+  // ── SCALES ──
+  const wScale = d3.scaleLinear().domain([0, 100]).range([0.4, 4.0]);
+  const oScale = d3.scaleLinear().domain([0, 100]).range([0.08, 0.62]);
+
+  // Attach base values to links
+  enrichedLinks.forEach(l => {
+    l._baseWidth   = wScale(l.value);
+    l._baseOpacity = oScale(l.value);
+  });
+
+  // ── CHORD PATH FUNCTION ──
+  function chordPath(sNode, tNode) {
+    const x1 = innerR * Math.cos(sNode._midAngle);
+    const y1 = innerR * Math.sin(sNode._midAngle);
+    const x2 = innerR * Math.cos(tNode._midAngle);
+    const y2 = innerR * Math.sin(tNode._midAngle);
+    // Cubic Bézier: both control points at origin → all chords share the center focal point
+    return `M${x1.toFixed(2)},${y1.toFixed(2)} C0,0 0,0 ${x2.toFixed(2)},${y2.toFixed(2)}`;
+  }
+
+  // ── DRAW CHORD LINES (weak first so strong render above) ──
+  const sortedForRender = [...enrichedLinks].sort((a, b) => a.value - b.value);
+
+  const linksG = g.append('g').attr('class', 'links-layer');
+
+  // Visible chord strokes
+  linksG.selectAll('.chord-vis')
+    .data(sortedForRender, d => `${d.source}-${d.target}`)
+    .join('path')
+    .attr('class', 'chord-vis')
+    .attr('d', d => chordPath(d.sourceNode, d.targetNode))
+    .attr('fill', 'none')
+    .attr('stroke', d => d.sourceNode.color)
+    .attr('stroke-width', d => wScale(d.value))
+    .attr('stroke-linecap', 'round')
+    .attr('opacity', 0)
+    .transition().duration(480).ease(d3.easeCubicOut)
+    .delay((_, i) => i * 16 + 350)
+    .attr('opacity', d => oScale(d.value));
+
+  // Wide transparent overlay paths for chord hover detection
+  linksG.selectAll('.chord-hover')
+    .data(enrichedLinks, d => `${d.source}-${d.target}`)
+    .join('path')
+    .attr('class', 'chord-hover')
+    .attr('d', d => chordPath(d.sourceNode, d.targetNode))
+    .attr('fill', 'none')
+    .attr('stroke', 'transparent')
+    .attr('stroke-width', 14)
+    .style('cursor', 'crosshair')
+    .on('mouseover', function(event, d) {
+      isHovering = true;
+      showLinkTooltip(event, d, nodeMap);
+      d3.selectAll('.chord-vis')
+        .transition().duration(160)
+        .attr('opacity',      l => l === d ? 0.9 : 0.03)
+        .attr('stroke-width', l => l === d ? wScale(l.value) * 2 : wScale(l.value));
+    })
+    .on('mousemove', event => moveTooltip(event))
+    .on('mouseout', function() {
+      isHovering = false;
+      hideTooltip();
+      if (highlightedNode) {
+        highlightNode(highlightedNode, enrichedLinks, wScale, oScale);
+      } else {
+        d3.selectAll('.chord-vis').transition().duration(250)
+          .attr('opacity',      d => d._baseOpacity)
+          .attr('stroke-width', d => d._baseWidth);
+      }
+    });
+
+  // ── DRAW NODE ARCS ──
+  const arcGen = d3.arc()
+    .innerRadius(arcInner)
+    .outerRadius(arcOuter)
+    .cornerRadius(3);
+
+  const nodesG = g.append('g').attr('class', 'nodes-layer');
+
+  const nodeGroups = nodesG.selectAll('.node-group')
+    .data(data.nodes, nd => nd.id)
+    .join('g')
+    .attr('class', 'node-group')
+    .attr('tabindex', '0')
+    .attr('role', 'button')
+    .attr('aria-label', nd => `${nd.label}: ${nd.sublabel}. Click to highlight connections.`);
+
+  // Arc segments
+  nodeGroups.append('path')
+    .attr('class', 'node-arc')
+    .attr('d', nd => arcGen({ startAngle: nd._startAngle, endAngle: nd._endAngle }))
+    .attr('fill', nd => nd.color)
+    .attr('opacity', 0)
+    .transition().duration(380).ease(d3.easeCubicOut)
+    .delay((_, i) => i * 45)
+    .attr('opacity', 1);
+
+  // Subtle inner glow ring (thin arc slightly inside, same color at low opacity)
+  nodeGroups.append('path')
+    .attr('d', nd => d3.arc()
+      .innerRadius(arcInner - 3)
+      .outerRadius(arcInner)
+      .cornerRadius(1)({ startAngle: nd._startAngle, endAngle: nd._endAngle }))
+    .attr('fill', nd => nd.color)
+    .attr('opacity', 0.3)
+    .attr('pointer-events', 'none');
+
+  // ── NODE LABELS ──
+  const labelR = R + 20;
+
+  nodeGroups.each(function(nd) {
+    const lx       = labelR * Math.cos(nd._midAngle);
+    const ly       = labelR * Math.sin(nd._midAngle);
+    const cosA     = Math.cos(nd._midAngle);
+    const anchor   = cosA > 0.05 ? 'start' : cosA < -0.05 ? 'end' : 'middle';
+
+    d3.select(this).append('text')
+      .attr('x', lx).attr('y', ly - 6)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', anchor)
+      .style('font-family', 'JetBrains Mono, monospace')
+      .style('font-size', '11px').style('font-weight', '800')
+      .style('letter-spacing', '0.04em')
+      .style('fill', nd.color)
+      .style('opacity', 0)
+      .text(nd.label)
+      .transition().delay((_, i) => i * 45 + 100).duration(320)
+      .style('opacity', 1);
+
+    d3.select(this).append('text')
+      .attr('x', lx).attr('y', ly + 8)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', anchor)
+      .style('font-family', 'JetBrains Mono, monospace')
+      .style('font-size', '9px').style('font-weight', '400')
+      .style('fill', '#797C7F')
+      .style('opacity', 0)
+      .text(nd.sublabel)
+      .transition().delay((_, i) => i * 45 + 180).duration(280)
+      .style('opacity', 1);
+  });
+
+  // ── NODE INTERACTION ──
+  nodeGroups
+    .on('mouseover', function(event, nd) {
+      isHovering = true;
+      showNodeTooltip(event, nd, data.links);
+      highlightNode(nd.id, enrichedLinks, wScale, oScale);
+    })
+    .on('mousemove', event => moveTooltip(event))
+    .on('mouseout', function() {
+      isHovering = false;
+      hideTooltip();
+      if (!highlightedNode) resetHighlight();
+      else if (highlightedNode) {
+        // Restore the pinned node's highlight after hover leaves
+        highlightNode(highlightedNode, enrichedLinks, wScale, oScale);
+      }
+    })
+    .on('click', function(event, nd) {
+      if (highlightedNode === nd.id) {
+        highlightedNode = null;
+        isHovering = false;
+        resetHighlight();
+      } else {
+        highlightedNode = nd.id;
+        highlightNode(nd.id, enrichedLinks, wScale, oScale);
+      }
+    })
+    .on('focus', function(event, nd) {
+      showNodeTooltip({ clientX: 200, clientY: 200 }, nd, data.links);
+      highlightNode(nd.id, enrichedLinks, wScale, oScale);
+    })
+    .on('blur', function() {
+      hideTooltip();
+      if (!highlightedNode) resetHighlight();
+    })
+    .on('keydown', function(event, nd) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (highlightedNode === nd.id) {
+          highlightedNode = null;
+          resetHighlight();
+        } else {
+          highlightedNode = nd.id;
+          highlightNode(nd.id, enrichedLinks, wScale, oScale);
+        }
+      }
+    });
+
+  // ── CENTER ANNOTATION ──
+  g.append('text')
+    .attr('text-anchor', 'middle').attr('y', -10)
+    .style('font-family', 'JetBrains Mono, monospace')
+    .style('font-size', '9px').style('font-weight', '600')
+    .style('letter-spacing', '0.12em').style('text-transform', 'uppercase')
+    .style('fill', '#EDEDED')
+    .text('28 connections');
+
+  g.append('text')
+    .attr('text-anchor', 'middle').attr('y', 6)
+    .style('font-family', 'JetBrains Mono, monospace')
+    .style('font-size', '8px').style('font-weight', '400')
+    .style('fill', '#EDEDED')
+    .text('thickness = strength');
+}
+
+// ============================================================
+//  DATA LOAD
+// ============================================================
+d3.json('./chord-diagram/data.json').then(data => {
+  rawData = data;
+  document.getElementById('data-summary').textContent =
+    `${data.nodes.length} nodes · ${data.links.length} connections`;
+
+  renderChart(data);
+
+  const ro = new ResizeObserver(debounce(() => {
+    if (current === 0 && rawData) {
+      highlightedNode = null;
+      isHovering = false;
+      renderChart(rawData);
+    }
+  }, 180));
+  ro.observe(container);
+
+}).catch(() => {
+  document.getElementById('chart-container').innerHTML =
+    '<p style="color:var(--p3);padding:40px;font-size:12px;font-family:var(--font)">' +
+    '// data.json not found — add <strong>chord-diagram/data.json</strong> to run this visualization.</p>';
+});
+
+// ============================================================
+//  UTILS
+// ============================================================
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
 </script>
 </body>
 </html>

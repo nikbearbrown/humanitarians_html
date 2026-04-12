@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unity Project Walker Report — Final Game Project</title>
+  <meta name="description" content="A full technical audit of a Unity 2021.3 2D platformer project — covering engine environment, asset inventory, scene structure, script architecture, legacy API hits, hardcoded asset references, suggested refactor priorities, and a ready-to-paste CLAUDE.md constitution for AI-assisted development.">
+  <meta name="keywords" content="Unity audit, Unity refactor, assembly definitions, legacy API, hardcoded assets, CLAUDE.md, Unity 2021, built-in render pipeline, C# architecture, game development">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    /* ── HEADER ── */
+    .doc-header { border-bottom: 3px solid var(--bb-2); padding: 60px 0 48px; background: var(--bb-1); }
+    .doc-header-inner { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+    .doc-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--bb-7); margin-bottom: 20px; }
+    .doc-eyebrow span { color: var(--bb-4); }
+
+    .doc-title { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(24px, 3.8vw, 40px); font-weight: 900; line-height: 1.15; color: var(--bb-8); margin-bottom: 12px; max-width: 740px; }
+
+    .doc-subtitle { font-family: 'Source Serif 4', Georgia, serif; font-size: 15px; font-style: italic; color: var(--bb-7); margin-bottom: 28px; max-width: 680px; line-height: 1.5; }
+
+    .doc-meta { display: flex; flex-wrap: wrap; gap: 20px; }
+    .doc-meta-item { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-7); text-transform: uppercase; letter-spacing: 0.1em; }
+    .doc-meta-item strong { color: var(--bb-4); }
+
+    /* ── TOC ── */
+    .toc-wrap { background: rgba(139,58,15,0.12); border: 1px solid rgba(200,169,110,0.4); border-radius: 4px; padding: 28px 32px; margin: 40px 0 0; }
+    .toc-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--bb-6); margin-bottom: 16px; }
+    .toc-list { list-style: none; columns: 2; column-gap: 40px; }
+    @media (max-width: 600px) { .toc-list { columns: 1; } }
+    .toc-list li { margin-bottom: 9px; break-inside: avoid; }
+    .toc-list a { color: var(--bb-8); text-decoration: none; font-size: 14px; font-family: 'JetBrains Mono', monospace; border-bottom: 1px solid transparent; transition: border-color 0.2s, color 0.2s; opacity: 0.85; }
+    .toc-list a:hover { opacity: 1; border-bottom-color: var(--bb-4); color: var(--bb-4); }
+    .toc-num { color: var(--bb-6); margin-right: 8px; }
+
+    /* ── LAYOUT ── */
+    .doc-body { max-width: 900px; margin: 0 auto; padding: 0 32px 80px; }
+    .section { padding-top: 64px; }
+    .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    /* ── TYPOGRAPHY ── */
+    h2 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(19px, 2.6vw, 26px); font-weight: 700; color: var(--bb-2); line-height: 1.2; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 2px solid var(--bb-7); }
+    h3 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(15px, 1.8vw, 19px); font-weight: 700; font-style: italic; color: var(--bb-1); margin: 32px 0 10px; }
+    h4 { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bb-5); margin: 24px 0 8px; }
+    p { margin-bottom: 18px; }
+    a { color: var(--bb-2); }
+    a:hover { color: var(--bb-5); }
+    strong { font-weight: 600; color: var(--bb-2); }
+    em { font-style: italic; }
+    ul, ol { margin: 0 0 18px; padding-left: 1.6em; }
+    li { margin-bottom: 6px; }
+
+    /* ── STAT TILES ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 28px 0; }
+    .stat-tile { border: 1px solid var(--bb-7); border-radius: 4px; padding: 18px; background: rgba(200,169,110,0.08); }
+    .stat-tile-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bb-6); margin-bottom: 6px; }
+    .stat-tile-value { font-family: 'Playfair Display', Georgia, serif; font-size: 28px; font-weight: 700; color: var(--bb-2); line-height: 1; margin-bottom: 4px; }
+    .stat-tile-desc { font-size: 12px; color: var(--bb-6); line-height: 1.4; }
+    .stat-tile.warn { border-color: var(--bb-5); }
+    .stat-tile.warn .stat-tile-value { color: var(--bb-5); }
+    .stat-tile.alert { border-color: var(--bb-3); }
+    .stat-tile.alert .stat-tile-value { color: var(--bb-3); }
+
+    /* ── CALLOUTS ── */
+    .callout { border-left: 4px solid var(--bb-4); padding: 14px 18px; margin: 24px 0; background: rgba(232,160,32,0.08); border-radius: 0 4px 4px 0; }
+    .callout p { margin-bottom: 0; font-size: 15px; }
+    .callout-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-5); margin-bottom: 6px; }
+    .callout.alert { border-left-color: var(--bb-3); background: rgba(192,57,43,0.07); }
+    .callout.alert .callout-label { color: var(--bb-3); }
+    .callout.info { border-left-color: var(--bb-6); background: rgba(184,134,11,0.07); }
+    .callout.info .callout-label { color: var(--bb-6); }
+
+    /* ── TABLES ── */
+    .table-wrap { overflow-x: auto; margin: 24px 0; border: 1px solid var(--bb-7); border-radius: 4px; }
+    .table-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--bb-6); padding: 10px 14px 7px; border-bottom: 1px solid var(--bb-7); background: rgba(200,169,110,0.12); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead { background: var(--bb-2); }
+    thead th { color: var(--bb-8); font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; padding: 9px 14px; text-align: left; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid rgba(200,169,110,0.35); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(200,169,110,0.08); }
+    tbody td { padding: 9px 14px; color: var(--bb-1); vertical-align: top; line-height: 1.5; }
+    .td-hi { color: var(--bb-2); font-weight: 600; }
+    .td-alert { color: var(--bb-3); font-weight: 600; }
+    .td-warn { color: var(--bb-5); font-weight: 600; }
+    .td-good { color: var(--bb-6); font-weight: 600; }
+    .td-muted { color: var(--bb-6); font-size: 12px; }
+    .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .row-alert { background: rgba(192,57,43,0.07) !important; }
+    .row-warn  { background: rgba(212,80,10,0.06) !important; }
+    .row-good  { background: rgba(184,134,11,0.07) !important; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 2px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 600; white-space: nowrap; }
+    .badge-high   { background: var(--bb-3); color: #fff; }
+    .badge-medium { background: var(--bb-5); color: #fff; }
+    .badge-low    { background: var(--bb-6); color: #fff; }
+    .badge-ok     { background: var(--bb-7); color: var(--bb-1); }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap { margin: 24px 0; border: 1px solid var(--bb-7); border-radius: 4px; overflow: hidden; }
+    .code-header { background: var(--bb-1); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .code-header-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--bb-6); }
+    .copy-btn {
+      background: var(--bb-5);
+      color: #fff;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--bb-2); }
+    pre {
+      background: rgba(26,10,0,0.94);
+      margin: 0;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--bb-8);
+      white-space: pre;
+    }
+    code .c-comment { color: var(--bb-7); }
+    code .c-key     { color: var(--bb-4); }
+    code .c-val     { color: rgba(240,230,208,0.75); }
+    code .c-section { color: var(--bb-5); font-weight: 600; }
+
+    /* ── FILE LIST ── */
+    .file-list { list-style: none; padding-left: 0; margin: 16px 0 24px; }
+    .file-list li { display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px solid rgba(200,169,110,0.3); font-size: 13px; align-items: baseline; }
+    .file-list li:last-child { border-bottom: none; }
+    .file-path { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-2); flex-shrink: 0; }
+    .file-detail { color: var(--bb-6); font-size: 12px; }
+
+    /* ── API HIT BLOCK ── */
+    .api-hit { margin: 20px 0; border: 1px solid var(--bb-7); border-radius: 4px; overflow: hidden; }
+    .api-hit-header { background: rgba(192,57,43,0.1); padding: 10px 16px; border-bottom: 1px solid var(--bb-7); }
+    .api-hit-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--bb-3); font-weight: 600; }
+    .api-hit-note { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--bb-6); margin-top: 2px; }
+    .api-hit-lines { padding: 12px 16px; background: rgba(26,10,0,0.04); }
+    .api-hit-line { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-1); padding: 2px 0; display: flex; gap: 12px; }
+    .api-hit-loc { color: var(--bb-6); flex-shrink: 0; width: 160px; }
+
+    /* ── PRIORITY LIST ── */
+    .priority-list { list-style: none; padding-left: 0; }
+    .priority-list li { display: flex; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--bb-7); align-items: flex-start; }
+    .priority-list li:last-child { border-bottom: none; }
+    .priority-content h4 { margin: 0 0 4px; }
+    .priority-content p { margin: 0; font-size: 14px; }
+
+    /* ── REFERENCES ── */
+    .references-list { list-style: none; padding-left: 0; }
+    .references-list li { display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px solid rgba(200,169,110,0.3); font-size: 13px; }
+    .references-list li:last-child { border-bottom: none; }
+    .ref-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-5); flex-shrink: 0; width: 28px; padding-top: 2px; }
+
+    /* ── FOOTER ── */
+    footer { text-align: center; padding: 32px; border-top: 1px solid var(--bb-7); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--bb-6); letter-spacing: 0.06em; }
+    footer a { color: var(--bb-6); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .doc-header-inner, .doc-body { padding-left: 20px; padding-right: 20px; }
+      .toc-wrap { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <div class="doc-eyebrow">
+      <span>Unity Project Walker</span> · Automated Audit Report
+    </div>
+    <h1 class="doc-title">Final Game Project — Architecture Audit</h1>
+    <p class="doc-subtitle">Generated 2026-04-02 · Unity 2021.3.32f1 · Built-in Render Pipeline · 56 C# scripts · 50.3 MB assets</p>
+    <div class="doc-meta">
+      <div class="doc-meta-item">Project: <strong>Final Game project</strong></div>
+      <div class="doc-meta-item">Path: <strong>/Users/bear/Downloads/YixinDu_CSYE7270_Final/</strong></div>
+      <div class="doc-meta-item">Phase: <strong>Audit Complete — Awaiting Phase 2</strong></div>
+    </div>
+
+    <div class="toc-wrap">
+      <div class="toc-label">Sections</div>
+      <ol class="toc-list">
+        <li><a href="#engine"><span class="toc-num">01</span>Engine &amp; Environment</a></li>
+        <li><a href="#assets"><span class="toc-num">02</span>Asset Inventory</a></li>
+        <li><a href="#scenes"><span class="toc-num">03</span>Scene Inventory</a></li>
+        <li><a href="#scripts"><span class="toc-num">04</span>Script Analysis</a></li>
+        <li><a href="#legacy"><span class="toc-num">05</span>Legacy / Deprecated API Hits</a></li>
+        <li><a href="#hardcoded"><span class="toc-num">06</span>Hardcoded Asset References</a></li>
+        <li><a href="#claude"><span class="toc-num">07</span>CLAUDE.md Constitution</a></li>
+        <li><a href="#priority"><span class="toc-num">08</span>Refactor Priority</a></li>
+      </ol>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ BODY -->
+<main class="doc-body">
+
+  <!-- ── 01 ENGINE ── -->
+  <div class="section">
+    <span class="section-anchor" id="engine"></span>
+    <h2>01 · Engine &amp; Environment</h2>
+
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <div class="stat-tile-label">Unity Version</div>
+        <div class="stat-tile-value" style="font-size:20px;">2021.3.32f1</div>
+        <div class="stat-tile-desc">LTS release. Stable but approaching end of extended support window.</div>
+      </div>
+      <div class="stat-tile warn">
+        <div class="stat-tile-label">Render Pipeline</div>
+        <div class="stat-tile-value" style="font-size:18px;">Built-in</div>
+        <div class="stat-tile-desc">Legacy pipeline. No URP/HDRP. Migration to URP would require shader audit.</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">Cinemachine</div>
+        <div class="stat-tile-value" style="font-size:20px;">2.8.9</div>
+        <div class="stat-tile-desc">com.unity.cinemachine — camera control package.</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-tile-label">TextMeshPro</div>
+        <div class="stat-tile-value" style="font-size:20px;">3.0.6</div>
+        <div class="stat-tile-desc">com.unity.textmeshpro — current stable for Unity 2021 LTS.</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-label">Key Packages</div>
+      <table>
+        <thead><tr><th>Package</th><th>Version</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td class="td-mono">com.unity.cinemachine</td><td>2.8.9</td><td>Camera control and virtual cameras</td></tr>
+          <tr><td class="td-mono">com.unity.textmeshpro</td><td>3.0.6</td><td>High-quality text rendering</td></tr>
+          <tr><td class="td-mono">com.unity.timeline</td><td>1.6.4</td><td>Sequenced cutscenes and animations</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── 02 ASSETS ── -->
+  <div class="section">
+    <span class="section-anchor" id="assets"></span>
+    <h2>02 · Asset Inventory</h2>
+
+    <p>Total Assets/ size: <strong>50.3 MB.</strong> No third-party/vendor folders were detected by the walker. Special Unity folders present include TextMesh Pro/Resources and Joystick Pack/Scripts/Editor.</p>
+
+    <div class="table-wrap">
+      <div class="table-label">File Counts by Extension</div>
+      <table>
+        <thead><tr><th>Extension</th><th>Count</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr class="row-good"><td class="td-mono">.asset</td><td class="td-hi">559</td><td>ScriptableObject data, settings, and configs</td></tr>
+          <tr><td class="td-mono">.png</td><td>306</td><td>Primary sprite and UI texture format</td></tr>
+          <tr><td class="td-mono">.prefab</td><td>106</td><td>Prefab library — 106 reusable GameObjects</td></tr>
+          <tr class="row-warn"><td class="td-mono">.wav</td><td>95</td><td>Uncompressed audio — consider .ogg for build size</td></tr>
+          <tr class="row-good"><td class="td-mono">.cs</td><td>56</td><td>C# scripts — see Script Analysis section</td></tr>
+          <tr><td class="td-mono">.anim</td><td>53</td><td>Animation clips</td></tr>
+          <tr><td class="td-mono">.controller</td><td>41</td><td>Animator state machines</td></tr>
+          <tr><td class="td-mono">.unity</td><td>38</td><td>Scenes — 4 game scenes + TMP examples + vendor demos</td></tr>
+          <tr><td class="td-mono">.mat</td><td>24</td><td>Materials</td></tr>
+          <tr><td class="td-mono">.shader</td><td>13</td><td>Custom shaders</td></tr>
+          <tr><td class="td-mono">.ttf</td><td>10</td><td>Font assets</td></tr>
+          <tr><td class="td-mono">.jpg</td><td>10</td><td>Non-sprite textures</td></tr>
+          <tr><td class="td-mono">.txt / .json / .pdf</td><td>13</td><td>Documentation and data files</td></tr>
+          <tr class="row-warn"><td class="td-mono">.mp3</td><td>1</td><td>Mixed audio formats — standardize to .wav or .ogg</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">Audio Format Note</div>
+      <p>95 .wav files and 1 .mp3 indicates inconsistent audio pipeline. For build-size optimization, consider converting background music to .ogg (good compression) and short SFX to .wav (low decode overhead). Mixing formats can complicate AudioMixer management.</p>
+    </div>
+  </div>
+
+  <!-- ── 03 SCENES ── -->
+  <div class="section">
+    <span class="section-anchor" id="scenes"></span>
+    <h2>03 · Scene Inventory</h2>
+
+    <p>38 total scenes detected. The four <strong>game scenes</strong> are the targets for all active development. The remaining scenes are TextMesh Pro examples (to be excluded from build settings) and vendor/asset-pack demos (informational only).</p>
+
+    <h3>Game Scenes — Active Development Targets</h3>
+
+    <div class="table-wrap">
+      <div class="table-label">Core Game Scenes</div>
+      <table>
+        <thead><tr><th>Scene</th><th>Size</th><th>Objects</th><th>Lighting</th></tr></thead>
+        <tbody>
+          <tr class="row-good"><td class="td-mono td-hi">Scenes/Level02.unity</td><td>412.0 KB</td><td>~88</td><td>Baked</td></tr>
+          <tr class="row-good"><td class="td-mono td-hi">Scenes/Level01.unity</td><td>358.9 KB</td><td>~80</td><td>Baked</td></tr>
+          <tr class="row-good"><td class="td-mono td-hi">Scenes/Menu.unity</td><td>60.5 KB</td><td>~41</td><td>Baked</td></tr>
+          <tr class="row-good"><td class="td-mono td-hi">Scenes/Pass.unity</td><td>30.3 KB</td><td>~21</td><td>Baked</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Vendor / Demo Scenes — Do Not Modify</h3>
+
+    <div class="table-wrap">
+      <div class="table-label">Asset Pack and TMP Example Scenes</div>
+      <table>
+        <thead><tr><th>Scene</th><th>Size</th><th>Objects</th></tr></thead>
+        <tbody>
+          <tr><td class="td-mono">Cainos/…/SC Demo Scene - Village Props.unity</td><td>912.6 KB</td><td>~239</td></tr>
+          <tr><td class="td-mono">SunnyLand Artwork/Scenes/Demo_characters.unity</td><td>371.3 KB</td><td>~159</td></tr>
+          <tr><td class="td-mono">TWD/FreeButtonSet/Scenes/SampleScene.unity</td><td>180.4 KB</td><td>~160</td></tr>
+          <tr><td class="td-mono">Joystick Pack/Examples/Example Scene.unity</td><td>123.0 KB</td><td>~96</td></tr>
+          <tr><td class="td-mono td-muted">TextMesh Pro/Examples &amp; Extras/Scenes/* (25 scenes)</td><td>6–270 KB each</td><td>3–250</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout alert">
+      <div class="callout-label">Build Settings Warning</div>
+      <p>Ensure that all TextMesh Pro example scenes and vendor demo scenes are <strong>excluded from Build Settings.</strong> Including them will inflate build size significantly and may introduce unintended scene-load paths.</p>
+    </div>
+  </div>
+
+  <!-- ── 04 SCRIPTS ── -->
+  <div class="section">
+    <span class="section-anchor" id="scripts"></span>
+    <h2>04 · Script Analysis</h2>
+
+    <div class="stat-grid">
+      <div class="stat-tile"><div class="stat-tile-label">Total C# Scripts</div><div class="stat-tile-value">56</div><div class="stat-tile-desc">Across all folders including TMP examples.</div></div>
+      <div class="stat-tile"><div class="stat-tile-label">MonoBehaviours</div><div class="stat-tile-value">42</div><div class="stat-tile-desc">Component scripts attached to GameObjects.</div></div>
+      <div class="stat-tile alert"><div class="stat-tile-label">Assembly .asmdef</div><div class="stat-tile-value">0</div><div class="stat-tile-desc">No assembly boundaries. Everything in the default assembly.</div></div>
+      <div class="stat-tile warn"><div class="stat-tile-label">Namespaces</div><div class="stat-tile-value">2</div><div class="stat-tile-desc">TMPro and TMPro.Examples only. Game scripts lack namespaces.</div></div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-label">Script Architecture Breakdown</div>
+      <table>
+        <thead><tr><th>Category</th><th>Count</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr class="row-good"><td class="td-hi">MonoBehaviours</td><td>42</td><td class="td-good">Normal for project scale</td></tr>
+          <tr class="row-alert"><td class="td-hi">ScriptableObjects</td><td>0</td><td class="td-alert">No SO-based architecture — data lives in scene hierarchies</td></tr>
+          <tr class="row-alert"><td class="td-hi">Interfaces</td><td>0</td><td class="td-alert">No abstraction layer — tight coupling between systems</td></tr>
+          <tr class="row-alert"><td class="td-hi">Assembly Definitions (.asmdef)</td><td>0</td><td class="td-alert">HIGH PRIORITY — create before any other refactor</td></tr>
+          <tr><td class="td-hi">Editor Scripts</td><td>4</td><td>Custom editor tooling (Joystick Pack)</td></tr>
+          <tr class="row-warn"><td class="td-hi">Namespaces in Use</td><td>2</td><td class="td-warn">TMPro only — game scripts are unnamespaced</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout alert">
+      <div class="callout-label">Observer / Event Pattern Detected</div>
+      <p>The walker detected Observer/Event pattern usage. Without assembly definitions, these event subscriptions cross assembly boundaries invisibly — making it impossible to reason about compile-time dependencies. <strong>Create assembly definitions first</strong> to make these dependencies explicit before any further refactoring.</p>
+    </div>
+  </div>
+
+  <!-- ── 05 LEGACY ── -->
+  <div class="section">
+    <span class="section-anchor" id="legacy"></span>
+    <h2>05 · Legacy / Deprecated API Hits</h2>
+
+    <p>18 total legacy API calls detected across game scripts and TMP example scripts. The TMP example hits are low-priority (vendor code, not modified). The hits in your own scripts — particularly <strong>Menu.cs</strong> — should be addressed in Phase 2.</p>
+
+    <div class="api-hit">
+      <div class="api-hit-header">
+        <div class="api-hit-title">GameObject.Find(</div>
+        <div class="api-hit-note">⚠ Fragile — consider dependency injection or serialized references instead</div>
+      </div>
+      <div class="api-hit-lines">
+        <div class="api-hit-line"><span class="api-hit-loc">Scripts/Menu.cs:19</span><span>GameObject.Find( call</span></div>
+        <div class="api-hit-line"><span class="api-hit-loc">Scripts/Menu.cs:20</span><span>GameObject.Find( call</span></div>
+        <div class="api-hit-line"><span class="api-hit-loc">Scripts/Menu.cs:24</span><span>GameObject.Find( call</span></div>
+        <div class="api-hit-line"><span class="api-hit-loc">Scripts/Menu.cs:25</span><span>GameObject.Find( call</span></div>
+        <div class="api-hit-line"><span class="api-hit-loc">Scripts/Menu.cs:29</span><span>GameObject.Find( call</span></div>
+      </div>
+    </div>
+
+    <div class="api-hit">
+      <div class="api-hit-header">
+        <div class="api-hit-title">Resources.Load(</div>
+        <div class="api-hit-note">⚠ Prefer Addressables for runtime asset loading — Resources.Load blocks the main thread</div>
+      </div>
+      <div class="api-hit-lines">
+        <div class="api-hit-line"><span class="api-hit-loc">TMP Examples (13+)</span><span>Font and material loading via Resources.Load — vendor code, low priority</span></div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">Refactor Strategy</div>
+      <p>For <strong>Menu.cs</strong>: replace all <code>GameObject.Find()</code> calls with serialized <code>[SerializeField]</code> references set in the Inspector, or inject via a ServiceLocator / singleton manager. This eliminates string-based coupling and runtime search overhead. The <code>Resources.Load</code> hits in TMP example scripts are vendor code — do not modify them.</p>
+    </div>
+  </div>
+
+  <!-- ── 06 HARDCODED ── -->
+  <div class="section">
+    <span class="section-anchor" id="hardcoded"></span>
+    <h2>06 · Hardcoded Asset References</h2>
+
+    <p>14 scripts contain hardcoded asset references that need migration to a ContentRegistry ScriptableObject or Addressables. The game scripts listed below are the priority targets. TMP example scripts are vendor code and should not be modified.</p>
+
+    <h3>Game Scripts — Priority Migration Targets</h3>
+
+    <div class="table-wrap">
+      <div class="table-label">Hardcoded Public GameObject References — Your Scripts</div>
+      <table>
+        <thead><tr><th>Script</th><th>Line</th><th>Reference</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr class="row-alert">
+            <td class="td-mono td-hi">Scripts/FirstDoor.cs</td>
+            <td class="td-mono">L7</td>
+            <td class="td-mono">public GameObject enterDialog;</td>
+            <td>Migrate to ContentRegistry or [SerializeField]</td>
+          </tr>
+          <tr class="row-alert">
+            <td class="td-mono td-hi">Scripts/Caidan.cs</td>
+            <td class="td-mono">L9–11</td>
+            <td class="td-mono">SheZhi, FanHui, MianBan</td>
+            <td>Three public refs — consolidate into a UI config SO</td>
+          </tr>
+          <tr class="row-warn">
+            <td class="td-mono td-hi">Scripts/PlayerCtrl.cs</td>
+            <td class="td-mono">L21</td>
+            <td class="td-mono">public GameObject go;</td>
+            <td>Identify reference target and inject via Inspector</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>TMP Vendor Scripts — Do Not Modify</h3>
+
+    <div class="callout info">
+      <div class="callout-label">Vendor Code — Informational Only</div>
+      <p>The remaining 11 scripts with hardcoded references are all in <code>TextMesh Pro/Examples &amp; Extras/Scripts/</code>. These are Unity-provided example scripts. They use <code>Resources.Load</code> to load fonts and materials at runtime. <strong>Do not modify these files.</strong> They will not affect your game build if the TMP example scenes are excluded from Build Settings.</p>
+    </div>
+  </div>
+
+  <!-- ── 07 CLAUDE.md ── -->
+  <div class="section">
+    <span class="section-anchor" id="claude"></span>
+    <h2>07 · CLAUDE.md Constitution</h2>
+
+    <p>Paste the following block into your root <code>CLAUDE.md</code> file. This gives Claude Code the architectural context it needs to assist safely — enforcing assembly boundaries, preventing vendor file modification, and gating refactor scope to one script per turn.</p>
+
+    <div class="code-wrap">
+      <div class="code-header">
+        <div class="code-header-label">CLAUDE.md — Root Constitution</div>
+        <button class="copy-btn" onclick="
+          const code = this.closest('.code-wrap').querySelector('code');
+          navigator.clipboard.writeText(code.innerText);
+          this.textContent = 'Copied!';
+          setTimeout(() => this.textContent = 'Copy', 1800);
+        ">Copy</button>
+      </div>
+      <pre><code><span class="c-section"># Final Game project — Claude Code Constitution</span>
+
+<span class="c-section">## Tech Stack</span>
+<span class="c-val">- Unity 2021.3.32f1
+- Render Pipeline: Built-in (Legacy)
+- C# — .NET Standard 2.1</span>
+
+<span class="c-section">## Architecture State (pre-refactor)</span>
+<span class="c-val">- Observer/Event pattern detected
+- NO Assembly Definitions — everything in default assembly</span>
+
+<span class="c-section">## Assembly Boundaries (to be created)</span>
+<span class="c-val">- Core.asmdef        — no dependencies
+- Gameplay.asmdef    — depends on Core only
+- UI.asmdef          — depends on Core only
+- Content/           — NO asmdef, assets only</span>
+
+<span class="c-section">## Critical Rules</span>
+<span class="c-val">1. NEVER modify files in ThirdParty/ or Plugins/
+2. NEVER move files outside the Unity Editor window
+3. NEVER create direct asset references in Gameplay/ or Core/
+4. ALL asset access through ContentRegistry ScriptableObject
+5. Stop and show diff after each file — wait for approval
+6. Do not refactor more than one script per turn</span>
+
+<span class="c-section">## Do Not Touch</span>
+<span class="c-comment"># (populate with specific vendor folders as identified)</span>
+
+<span class="c-section">## Refactor Phase</span>
+<span class="c-val">CURRENT: Audit complete — awaiting Phase 2 (Interface Generation)</span></code></pre>
+    </div>
+  </div>
+
+  <!-- ── 08 PRIORITY ── -->
+  <div class="section">
+    <span class="section-anchor" id="priority"></span>
+    <h2>08 · Suggested Refactor Priority</h2>
+
+    <ul class="priority-list">
+      <li>
+        <span class="badge badge-high">High</span>
+        <div class="priority-content">
+          <h4>Create Assembly Definitions</h4>
+          <p>No .asmdef files exist — the entire project compiles in a single default assembly. Creating <code>Core.asmdef</code>, <code>Gameplay.asmdef</code>, and <code>UI.asmdef</code> before any other refactor is essential. Without boundaries, the Observer/Event dependencies are invisible to the compiler and impossible to reason about safely. This is the prerequisite for all subsequent phases.</p>
+        </div>
+      </li>
+      <li>
+        <span class="badge badge-medium">Medium</span>
+        <div class="priority-content">
+          <h4>Update Legacy API Calls (18 hits)</h4>
+          <p>Replace all <code>GameObject.Find()</code> calls in <code>Menu.cs</code> with serialized Inspector references or a ServiceLocator pattern. The <code>Resources.Load</code> hits in TMP example scripts are vendor code — do not touch. Focus only on the 5 hits in your own scripts.</p>
+        </div>
+      </li>
+      <li>
+        <span class="badge badge-medium">Medium</span>
+        <div class="priority-content">
+          <h4>Migrate Hardcoded Asset References (14 scripts)</h4>
+          <p>The 3 game scripts with public <code>GameObject</code> references (<code>FirstDoor.cs</code>, <code>Caidan.cs</code>, <code>PlayerCtrl.cs</code>) should be migrated to a <code>ContentRegistry ScriptableObject</code> or promoted to <code>[SerializeField]</code> with Inspector assignment. TMP example scripts are not migration targets.</p>
+        </div>
+      </li>
+      <li>
+        <span class="badge badge-low">Phase 3</span>
+        <div class="priority-content">
+          <h4>Exclude Vendor Scenes from Build Settings</h4>
+          <p>Remove all TextMesh Pro example scenes and asset-pack demo scenes from Build Settings before the next build. This will reduce build size and eliminate unintended scene-load paths.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+</main>
+
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>

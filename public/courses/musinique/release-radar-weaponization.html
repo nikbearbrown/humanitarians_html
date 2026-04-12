@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithmic Infiltration: Release Radar Weaponization & Royalty Fraud</title>
+  <meta name="description" content="A forensic economic analysis of how bad actors exploit Spotify's Release Radar notification system and distributor metadata vulnerabilities to hijack artist profiles and capture royalty payments. Documents the 2025–2026 wave of attribution fraud targeting jazz and legacy artists.">
+  <meta name="keywords" content="Release Radar, Spotify fraud, streaming fraud, metadata hijacking, royalty fraud, DistroKid, music distribution, attribution fraud, Confusion Window, streaming bots">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bb-1: #0D0D0D;
+      --bb-2: #4A4A4A;
+      --bb-3: #8B0000;
+      --bb-4: #5C3317;
+      --bb-5: #2F2F2F;
+      --bb-6: #6B6B5E;
+      --bb-7: #9B957F;
+      --bb-8: #FFFFFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bb-8);
+      color: var(--bb-1);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.75;
+    }
+
+    /* ── HEADER ── */
+    .doc-header {
+      border-bottom: 3px solid var(--bb-2);
+      padding: 60px 0 48px;
+      background: var(--bb-1);
+    }
+
+    .doc-header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    .doc-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--bb-7);
+      margin-bottom: 20px;
+    }
+
+    .doc-eyebrow span { color: var(--bb-4); }
+
+    .doc-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(24px, 3.8vw, 42px);
+      font-weight: 900;
+      line-height: 1.15;
+      color: var(--bb-8);
+      margin-bottom: 12px;
+      max-width: 740px;
+    }
+
+    .doc-subtitle {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--bb-7);
+      margin-bottom: 28px;
+      max-width: 680px;
+      line-height: 1.5;
+    }
+
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+    }
+
+    .doc-meta-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--bb-7);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .doc-meta-item strong { color: var(--bb-4); }
+
+    /* ── TOC ── */
+    .toc-wrap {
+      background: rgba(139,58,15,0.12);
+      border: 1px solid rgba(200,169,110,0.4);
+      border-radius: 4px;
+      padding: 28px 32px;
+      margin: 40px 0 0;
+    }
+
+    .toc-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--bb-6);
+      margin-bottom: 16px;
+    }
+
+    .toc-list {
+      list-style: none;
+      columns: 2;
+      column-gap: 40px;
+    }
+
+    @media (max-width: 600px) { .toc-list { columns: 1; } }
+
+    .toc-list li { margin-bottom: 9px; break-inside: avoid; }
+
+    .toc-list a {
+      color: var(--bb-8);
+      text-decoration: none;
+      font-size: 14px;
+      font-family: 'Source Serif 4', Georgia, serif;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.2s, color 0.2s;
+      opacity: 0.85;
+    }
+
+    .toc-list a:hover { opacity: 1; border-bottom-color: var(--bb-4); color: var(--bb-4); }
+
+    .toc-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--bb-6);
+      margin-right: 8px;
+    }
+
+    /* ── LAYOUT ── */
+    .doc-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── SECTIONS ── */
+    .section { padding-top: 64px; }
+
+    .section-anchor {
+      display: block;
+      position: relative;
+      top: -80px;
+      visibility: hidden;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(20px, 2.8vw, 28px);
+      font-weight: 700;
+      color: var(--bb-2);
+      line-height: 1.2;
+      margin-bottom: 6px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--bb-7);
+    }
+
+    h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(16px, 2vw, 20px);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--bb-1);
+      margin: 36px 0 12px;
+    }
+
+    h4 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--bb-5);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 20px; }
+
+    a { color: var(--bb-2); }
+    a:hover { color: var(--bb-5); }
+
+    strong { font-weight: 600; color: var(--bb-2); }
+    em { font-style: italic; }
+
+    ul, ol { margin: 0 0 20px 0; padding-left: 1.6em; }
+    li { margin-bottom: 8px; }
+
+    /* ── EXEC SUMMARY ── */
+    .exec-summary {
+      margin-top: 48px;
+      padding: 32px 36px;
+      background: var(--bb-1);
+      border-radius: 4px;
+      color: var(--bb-8);
+    }
+
+    .exec-summary-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--bb-4);
+      margin-bottom: 16px;
+    }
+
+    .exec-summary p {
+      color: rgba(240,230,208,0.88);
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    .exec-summary p:last-child { margin-bottom: 0; }
+    .exec-summary strong { color: var(--bb-4); }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-left: 4px solid var(--bb-4);
+      padding: 16px 20px;
+      margin: 28px 0;
+      background: rgba(232,160,32,0.08);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout p { margin-bottom: 0; font-size: 15px; }
+
+    .callout-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-5);
+      margin-bottom: 8px;
+    }
+
+    .callout.alert { border-left-color: var(--bb-3); background: rgba(192,57,43,0.07); }
+    .callout.alert .callout-label { color: var(--bb-3); }
+
+    .callout.info { border-left-color: var(--bb-6); background: rgba(184,134,11,0.07); }
+    .callout.info .callout-label { color: var(--bb-6); }
+
+    /* ── PULL QUOTE ── */
+    .pull-quote {
+      margin: 36px 0;
+      padding: 0 0 0 28px;
+      border-left: 5px solid var(--bb-5);
+    }
+
+    .pull-quote p {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(17px, 2.2vw, 22px);
+      font-style: italic;
+      color: var(--bb-2);
+      line-height: 1.55;
+      margin-bottom: 0;
+    }
+
+    /* ── FORMULA ── */
+    .formula-block {
+      background: var(--bb-1);
+      border-radius: 4px;
+      padding: 28px 32px;
+      margin: 28px 0;
+    }
+
+    .formula-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-6);
+      margin-bottom: 16px;
+    }
+
+    .formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: var(--bb-4);
+      letter-spacing: 0.04em;
+      line-height: 2;
+    }
+
+    .formula-caption {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--bb-7);
+      margin-top: 16px;
+      line-height: 1.7;
+    }
+
+    .formula-result {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 10px 18px;
+      background: rgba(232,160,32,0.15);
+      border: 1px solid var(--bb-4);
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--bb-4);
+      font-weight: 600;
+    }
+
+    /* ── TABLES ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 32px 0;
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+    }
+
+    .table-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--bb-6);
+      padding: 12px 16px 8px;
+      border-bottom: 1px solid var(--bb-7);
+      background: rgba(200,169,110,0.12);
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+
+    thead { background: var(--bb-2); }
+
+    thead th {
+      color: var(--bb-8);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 600;
+      padding: 10px 14px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    tbody tr { border-bottom: 1px solid rgba(200,169,110,0.35); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:nth-child(even) { background: rgba(200,169,110,0.1); }
+
+    tbody td {
+      padding: 10px 14px;
+      color: var(--bb-1);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .td-hi { color: var(--bb-2); font-weight: 600; }
+    .td-alert { color: var(--bb-3); font-weight: 600; }
+    .td-warn { color: var(--bb-5); font-weight: 600; }
+    .td-muted { color: var(--bb-6); font-size: 13px; }
+    .td-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+
+    /* ── RISK BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-high { background: var(--bb-3); color: #fff; }
+    .badge-moderate-high { background: var(--bb-5); color: #fff; }
+    .badge-moderate { background: var(--bb-6); color: #fff; }
+    .badge-none { background: var(--bb-7); color: var(--bb-1); }
+
+    /* ── FRAUD CYCLE ── */
+    .fraud-cycle {
+      margin: 32px 0;
+      border: 1px solid var(--bb-7);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .cycle-header {
+      background: var(--bb-2);
+      color: var(--bb-8);
+      padding: 12px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .cycle-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 0;
+    }
+
+    .cycle-step {
+      padding: 20px;
+      border-right: 1px solid var(--bb-7);
+      border-bottom: 1px solid var(--bb-7);
+      position: relative;
+    }
+
+    .cycle-step:last-child { border-right: none; }
+
+    .cycle-step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--bb-7);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .cycle-step-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--bb-5);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .cycle-step p {
+      font-size: 13px;
+      color: var(--bb-1);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* ── GAP LIST ── */
+    .gap-list { list-style: none; padding-left: 0; }
+
+    .gap-list li {
+      display: flex;
+      gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--bb-7);
+    }
+
+    .gap-list li:last-child { border-bottom: none; }
+
+    .gap-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--bb-5);
+      font-weight: 600;
+      flex-shrink: 0;
+      width: 28px;
+      padding-top: 3px;
+    }
+
+    .gap-content h4 { margin: 0 0 4px; }
+    .gap-content p { margin: 0; font-size: 15px; }
+
+    /* ── CITE NOTE ── */
+    .cite-note {
+      font-size: 13px;
+      color: var(--bb-6);
+      font-style: italic;
+      margin: -12px 0 20px;
+    }
+
+    /* ── REFERENCES ── */
+    .references-list { list-style: none; padding-left: 0; }
+
+    .references-list li {
+      display: flex;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(200,169,110,0.3);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .references-list li:last-child { border-bottom: none; }
+
+    .ref-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--bb-5);
+      flex-shrink: 0;
+      width: 28px;
+      padding-top: 2px;
+    }
+
+    .ref-link {
+      color: var(--bb-2);
+      word-break: break-all;
+      font-size: 12px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      border-top: 1px solid var(--bb-7);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--bb-6);
+      letter-spacing: 0.06em;
+    }
+
+    footer a { color: var(--bb-6); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .doc-header-inner, .doc-body { padding-left: 20px; padding-right: 20px; }
+      .exec-summary { padding: 24px 20px; }
+      .toc-wrap { padding: 20px; }
+      .formula { font-size: 12px; }
+      .cycle-steps { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 420px) {
+      .cycle-steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ HEADER -->
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <div class="doc-eyebrow">
+      <span>Forensic Report</span> · Streaming Fraud · bearbrown.co
+    </div>
+    <h1 class="doc-title">Algorithmic Infiltration: The Systematic Weaponization of Release Radar</h1>
+    <p class="doc-subtitle">A Forensic Economic Model of Royalty Fraud via Attribution Hijacking in the Spotify Distribution Pipeline, 2025–2026</p>
+    <div class="doc-meta">
+      <div class="doc-meta-item">Reporting Date: <strong>March 14, 2026</strong></div>
+      <div class="doc-meta-item">Coverage: <strong>2024 – Q1 2026</strong></div>
+      <div class="doc-meta-item">Focus: <strong>Distribution Pipeline · Artist URI Fraud</strong></div>
+    </div>
+
+    <!-- TABLE OF CONTENTS -->
+    <div class="toc-wrap">
+      <div class="toc-label">Contents</div>
+      <ol class="toc-list">
+        <li><a href="#overview"><span class="toc-num">01</span>Overview &amp; Framing</a></li>
+        <li><a href="#metadata"><span class="toc-num">02</span>Metadata Ingestion Vulnerabilities</a></li>
+        <li><a href="#trigger"><span class="toc-num">03</span>The Release Radar Trigger Mechanism</a></li>
+        <li><a href="#confusion"><span class="toc-num">04</span>The Confusion Window</a></li>
+        <li><a href="#threshold"><span class="toc-num">05</span>The 1,000-Stream Arbitrage</a></li>
+        <li><a href="#math"><span class="toc-num">06</span>Per-Stream ROI Math</a></li>
+        <li><a href="#takedown"><span class="toc-num">07</span>Takedown Asymmetry</a></li>
+        <li><a href="#cases"><span class="toc-num">08</span>Case Documentation 2025–2026</a></li>
+        <li><a href="#distributors"><span class="toc-num">09</span>Distributor Accountability</a></li>
+        <li><a href="#regulatory"><span class="toc-num">10</span>Regulatory Outlook</a></li>
+        <li><a href="#incentive"><span class="toc-num">11</span>Platform Incentive Misalignment</a></li>
+        <li><a href="#conclusions"><span class="toc-num">12</span>Conclusions &amp; Recommendations</a></li>
+        <li><a href="#references"><span class="toc-num">13</span>Works Cited</a></li>
+      </ol>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════ BODY -->
+<main class="doc-body">
+
+  <!-- ── 01 OVERVIEW ── -->
+  <div class="section">
+    <span class="section-anchor" id="overview"></span>
+
+    <div class="exec-summary">
+      <div class="exec-summary-label">01 · Overview &amp; Framing</div>
+      <p>The digital music ecosystem in 2025 and 2026 has been defined by the emergence of a highly specific, technologically enabled form of intellectual property exploitation: <strong>Release Radar weaponization.</strong> This mechanism represents a fundamental shift from primitive streaming fraud—which historically relied on low-quality "click farms"—toward a sophisticated model of attribution hijacking.</p>
+      <p>By exploiting the technical architecture of the Spotify Artist URI mapping system and the automated notification logic of the Release Radar algorithm, bad actors have successfully bypassed traditional security gates to capture organic listener traffic. This report provides an exhaustive forensic analysis of the technical triggers, behavioral economics, and financial structures that allow this fraud to persist, documenting the systemic failure of verification in the global distribution pipeline.</p>
+    </div>
+
+    <!-- Fraud Cycle Visual -->
+    <div class="fraud-cycle" style="margin-top: 40px;">
+      <div class="cycle-header">The Release Radar Fraud Cycle — Six Stages</div>
+      <div class="cycle-steps">
+        <div class="cycle-step">
+          <span class="cycle-step-num">01</span>
+          <span class="cycle-step-label">URI Claim</span>
+          <p>Scammer submits track claiming target artist's Spotify URI via distributor with no identity verification.</p>
+        </div>
+        <div class="cycle-step">
+          <span class="cycle-step-num">02</span>
+          <span class="cycle-step-label">Profile Injection</span>
+          <p>Spotify ingests distributor delivery and populates track into the legitimate artist's discography.</p>
+        </div>
+        <div class="cycle-step">
+          <span class="cycle-step-num">03</span>
+          <span class="cycle-step-label">Radar Trigger</span>
+          <p>Algorithm identifies a new release and automatically pushes notifications to all followers.</p>
+        </div>
+        <div class="cycle-step">
+          <span class="cycle-step-num">04</span>
+          <span class="cycle-step-label">Confusion Window</span>
+          <p>Fans trust the brand, delay skipping, and cross the 30-second royalty trigger threshold.</p>
+        </div>
+        <div class="cycle-step">
+          <span class="cycle-step-num">05</span>
+          <span class="cycle-step-label">Payout Accrual</span>
+          <p>Streams accumulate; track crosses 1,000-stream threshold; royalties enter the processing queue.</p>
+        </div>
+        <div class="cycle-step">
+          <span class="cycle-step-num">06</span>
+          <span class="cycle-step-label">Collection &amp; Exit</span>
+          <p>Payout cycles before removal. Track taken down 3–8 weeks later. Scammer repeats with a new profile.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 02 METADATA ── -->
+  <div class="section">
+    <span class="section-anchor" id="metadata"></span>
+    <h2>02 · The Technical Genesis of Profile Hijacking: Metadata Ingestion Vulnerabilities</h2>
+
+    <p>The foundational vulnerability facilitating Release Radar weaponization lies not within Spotify's internal systems but at the point of ingestion — the "handshake" between third-party distributors and the platform's metadata database. Platforms like DistroKid and TuneCore operate as high-volume, self-service portals that prioritize <em>"frictionless"</em> uploads.</p>
+
+    <p>The critical security gap is the absence of a robust identity verification layer for URI mapping. Scammers do not need to "hack" an artist's Spotify account; they simply need to claim that their new track is a release by an established artist using that artist's publicly available URI. For many distributors, the verification for this claim is limited to a simple <strong>Terms of Service checkbox.</strong></p>
+
+    <p>Once the distributor delivers the track with the targeted artist's metadata, Spotify's ingestion engine treats the distributor as a "preferred partner" and automatically populates the track into the discography of the verified artist profile. The 2026 rebrand of the "Verified Artist" blue checkmark to a "Registered Artist" label has not addressed the underlying vulnerability.</p>
+
+    <div class="table-wrap">
+      <div class="table-label">Distributor Verification Matrix — 2025–2026</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Distributor</th>
+            <th>URI Verification Method</th>
+            <th>Instant S4A Access</th>
+            <th>Identity Proofing</th>
+            <th>Fraud Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-hi">DistroKid</td>
+            <td>ToS Agreement Checkbox</td>
+            <td>Yes (Special Access menu)</td>
+            <td class="td-alert">None</td>
+            <td><span class="badge badge-high">High</span></td>
+          </tr>
+          <tr>
+            <td class="td-hi">TuneCore</td>
+            <td>Metadata Match / Artist ID Field</td>
+            <td>Yes (Dashboard Link)</td>
+            <td class="td-alert">None (Rising Artist)</td>
+            <td><span class="badge badge-moderate-high">Moderate–High</span></td>
+          </tr>
+          <tr>
+            <td>CD Baby</td>
+            <td>Manual Review (Select Tiers)</td>
+            <td>No (Request-based)</td>
+            <td class="td-alert">None (Standard)</td>
+            <td><span class="badge badge-moderate">Moderate</span></td>
+          </tr>
+          <tr>
+            <td>Amuse</td>
+            <td>Automated Metadata Scan</td>
+            <td>Yes (Professional Tier)</td>
+            <td class="td-alert">None</td>
+            <td><span class="badge badge-moderate-high">Moderate–High</span></td>
+          </tr>
+          <tr>
+            <td>Too Lost</td>
+            <td>ToS Agreement</td>
+            <td>Yes (Label/Artist Portal)</td>
+            <td class="td-alert">None</td>
+            <td><span class="badge badge-high">High</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>By placing a track on a profile with a high follower count, the scammer effectively <strong>"inherits" the organic reach</strong> of that artist without having to build an audience. This "Profile Injection" is the prerequisite for the entire fraud cycle.</p>
+  </div>
+
+  <!-- ── 03 TRIGGER ── -->
+  <div class="section">
+    <span class="section-anchor" id="trigger"></span>
+    <h2>03 · The Trigger Mechanism: Release Radar and Notification Architecture</h2>
+
+    <p>Once a track is successfully injected into an artist's profile, the Spotify algorithm identifies it as a new release. This status automatically triggers the <strong>Release Radar notification system</strong> — a personalized, algorithmically generated playlist delivered every Friday to every user who follows the targeted artist. Unlike editorial playlists (e.g., New Music Friday), which require human curation, Release Radar is fueled entirely by metadata and the follower relationship.</p>
+
+    <h3>The Technical Trigger Hierarchy</h3>
+    <ol>
+      <li><strong>Follower Relationship:</strong> If a user follows Artist A, any new release with Artist A as a "Main Artist" or "Featured Artist" is eligible for that user's Release Radar.</li>
+      <li><strong>Pitching Status:</strong> If the uploader pitches the track via Spotify for Artists at least 7 days before release, they can select a specific song for guaranteed inclusion.</li>
+      <li><strong>Metadata Finalization:</strong> Once the distributor's ingestion is confirmed, the track is locked into the Release Radar cycle for the following Friday.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-label">Scale of Delivery</div>
+      <p>For a mid-tier legacy artist with 15,000 to 30,000 followers, a single fraudulent upload generates <strong>thousands of push notifications and email alerts</strong> — all carrying the trust signal of an artist the recipient already follows.</p>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-label">Notification Type Comparison — Engagement &amp; Fraud Utility (2025–2026)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Notification Type</th>
+            <th>Estimated Open Rate</th>
+            <th>User Perception</th>
+            <th>Royalty Trigger Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-hi">Release Radar Push</td>
+            <td class="td-hi">High</td>
+            <td>High Trust (Existing Follow)</td>
+            <td class="td-hi">High</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Release Radar Email</td>
+            <td class="td-hi">High</td>
+            <td>High Trust (Newsletter-style)</td>
+            <td>Moderate</td>
+          </tr>
+          <tr>
+            <td>Discover Weekly</td>
+            <td>Moderate</td>
+            <td>Exploration (Low Trust)</td>
+            <td>Low</td>
+          </tr>
+          <tr>
+            <td>Daily Mix / Radio</td>
+            <td>Low</td>
+            <td>Background (Passive)</td>
+            <td>Low</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>This high engagement is the <em>"Passive Listener Capture"</em> phase of the fraud model. Listeners are served the track not because they searched for it, but because the platform's internal notification architecture actively pushes it to them as a trusted update from an artist they already enjoy.</p>
+  </div>
+
+  <!-- ── 04 CONFUSION WINDOW ── -->
+  <div class="section">
+    <span class="section-anchor" id="confusion"></span>
+    <h2>04 · Listener Behavioral Economics: The "Confusion Window" and Skip Suppression</h2>
+
+    <p>The financial viability of Release Radar weaponization depends entirely on the first 30 seconds of the listening experience. Spotify's royalty model dictates that a stream is only counted as payable once the listener crosses the <strong>30-second threshold.</strong> In standard fraudulent scenarios involving unknown artists, skip rates are extremely high because listeners quickly identify the content as irrelevant.</p>
+
+    <p>However, when the content is attributed to a known, respected artist, the <strong>"Confusion Window"</strong> takes effect — a documented psychological delay where a listener, encountering a stylistically anomalous track (e.g., an AI-generated country song on a bebop pianist's profile), does not immediately skip.</p>
+
+    <h3>Why Listeners Wait</h3>
+    <p>Because of brand trust, listeners assume the artist is:</p>
+    <ul>
+      <li>Experimenting with a new genre or "artistic direction."</li>
+      <li>Collaborating with a different type of musician.</li>
+      <li>Releasing an archival "lost" recording with different production values.</li>
+      <li>Updating their sound for a modern audience.</li>
+    </ul>
+
+    <div class="callout alert">
+      <div class="callout-label">The Critical Bridge</div>
+      <p>Data suggests that for followed artists, listeners will often wait <strong>35 to 45 seconds</strong> before deciding they do not like the direction — comfortably past the 30-second royalty trigger. Familiarity suppresses the skip reflex precisely long enough to generate revenue.</p>
+    </div>
+
+    <div class="pull-quote">
+      <p>The Confusion Window is not a design flaw. It is a consequence of the platform successfully building trust — and that trust is the attack surface.</p>
+    </div>
+  </div>
+
+  <!-- ── 05 THRESHOLD ── -->
+  <div class="section">
+    <span class="section-anchor" id="threshold"></span>
+    <h2>05 · The 1,000-Stream Arbitrage: Royalty Thresholds as a Fraud Roadmap</h2>
+
+    <p>In April 2024, Spotify implemented a minimum royalty threshold requiring each track to achieve at least <strong>1,000 streams within a 12-month period</strong> to be eligible for payments. While the stated rationale was to remove "non-music noise" and low-volume spam, the policy shift has inadvertently created a roadmap for sophisticated scammers.</p>
+
+    <p>By targeting established artist profiles with 10,000+ followers, bad actors can ensure that a single Release Radar push will carry a track over the 1,000-stream threshold in the first 24 to 48 hours of release. The royalty is paid per-stream for all streams once the threshold is crossed, meaning the 1,001st stream effectively "unlocks" the value of the previous 1,000.</p>
+
+    <div class="table-wrap">
+      <div class="table-label">Follower Tier vs. Fraud Efficiency</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Artist Follower Tier</th>
+            <th>Expected Radar Reach (Wk 1)</th>
+            <th>Probability of Crossing 1,000</th>
+            <th>Estimated ROI Per Track</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Micro (&lt;5,000)</td>
+            <td class="td-muted">&lt;500 streams</td>
+            <td class="td-alert">Low</td>
+            <td class="td-alert">Negative</td>
+          </tr>
+          <tr>
+            <td>Mid-Tier (5,000–20,000)</td>
+            <td>1,000–5,000 streams</td>
+            <td class="td-warn">Moderate</td>
+            <td>Low–Moderate</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Established (&gt;20,000)</td>
+            <td class="td-hi">5,000–30,000 streams</td>
+            <td class="td-hi">High</td>
+            <td class="td-hi">High</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The 1,000-stream rule has not eliminated fraud. It has merely shifted the strategy from low-volume "noise" tracks to high-volume "attribution" hijacking. Targeting a mid-tier jazz artist like Benny Green or Nat Adderley is infinitely more efficient than creating original content, as the pre-installed audience acts as a guaranteed monetization engine.</p>
+  </div>
+
+  <!-- ── 06 MATH ── -->
+  <div class="section">
+    <span class="section-anchor" id="math"></span>
+    <h2>06 · The Math of Per-Stream Payouts and ROI</h2>
+
+    <p>To calculate the economic return of a single fraudulent release, the following model applies. Let <em>R</em> be the total royalty, <em>S</em> be the number of streams, <em>p</em> be the average payout per stream, and <em>C</em> be the all-in cost of the release.</p>
+
+    <div class="formula-block">
+      <div class="formula-title">Royalty Capture Formula</div>
+      <div class="formula">
+        R = S × p − C<br><br>
+        C = (DistroKid annual fee) + (AI generation cost) + (time cost of URI research)
+      </div>
+      <div class="formula-caption">
+        Where p ≈ $0.003 to $0.005 per stream (2025–2026 average).<br>
+        DistroKid annual fee ≈ $22.99 (unlimited uploads).<br>
+        AI generation cost ≈ $0 to $10 per track (Suno / Udio).<br>
+        Time cost of URI research ≈ negligible (public data).
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Single Hijacking — Example Calculation</div>
+      <p>For a single successful hijacking generating <strong>10,000 streams</strong> at an average of $0.004/stream:<br><br>
+      R = 10,000 × $0.004 − $33 ≈ <strong>$7 net</strong> per track, per operation. Across hundreds of simultaneously hijacked profiles — and with the $33 fixed cost shared across unlimited uploads — <strong>monthly royalty capture can reach tens of thousands of dollars</strong> before detection and removal.</p>
+    </div>
+
+    <p>The cost structure approaches near-zero marginal cost at industrial scale. Because DistroKid's "unlimited" plan charges a flat annual fee regardless of upload volume, each additional hijacked profile adds no incremental cost beyond the 10–15 minutes required to identify a target URI and submit a track.</p>
+  </div>
+
+  <!-- ── 07 TAKEDOWN ── -->
+  <div class="section">
+    <span class="section-anchor" id="takedown"></span>
+    <h2>07 · The Takedown Asymmetry: Time-to-Removal vs. Payout Cycles</h2>
+
+    <p>The <em>"Collection Window Exploitation"</em> relies on the delay between the reporting of fraudulent content and its actual removal. Documented cases from 2025 and 2026 reveal a significant "Takedown Gap." While automated spam filters can catch identical audio files, they frequently fail to identify stylistic mismatches or attribution fraud where the audio is unique (AI-generated) but the artist is fake.</p>
+
+    <div class="table-wrap">
+      <div class="table-label">The Temporal Alignment of Fraud and Payout</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Typical Timeline</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-hi">Track Upload &amp; Release Radar Push</td>
+            <td class="td-mono">Day 0–7</td>
+            <td>Immediate follower notification upon ingestion confirmation</td>
+          </tr>
+          <tr>
+            <td>Fan / Artist Discovery of Fraud</td>
+            <td class="td-mono">Day 7–21</td>
+            <td>Fans usually discover via their own Release Radar or artist notifications</td>
+          </tr>
+          <tr>
+            <td>Reporting via S4A Support Portal</td>
+            <td class="td-mono">Day 14–28</td>
+            <td>Artists must use the S4A portal; fans have no direct "report for fraud" button</td>
+          </tr>
+          <tr>
+            <td class="td-alert">Average Track Removal</td>
+            <td class="td-mono td-alert">Week 3–8</td>
+            <td>Automated filters miss stylistic mismatches; attribution fraud requires manual review</td>
+          </tr>
+          <tr>
+            <td class="td-alert">Royalty Payout Processing</td>
+            <td class="td-mono td-alert">~8-week delay</td>
+            <td>Spotify pays royalties on a two-month cycle — aligned with the removal window</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout alert">
+      <div class="callout-label">Perfect Temporal Alignment</div>
+      <p>By the time the track is removed (Week 8), the first wave of royalties from the first month of streams is already processing for payout. Scammers often time re-uploads to coincide with the beginning of a new month, maximizing their window before the next reporting cycle.</p>
+    </div>
+  </div>
+
+  <!-- ── 08 CASES ── -->
+  <div class="section">
+    <span class="section-anchor" id="cases"></span>
+    <h2>08 · Case Documentation: The 2025–2026 Wave</h2>
+
+    <p>The following cases illustrate the systematic nature of this fraud. Targets are disproportionately drawn from jazz and legacy folk artists with high-authority brands but limited capacity for real-time digital estate monitoring.</p>
+
+    <div class="table-wrap">
+      <div class="table-label">Documented Incidents — 2025–2026</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Artist</th>
+            <th>Release / Incident</th>
+            <th>Discovery Date</th>
+            <th>Removal Delay</th>
+            <th>Est. Streams</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-hi">Emily Portman</td>
+            <td>Album: <em>Orca</em> (AI-generated)</td>
+            <td class="td-muted">July 2025</td>
+            <td class="td-alert">8 weeks</td>
+            <td>10k–20k</td>
+            <td>Removed after 8-week appeal</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Benny Green</td>
+            <td>Fake EP with Freddy Cole</td>
+            <td class="td-muted">Feb 2026</td>
+            <td>3 weeks</td>
+            <td>5k–8k</td>
+            <td>Removed after fan outcry</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Nat Adderley</td>
+            <td>Track: "Hippodelphia"</td>
+            <td class="td-muted">March 2026</td>
+            <td>4 weeks</td>
+            <td>3k–5k</td>
+            <td>Metadata mismatch identified</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Abbey Lincoln</td>
+            <td>March 2026 Wave</td>
+            <td class="td-muted">March 2026</td>
+            <td>2–4 weeks</td>
+            <td>5k+</td>
+            <td>Documented by Ted Gioia</td>
+          </tr>
+          <tr>
+            <td class="td-hi">Sophie</td>
+            <td>Suspect posthumous albums</td>
+            <td class="td-muted">Late 2025</td>
+            <td class="td-alert">Ongoing</td>
+            <td>Unknown</td>
+            <td>Multiple flagged by Paul Bender</td>
+          </tr>
+          <tr>
+            <td>Johan Röhr</td>
+            <td>2,700 songs / 656 aliases</td>
+            <td class="td-muted">Identified 2024</td>
+            <td class="td-none">N/A (internal)</td>
+            <td class="td-alert">15 Billion</td>
+            <td>"Ghost artist" model via PFC initiative</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-label">The Röhr Proof of Concept</div>
+      <p>The Johan Röhr case — technically "legal" within Spotify's Perfect Fit Content (PFC) initiative — served as the proof-of-concept for the fraud. Röhr generated significant revenue in 2022 by saturating instrumental playlists with alias-based content. Scammers simply upgraded this model by using the names of famous artists instead of invented ones, knowing that Release Radar would provide a more powerful distribution engine than any static playlist.</p>
+    </div>
+  </div>
+
+  <!-- ── 09 DISTRIBUTORS ── -->
+  <div class="section">
+    <span class="section-anchor" id="distributors"></span>
+    <h2>09 · Distributor Accountability and Conflict of Interest</h2>
+
+    <p>A critical component of the Release Radar weaponization loop is the distributor's role as a gatekeeper. The lack of verification for claiming a legacy Spotify Artist URI is exacerbated by the financial relationship between distributors and the platform.</p>
+
+    <p>Distributors benefit from high volume. While they may not take a commission on major DSP royalties, they charge annual subscription fees for "unlimited" uploads. In some cases, such as TuneCore's Social Platforms revenue, the distributor takes a commission on TikTok and YouTube Content ID revenue. This creates a nuanced conflict of interest: <strong>distributors have a financial incentive to allow as much content as possible into the system,</strong> as every new uploader is a paying customer.</p>
+
+    <h3>Risk Assessment by Platform</h3>
+
+    <ul class="gap-list">
+      <li>
+        <div class="gap-num"><span class="badge badge-high">High</span></div>
+        <div class="gap-content">
+          <h4>DistroKid</h4>
+          <p>The "Special Access" menu allows users to claim a Spotify for Artists profile nearly instantly once a track is in the system. The "unlimited" model makes it the preferred tool for industrial-scale scammers — zero marginal cost per fraudulent upload beyond the flat annual fee.</p>
+        </div>
+      </li>
+      <li>
+        <div class="gap-num"><span class="badge badge-moderate-high">Mod–Hi</span></div>
+        <div class="gap-content">
+          <h4>TuneCore</h4>
+          <p>Requires a Spotify Artist ID, but offers no secondary identity proofing for "Rising Artist" subscribers. The commission on social revenue creates a vested interest in volume regardless of content legitimacy.</p>
+        </div>
+      </li>
+      <li>
+        <div class="gap-num"><span class="badge badge-moderate">Moderate</span></div>
+        <div class="gap-content">
+          <h4>CD Baby</h4>
+          <p>More "legacy" in approach, often involving slower ingestion times which may allow for metadata mismatch detection. Still lacks a formal ID-at-upload requirement for URI mapping on standard tiers.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ── 10 REGULATORY ── -->
+  <div class="section">
+    <span class="section-anchor" id="regulatory"></span>
+    <h2>10 · Legislative and Regulatory Outlook: ELVIS and NO FAKES</h2>
+
+    <p>The rise of this fraud has prompted a pivot in the legal landscape toward <strong>"Personality Rights"</strong> rather than simple copyright enforcement. Traditional copyright protects the recording; the Release Radar scam exploits the identity of the artist.</p>
+
+    <h3>The ELVIS Act (Tennessee, 2024)</h3>
+
+    <p>Effective July 1, 2024, Tennessee's Ensuring Likeness, Voice, and Image Security (ELVIS) Act was the first law to explicitly prohibit AI voice cloning and unauthorized digital replicas. It provides artists and their estates with a civil right of action against anyone who uses their voice to "mimic an artist's songs without authorization." This law is particularly relevant for the estates of jazz legends like Nat Adderley or Abbey Lincoln, who are disproportionately targeted by this fraud.</p>
+
+    <h3>The NO FAKES Act (Federal, 2025)</h3>
+
+    <p>Reintroduced in April 2025, the NO FAKES Act aims to create a federal right to control one's voice and likeness. The 2025 version includes a <strong>"notice-and-takedown" mechanism</strong> that would require platforms like Spotify to remove unauthorized deepfakes and fraudulent attributions within <strong>48 hours</strong> of a valid report — a significant compression of the current 3–8 week removal window.</p>
+
+    <p>It also proposes strict liability for platforms "designed or promoted" to facilitate these replicas, which could eventually be used to force distributors to implement <strong>KYC (Know Your Customer) protocols</strong> for artist profile mapping.</p>
+
+    <div class="callout">
+      <div class="callout-label">Legislative Gap</div>
+      <p>Neither act directly mandates cryptographic signing of metadata at the distributor level — the precise point where the fraud originates. Legislative progress on voice rights does not close the Accountability Gap in the distribution pipeline.</p>
+    </div>
+  </div>
+
+  <!-- ── 11 INCENTIVE ── -->
+  <div class="section">
+    <span class="section-anchor" id="incentive"></span>
+    <h2>11 · Platform Incentive Misalignment: The Pro-Rata Problem</h2>
+
+    <p>A fundamental question in the 2026 fraud investigation is whether Spotify has a direct financial incentive to allow fraudulent streams to persist. Under the pro-rata model, the total royalty pool is a fixed percentage of total revenue. Fraudulent streams do not necessarily increase the total amount Spotify pays out; instead, they change <em>who</em> gets paid, diluting the per-stream value for legitimate artists.</p>
+
+    <p>However, there is a secondary incentive: <strong>total platform engagement.</strong> If a user receives a Release Radar notification for a "new" Benny Green track, they are more likely to open the app and listen to 30 seconds of music. Even if the track is fake, the 30 seconds of attention are "captured" by Spotify, contributing to churn reduction and active user metrics.</p>
+
+    <div class="callout alert">
+      <div class="callout-label">The Filter Limitation</div>
+      <p>While Spotify has committed to a "music spam filter" to detect mass uploads, these filters are currently more effective at catching botnets than at catching the "Confusion Window" behavior of real human followers — who listen voluntarily, making their engagement indistinguishable from legitimate streams.</p>
+    </div>
+  </div>
+
+  <!-- ── 12 CONCLUSIONS ── -->
+  <div class="section">
+    <span class="section-anchor" id="conclusions"></span>
+    <h2>12 · Conclusions and Systemic Recommendations</h2>
+
+    <p>The weaponization of Release Radar is a byproduct of the music industry's rush to automate distribution at the expense of verification. The core of the issue is an <strong>"Accountability Gap"</strong> in the metadata pipeline. Until distributors are required to provide cryptographic proof of identity or estate authorization before mapping a track to a verified URI, the Release Radar system will continue to function as a delivery mechanism for fraud.</p>
+
+    <p>The 2025–2026 data indicates that scammers have moved past the "AI-generated spam" phase and into a <strong>"Brand-Attribution Hijacking" phase.</strong> This new phase is more damaging because it consumes the organic trust between artists and fans, turning a discovery tool into a vehicle for deception.</p>
+
+    <p>The economic model — built on near-zero marginal cost and 8-week takedown windows — is too lucrative to be stopped by simple ToS updates. It requires a fundamental re-engineering of the platform–distributor relationship.</p>
+
+    <h3>Required Systemic Changes</h3>
+
+    <ul class="gap-list">
+      <li>
+        <div class="gap-num">01</div>
+        <div class="gap-content">
+          <h4>Mandatory 2FA for All URI Mappings</h4>
+          <p>Any track claiming to belong to an existing Spotify Artist URI must be confirmed by the verified account holder via two-factor authentication before the distributor delivers the content to Spotify's ingestion pipeline.</p>
+        </div>
+      </li>
+      <li>
+        <div class="gap-num">02</div>
+        <div class="gap-content">
+          <h4>Fingerprint-to-Artist Verification</h4>
+          <p>Use AI tools not to create music, but to verify that a new upload stylistically matches the profile it is being mapped to before Release Radar notifications are sent. Flag high-divergence submissions for human review before publication.</p>
+        </div>
+      </li>
+      <li>
+        <div class="gap-num">03</div>
+        <div class="gap-content">
+          <h4>Real-Time Estate Reporting</h4>
+          <p>Provide authorized estates of deceased artists with immediate "Approval/Denial" rights for any track delivered to that artist's profile via a third-party distributor. Posthumous profiles are disproportionately targeted and have no living advocate to monitor them in real time.</p>
+        </div>
+      </li>
+      <li>
+        <div class="gap-num">04</div>
+        <div class="gap-content">
+          <h4>Delay Release Radar Until Review Window</h4>
+          <p>For tracks on profiles flagged as high-risk (legacy artists, deceased artists, artists with recent fraud reports), introduce a mandatory 48-hour review hold before Release Radar notifications are dispatched. This decouples the notification from the fraud cycle.</p>
+        </div>
+      </li>
+    </ul>
+
+    <div class="pull-quote">
+      <p>Without systemic change, the Confusion Window will continue to be a profitable collection window for bad actors, and the Release Radar algorithm will remain one of the most efficient — if inadvertent — fraud engines in the digital economy.</p>
+    </div>
+  </div>
+
+  <!-- ── 13 REFERENCES ── -->
+  <div class="section">
+    <span class="section-anchor" id="references"></span>
+    <h2>13 · Works Cited</h2>
+
+    <ol class="references-list">
+      <li><span class="ref-num">1</span><div>Doc Searls Weblog: This Tuesday <a class="ref-link" href="https://doc.searls.com/2026/03/10/this-tuesday/" target="_blank" rel="noopener">doc.searls.com</a></div></li>
+      <li><span class="ref-num">2</span><div>APAC Labels Assess Brand Risk as AI Music Clones Spread — Mission Media Asia <a class="ref-link" href="https://missionmedia.asia/ai-music-fraud-apac-brand-risk-streaming-platforms/" target="_blank" rel="noopener">missionmedia.asia</a></div></li>
+      <li><span class="ref-num">3</span><div>Mastering Spotify Release Radar 2026: Algorithm Hacks for Playlists — ArtisTrack <a class="ref-link" href="https://artistrack.com/spotify-release-radar-2026-strategy/" target="_blank" rel="noopener">artistrack.com</a></div></li>
+      <li><span class="ref-num">4</span><div>Everything Spotify — DistroKid Help Center <a class="ref-link" href="https://support.distrokid.com/hc/en-us/sections/1500000533001-Everything-Spotify" target="_blank" rel="noopener">support.distrokid.com</a></div></li>
+      <li><span class="ref-num">5</span><div>Optimizing Your Spotify Footprint: Claiming Your Artist Page — SubmitLink <a class="ref-link" href="https://www.submitlink.io/post/optimizing-your-spotify-footprint-a-guide-to-claiming-your-artist-page" target="_blank" rel="noopener">submitlink.io</a></div></li>
+      <li><span class="ref-num">6</span><div>Collaborations don't work: Rant + Question — Reddit / DistroKidHelpDesk <a class="ref-link" href="https://www.reddit.com/r/DistroKidHelpDesk/comments/1cmbhb3/collaborations_dont_work_rant_question/" target="_blank" rel="noopener">reddit.com</a></div></li>
+      <li><span class="ref-num">7</span><div>Instant Spotify for Artists registration — DistroKid <a class="ref-link" href="https://distrokid.com/spotify/" target="_blank" rel="noopener">distrokid.com</a></div></li>
+      <li><span class="ref-num">8</span><div>Getting music on Release Radar — Spotify Support <a class="ref-link" href="https://support.spotify.com/us/artists/article/getting-music-on-release-radar/" target="_blank" rel="noopener">support.spotify.com</a></div></li>
+      <li><span class="ref-num">9</span><div>AI fakes flooding playlists — The Star (Malaysia) <a class="ref-link" href="https://www.thestar.com.my/news/focus/2025/12/25/ai-fakes-flooding-playlists" target="_blank" rel="noopener">thestar.com.my</a></div></li>
+      <li><span class="ref-num">10</span><div>"Is Spotify Enabling Massive Impersonation of Famous Jazz Artists?" — Reddit / r/Jazz <a class="ref-link" href="https://www.reddit.com/r/Jazz/comments/1rpbpf9/is_spotify_enabling_massive_impersonation_of/" target="_blank" rel="noopener">reddit.com/r/Jazz</a></div></li>
+      <li><span class="ref-num">11</span><div>Track monetization eligibility — Spotify Support <a class="ref-link" href="https://support.spotify.com/us/artists/article/track-monetization-eligibility/" target="_blank" rel="noopener">support.spotify.com</a></div></li>
+      <li><span class="ref-num">12</span><div>Spotify's 1000-Stream Rule Explained — CyberPR Music <a class="ref-link" href="https://cyberprmusic.com/spotify-royalty/" target="_blank" rel="noopener">cyberprmusic.com</a></div></li>
+      <li><span class="ref-num">13</span><div>How the Music Industry is Fighting the $2B Streaming Fraud Issue — Trolley <a class="ref-link" href="https://trolley.com/learning-center/music-streaming-fraud-challenges-solutions-industry-insights/" target="_blank" rel="noopener">trolley.com</a></div></li>
+      <li><span class="ref-num">14</span><div>Spotify Royalty Calculator — Unchained Music <a class="ref-link" href="https://www.unchainedmusic.io/blog-posts/spotify-royalty-calculator" target="_blank" rel="noopener">unchainedmusic.io</a></div></li>
+      <li><span class="ref-num">15</span><div>Top 7 DistroKid Alternatives for Independent Musicians in 2025 — Loop Fans <a class="ref-link" href="https://music.loop.fans/blog/sites-like-distrokid" target="_blank" rel="noopener">music.loop.fans</a></div></li>
+      <li><span class="ref-num">16</span><div>Royalty Source of the Week: Too Lost — Infinite Catalog <a class="ref-link" href="https://www.infinitecatalog.com/blog/royalty-source-of-the-week-too-lost" target="_blank" rel="noopener">infinitecatalog.com</a></div></li>
+      <li><span class="ref-num">17</span><div>Swedish composer becomes Spotify's most-famous musician you've never heard of — The Guardian <a class="ref-link" href="https://www.theguardian.com/uk-news/2024/mar/19/swedish-composer-johan-rohr-becomes-spotifys-most-famous-musician-youve-never-heard-of" target="_blank" rel="noopener">theguardian.com</a></div></li>
+      <li><span class="ref-num">18</span><div>Composer Behind 650 Spotify Fake Artists Revealed — iMusician <a class="ref-link" href="https://imusician.pro/en/resources/blog/spotify-fake-artist-revealed" target="_blank" rel="noopener">imusician.pro</a></div></li>
+      <li><span class="ref-num">19</span><div>Controversy over fake artists on Spotify — Wikipedia <a class="ref-link" href="https://en.wikipedia.org/wiki/Controversy_over_fake_artists_on_Spotify" target="_blank" rel="noopener">wikipedia.org</a></div></li>
+      <li><span class="ref-num">20</span><div>Why Tennessee's ELVIS Act Is the King of AI Protections — Vanderbilt University / JETLAW <a class="ref-link" href="https://www.vanderbilt.edu/jetlaw/wp-content/uploads/sites/356/2025/03/Fowler_FINAL.pdf" target="_blank" rel="noopener">vanderbilt.edu</a></div></li>
+      <li><span class="ref-num">21</span><div>Transcript: Senate Holds Hearing on AI Deepfakes and the NO FAKES Act — Tech Policy Press <a class="ref-link" href="https://www.techpolicy.press/transcript-senate-holds-hearing-on-ai-deepfakes-and-the-no-fakes-act/" target="_blank" rel="noopener">techpolicy.press</a></div></li>
+      <li><span class="ref-num">22</span><div>Innovation Law Insights 23 April 2025 — DLA Piper <a class="ref-link" href="https://www.dlapiper.com/en-qa/insights/publications/innovation-law-insights/2025/innovation-law-insights-23-aprile-2025" target="_blank" rel="noopener">dlapiper.com</a></div></li>
+      <li><span class="ref-num">23</span><div>Spotify Track Monetization FAQ — UnitedMasters <a class="ref-link" href="https://support.unitedmasters.com/hc/en-us/articles/30011900581267-Spotify-Track-Monetization-FAQ" target="_blank" rel="noopener">support.unitedmasters.com</a></div></li>
+    </ol>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════ FOOTER -->
+<footer>
+  Built with <a href="https://www.bearbrown.co">bearbrown.co</a> · AI tools for educators, creators &amp; founders
+</footer>
+
+</body>
+</html>
