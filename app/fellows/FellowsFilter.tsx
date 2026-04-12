@@ -30,7 +30,7 @@ export default function FellowsFilter({
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             filter === "current"
               ? "bg-foreground text-background"
-              : "bg-gray-100 dark:bg-neutral-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-muted dark:bg-neutral-800 text-muted-foreground hover:bg-muted/80 dark:hover:bg-neutral-700"
           }`}
         >
           Current Fellows
@@ -40,7 +40,7 @@ export default function FellowsFilter({
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             filter === "alumni"
               ? "bg-foreground text-background"
-              : "bg-gray-100 dark:bg-neutral-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-muted dark:bg-neutral-800 text-muted-foreground hover:bg-muted/80 dark:hover:bg-neutral-700"
           }`}
         >
           Alumni
@@ -73,8 +73,8 @@ export default function FellowsFilter({
                 <span
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     project.open
-                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-gray-100 text-gray-600 dark:bg-neutral-700 dark:text-neutral-400"
+                      ? "bg-accent/20 text-foreground"
+                      : "bg-muted text-muted-foreground dark:bg-neutral-700 dark:text-neutral-400"
                   }`}
                 >
                   {project.open ? "Open" : "Closed"}
@@ -132,7 +132,7 @@ export default function FellowsFilter({
                               className="w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+                            <div className="w-10 h-10 rounded-full bg-muted dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                               {getInitials(fellow.name)}
                             </div>
                           )}
@@ -145,7 +145,7 @@ export default function FellowsFilter({
                             </Link>
                             <div className="flex items-center gap-2">
                               {role === "pm" && (
-                                <span className="text-xs font-medium text-orange-600 dark:text-orange-400">
+                                <span className="text-xs font-medium text-warm-clay">
                                   Project Manager
                                 </span>
                               )}

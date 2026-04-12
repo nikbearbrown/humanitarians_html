@@ -78,7 +78,7 @@ export default function BlogAdminPage() {
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={allFilteredSelected} onChange={toggleSelectAll} className="rounded" />Select all {activeTag ? 'filtered' : ''} ({filteredPosts.length})</label>
           {selectedIds.size > 0 && (
             <>
-              {posts.filter(p => selectedIds.has(p.id) && !p.published).length > 0 && <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={bulkPublish}>Publish {posts.filter(p => selectedIds.has(p.id) && !p.published).length} selected</Button>}
+              {posts.filter(p => selectedIds.has(p.id) && !p.published).length > 0 && <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground" onClick={bulkPublish}>Publish {posts.filter(p => selectedIds.has(p.id) && !p.published).length} selected</Button>}
               {posts.filter(p => selectedIds.has(p.id) && p.published).length > 0 && <Button variant="secondary" size="sm" onClick={bulkUnpublish}>Unpublish {posts.filter(p => selectedIds.has(p.id) && p.published).length} selected</Button>}
               <Button variant="destructive" size="sm" onClick={bulkDelete}>Delete {selectedIds.size} selected</Button>
             </>
@@ -101,7 +101,7 @@ export default function BlogAdminPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
-                  <Button variant="outline" size="sm" title={post.published ? 'Unpublish' : 'Publish'} onClick={() => togglePublish(post)}>{post.published ? <XCircle className="h-3.5 w-3.5 text-muted-foreground" /> : <Check className="h-3.5 w-3.5 text-green-600" />}</Button>
+                  <Button variant="outline" size="sm" title={post.published ? 'Unpublish' : 'Publish'} onClick={() => togglePublish(post)}>{post.published ? <XCircle className="h-3.5 w-3.5 text-muted-foreground" /> : <Check className="h-3.5 w-3.5 text-foreground" />}</Button>
                   <Link href={`/admin/dashboard/blog/${post.id}/edit`}><Button variant="outline" size="sm"><Pencil className="h-3.5 w-3.5" /></Button></Link>
                   <Button variant="outline" size="sm" onClick={() => deletePost(post.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>

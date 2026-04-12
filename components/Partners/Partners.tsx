@@ -10,7 +10,7 @@ export default function Partners() {
         <div className="mx-auto grid max-w-5xl grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6 items-center justify-center py-8">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="flex items-center justify-center">
-              <div className="h-16 w-16 rounded-full bg-gray-200"></div>
+              <div className="h-16 w-16 rounded-full bg-muted"></div>
             </div>
           ))}
         </div>

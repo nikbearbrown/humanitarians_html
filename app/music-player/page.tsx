@@ -193,7 +193,7 @@ const SpotifyArtistDisplay: React.FC = () => {
                 href={artist.external_urls?.spotify}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-2 bg-white text-[#481801] rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center px-6 py-2 bg-background text-foreground rounded-full font-semibold hover:bg-muted transition-colors"
               >
                 Open in Spotify
               </a>
@@ -213,7 +213,7 @@ const SpotifyArtistDisplay: React.FC = () => {
               {topTracks.map((track, index) => (
                 <div 
                   key={track.id}
-                  className="p-3 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-3"
+                  className="p-3 hover:bg-muted cursor-pointer transition-colors flex items-center gap-3"
                   onClick={() => getTrackDetails(track)}
                 >
                   <span className="text-gray-400 w-6 text-right">{index + 1}</span>

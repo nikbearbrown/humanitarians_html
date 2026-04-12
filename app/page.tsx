@@ -127,17 +127,17 @@ export default function Home() {
               <div className="border rounded-lg p-6 bg-muted dark:bg-neutral-900">
                 <div className="text-2xl font-bold mb-1">Tier 1</div>
                 <div className="text-sm text-muted-foreground mb-1">Pattern recognition, fact retrieval, syntactic correctness</div>
-                <div className="text-xs font-medium text-orange-600 dark:text-orange-400">Machine capability: superhuman</div>
+                <div className="text-xs font-medium text-destructive">Machine capability: superhuman</div>
               </div>
               <div className="border rounded-lg p-6 bg-muted dark:bg-neutral-900">
                 <div className="text-2xl font-bold mb-1">Tiers 3–6</div>
                 <div className="text-sm text-muted-foreground mb-1">Judgment, causal reasoning, ethics, collaboration</div>
-                <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: poor to absent</div>
+                <div className="text-xs font-medium text-dim-gray">Machine capability: poor to absent</div>
               </div>
               <div className="border rounded-lg p-6 bg-muted dark:bg-neutral-900">
                 <div className="text-2xl font-bold mb-1">Tier 7</div>
                 <div className="text-sm text-muted-foreground mb-1">Practical wisdom under genuine stakes</div>
-                <div className="text-xs font-medium text-green-600 dark:text-green-400">Machine capability: absent — no stakes, no lived time</div>
+                <div className="text-xs font-medium text-dim-gray">Machine capability: absent — no stakes, no lived time</div>
               </div>
             </div>
           </div>

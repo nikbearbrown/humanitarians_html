@@ -61,7 +61,7 @@ export default function ResumeDesign() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
-                  <tr className="bg-gray-100">
+                  <tr className="bg-muted">
                     <th className="border border-gray-300 p-3 text-left font-bold">Design Element</th>
                     <th className="border border-gray-300 p-3 text-left font-bold">Strategic Choice</th>
                     <th className="border border-gray-300 p-3 text-left font-bold">Why It Works for ATS</th>
@@ -75,7 +75,7 @@ export default function ResumeDesign() {
                     <td className="border border-gray-300 p-3">Ensures sequential, top-to-bottom parsing without data scrambling</td>
                     <td className="border border-gray-300 p-3">Natural reading order; clean, uncluttered visual hierarchy</td>
                   </tr>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-background">
                     <td className="border border-gray-300 p-3 font-semibold">Typography</td>
                     <td className="border border-gray-300 p-3">Calibri, Arial, Helvetica (11-12pt body)</td>
                     <td className="border border-gray-300 p-3">Universal compatibility; renders correctly across all systems</td>
@@ -87,7 +87,7 @@ export default function ResumeDesign() {
                     <td className="border border-gray-300 p-3">Matches ATS recognition rules for instant categorization</td>
                     <td className="border border-gray-300 p-3">Clear, scannable structure; recruiters find information instantly</td>
                   </tr>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-background">
                     <td className="border border-gray-300 p-3 font-semibold">Formatting</td>
                     <td className="border border-gray-300 p-3">Minimal bold (headings/titles only), standard bullets</td>
                     <td className="border border-gray-300 p-3">Avoids parsing errors from complex styling</td>
@@ -99,7 +99,7 @@ export default function ResumeDesign() {
                     <td className="border border-gray-300 p-3">Builds accurate chronological timeline</td>
                     <td className="border border-gray-300 p-3">Easy to scan career progression at a glance</td>
                   </tr>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-background">
                     <td className="border border-gray-300 p-3 font-semibold">Content Structure</td>
                     <td className="border border-gray-300 p-3">Action verbs + quantified results (CAR framework)</td>
                     <td className="border border-gray-300 p-3">Provides rich semantic data for LLM scoring and skill inference</td>
@@ -111,7 +111,7 @@ export default function ResumeDesign() {
                     <td className="border border-gray-300 p-3">Clear boundaries for parsing algorithms</td>
                     <td className="border border-gray-300 p-3">Reduces cognitive load; improves readability and scannability</td>
                   </tr>
-                  <tr className="bg-gray-50">
+                  <tr className="bg-background">
                     <td className="border border-gray-300 p-3 font-semibold">File Format</td>
                     <td className="border border-gray-300 p-3">.docx or PDF (Standard export)</td>
                     <td className="border border-gray-300 p-3">Preserves text layer for accurate extraction</td>
@@ -182,12 +182,12 @@ export default function ResumeDesign() {
                 <li><strong>Result:</strong> The measurable, positive outcome</li>
               </ul>
               
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+              <div className="bg-destructive/5 border-l-4 border-destructive p-4 mb-4">
                 <p className="font-semibold mb-1">Poor Example (Passive, Vague):</p>
                 <p className="italic">"Responsible for managing social media accounts"</p>
               </div>
               
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+              <div className="bg-muted border-l-4 border-warm-clay p-4 mb-6">
                 <p className="font-semibold mb-1">Strong Example (CAR Framework):</p>
                 <p className="italic">"Spearheaded Instagram strategy overhaul, implementing data-driven content calendar and engagement tactics, increasing follower growth by 340% and engagement rate by 125% over 6 months"</p>
               </div>
@@ -276,7 +276,7 @@ export default function ResumeDesign() {
                 href="https://github.com/Humanitariansai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors text-center"
+                className="inline-block px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg hover:bg-primary/90 transition-colors text-center"
               >
                 GitHub Repository
               </a>
@@ -284,7 +284,7 @@ export default function ResumeDesign() {
                 href="https://www.youtube.com/@humanitariansai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-center"
+                className="inline-block px-6 py-3 bg-muted text-foreground font-semibold rounded-lg hover:bg-muted/80 transition-colors text-center"
               >
                 YouTube Channel
               </a>
@@ -292,7 +292,7 @@ export default function ResumeDesign() {
                 href="https://www.humanitarians.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-6 py-3 bg-gray-200 text-gray-900 font-semibold rounded-lg hover:bg-gray-300 transition-colors text-center"
+                className="inline-block px-6 py-3 bg-muted text-foreground font-semibold rounded-lg hover:bg-muted/80 transition-colors text-center"
               >
                 Official Website
               </a>
@@ -305,7 +305,7 @@ export default function ResumeDesign() {
                   href="https://www.linkedin.com/company/105696953/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   LinkedIn
                 </a>
@@ -313,7 +313,7 @@ export default function ResumeDesign() {
                   href="https://www.youtube.com/@humanitariansai"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   YouTube
                 </a>
@@ -321,7 +321,7 @@ export default function ResumeDesign() {
                   href="https://www.humanitarians.ai/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   Website
                 </a>
@@ -329,7 +329,7 @@ export default function ResumeDesign() {
                   href="https://github.com/Humanitariansai/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   GitHub
                 </a>
@@ -337,7 +337,7 @@ export default function ResumeDesign() {
                   href="https://music.apple.com/us/artist/humanitarians-ai/1781414009"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   Apple Music
                 </a>
@@ -345,7 +345,7 @@ export default function ResumeDesign() {
                   href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-primary hover:underline"
                 >
                   Spotify
                 </a>

@@ -325,7 +325,7 @@ export default function EditFellowPage() {
             Generate a new temporary password. The fellow will need to receive it directly — it is shown once.
           </p>
           {tempPassword ? (
-            <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4">
+            <div className="rounded-md bg-accent/10 border border-border p-4">
               <p className="text-sm font-medium mb-2">
                 Temp password — copy now. Cannot be recovered after leaving this page.
               </p>

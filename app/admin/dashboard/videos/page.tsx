@@ -346,7 +346,7 @@ export default function VideosAdminPage() {
       </div>
 
       {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-      {success && <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">{success}</div>}
+      {success && <div className="rounded-md bg-muted p-3 text-sm text-foreground">{success}</div>}
 
       {allTags.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">

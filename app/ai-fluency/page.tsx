@@ -134,7 +134,7 @@ export default function AIFluency() {
             Our courses are work-in-progress projects built by volunteers learning-by-teaching. Join our mission as a fellow and help build ethical, accessible AI education.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <SecondaryButton href="https://www.humanitarians.ai/fellows" className="bg-white text-primary hover:bg-gray-100 border-none">
+            <SecondaryButton href="https://www.humanitarians.ai/fellows" className="bg-white text-primary hover:bg-muted border-none">
               Become a Fellow
             </SecondaryButton>
             <Link href="https://github.com/Humanitariansai" className="px-6 py-3 rounded-md border border-white/30 hover:bg-white/10 transition-colors">

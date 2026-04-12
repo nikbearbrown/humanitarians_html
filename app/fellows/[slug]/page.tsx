@@ -93,7 +93,7 @@ export default async function FellowProfilePage({
                 className="w-20 h-20 rounded-full object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-xl font-medium text-muted-foreground flex-shrink-0">
+              <div className="w-20 h-20 rounded-full bg-muted dark:bg-neutral-700 flex items-center justify-center text-xl font-medium text-muted-foreground flex-shrink-0">
                 {getInitials(fellow.name)}
               </div>
             )}
@@ -105,7 +105,7 @@ export default async function FellowProfilePage({
                 <span
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     fellow.status === "current"
-                      ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                      ? "bg-accent/20 text-foreground"
                       : "bg-silver text-foreground dark:bg-neutral-700 dark:text-neutral-200"
                   }`}
                 >
@@ -115,7 +115,7 @@ export default async function FellowProfilePage({
 
               {/* PM role */}
               {pmProjects.length > 0 && (
-                <p className="text-sm font-medium text-orange-600 dark:text-orange-400 mb-2">
+                <p className="text-sm font-medium text-warm-clay mb-2">
                   Project Manager —{" "}
                   {pmProjects.map((p, i) => (
                     <span key={p!.id}>
@@ -188,8 +188,8 @@ export default async function FellowProfilePage({
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           project.open
-                            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                            : "bg-gray-100 text-gray-600 dark:bg-neutral-700 dark:text-neutral-400"
+                            ? "bg-accent/20 text-foreground"
+                            : "bg-muted text-muted-foreground dark:bg-neutral-700 dark:text-neutral-400"
                         }`}
                       >
                         {project.open ? "Open" : "Closed"}

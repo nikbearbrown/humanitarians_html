@@ -88,7 +88,7 @@ export default function EightyDaystoStay() {
                   <h3 className="text-lg font-bold mb-2">1. Misconceptions About Cost & Complexity</h3>
                   <div className="grid md:grid-cols-2 gap-4 mt-4">
                     <div>
-                      <div className="text-sm font-semibold text-green-600 dark:text-green-400 mb-2">✓ Reality:</div>
+                      <div className="text-sm font-semibold text-dim-gray mb-2">✓ Reality:</div>
                       <ul className="text-sm space-y-1 text-muted-foreground">
                         <li>OPT requires NO employer sponsorship</li>
                         <li>F-1/OPT saves ~7.65% in payroll taxes</li>
@@ -346,19 +346,19 @@ export default function EightyDaystoStay() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">SEC Data:</span>
-                    <span className="font-bold text-green-600">$0/month</span>
+                    <span className="font-bold text-foreground">$0/month</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Hosting:</span>
-                    <span className="font-bold text-green-600">$0/month</span>
+                    <span className="font-bold text-foreground">$0/month</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Database:</span>
-                    <span className="font-bold text-green-600">$0/month</span>
+                    <span className="font-bold text-foreground">$0/month</span>
                   </div>
                   <div className="pt-2 border-t border-border flex justify-between">
                     <span className="font-bold">Total:</span>
-                    <span className="font-bold text-green-600">$0/month</span>
+                    <span className="font-bold text-foreground">$0/month</span>
                   </div>
                   <div className="text-xs text-muted-foreground italic">
                     (vs $99/month for commercial data sources)

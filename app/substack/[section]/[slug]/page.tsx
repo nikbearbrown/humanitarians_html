@@ -34,7 +34,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ sectio
           <div className="mt-16 border-t pt-8">
             <p className="text-lg font-semibold">Enjoy this article?</p>
             <p className="text-muted-foreground mt-1">Subscribe on Substack to get new posts delivered to your inbox.</p>
-            <a href={sectionData.substack_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium mt-4 bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Subscribe on Substack</a>
+            <a href={sectionData.substack_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium mt-4 bg-foreground text-background shadow hover:bg-foreground/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Subscribe on Substack</a>
           </div>
         </div>
       </article>

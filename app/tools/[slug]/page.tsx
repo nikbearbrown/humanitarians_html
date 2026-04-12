@@ -70,7 +70,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             {tool.description && <p className="text-sm text-muted-foreground mt-1">{tool.description}</p>}
           </div>
           {tool.claude_url && (
-            <a href={tool.claude_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-6 text-sm font-medium bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Open External</a>
+            <a href={tool.claude_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-6 text-sm font-medium bg-foreground text-background shadow hover:bg-foreground/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Open External</a>
           )}
         </div>
       </div>

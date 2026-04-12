@@ -45,7 +45,7 @@ export default async function ProjectFellows({
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+              <div className="w-12 h-12 rounded-full bg-muted dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                 {getInitials(pm.name)}
               </div>
             )}
@@ -56,7 +56,7 @@ export default async function ProjectFellows({
               >
                 {pm.name}
               </Link>
-              <span className="ml-2 text-xs font-medium text-orange-600 dark:text-orange-400">
+              <span className="ml-2 text-xs font-medium text-warm-clay">
                 Project Manager
               </span>
               {pm.bio && (
@@ -84,7 +84,7 @@ export default async function ProjectFellows({
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+                    <div className="w-10 h-10 rounded-full bg-muted dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                       {getInitials(fellow.name)}
                     </div>
                   )}

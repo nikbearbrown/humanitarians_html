@@ -149,7 +149,7 @@ export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; vid
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-md border transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-md border transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4" /> Previous
               </button>
@@ -159,7 +159,7 @@ export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; vid
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-md border transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 text-sm font-medium px-4 py-2 rounded-md border transition-colors hover:bg-muted disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>

@@ -29,7 +29,7 @@ export default function NotesAdminPage() {
         <Button variant="outline" onClick={fetchDocs} disabled={syncing} className="gap-2"><RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />{syncing ? 'Syncing\u2026' : 'Sync Notes'}</Button>
       </div>
       {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-      {message && <div className="rounded-md bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400">{message}</div>}
+      {message && <div className="rounded-md bg-accent/10 p-3 text-sm text-foreground">{message}</div>}
       {loading ? <p className="text-muted-foreground">Loading...</p> : docs.length === 0 ? <p className="text-muted-foreground">No docs found. Drop .html files into public/notes/.</p> : (
         <div className="grid gap-3">
           {docs.map(doc => (

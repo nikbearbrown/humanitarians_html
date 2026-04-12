@@ -45,7 +45,7 @@ export default async function BookDetailPage({ params }: { params: Promise<{ slu
             {book.published && <p className="text-sm text-muted-foreground mb-1">Published: {book.published}</p>}
             {book.description && <p className="mt-4 text-foreground leading-relaxed">{book.description}</p>}
             <div className="flex flex-wrap gap-3 mt-6">
-              {book.amazonUrl && <a href={book.amazonUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-black text-white rounded-md hover:bg-gray-800 dark:border dark:border-white/20 dark:hover:bg-white/10 transition-colors">Buy on Amazon</a>}
+              {book.amazonUrl && <a href={book.amazonUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-foreground text-background rounded-md hover:bg-foreground/90 dark:border dark:border-white/20 dark:hover:bg-white/10 transition-colors">Buy on Amazon</a>}
               {book.relatedCourse && <Link href={book.relatedCourse} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border rounded-md hover:bg-accent transition-colors">Related Course</Link>}
             </div>
             {book.keywords.length > 0 && (

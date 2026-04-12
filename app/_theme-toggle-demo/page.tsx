@@ -69,7 +69,7 @@ export default function ThemeToggleDemo() {
             </p>
           </div>
 
-          <div className="p-6 bg-gray-100 dark:bg-neutral-900 rounded-lg border dark:border-neutral-700">
+          <div className="p-6 bg-muted dark:bg-neutral-900 rounded-lg border dark:border-neutral-700">
             <h3 className="text-xl font-bold mb-2">Another Example</h3>
             <p className="text-gray-700 dark:text-neutral-300">
               Different components can have different styling based on the theme.

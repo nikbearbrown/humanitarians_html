@@ -83,7 +83,7 @@ export default function NewFellowPage() {
             <CardTitle>Fellow Created</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4">
+            <div className="rounded-md bg-accent/10 border border-border p-4">
               <p className="text-sm font-medium mb-2">
                 Temporary password — copy it now. It cannot be recovered after you leave this page.
               </p>

@@ -18,7 +18,7 @@ export default async function SectionPage({ params }: { params: Promise<{ sectio
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl">{sectionData.title}</h1>
           {sectionData.description && <p className="mt-4 text-lg text-muted-foreground">{sectionData.description}</p>}
-          <a href={sectionData.substack_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium mt-6 bg-black text-white shadow hover:bg-gray-800 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Follow on Substack</a>
+          <a href={sectionData.substack_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center justify-center rounded-md px-8 text-sm font-medium mt-6 bg-foreground text-background shadow hover:bg-foreground/90 dark:border dark:border-input dark:bg-background dark:text-foreground dark:shadow-sm dark:hover:bg-accent dark:hover:text-accent-foreground">Follow on Substack</a>
         </div>
       </section>
       <section className="w-full pb-16">

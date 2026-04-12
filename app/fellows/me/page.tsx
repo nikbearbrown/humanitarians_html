@@ -220,7 +220,7 @@ export default function FellowDashboard() {
                 {fellow.photo_url ? (
                   <img src={fellow.photo_url} alt={fellow.name} className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-lg font-medium text-muted-foreground flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-muted dark:bg-neutral-700 flex items-center justify-center text-lg font-medium text-muted-foreground flex-shrink-0">
                     {getInitials(fellow.name)}
                   </div>
                 )}
@@ -229,7 +229,7 @@ export default function FellowDashboard() {
                     <span className="text-lg font-bold">{fellow.name}</span>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       fellow.status === 'current'
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        ? 'bg-accent/20 text-foreground'
                         : 'bg-silver text-foreground dark:bg-neutral-700 dark:text-neutral-200'
                     }`}>
                       {fellow.status === 'current' ? 'Current Fellow' : 'Alumni'}
@@ -273,7 +273,7 @@ export default function FellowDashboard() {
               <CardTitle>Edit Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              {saveMsg && <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-300 mb-4">{saveMsg}</div>}
+              {saveMsg && <div className="rounded-md bg-muted border border-border p-3 text-sm text-foreground mb-4">{saveMsg}</div>}
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
@@ -335,7 +335,7 @@ export default function FellowDashboard() {
               <CardTitle>Change Password</CardTitle>
             </CardHeader>
             <CardContent>
-              {pwMsg && <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-300 mb-4">{pwMsg}</div>}
+              {pwMsg && <div className="rounded-md bg-muted border border-border p-3 text-sm text-foreground mb-4">{pwMsg}</div>}
               {pwError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">{pwError}</div>}
 
               <form onSubmit={handleChangePassword} className="space-y-4">
@@ -368,7 +368,7 @@ export default function FellowDashboard() {
               <CardTitle>Submit Report</CardTitle>
             </CardHeader>
             <CardContent>
-              {reportMsg && <div className="rounded-md bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 text-sm text-green-700 dark:text-green-300 mb-4">{reportMsg}</div>}
+              {reportMsg && <div className="rounded-md bg-muted border border-border p-3 text-sm text-foreground mb-4">{reportMsg}</div>}
               {reportError && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">{reportError}</div>}
 
               <form onSubmit={handleSubmitReport} className="space-y-4">
@@ -397,7 +397,7 @@ export default function FellowDashboard() {
                     placeholder="Paste your Addams report here. Markdown is supported."
                     className="w-full rounded-md border px-3 py-2 text-sm bg-background resize-y font-mono"
                   />
-                  <p className={`text-xs ${reportContent.length < 100 ? 'text-muted-foreground' : 'text-green-600 dark:text-green-400'}`}>
+                  <p className={`text-xs ${reportContent.length < 100 ? 'text-muted-foreground' : 'text-dim-gray'}`}>
                     {reportContent.length}/100 minimum characters
                   </p>
                 </div>
@@ -428,7 +428,7 @@ export default function FellowDashboard() {
                           })}
                         </time>
                         {project && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-400">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-muted dark:bg-neutral-700 text-muted-foreground dark:text-neutral-400">
                             {project.name}
                           </span>
                         )}

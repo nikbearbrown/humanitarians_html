@@ -54,7 +54,7 @@ export default function BlogImportPage() {
         </>
       )}
       {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
-      {result && <div className="rounded-md bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">{result}</div>}
+      {result && <div className="rounded-md bg-muted p-3 text-sm text-foreground">{result}</div>}
       <div className="flex gap-3">
         <Button onClick={handleImport} disabled={uploading || !file}>{uploading ? 'Importing\u2026' : 'Import'}</Button>
         <Button variant="outline" onClick={() => router.push('/admin/dashboard/blog')}>Back to Posts</Button>

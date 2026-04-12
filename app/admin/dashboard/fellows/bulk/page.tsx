@@ -64,9 +64,9 @@ export default function BulkUploadPage() {
         </div>
 
         {!downloaded && (
-          <div className="rounded-md bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-4">
+          <div className="rounded-md bg-accent/10 border border-border p-4">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="h-5 w-5 text-warm-clay flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium mb-1">
                   Download this file now.
