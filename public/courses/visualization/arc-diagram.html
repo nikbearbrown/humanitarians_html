@@ -20,47 +20,40 @@
   <style>
     /* ── HAI PALETTE ─────────────────────────────────────────── */
     :root {
-      --p1: #1B1B1B;  /* obsidian — primary text        AAA 18.2:1 */
-      --p2: #5C3317;  /* walnut   — primary accent       AAA 10.7:1 */
-      --p3: #7A0000;  /* blood-red— danger / emphasis    AA   5.8:1 */
-      --p4: #F7FAFD;  /* sky-faint— decorative bg only   FAIL 1.1:1 */
-      --p5: #4A4D4F;  /* dim-gray — secondary accent     AAA  9.4:1 */
-      --p6: #797C7F;  /* mist     — muted / labels        AA   4.6:1 */
-      --p7: #EDEDED;  /* silver   — borders only          FAIL 1.1:1 */
-      --p8: #FFFFFF;  /* pure-white — page background             bg */
+      --p1: #1B1B1B;
+      --p2: #5C3317;
+      --p3: #7A0000;
+      --p4: #F7FAFD;
+      --p5: #4A4D4F;
+      --p6: #797C7F;
+      --p7: #EDEDED;
+      --p8: #FFFFFF;
       --font: 'JetBrains Mono', monospace;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
-      height: 100%;
+      min-height: 100%;
       font-family: var(--font);
       background: var(--p8);
       color: var(--p1);
-      overflow: hidden;
     }
 
-    /* ── SLIDE ENGINE ────────────────────────────────────────── */
-    .slides {
-      position: relative;
-      width: 100%;
-      height: calc(100vh - 40px);
-      overflow: hidden;
+    /* ── PAGE LAYOUT ─────────────────────────────────────────── */
+    .page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
-    .slide {
-      position: absolute;
-      inset: 0;
+    /* ── SLIDE / VIZ SECTION ─────────────────────────────────── */
+    .viz-section {
       display: flex;
       flex-direction: column;
       padding: 32px 56px 0;
-      transform: translateX(100%);
-      transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
-      overflow: hidden;
+      flex-shrink: 0;
     }
-    .slide.active  { transform: translateX(0); }
-    .slide.exiting { transform: translateX(-100%); }
 
     /* ── TYPOGRAPHY ──────────────────────────────────────────── */
     .label {
@@ -113,9 +106,9 @@
 
     /* ── VIZ CONTAINER ───────────────────────────────────────── */
     .viz-container {
-      flex: 1;
-      min-height: 0;
       width: 100%;
+      height: 52vh;
+      min-height: 320px;
       position: relative;
     }
     #svg {
@@ -148,7 +141,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 0 12px;
+      padding: 10px 0 0;
       border-top: 2px solid var(--p7);
       margin-top: 6px;
       flex-wrap: wrap;
@@ -174,289 +167,314 @@
       outline: none;
     }
 
-    .nav-dots {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-left: auto;
-    }
-    .dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--p7);
-      cursor: pointer;
-      border: none;
-      padding: 0;
-      transition: background 0.2s;
-    }
-    .dot.active { background: var(--p2); }
-
-    /* ── LEARN SLIDE ─────────────────────────────────────────── */
-    .slide-learn { overflow: hidden; }
-
-    .learn-grid {
+    /* ── EXPLANATION SECTION ─────────────────────────────────── */
+    .explanation {
+      padding: 36px 56px 40px;
+      border-top: 2px solid var(--p7);
+      margin-top: 24px;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 28px 40px;
-      flex: 1;
-      overflow-y: auto;
-      padding-bottom: 8px;
-      min-height: 0;
+      gap: 32px 56px;
     }
 
-    .learn-block {
-      border-left: 3px solid var(--p2);
-      padding-left: 18px;
+    @media (max-width: 700px) {
+      .explanation { grid-template-columns: 1fr; }
+      .viz-section, .explanation { padding-left: 24px; padding-right: 24px; }
     }
-    .learn-block h2 {
+
+    .expl-header {
+      grid-column: 1 / -1;
+      border-left: 4px solid var(--p2);
+      padding-left: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .expl-header h2 {
+      font-size: clamp(13px, 2vw, 22px);
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--p1);
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+    }
+
+    .expl-header .subtitle {
+      font-size: 11px;
+      color: var(--p6);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .expl-block {
+      border-left: 2px solid var(--p7);
+      padding-left: 16px;
+    }
+
+    .expl-block h3 {
       font-size: 10px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.12em;
       color: var(--p2);
-      margin-bottom: 9px;
+      margin-bottom: 10px;
     }
-    .learn-block p {
-      font-size: 11px;
-      line-height: 1.85;
+
+    .expl-block p {
+      font-size: 12px;
+      line-height: 1.9;
       color: var(--p5);
       font-weight: 400;
     }
-    .learn-block strong { color: var(--p1); font-weight: 800; }
-    .learn-block em { color: var(--p2); font-style: normal; font-weight: 600; }
 
-    .framework-box {
+    .expl-block p + p { margin-top: 10px; }
+
+    .expl-block strong { color: var(--p1); font-weight: 800; }
+    .expl-block em     { color: var(--p2); font-style: normal; font-weight: 600; }
+
+    .expl-block .framework-box {
       background: var(--p4);
       border: 1px solid var(--p7);
-      padding: 14px 16px;
-      margin-top: 10px;
+      border-left: 3px solid var(--p2);
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.8;
+      color: var(--p5);
     }
-    .framework-box .label { display: block; margin-bottom: 8px; }
+
+    .expl-block .framework-box .label {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    /* ── THIS EXAMPLE BLOCK ──────────────────────────────────── */
+    .example-block {
+      grid-column: 1 / -1;
+      border-left: 4px solid var(--p2);
+      padding: 16px 20px;
+      background: var(--p4);
+      margin-top: 8px;
+    }
+
+    .example-block h3 {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--p2);
+      margin-bottom: 10px;
+    }
+
+    .example-block p {
+      font-size: 12px;
+      line-height: 1.9;
+      color: var(--p5);
+    }
+
+    .example-block strong { color: var(--p1); font-weight: 800; }
 
     /* ── FOOTER ──────────────────────────────────────────────── */
     footer {
       border-top: 2px solid var(--p7);
-      padding: 9px 56px;
+      padding: 14px 56px;
       font-size: 10px;
       color: var(--p6);
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: auto;
       flex-shrink: 0;
+    }
+
+    @media (max-width: 700px) {
+      footer { padding-left: 24px; padding-right: 24px; }
+    }
+
+    footer .footer-name {
+      font-weight: 800;
+      color: var(--p5);
+      letter-spacing: 0.06em;
+    }
+
+    footer .footer-links {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    footer a {
+      color: var(--p2);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      transition: color 0.13s;
+    }
+
+    footer a:hover { color: var(--p3); text-decoration: underline; }
+
+    footer .sep {
+      color: var(--p7);
+      user-select: none;
     }
   </style>
 </head>
 <body>
+<div class="page">
 
 <div id="tooltip" role="tooltip" aria-live="polite"></div>
 
-<div class="slides" id="slides">
+<!-- ── VISUALIZATION SECTION ─────────────────────────────────── -->
+<div class="viz-section">
 
-  <!-- ══ SLIDE 01 — VISUALIZATION ════════════════════════════ -->
-  <section class="slide active" id="slide-01"
-           aria-label="Arc Diagram — character co-occurrence network">
+  <div class="slide-meta">
+    <span class="label">// ARC DIAGRAM — CO-OCCURRENCE NETWORK</span>
+  </div>
 
-    <div class="slide-meta">
-      <span class="label">// ARC DIAGRAM — 01 / 02</span>
+  <h1 class="slide-title">Co-occurrence reveals who shares the most scenes</h1>
+
+  <div class="legend" aria-label="Arc weight legend">
+    <span class="label" style="margin-right:2px;">arc weight:</span>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--p6);"></div>
+      <span>low</span>
     </div>
-
-    <h1 class="slide-title">Co-occurrence reveals who shares the most scenes</h1>
-
-    <div class="legend" aria-label="Arc weight legend">
-      <span class="label" style="margin-right:2px;">arc weight:</span>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background:var(--p6);"></div>
-        <span>low</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background:var(--p2);height:5px;"></div>
-        <span>medium</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background:var(--p3);height:7px;"></div>
-        <span>high</span>
-      </div>
-      <div class="legend-item" style="margin-left:12px;">
-        <svg width="14" height="14" aria-hidden="true">
-          <circle cx="7" cy="7" r="5" fill="var(--p2)"/>
-        </svg>
-        <span>node size = total scenes</span>
-      </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--p2);height:5px;"></div>
+      <span>medium</span>
     </div>
-
-    <div class="viz-container" id="chart" role="img"
-         aria-labelledby="chart-accessible-title">
-      <svg id="svg">
-        <title id="chart-accessible-title">
-          Arc diagram. Eight fictional characters are arranged along a horizontal
-          axis. Arcs connect characters who share scenes; arc thickness and colour
-          encode frequency. Hover a node or arc for details.
-        </title>
-        <desc>
-          One-dimensional network graph showing co-occurrence between Elara,
-          Fenn, Voss, Mira, Cas, Theo, Lena, and Dax. Elara–Fenn share the
-          most scenes (18). Lena–Dax share the fewest (2).
-        </desc>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--p3);height:7px;"></div>
+      <span>high</span>
+    </div>
+    <div class="legend-item" style="margin-left:12px;">
+      <svg width="14" height="14" aria-hidden="true">
+        <circle cx="7" cy="7" r="5" fill="var(--p2)"/>
       </svg>
+      <span>node size = total scenes</span>
     </div>
+  </div>
 
-    <div class="controls">
-      <button id="audio-toggle" aria-label="Play narration" tabindex="0">▶ narration</button>
-      <button id="sort-toggle" tabindex="0">sort: connections ↓</button>
-      <button id="reset-btn" tabindex="0">reset highlight</button>
-      <div class="nav-dots" aria-label="Slide navigation">
-        <button class="dot active" data-slide="0" tabindex="0"
-                aria-label="Slide 1: visualization" aria-current="true"></button>
-        <button class="dot" data-slide="1" tabindex="0"
-                aria-label="Slide 2: learn panel"></button>
-      </div>
+  <div class="viz-container" id="chart" role="img"
+       aria-labelledby="chart-accessible-title">
+    <svg id="svg">
+      <title id="chart-accessible-title">
+        Arc diagram. Eight fictional characters are arranged along a horizontal
+        axis. Arcs connect characters who share scenes; arc thickness and colour
+        encode frequency. Hover a node or arc for details.
+      </title>
+      <desc>
+        One-dimensional network graph showing co-occurrence between Elara,
+        Fenn, Voss, Mira, Cas, Theo, Lena, and Dax. Elara–Fenn share the
+        most scenes (18). Lena–Dax share the fewest (2).
+      </desc>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <button id="audio-toggle" aria-label="Play narration" tabindex="0">▶ narration</button>
+    <button id="sort-toggle"  tabindex="0">sort: connections ↓</button>
+    <button id="reset-btn"    tabindex="0">reset highlight</button>
+  </div>
+
+</div><!-- /viz-section -->
+
+<!-- ── EXPLANATION SECTION ────────────────────────────────────── -->
+<div class="explanation">
+
+  <div class="expl-header">
+    <h2>Arc Diagram</h2>
+    <p class="subtitle">Also known as: Arc Graph · Linear Network Diagram · One-Dimensional Network</p>
+  </div>
+
+  <div class="expl-block">
+    <h3>What this chart type is</h3>
+    <p>An <strong>Arc Diagram</strong> places all nodes on a single horizontal axis and draws the connections between them as curved arcs above that line. Arc <strong>thickness</strong> encodes the strength or frequency of each relationship. <strong>Node size</strong> encodes a second quantitative variable — here, the total number of scenes each character appears in.</p>
+    <p>The perceptual mechanisms at work are <em>stroke weight</em> and <em>spatial proximity</em> — two preattentive channels that let the eye detect dominant connections before conscious reasoning begins. The arc's height is determined by the horizontal distance between its two endpoints: nodes that are far apart on the axis produce tall arcs; adjacent nodes produce shallow, tight curves.</p>
+    <p>Arc diagrams are best suited for <em>co-occurrence</em> and <em>co-authorship</em> data — situations where relationship strength matters more than cluster membership, and where an honest one-dimensional layout is preferable to a force-directed 2D layout that implies spatial meaning the data does not have.</p>
+  </div>
+
+  <div class="expl-block">
+    <h3>How to read this chart</h3>
+    <p>Characters are arranged along the horizontal axis. Each arc connects two characters who appear together in at least one scene. <strong>Thicker, darker arcs</strong> (blood-red) represent the most frequent co-occurrences. <strong>Thin, muted arcs</strong> (grey) represent rare shared appearances.</p>
+    <p><strong>Hover any node</strong> to highlight only the arcs connected to that character — all other arcs dim out. This isolates the character's relational network. <strong>Hover any arc</strong> to see the exact shared-scene count in the tooltip. Use the <em>sort</em> button to reorder nodes by total connections (descending) or alphabetically — sorting by connections places the most-connected characters near the centre, reducing arc crossing and exposing the hub structure.</p>
+    <p>Node order is the single most consequential design decision in an arc diagram: alphabetical order maximises arc crossings; connection-sorted order minimises them. Try both with the toggle above.</p>
+  </div>
+
+  <div class="expl-block">
+    <h3>Why arc diagrams — not force-directed graphs</h3>
+    <p>A 2D force-directed graph places nodes wherever spring physics settle — a result that varies by run and initial conditions, and implies that <em>proximity means relatedness</em>. For co-occurrence data, that implication is false: two characters may appear far apart in the layout simply because the physics converged that way, not because they are unrelated.</p>
+    <p>The arc diagram is honest: it admits the data is a <em>list</em>, not a <em>map</em>. The axis is stable, reproducible, and sortable. The trade-off is that <strong>cluster visibility</strong> is reduced — communities that would form visually distinct blobs in a 2D network layout appear as overlapping arc bundles in an arc diagram. When cluster detection is the primary goal, a force-directed or community-layout graph is the better choice.</p>
+
+    <div class="framework-box">
+      <span class="label">// FT Visual Vocabulary · Abela · Tufte</span>
+      <strong>FT Visual Vocabulary:</strong> Relationship — Connection.<br>
+      <strong>Abela quadrant:</strong> Relationship (show connections between entities, not comparison or composition).<br>
+      <strong>Tufte principle:</strong> every pixel of arc thickness encodes a real value — the axis line itself is the only non-data ink in the chart.
     </div>
-  </section>
+  </div>
 
-  <!-- ══ SLIDE 02 — LEARN ════════════════════════════════════ -->
-  <section class="slide slide-learn" id="slide-02"
-           aria-label="Learn panel — Arc Diagram">
+  <div class="expl-block">
+    <h3>Strengths and limitations</h3>
+    <p><strong>Strengths:</strong> Preserves exact values (arc thickness encodes the raw count, not a binned category). Sortable axis gives the analyst direct control over the visual hierarchy. Scales cleanly to 10–25 nodes; beyond that, arc crossings become visually dense.</p>
+    <p><strong>Limitations:</strong> Does not reveal community structure as clearly as 2D network layouts. Arc crossings increase as O(n²) with node count — charts with more than ~30 nodes become difficult to read without filtering. Does not support directed edges (arrows) as cleanly as a Sankey or DAG layout. Values at the extremes of the weight scale (very thick vs very thin) are distinguishable; values in the middle range can be hard to compare precisely.</p>
+  </div>
 
-    <div class="slide-meta">
-      <span class="label">// LEARN — ARC DIAGRAM — 02 / 02</span>
-    </div>
+  <!-- This specific example -->
+  <div class="example-block">
+    <h3>About this example — fictional novel character co-occurrence</h3>
+    <p>This diagram maps the shared-scene relationships among <strong>eight characters</strong> from a fictional novel. Each node represents one character; node size encodes their total scene count across the full narrative. Each arc represents at least one shared scene; arc thickness encodes the number of scenes shared.</p>
+    <p><strong>Elara</strong> is the clear hub — she appears in 42 scenes and shares the most scenes with <strong>Fenn</strong> (18 co-appearances), followed by <strong>Voss</strong> (12). The <strong>Lena–Dax</strong> connection is the thinnest arc in the chart (2 shared scenes), suggesting they appear together only briefly. <strong>Fenn–Voss</strong> (14 shared scenes) is the strongest secondary relationship, hinting at a subplot that runs parallel to Elara's main arc. The sort-by-connections order places Elara and Fenn adjacent at the left, compressing the heaviest arcs into a tight, readable cluster on the left side of the axis.</p>
+    <p>To substitute real data, replace the <code>nodes</code> and <code>links</code> arrays in <code>arc-diagram/data.json</code>. Each node needs an <code>id</code>, <code>label</code>, and <code>totalScenes</code> (or equivalent total-activity metric). Each link needs <code>source</code>, <code>target</code> (matching node ids), and <code>weight</code> (the co-occurrence count).</p>
+  </div>
 
-    <h1 class="slide-title">What arc diagrams are — and when they break</h1>
+</div><!-- /explanation -->
 
-    <div class="learn-grid">
-
-      <div class="learn-block">
-        <h2>What this chart is</h2>
-        <p>An Arc Diagram places nodes on a single linear axis and draws
-        connections as curved arcs above that line. The arc's height is
-        determined by the <em>horizontal distance</em> between its two
-        endpoints — far-apart nodes produce tall arcs; adjacent nodes
-        produce shallow ones. Arc <strong>thickness</strong> encodes
-        relationship strength or frequency. The perceptual mechanisms at
-        work are <em>stroke weight</em> and <em>spatial proximity</em> —
-        two pre-attentive channels that let the eye detect dominant
-        connections before conscious reasoning begins.</p>
-      </div>
-
-      <div class="learn-block">
-        <h2>Why it was chosen here</h2>
-        <p>Co-occurrence data — characters sharing scenes, words appearing
-        together, researchers co-authoring — has <em>no intrinsic spatial
-        arrangement</em>. Forcing it into a 2D force-directed layout implies
-        that node position carries meaning, which it does not. The arc
-        diagram is honest: it admits the data is a list, not a map. Arc
-        thickness maps cleanly to frequency counts. Node radius maps to
-        total activity. Both encodings are readable without a legend once
-        the axis is ordered correctly.</p>
-      </div>
-
-      <div class="learn-block">
-        <h2>What a force-directed layout would break</h2>
-        <p>A 2D force-directed graph places nodes wherever spring physics
-        settle — a result that varies by run and initial conditions.
-        It implies that <em>proximity means relatedness</em>, which for
-        co-occurrence data is false. The arc diagram sacrifices
-        <strong>cluster visibility</strong> (you cannot see communities
-        as clearly as in a network layout) but gains
-        <strong>honest encoding</strong>: the axis is stable, reproducible,
-        and — critically — <em>sortable</em>. Reorder nodes by total
-        connections to minimize arc crossing and expose hub structure.
-        Try the sort toggle on slide 1.</p>
-      </div>
-
-      <div class="learn-block">
-        <h2>Framework reference &amp; the one decision worth knowing</h2>
-        <div class="framework-box">
-          <span class="label">// FT Visual Vocabulary + Abela</span>
-          <p style="margin-top:6px;font-size:11px;line-height:1.8;color:var(--p5);">
-            FT Visual Vocabulary: <strong>Relationship — Connection</strong>.
-            Abela quadrant: <strong>Relationship</strong> (show connections
-            between entities, not comparison or composition).
-            Tufte: every pixel of arc thickness encodes a real value —
-            the axis line itself is the only non-data ink.
-          </p>
-        </div>
-        <p style="margin-top:12px;">
-          <strong>The one design decision worth knowing:</strong> node order
-          on the axis determines arc-crossing density. Ordering by
-          <em>total connections (descending)</em> places hubs adjacent,
-          reducing crossings for hub-and-spoke patterns. Alphabetical ordering
-          maximises crossings. This implementation exposes a sort toggle on
-          slide 1 so you can observe the difference directly.
-        </p>
-      </div>
-
-    </div>
-
-    <div class="controls">
-      <button id="audio-toggle-2" aria-label="Play narration" tabindex="0">▶ narration</button>
-      <div class="nav-dots" aria-label="Slide navigation">
-        <button class="dot" data-slide="0" tabindex="0"
-                aria-label="Slide 1: visualization"></button>
-        <button class="dot active" data-slide="1" tabindex="0"
-                aria-label="Slide 2: learn panel" aria-current="true"></button>
-      </div>
-    </div>
-  </section>
-
-</div><!-- /slides -->
-
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
 <footer>
-  <span>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</span>
-  <span>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</span>
+  <span class="footer-name">Nik Bear Brown · Irreducibly Human · What AI Can and Can't Do</span>
+  <div class="footer-links">
+    <a href="https://boondoggling.ai"      target="_blank" rel="noopener">boondoggling.ai</a>
+    <span class="sep">·</span>
+    <a href="https://brutalist.art"        target="_blank" rel="noopener">brutalist.art</a>
+    <span class="sep">·</span>
+    <a href="https://bearbrown.co"         target="_blank" rel="noopener">bearbrown.co</a>
+    <span class="sep">·</span>
+    <a href="https://frictional.xyz"       target="_blank" rel="noopener">frictional.xyz</a>
+    <span class="sep">·</span>
+    <a href="https://irreducibly.xyz"      target="_blank" rel="noopener">irreducibly.xyz</a>
+    <span class="sep">·</span>
+    <a href="https://humanitarians.ai"     target="_blank" rel="noopener">humanitarians.ai</a>
+    <span class="sep">·</span>
+    <a href="https://musinique.com"        target="_blank" rel="noopener">musinique.com</a>
+    <span class="sep">·</span>
+    <a href="https://nikbearbrown.com"     target="_blank" rel="noopener">nikbearbrown.com</a>
+  </div>
 </footer>
 
-<audio id="page-audio" src="./arc-diagram/audio.mp3" preload="none"></audio>
+</div><!-- /page -->
+
+<audio id="page-audio" src="./arc-diagram/slide_1.mp3" preload="none"></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 'use strict';
 
-/* ══ SLIDE SYSTEM ══════════════════════════════════════════════ */
-let currentSlide = 0;
-const slideEls = document.querySelectorAll('.slide');
-const allDots  = document.querySelectorAll('.dot');
-
-function goToSlide(idx) {
-  if (idx === currentSlide) return;
-  slideEls[currentSlide].classList.remove('active');
-  slideEls[currentSlide].classList.add('exiting');
-  const old = currentSlide;
-  currentSlide = idx;
-  slideEls[currentSlide].classList.add('active');
-  allDots.forEach((d, i) => {
-    d.classList.toggle('active', i === currentSlide);
-    d.setAttribute('aria-current', i === currentSlide ? 'true' : 'false');
-  });
-  setTimeout(() => slideEls[old].classList.remove('exiting'), 600);
-}
-
-allDots.forEach((dot, i) => dot.addEventListener('click', () => goToSlide(i)));
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight') goToSlide(Math.min(currentSlide + 1, slideEls.length - 1));
-  if (e.key === 'ArrowLeft')  goToSlide(Math.max(currentSlide - 1, 0));
-});
-
 /* ══ AUDIO ═════════════════════════════════════════════════════ */
-const audio = document.getElementById('page-audio');
+const audio    = document.getElementById('page-audio');
+const audioBtn = document.getElementById('audio-toggle');
 
-function bindAudioBtn(btnId) {
-  const btn = document.getElementById(btnId);
-  btn.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play().catch(() => {});
-      [document.getElementById('audio-toggle'),
-       document.getElementById('audio-toggle-2')].forEach(b => b.textContent = '⏸ narration');
-    } else {
-      audio.pause();
-      [document.getElementById('audio-toggle'),
-       document.getElementById('audio-toggle-2')].forEach(b => b.textContent = '▶ narration');
-    }
-  });
-}
-bindAudioBtn('audio-toggle');
-bindAudioBtn('audio-toggle-2');
+audioBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play().catch(() => {});
+    audioBtn.textContent = '⏸ narration';
+  } else {
+    audio.pause();
+    audioBtn.textContent = '▶ narration';
+  }
+});
+audio.addEventListener('ended', () => { audioBtn.textContent = '▶ narration'; });
 
 /* ══ TOOLTIP ═══════════════════════════════════════════════════ */
 const tip = document.getElementById('tooltip');
@@ -476,9 +494,9 @@ function moveTip(cx, cy) {
 function hideTip() { tip.classList.remove('visible'); }
 
 /* ══ ARC DIAGRAM ════════════════════════════════════════════════ */
-let chartData    = null;
-let sortByConn   = true;
-let highlighted  = null;   // currently highlighted node id
+let chartData   = null;
+let sortByConn  = true;
+let highlighted = null;
 
 function arcColor(weight, max) {
   const t = weight / max;
@@ -496,23 +514,18 @@ function buildChart(data) {
   const margin = { top: 20, right: 48, bottom: 20, left: 48 };
   const iW = W - margin.left - margin.right;
   const iH = H - margin.top  - margin.bottom;
-
-  // Axis sits at 60% down from inner top — arcs extend above, labels below
   const axisY = iH * 0.60;
 
-  // Sort nodes
   const nodes = [...data.nodes].sort((a, b) =>
     sortByConn ? b.totalScenes - a.totalScenes
                : a.label.localeCompare(b.label)
   );
   const nodeIds = nodes.map(d => d.id);
 
-  // Filter to valid links only
   const links = data.links.filter(l =>
     nodeIds.includes(l.source) && nodeIds.includes(l.target)
   );
 
-  // Per-node connection totals
   const connTotal = {};
   links.forEach(l => {
     connTotal[l.source] = (connTotal[l.source] || 0) + l.weight;
@@ -524,7 +537,7 @@ function buildChart(data) {
     .range([0, iW])
     .padding(0.35);
 
-  const maxW = d3.max(links, d => d.weight);
+  const maxW   = d3.max(links, d => d.weight);
   const strokeW = d3.scaleLinear().domain([0, maxW]).range([1.2, 9]);
 
   const maxScenes = d3.max(nodes, d => d.totalScenes);
@@ -533,28 +546,25 @@ function buildChart(data) {
     .domain([minScenes, maxScenes])
     .range([5, 14]);
 
-  // Sort links: shortest first (they animate in first, reveal structure)
   const sortedLinks = [...links].sort((a, b) => {
     const da = Math.abs(nodeIds.indexOf(a.source) - nodeIds.indexOf(a.target));
     const db = Math.abs(nodeIds.indexOf(b.source) - nodeIds.indexOf(b.target));
     return da - db;
   });
 
-  // Clear and rebuild SVG
   const svg = d3.select('#svg');
   svg.selectAll('*').remove();
 
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left},${margin.top})`);
 
-  // ── AXIS LINE
+  // Axis line
   g.append('line')
     .attr('x1', -4).attr('x2', iW + 4)
     .attr('y1', axisY).attr('y2', axisY)
     .attr('stroke', 'var(--p7)')
     .attr('stroke-width', 2);
 
-  // ── ARCS
   function pathD(d) {
     const sx = xScale(d.source);
     const tx = xScale(d.target);
@@ -579,7 +589,6 @@ function buildChart(data) {
     .attr('aria-label', d =>
       `Connection: ${d.source} to ${d.target}, ${d.weight} shared scenes`);
 
-  // Stroke-dasharray entrance animation
   arcPaths.each(function() {
     const len = this.getTotalLength() || 1;
     d3.select(this)
@@ -593,7 +602,16 @@ function buildChart(data) {
     .ease(d3.easeCubicOut)
     .attr('stroke-dashoffset', 0);
 
-  // Arc hover / keyboard
+  function dim() {
+    arcPaths.attr('opacity', 0.08);
+    nodeGs.attr('opacity', 0.25);
+  }
+  function restore() {
+    arcPaths.attr('opacity', 0.82).attr('stroke-width', d => strokeW(d.weight));
+    nodeGs.attr('opacity', 1);
+    highlighted = null;
+  }
+
   arcPaths
     .on('mouseover', function(event, d) {
       dim();
@@ -605,7 +623,7 @@ function buildChart(data) {
       );
     })
     .on('mousemove', event => moveTip(event.clientX, event.clientY))
-    .on('mouseout',  function(event, d) {
+    .on('mouseout', function(event, d) {
       if (!highlighted) restore();
       d3.select(this).attr('stroke-width', strokeW(d.weight));
       hideTip();
@@ -621,7 +639,6 @@ function buildChart(data) {
       }
     });
 
-  // ── NODES
   const nodeGs = g.selectAll('.node')
     .data(nodes, d => d.id)
     .join('g')
@@ -632,14 +649,12 @@ function buildChart(data) {
     .attr('aria-label', d =>
       `${d.label}: ${d.totalScenes} scenes, ${connTotal[d.id] || 0} total co-occurrences`);
 
-  // Circle
   nodeGs.append('circle')
     .attr('r', d => nodeR(d.totalScenes))
     .attr('fill', 'var(--p2)')
     .attr('stroke', 'var(--p8)')
     .attr('stroke-width', 2.5);
 
-  // Name label below axis
   nodeGs.append('text')
     .attr('y', d => nodeR(d.totalScenes) + 16)
     .attr('text-anchor', 'middle')
@@ -649,7 +664,6 @@ function buildChart(data) {
     .attr('fill', 'var(--p1)')
     .text(d => d.label);
 
-  // Scene count sub-label
   nodeGs.append('text')
     .attr('y', d => nodeR(d.totalScenes) + 29)
     .attr('text-anchor', 'middle')
@@ -659,32 +673,17 @@ function buildChart(data) {
     .attr('fill', 'var(--p6)')
     .text(d => `${d.totalScenes} sc.`);
 
-  // Node entrance animation (bounce in after arcs start drawing)
   nodeGs.transition()
     .delay((d, i) => i * 55)
     .duration(450)
     .ease(d3.easeBounceOut)
     .attr('opacity', 1);
 
-  // Dim/restore helpers (defined after arcPaths and nodeGs exist)
-  function dim() {
-    arcPaths.attr('opacity', 0.08);
-    nodeGs.attr('opacity', 0.25);
-  }
-  function restore() {
-    arcPaths.attr('opacity', 0.82).attr('stroke-width', d => strokeW(d.weight));
-    nodeGs.attr('opacity', 1);
-    highlighted = null;
-  }
-
-  // Node hover / keyboard
   nodeGs
     .on('mouseover', function(event, d) {
       highlighted = d.id;
       dim();
-      // Highlight this node
       d3.select(this).attr('opacity', 1);
-      // Highlight connected arcs
       arcPaths
         .filter(l => l.source === d.id || l.target === d.id)
         .attr('opacity', 1)
@@ -697,10 +696,7 @@ function buildChart(data) {
       );
     })
     .on('mousemove', event => moveTip(event.clientX, event.clientY))
-    .on('mouseout', () => {
-      restore();
-      hideTip();
-    })
+    .on('mouseout', () => { restore(); hideTip(); })
     .on('keydown', function(event, d) {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -713,7 +709,6 @@ function buildChart(data) {
       }
     });
 
-  // Expose restore for reset button
   window._restoreChart = restore;
 }
 

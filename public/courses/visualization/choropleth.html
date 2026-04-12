@@ -171,6 +171,37 @@
       font-size: 11px;
     }
 
+    /* ── CHART EXPLAINER ───────────────────────────────── */
+    .chart-explainer {
+      border-top: 1px solid var(--p7);
+      margin-top: 18px;
+      padding-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px 40px;
+    }
+    @media (max-width: 700px) {
+      .chart-explainer { grid-template-columns: 1fr; }
+    }
+    .explainer-block {}
+    .explainer-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--p2);
+      border-bottom: 1px solid var(--p7);
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+    .explainer-block p {
+      font-size: 11px;
+      color: var(--p5);
+      line-height: 1.75;
+    }
+    .explainer-block p + p { margin-top: 7px; }
+    .explainer-block strong { color: var(--p1); font-weight: 700; }
+
     /* ── LEARN SLIDE ───────────────────────────────────── */
     .slide-learn {
       background: var(--p8);
@@ -235,6 +266,13 @@
       padding: 10px 36px;
       line-height: 1.7;
     }
+    footer a {
+      color: var(--p2);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.12s;
+    }
+    footer a:hover { border-color: var(--p2); }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
@@ -274,6 +312,20 @@
     </select>
     <button id="reset-btn" aria-label="Reset zoom and filters">↺ reset</button>
     <button id="audio-toggle" aria-label="Play narration">▶ narration</button>
+  </div>
+
+  <!-- ── EXPLAINER TEXT ──────────────────────────────────── -->
+  <div class="chart-explainer" aria-label="Chart explanation">
+    <div class="explainer-block">
+      <div class="explainer-label">// What is a Choropleth Map?</div>
+      <p>A <strong>choropleth map</strong> uses colour saturation to encode a continuous quantitative variable across geographic regions. Each country or area is filled with a shade drawn from a sequential colour ramp — light for low values, dark for high. The viewer's visual system performs the comparison pre-attentively: geographic clusters, outliers, and gradients emerge immediately without reading axes or scales.</p>
+      <p>Choropleths exploit <strong>colour lightness</strong> as an encoding channel — the most intuitive channel for a single ordered variable across spatial units. They are best suited to data that is meaningfully attached to fixed geographic areas, such as rates, per-capita figures, or indices. They are not suitable for raw totals (large countries appear dominant by size alone) or for data with more than one dimension per region.</p>
+    </div>
+    <div class="explainer-block">
+      <div class="explainer-label">// This Example: GDP per Capita</div>
+      <p>This map encodes <strong>GDP per capita (USD)</strong> for countries worldwide — a measure of economic output divided by population, used as a proxy for average living standards. The colour ramp runs from pale parchment (lowest income) to deep espresso (highest), drawn from the walnut end of the <em>hai</em> palette.</p>
+      <p>A <strong>logarithmic scale</strong> is applied by default because GDP per capita spans three orders of magnitude (roughly $200 to $130,000). On a linear scale, most of the world compresses into the lowest 10% of the ramp and meaningful differentiation between low- and middle-income countries disappears. The log scale restores perceptual resolution across the full range. Use the Scale control above to compare log, square-root, and linear encodings and observe how the geographic story changes.</p>
+    </div>
   </div>
 </section>
 
@@ -315,11 +367,17 @@
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+  <p>
+    <a href="https://humanitarians.ai" target="_blank" rel="noopener">humanitarians.ai</a>
+    &nbsp;·&nbsp;
+    <a href="https://brutalist.art" target="_blank" rel="noopener">brutalist.art</a>
+    &nbsp;·&nbsp;
+    <a href="https://nikbearbrown.com" target="_blank" rel="noopener">nikbearbrown.com</a>
+  </p>
 </footer>
 
 <div id="tooltip"></div>
-<audio id="page-audio" src="./choropleth/audio.mp3"></audio>
+<audio id="page-audio" src="./choropleth/slide_1.mp3"></audio>
 
 <!-- ── SCRIPTS ─────────────────────────────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -402,12 +460,6 @@ function drawMap() {
   // Countries
   const countries = topojson.feature(geoData, geoData.objects.countries).features;
 
-  // Numeric ID → alpha3 via ISO numeric lookup
-  const numToAlpha = {};
-  countryData.forEach(d => {
-    // Use a manual numeric lookup table for key nations; fall back to name match
-  });
-
   gMap.selectAll('path.country')
     .data(countries)
     .join('path')
@@ -454,12 +506,12 @@ function drawMap() {
     .attr('fill-opacity', 1);
 
   // Reset zoom button
-  document.getElementById('reset-btn').addEventListener('click', () => {
+  document.getElementById('reset-btn').onclick = () => {
     svgEl.transition().duration(500).call(zoomBehaviour.transform, d3.zoomIdentity);
     activeRegion = 'all';
     document.getElementById('region-filter').value = 'all';
     updateFilter();
-  });
+  };
 
   drawLegend(W, H);
 }
@@ -525,8 +577,6 @@ function updateFilter() {
 }
 
 // ── ISO NUMERIC → ALPHA3 ──────────────────────────────────────
-// TopoJSON countries-110m uses UN M.49 numeric codes.
-// This lookup covers the countries in our dataset.
 const NUM_TO_A3 = {
   4:'AFG',8:'ALB',12:'DZA',24:'AGO',32:'ARG',51:'ARM',36:'AUS',40:'AUT',
   31:'AZE',44:'BHS',50:'BGD',112:'BLR',56:'BEL',204:'BEN',64:'BTN',68:'BOL',

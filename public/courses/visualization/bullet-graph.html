@@ -9,34 +9,6 @@
   <meta name="author" content="Nik Bear Brown">
   <meta name="category" content="Humanitarian Analytics / Data Visualization">
 
-  <!--
-  ═══════════════════════════════════════════════════
-  PALETTE: hai — Humanitarians AI
-  ═══════════════════════════════════════════════════
-  WCAG AUDIT (text elements on bg #FFFFFF):
-    p1 #1B1B1B  18.2:1  AAA  ✓
-    p2 #5C3317  10.7:1  AAA  ✓
-    p3 #7A0000   5.8:1  AA   ✓
-    p5 #4A4D4F   9.4:1  AAA  ✓
-    p6 #797C7F   4.6:1  AA   ✓
-    p4 #F7FAFD   1.1:1  FAIL — used only for structural bg (framework block)
-    p7 #EDEDED   1.4:1  FAIL — used only for rule lines and row separators
-
-  WCAG AUDIT (non-text graphical elements — range bands):
-    Per Stephen Few's bullet graph spec, qualitative range bands are
-    intentionally low-contrast backgrounds. They are categorical
-    context cues, not data-bearing marks. The featured measure bar
-    (p2, 10.7:1) and target line (p3, 5.8:1) carry all quantitative
-    meaning and meet or exceed 3:1 thresholds.
-    Range bands below 3:1 are flagged:
-      --range-poor:        #BEBEBE  1.8:1  FAIL non-text 3:1
-      --range-satisfactory:#D9D9D9  1.4:1  FAIL non-text 3:1
-      --range-good:        #F2F2F2  1.1:1  FAIL non-text 3:1
-    Mitigation: redundant encoding via position (not only color).
-    Screen reader aria-labels on each row convey all data textually.
-  ═══════════════════════════════════════════════════
-  -->
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
@@ -44,16 +16,15 @@
   <style>
     /* ═══ HAI PALETTE ═══ */
     :root {
-      --p1: #1B1B1B;  /* obsidian — primary text       18.2:1 AAA */
-      --p2: #5C3317;  /* walnut — primary accent        10.7:1 AAA */
-      --p3: #7A0000;  /* blood-red — target marker       5.8:1 AA  */
-      --p4: #F7FAFD;  /* sky-faint — structural bg       1.1:1 FAIL text */
-      --p5: #4A4D4F;  /* dim-gray — secondary text       9.4:1 AAA */
-      --p6: #797C7F;  /* mist — muted / labels           4.6:1 AA  */
-      --p7: #EDEDED;  /* silver — borders, separators    1.4:1 FAIL text */
-      --p8: #FFFFFF;  /* pure-white — page background    — bg  */
+      --p1: #1B1B1B;
+      --p2: #5C3317;
+      --p3: #7A0000;
+      --p4: #F7FAFD;
+      --p5: #4A4D4F;
+      --p6: #797C7F;
+      --p7: #EDEDED;
+      --p8: #FFFFFF;
 
-      /* Range band fills (intentionally subtle per Few spec) */
       --range-poor:         #BEBEBE;
       --range-satisfactory: #D9D9D9;
       --range-good:         #F2F2F2;
@@ -65,10 +36,7 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html {
-      scroll-behavior: smooth;
-      scroll-snap-type: y mandatory;
-    }
+    html { scroll-behavior: smooth; }
 
     body {
       font-family: var(--font);
@@ -83,7 +51,6 @@
       padding: var(--pad);
       display: flex;
       flex-direction: column;
-      scroll-snap-align: start;
       position: relative;
       border-bottom: var(--border-main);
     }
@@ -103,11 +70,7 @@
       text-transform: uppercase;
     }
 
-    .slide-num {
-      font-size: 11px;
-      color: var(--p6);
-      letter-spacing: 0.06em;
-    }
+    .slide-num { font-size: 11px; color: var(--p6); letter-spacing: 0.06em; }
 
     .slide-title {
       font-size: clamp(15px, 2.8vw, 28px);
@@ -139,26 +102,9 @@
       letter-spacing: 0.04em;
     }
 
-    .legend-swatch {
-      width: 22px;
-      height: 11px;
-      border: 1px solid var(--p6);
-      flex-shrink: 0;
-    }
-
-    .legend-bar {
-      width: 22px;
-      height: 11px;
-      background: var(--p2);
-      flex-shrink: 0;
-    }
-
-    .legend-line {
-      width: 22px;
-      height: 3px;
-      background: var(--p3);
-      flex-shrink: 0;
-    }
+    .legend-swatch { width: 22px; height: 11px; border: 1px solid var(--p6); flex-shrink: 0; }
+    .legend-bar    { width: 22px; height: 11px; background: var(--p2); flex-shrink: 0; }
+    .legend-line   { width: 22px; height: 3px;  background: var(--p3); flex-shrink: 0; }
 
     /* ═══ VIZ CONTAINER ═══ */
     .viz-container {
@@ -169,11 +115,36 @@
       min-height: 0;
     }
 
-    #chart {
-      width: 100%;
-      display: block;
-      overflow: visible;
+    #chart { width: 100%; display: block; overflow: visible; }
+
+    /* ═══ EXPLANATION BLOCK ═══ */
+    .chart-explanation {
+      margin-top: 1.75rem;
+      padding: 1.25rem 1.5rem;
+      border-left: 5px solid var(--p2);
+      background: var(--p4);
+      max-width: 80ch;
     }
+
+    .chart-explanation h3 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--p2);
+      margin-bottom: 0.75rem;
+    }
+
+    .chart-explanation p {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.85;
+      color: var(--p5);
+      margin-bottom: 0.6rem;
+    }
+
+    .chart-explanation p:last-child { margin-bottom: 0; }
+    .chart-explanation strong { color: var(--p1); font-weight: 700; }
 
     /* ═══ TOOLTIP ═══ */
     #tooltip {
@@ -203,15 +174,8 @@
       display: block;
     }
 
-    #tooltip .tt-hit {
-      color: #7BC67E;
-      font-weight: 600;
-    }
-
-    #tooltip .tt-miss {
-      color: #F4A261;
-      font-weight: 600;
-    }
+    #tooltip .tt-hit  { color: #7BC67E; font-weight: 600; }
+    #tooltip .tt-miss { color: #F4A261; font-weight: 600; }
 
     /* ═══ CONTROLS ═══ */
     .controls {
@@ -241,14 +205,9 @@
     .btn:hover { background: var(--p1); color: var(--p8); }
     .btn:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
 
-    .controls .hint {
-      margin-left: auto;
-      font-size: 11px;
-      color: var(--p6);
-      letter-spacing: 0.04em;
-    }
+    .controls .hint { margin-left: auto; font-size: 11px; color: var(--p6); letter-spacing: 0.04em; }
 
-    /* ═══ SLIDE NAV DOTS ═══ */
+    /* ═══ NAV DOTS ═══ */
     .nav-dots {
       position: fixed;
       right: 14px;
@@ -261,8 +220,7 @@
     }
 
     .nav-dot {
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       border: 1px solid var(--p5);
       background: transparent;
@@ -271,7 +229,7 @@
       transition: background 0.2s;
     }
 
-    .nav-dot.active  { background: var(--p2); border-color: var(--p2); }
+    .nav-dot.active { background: var(--p2); border-color: var(--p2); }
     .nav-dot:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
 
     /* ═══ LEARN SLIDE ═══ */
@@ -306,9 +264,7 @@
       margin-bottom: 6px;
     }
 
-    .learn-full {
-      grid-column: 1 / -1;
-    }
+    .learn-full { grid-column: 1 / -1; }
 
     .framework-ref {
       grid-column: 1 / -1;
@@ -330,24 +286,27 @@
       line-height: 1.8;
     }
 
-    /* ═══ D3 / SVG ELEMENTS ═══ */
+    footer a {
+      color: var(--p2);
+      text-decoration: none;
+      transition: color 0.12s;
+    }
+
+    footer a:hover { color: var(--p1); text-decoration: underline; }
+
+    /* ═══ D3 / SVG ═══ */
     .bullet-row { cursor: default; }
     .bullet-row:focus { outline: none; }
     .bullet-row:focus-visible rect.focus-ring { opacity: 1 !important; }
 
-    .axis text {
-      font-family: var(--font);
-      font-size: 10px;
-      fill: var(--p6);
-    }
-
+    .axis text { font-family: var(--font); font-size: 10px; fill: var(--p6); }
     .axis .domain { display: none; }
     .axis .tick line { stroke: var(--p7); }
   </style>
 </head>
 <body>
 
-<!-- SLIDE NAV -->
+<!-- NAV DOTS -->
 <nav class="nav-dots" aria-label="Slide navigation">
   <button class="nav-dot active" data-slide="0" aria-label="Slide 1: Chart"></button>
   <button class="nav-dot"        data-slide="1" aria-label="Slide 2: Learn panel"></button>
@@ -356,9 +315,7 @@
 <!-- TOOLTIP -->
 <div id="tooltip" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<!-- ════════════════════════════════════════
-     SLIDE 01 — CHART
-     ════════════════════════════════════════ -->
+<!-- ══ SLIDE 01 — CHART ══ -->
 <section class="slide" id="slide-01" aria-labelledby="chart-heading">
   <div class="slide-meta">
     <span class="label">// Humanitarians AI — Program Performance</span>
@@ -405,11 +362,17 @@
     <button class="btn" id="audio-btn" aria-label="Play audio narration">▶ narration</button>
     <span class="hint">hover / tab to explore</span>
   </div>
+
+  <!-- ── EXPLANATION BLOCK ──────────────────────────────────── -->
+  <div class="chart-explanation" aria-label="Chart explanation">
+    <h3>// About this chart type — Bullet Graph</h3>
+    <p>A <strong>bullet graph</strong>, designed by Stephen Few in 2005, is a compact linear replacement for the dashboard gauges and speedometer dials that were common in early business intelligence tools. Each row packs three comparisons into a single horizontal strip: a <strong>featured measure bar</strong> (the walnut bar) showing actual performance, a <strong>comparative marker</strong> (the blood-red line) showing the target, and <strong>qualitative range bands</strong> (shaded from dark to light) showing what constitutes poor, satisfactory, and good performance. It exploits position along a common axis — the most accurate perceptual channel for quantitative comparison — while radial gauges use angle, which is among the least accurate.</p>
+    <p>The range bands are intentionally rendered in neutral grays, not red-yellow-green. Using traffic-light hues for the bands would pull the eye to the background and compete with the bar and target line. The walnut bar and blood-red target are the data; the bands are context. Gray keeps the hierarchy honest.</p>
+    <p><strong>About this example:</strong> Five humanitarian program metrics are shown — each with its own scale, target, and qualitative bands. Community Trust is the only metric exceeding its target; hover it to see the surplus. The remaining four programs fall short by varying margins, visible both as the bar falling left of the target line and as the bar sitting in a darker (weaker) range band. The sort toggle reorders rows by actual value, making the performance ranking explicit. All data loads from <code>./bullet-graph/data.json</code>.</p>
+  </div>
 </section>
 
-<!-- ════════════════════════════════════════
-     SLIDE 02 — LEARN
-     ════════════════════════════════════════ -->
+<!-- ══ SLIDE 02 — LEARN ══ -->
 <section class="slide slide-learn" id="slide-02" aria-labelledby="learn-heading">
   <div class="slide-meta">
     <span class="label">// Learn — Bullet Graph</span>
@@ -459,29 +422,25 @@
   </div>
 </section>
 
-<!-- AUDIO (fails silently if absent) -->
-<audio id="page-audio" src="./bullet-graph/audio.mp3" preload="none"></audio>
+<!-- AUDIO -->
+<audio id="page-audio" src="./bullet-graph/slide_1.mp3" preload="none"></audio>
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+  <p>
+    <a href="https://brutalist.art"     target="_blank" rel="noopener">brutalist.art</a> ·
+    <a href="https://nikbearbrown.com"  target="_blank" rel="noopener">nikbearbrown.com</a> ·
+    <a href="https://irreducibly.xyz"   target="_blank" rel="noopener">irreducibly.xyz</a>
+  </p>
 </footer>
 
-<!-- D3 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
 'use strict';
 
-// ══════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════
-
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
-// ══════════════════════════════════════════════════════════
-// NAV DOTS
-// ══════════════════════════════════════════════════════════
-
+// ── NAV DOTS ──────────────────────────────────────────────────
 const slides = document.querySelectorAll('.slide');
 const dots   = document.querySelectorAll('.nav-dot');
 
@@ -491,14 +450,7 @@ dots.forEach(dot => {
   });
 });
 
-new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      const i = [...slides].indexOf(e.target);
-      dots.forEach((d, j) => d.classList.toggle('active', i === j));
-    }
-  });
-}, { threshold: 0.5 }).observe ? slides.forEach(s =>
+slides.forEach(s => {
   new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
@@ -506,13 +458,10 @@ new IntersectionObserver(entries => {
         dots.forEach((d, j) => d.classList.toggle('active', i === j));
       }
     });
-  }, { threshold: 0.5 }).observe(s)
-) : null;
+  }, { threshold: 0.5 }).observe(s);
+});
 
-// ══════════════════════════════════════════════════════════
-// AUDIO
-// ══════════════════════════════════════════════════════════
-
+// ── AUDIO ─────────────────────────────────────────────────────
 const audio    = document.getElementById('page-audio');
 const audioBtn = document.getElementById('audio-btn');
 
@@ -525,10 +474,7 @@ audioBtn.addEventListener('click', () => {
   }
 });
 
-// ══════════════════════════════════════════════════════════
-// TOOLTIP
-// ══════════════════════════════════════════════════════════
-
+// ── TOOLTIP ───────────────────────────────────────────────────
 const ttEl = document.getElementById('tooltip');
 
 function getRangeLabel(d) {
@@ -540,9 +486,8 @@ function getRangeLabel(d) {
 
 function showTip(event, d) {
   const hitTarget = d.value >= d.target;
-  const band = getRangeLabel(d);
-  const delta = (d.value - d.target).toFixed(0);
-  const deltaStr = hitTarget
+  const delta     = (d.value - d.target).toFixed(0);
+  const deltaStr  = hitTarget
     ? `<span class="tt-hit">+${Math.abs(delta)}${d.unit} above target ✓</span>`
     : `<span class="tt-miss">${delta}${d.unit} below target ✗</span>`;
 
@@ -550,7 +495,7 @@ function showTip(event, d) {
     <span class="tt-label">${d.label}</span>
     Actual: <strong>${d.value}${d.unit}</strong><br>
     Target: ${d.target}${d.unit}<br>
-    Band: ${band}<br>
+    Band: ${getRangeLabel(d)}<br>
     ${deltaStr}
   `;
   ttEl.style.opacity = '1';
@@ -558,8 +503,8 @@ function showTip(event, d) {
 }
 
 function positionTip(event) {
-  const x = event.clientX + 18;
-  const y = event.clientY - 44;
+  const x  = event.clientX + 18;
+  const y  = event.clientY - 44;
   const tw = ttEl.offsetWidth;
   ttEl.style.left = (x + tw > window.innerWidth - 8 ? event.clientX - tw - 10 : x) + 'px';
   ttEl.style.top  = Math.max(8, Math.min(y, window.innerHeight - ttEl.offsetHeight - 8)) + 'px';
@@ -567,12 +512,9 @@ function positionTip(event) {
 
 function hideTip() { ttEl.style.opacity = '0'; }
 
-// ══════════════════════════════════════════════════════════
-// CHART
-// ══════════════════════════════════════════════════════════
-
+// ── CHART ─────────────────────────────────────────────────────
 let masterData = [];
-let sortAsc    = null; // null = original order
+let sortAsc    = null;
 
 const MARGIN   = { top: 10, right: 52, bottom: 28, left: 210 };
 const ROW_H    = 58;
@@ -593,160 +535,97 @@ function buildChart(data) {
   const iH    = data.length * (ROW_H + ROW_GAP) - ROW_GAP;
   const H     = iH + MARGIN.top + MARGIN.bottom;
 
-  // Clear
   d3.select('#chart').selectAll('*').remove();
-  d3.select('#chart')
-    .attr('viewBox', `0 0 ${W} ${H}`)
-    .attr('height', H);
+  d3.select('#chart').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
 
-  const svg = d3.select('#chart')
-    .append('g')
+  const svg = d3.select('#chart').append('g')
     .attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
 
-  // ── X SCALE ──
-  // All data normalized 0–100 in this placeholder dataset
   const xMax   = d3.max(data, d => d.ranges[d.ranges.length - 1]);
   const xScale = d3.scaleLinear().domain([0, xMax]).range([0, iW]).nice();
 
-  // ── AXIS ──
-  const axisG = svg.append('g')
-    .attr('class', 'axis')
-    .attr('transform', `translate(0,${iH + 8})`);
-
-  axisG.call(
-    d3.axisBottom(xScale)
-      .ticks(5)
-      .tickSize(-(iH + 8))
-      .tickFormat(d => d + '%')
-  );
-
-  axisG.selectAll('.tick line')
-    .attr('stroke', css('--p7'))
-    .attr('stroke-dasharray', '3,5');
-
+  // Axis
+  const axisG = svg.append('g').attr('class','axis').attr('transform',`translate(0,${iH + 8})`);
+  axisG.call(d3.axisBottom(xScale).ticks(5).tickSize(-(iH + 8)).tickFormat(d => d + '%'));
+  axisG.selectAll('.tick line').attr('stroke', css('--p7')).attr('stroke-dasharray','3,5');
   axisG.select('.domain').remove();
 
-  // ── METRIC ROWS ──
+  // Rows
   data.forEach((d, i) => {
     const rowY = i * (ROW_H + ROW_GAP);
     const cy   = rowY + (ROW_H - RANGE_H) / 2;
     const barY = cy + (RANGE_H - BAR_H) / 2;
 
     const g = svg.append('g')
-      .attr('class', 'bullet-row')
+      .attr('class','bullet-row')
       .attr('tabIndex', 0)
-      .attr('role', 'img')
-      .attr(
-        'aria-label',
+      .attr('role','img')
+      .attr('aria-label',
         `${d.label}: actual ${d.value}${d.unit}, target ${d.target}${d.unit}, ` +
-        `status ${getRangeLabel(d)}, ` +
-        `${d.value >= d.target ? 'target met' : 'below target'}`
-      )
+        `status ${getRangeLabel(d)}, ${d.value >= d.target ? 'target met' : 'below target'}`)
       .on('mouseover',  (e) => showTip(e, d))
       .on('mousemove',  positionTip)
       .on('mouseout',   hideTip)
       .on('focus',      (e) => showTip(e, d))
       .on('blur',       hideTip)
-      .on('keydown',    (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { showTip(e, d); e.preventDefault(); }
-      });
+      .on('keydown',    (e) => { if (e.key === 'Enter' || e.key === ' ') { showTip(e, d); e.preventDefault(); } });
 
-    // Focus ring (invisible by default, shown via :focus-visible)
-    g.append('rect')
-      .attr('class', 'focus-ring')
-      .attr('x', -MARGIN.left + 2)
-      .attr('y', rowY)
-      .attr('width', iW + MARGIN.left - 4)
-      .attr('height', ROW_H)
-      .attr('fill', 'none')
-      .attr('stroke', css('--p2'))
-      .attr('stroke-width', 1.5)
-      .attr('opacity', 0)
-      .attr('pointer-events', 'none');
+    // Focus ring
+    g.append('rect').attr('class','focus-ring')
+      .attr('x', -MARGIN.left + 2).attr('y', rowY)
+      .attr('width', iW + MARGIN.left - 4).attr('height', ROW_H)
+      .attr('fill','none').attr('stroke', css('--p2')).attr('stroke-width', 1.5)
+      .attr('opacity', 0).attr('pointer-events','none');
 
-    // ── QUALITATIVE RANGE BANDS ──
-    const rangePairs = [
-      [0,          d.ranges[0]],
-      [d.ranges[0], d.ranges[1]],
-      [d.ranges[1], d.ranges[2]]
-    ];
-
-    rangePairs.forEach(([r0, r1], ri) => {
+    // Range bands
+    [[0, d.ranges[0]], [d.ranges[0], d.ranges[1]], [d.ranges[1], d.ranges[2]]].forEach(([r0, r1], ri) => {
       g.append('rect')
-        .attr('x',      xScale(r0))
-        .attr('y',      cy)
-        .attr('width',  xScale(r1) - xScale(r0))
-        .attr('height', RANGE_H)
-        .attr('fill',   RANGE_COLORS[ri])
-        .attr('aria-hidden', 'true');
+        .attr('x', xScale(r0)).attr('y', cy)
+        .attr('width', xScale(r1) - xScale(r0)).attr('height', RANGE_H)
+        .attr('fill', RANGE_COLORS[ri]).attr('aria-hidden','true');
     });
 
-    // ── FEATURED MEASURE (walnut bar) ──
-    const bar = g.append('rect')
-      .attr('x',      0)
-      .attr('y',      barY)
-      .attr('width',  0)      // animated from 0
-      .attr('height', BAR_H)
-      .attr('fill',   css('--p2'))
-      .attr('aria-hidden', 'true');
-
-    bar.transition()
-      .duration(750)
-      .delay(i * 90)
-      .ease(d3.easeCubicOut)
+    // Featured measure bar
+    g.append('rect')
+      .attr('x', 0).attr('y', barY).attr('width', 0).attr('height', BAR_H)
+      .attr('fill', css('--p2')).attr('aria-hidden','true')
+      .transition().duration(750).delay(i * 90).ease(d3.easeCubicOut)
       .attr('width', xScale(d.value));
 
-    // ── COMPARATIVE MEASURE (target line) ──
+    // Target line
     g.append('line')
-      .attr('x1',           xScale(d.target))
-      .attr('x2',           xScale(d.target))
-      .attr('y1',           cy + 2)
-      .attr('y2',           cy + RANGE_H - 2)
-      .attr('stroke',       css('--p3'))
-      .attr('stroke-width', 3)
-      .attr('opacity',      0)
-      .attr('aria-hidden',  'true')
-      .transition()
-      .duration(300)
-      .delay(i * 90 + 550)
+      .attr('x1', xScale(d.target)).attr('x2', xScale(d.target))
+      .attr('y1', cy + 2).attr('y2', cy + RANGE_H - 2)
+      .attr('stroke', css('--p3')).attr('stroke-width', 3)
+      .attr('opacity', 0).attr('aria-hidden','true')
+      .transition().duration(300).delay(i * 90 + 550)
       .attr('opacity', 1);
 
-    // ── LABEL ──
+    // Label
     g.append('text')
-      .attr('x',                -14)
-      .attr('y',                cy + RANGE_H / 2 - 5)
-      .attr('text-anchor',      'end')
-      .attr('dominant-baseline','middle')
-      .attr('fill',             css('--p1'))
-      .attr('font-family',      css('--font'))
-      .attr('font-size',        '12px')
-      .attr('font-weight',      '700')
+      .attr('x', -14).attr('y', cy + RANGE_H / 2 - 5)
+      .attr('text-anchor','end').attr('dominant-baseline','middle')
+      .attr('fill', css('--p1')).attr('font-family', css('--font'))
+      .attr('font-size','12px').attr('font-weight','700')
       .text(d.label);
 
-    // ── SUB-LABEL (value / target) ──
+    // Sub-label
     g.append('text')
-      .attr('x',                -14)
-      .attr('y',                cy + RANGE_H / 2 + 10)
-      .attr('text-anchor',      'end')
-      .attr('dominant-baseline','middle')
-      .attr('fill',             css('--p6'))
-      .attr('font-family',      css('--font'))
-      .attr('font-size',        '10px')
+      .attr('x', -14).attr('y', cy + RANGE_H / 2 + 10)
+      .attr('text-anchor','end').attr('dominant-baseline','middle')
+      .attr('fill', css('--p6')).attr('font-family', css('--font')).attr('font-size','10px')
       .text(`${d.value}${d.unit} · target ${d.target}${d.unit}`);
 
-    // ── ROW SEPARATOR ──
+    // Row separator
     if (i < data.length - 1) {
       g.append('line')
-        .attr('x1', -MARGIN.left)
-        .attr('x2', iW)
-        .attr('y1', ROW_H + ROW_GAP / 2)
-        .attr('y2', ROW_H + ROW_GAP / 2)
-        .attr('stroke', css('--p7'))
-        .attr('stroke-width', 1);
+        .attr('x1', -MARGIN.left).attr('x2', iW)
+        .attr('y1', ROW_H + ROW_GAP / 2).attr('y2', ROW_H + ROW_GAP / 2)
+        .attr('stroke', css('--p7')).attr('stroke-width', 1);
     }
   });
 
-  // ── KEYBOARD ROW NAVIGATION ──
+  // Keyboard row nav
   const rows = document.querySelectorAll('.bullet-row');
   rows.forEach((row, i) => {
     row.addEventListener('keydown', e => {
@@ -756,68 +635,47 @@ function buildChart(data) {
   });
 }
 
-// ══════════════════════════════════════════════════════════
-// SORT TOGGLE
-// ══════════════════════════════════════════════════════════
-
-const sortBtn = document.getElementById('sort-btn');
-sortBtn.addEventListener('click', () => {
+// ── SORT ──────────────────────────────────────────────────────
+document.getElementById('sort-btn').addEventListener('click', () => {
   if (sortAsc === null || sortAsc === false) {
     sortAsc = true;
     buildChart([...masterData].sort((a, b) => a.value - b.value));
-    sortBtn.textContent = '↕ Sort by performance ▲';
+    document.getElementById('sort-btn').textContent = '↕ Sort by performance ▲';
   } else if (sortAsc === true) {
     sortAsc = false;
     buildChart([...masterData].sort((a, b) => b.value - a.value));
-    sortBtn.textContent = '↕ Sort by performance ▼';
+    document.getElementById('sort-btn').textContent = '↕ Sort by performance ▼';
   } else {
     sortAsc = null;
     buildChart([...masterData]);
-    sortBtn.textContent = '↕ Sort by performance';
+    document.getElementById('sort-btn').textContent = '↕ Sort by performance';
   }
 });
 
-// ══════════════════════════════════════════════════════════
-// RESPONSIVE REDRAW
-// ══════════════════════════════════════════════════════════
-
+// ── RESPONSIVE ────────────────────────────────────────────────
 let resizeTimer;
 new ResizeObserver(() => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
-    if (masterData.length) {
-      const current = sortAsc === true
-        ? [...masterData].sort((a, b) => a.value - b.value)
-        : sortAsc === false
-        ? [...masterData].sort((a, b) => b.value - a.value)
-        : [...masterData];
-      buildChart(current);
-    }
+    if (!masterData.length) return;
+    const current = sortAsc === true
+      ? [...masterData].sort((a, b) => a.value - b.value)
+      : sortAsc === false
+      ? [...masterData].sort((a, b) => b.value - a.value)
+      : [...masterData];
+    buildChart(current);
   }, 150);
 }).observe(document.getElementById('slide-01'));
 
-// ══════════════════════════════════════════════════════════
-// DATA LOAD
-// ══════════════════════════════════════════════════════════
-
+// ── DATA LOAD ─────────────────────────────────────────────────
 d3.json('./bullet-graph/data.json')
-  .then(json => {
-    masterData = json.data;
-    buildChart(masterData);
-  })
+  .then(json => { masterData = json.data; buildChart(masterData); })
   .catch(err => {
     console.warn('[bullet-graph] data.json not found:', err);
-    d3.select('#chart')
-      .attr('viewBox', '0 0 600 80')
-      .attr('height', 80)
-      .append('text')
-        .attr('x', 300)
-        .attr('y', 40)
-        .attr('text-anchor', 'middle')
-        .attr('font-family', 'JetBrains Mono, monospace')
-        .attr('font-size', 12)
-        .attr('fill', '#797C7F')
-        .text('// data not found — add ./bullet-graph/data.json');
+    d3.select('#chart').attr('viewBox','0 0 600 80').attr('height', 80)
+      .append('text').attr('x', 300).attr('y', 40).attr('text-anchor','middle')
+      .attr('font-family','JetBrains Mono, monospace').attr('font-size', 12).attr('fill','#797C7F')
+      .text('// data not found — add ./bullet-graph/data.json');
   });
 </script>
 </body>

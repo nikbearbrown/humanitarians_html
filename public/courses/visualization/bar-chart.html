@@ -14,14 +14,14 @@
   <style>
     /* ── HAI PALETTE — Humanitarians AI ─────────────────────── */
     :root {
-      --p1: #1B1B1B; /* obsidian — primary text          WCAG 18.2:1 */
-      --p2: #5C3317; /* walnut — primary accent           WCAG 10.7:1 */
-      --p3: #7A0000; /* blood-red — danger/emphasis       WCAG  5.8:1 */
-      --p4: #F7FAFD; /* sky-faint — highlight/callout              — */
-      --p5: #4A4D4F; /* dim-gray — secondary accent       WCAG  9.4:1 */
-      --p6: #797C7F; /* mist — muted accent               WCAG  4.6:1 */
-      --p7: #EDEDED; /* silver — borders, subtle bg                 — */
-      --p8: #FFFFFF; /* pure-white — page background               — */
+      --p1: #1B1B1B;
+      --p2: #5C3317;
+      --p3: #7A0000;
+      --p4: #F7FAFD;
+      --p5: #4A4D4F;
+      --p6: #797C7F;
+      --p7: #EDEDED;
+      --p8: #FFFFFF;
       --font: 'JetBrains Mono', monospace;
     }
 
@@ -46,9 +46,7 @@
       border-bottom: 2px solid var(--p7);
     }
 
-    .slide-meta {
-      margin-bottom: 1.25rem;
-    }
+    .slide-meta { margin-bottom: 1.25rem; }
 
     .label {
       font-size: 11px;
@@ -78,7 +76,37 @@
 
     #chart { width: 100%; height: 100%; }
 
-    /* ── TOOLTIP ────────────────────────────────────────────────── */
+    /* ── EXPLANATION BLOCK ─────────────────────────────────────── */
+    .chart-explanation {
+      margin-top: 2rem;
+      padding: 1.25rem 1.5rem;
+      border-left: 4px solid var(--p2);
+      background: var(--p4);
+      max-width: 80ch;
+    }
+
+    .chart-explanation h3 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--p2);
+      margin-bottom: 0.75rem;
+    }
+
+    .chart-explanation p {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.85;
+      color: var(--p5);
+      margin-bottom: 0.6rem;
+    }
+
+    .chart-explanation p:last-child { margin-bottom: 0; }
+
+    .chart-explanation strong { color: var(--p1); font-weight: 700; }
+
+    /* ── TOOLTIP ───────────────────────────────────────────────── */
     .tooltip {
       position: fixed;
       pointer-events: none;
@@ -96,7 +124,7 @@
       line-height: 1.6;
     }
 
-    /* ── CONTROLS ───────────────────────────────────────────────── */
+    /* ── CONTROLS ──────────────────────────────────────────────── */
     .controls {
       display: flex;
       align-items: center;
@@ -121,12 +149,7 @@
 
     .btn:hover { background: var(--p1); color: var(--p8); }
     .btn:focus { outline: 2px solid var(--p2); outline-offset: 2px; }
-
-    .btn.active {
-      background: var(--p2);
-      border-color: var(--p2);
-      color: var(--p8);
-    }
+    .btn.active { background: var(--p2); border-color: var(--p2); color: var(--p8); }
 
     .sort-label {
       font-size: 11px;
@@ -134,7 +157,7 @@
       letter-spacing: 0.08em;
     }
 
-    /* ── NAV DOTS ────────────────────────────────────────────────── */
+    /* ── NAV DOTS ──────────────────────────────────────────────── */
     .nav-dots {
       position: fixed;
       right: clamp(1rem, 3vw, 2.5rem);
@@ -147,8 +170,7 @@
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       background: var(--p7);
       border: 1px solid var(--p6);
@@ -158,14 +180,10 @@
 
     .dot.active { background: var(--p2); border-color: var(--p2); }
 
-    /* ── LEARN SLIDE ─────────────────────────────────────────────── */
-    .slide-learn {
-      background: var(--p4);
-    }
+    /* ── LEARN SLIDE ───────────────────────────────────────────── */
+    .slide-learn { background: var(--p4); }
 
-    .learn-block {
-      max-width: 76ch;
-    }
+    .learn-block { max-width: 76ch; }
 
     .learn-block h2 {
       font-size: clamp(13px, 1.6vw, 17px);
@@ -201,7 +219,7 @@
       line-height: 1.7;
     }
 
-    /* ── AXIS NOTE ──────────────────────────────────────────────── */
+    /* ── AXIS NOTE ─────────────────────────────────────────────── */
     .axis-note {
       font-size: 10px;
       color: var(--p6);
@@ -209,7 +227,7 @@
       font-style: italic;
     }
 
-    /* ── FOOTER ─────────────────────────────────────────────────── */
+    /* ── FOOTER ────────────────────────────────────────────────── */
     footer {
       padding: clamp(1.5rem, 4vw, 3rem) clamp(1.5rem, 6vw, 7rem);
       border-top: 2px solid var(--p7);
@@ -219,10 +237,18 @@
       font-size: 11px;
       font-weight: 400;
       color: var(--p6);
-      line-height: 1.8;
+      line-height: 2;
     }
 
-    /* ── SLIDE ENTRANCE ─────────────────────────────────────────── */
+    footer a {
+      color: var(--p2);
+      text-decoration: none;
+      transition: color 0.12s;
+    }
+
+    footer a:hover { color: var(--p1); text-decoration: underline; }
+
+    /* ── SLIDE ENTRANCE ────────────────────────────────────────── */
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(18px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -247,7 +273,7 @@
 
 <div class="slideshow">
 
-  <!-- ── SLIDE 1 — CHART ───────────────────────────────────────── -->
+  <!-- ── SLIDE 1 — CHART ──────────────────────────────────────── -->
   <section class="slide" id="slide-01" aria-label="AI Adoption Rate by Sector">
     <div class="slide-meta">
       <span class="label">// DATA — SECTOR COMPARISON</span>
@@ -268,9 +294,18 @@
       <button class="btn" id="audio-toggle" tabindex="0" aria-label="Play narration">▶ narration</button>
     </div>
     <p class="axis-note">Axis starts at 0% — no baseline distortion applied.</p>
+
+    <!-- ── EXPLANATION BLOCK ──────────────────────────────────── -->
+    <div class="chart-explanation" aria-label="Chart explanation">
+      <h3>// About this chart type — Horizontal Bar Chart</h3>
+      <p>A <strong>bar chart</strong> encodes quantitative values as the length of rectangular bars along a shared baseline. Length on a common axis is the most accurate perceptual channel in static graphics — it outperforms area, angle, and colour saturation for comparison tasks. Each bar here represents one industry sector; the bars are independent and do not imply a continuous trend or a part-to-whole relationship.</p>
+      <p>The <strong>horizontal orientation</strong> is deliberate. With many categories, vertical bars compress label space and force rotation or truncation. Horizontal layout gives each sector name full left-aligned legibility while bars extend rightward along the value axis — reading naturally in the direction of magnitude.</p>
+      <p><strong>About this example:</strong> This chart compares the percentage of organisations across twelve industry sectors that have adopted at least one AI-powered tool. Sectors are colour-coded by whether their adoption rate falls above or below the median: walnut (above) versus blood-red (below). The dashed median line makes the threshold explicit. Technology leads at 87%; Agriculture trails at 18% — a 69-point gap that the sorted bar chart makes immediately visible. Hover any bar to see the sector note and exact value.</p>
+      <p>Bars are sorted by adoption rate by default because the message is a ranking story — "which sectors lead and which lag?" — not a lookup. Toggle to alphabetical order if you need to locate a specific sector. Sort order is not decoration: it determines which question the viewer answers first.</p>
+    </div>
   </section>
 
-  <!-- ── SLIDE 2 — LEARN ───────────────────────────────────────── -->
+  <!-- ── SLIDE 2 — LEARN ──────────────────────────────────────── -->
   <section class="slide slide-learn" id="slide-02" aria-label="Learn: Bar Chart">
     <div class="slide-meta">
       <span class="label">// LEARN — BAR CHART / COLUMN CHART</span>
@@ -303,35 +338,38 @@
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+  <p>
+    <a href="https://boondoggling.ai"    target="_blank" rel="noopener">boondoggling.ai</a> ·
+    <a href="https://brutalist.art"      target="_blank" rel="noopener">brutalist.art</a> ·
+    <a href="https://bearbrown.co"       target="_blank" rel="noopener">bearbrown.co</a> ·
+    <a href="https://frictional.xyz"     target="_blank" rel="noopener">frictional.xyz</a> ·
+    <a href="https://irreducibly.xyz"    target="_blank" rel="noopener">irreducibly.xyz</a> ·
+    <a href="https://humanitarians.ai"   target="_blank" rel="noopener">humanitarians.ai</a> ·
+    <a href="https://musinique.com"      target="_blank" rel="noopener">musinique.com</a> ·
+    <a href="https://nikbearbrown.com"   target="_blank" rel="noopener">nikbearbrown.com</a>
+  </p>
 </footer>
 
-<audio id="page-audio" src="./bar-chart/audio.mp3"></audio>
+<audio id="page-audio" src="./bar-chart/slide_1.mp3"></audio>
 
 <script>
 (function () {
-  // ── AUDIO TOGGLE ─────────────────────────────────────────────
+  // ── AUDIO TOGGLE ──────────────────────────────────────────────
   const audio = document.getElementById('page-audio');
   const audioBtn = document.getElementById('audio-toggle');
   let playing = false;
   audioBtn.addEventListener('click', () => {
-    if (!audio.src) return;
     if (playing) { audio.pause(); audioBtn.textContent = '▶ narration'; }
-    else {
-      audio.play().catch(() => {});
-      audioBtn.textContent = '⏸ narration';
-    }
+    else { audio.play().catch(() => {}); audioBtn.textContent = '⏸ narration'; }
     playing = !playing;
   });
   audio.addEventListener('ended', () => { playing = false; audioBtn.textContent = '▶ narration'; });
 
-  // ── NAV DOTS ─────────────────────────────────────────────────
+  // ── NAV DOTS ──────────────────────────────────────────────────
   const slides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.dot');
+  const dots   = document.querySelectorAll('.dot');
 
-  function scrollToSlide(i) {
-    slides[i].scrollIntoView({ behavior: 'smooth' });
-  }
+  function scrollToSlide(i) { slides[i].scrollIntoView({ behavior: 'smooth' }); }
 
   dots.forEach((dot, i) => {
     dot.addEventListener('click', () => scrollToSlide(i));
@@ -351,11 +389,10 @@
 
   slides.forEach(s => observer.observe(s));
 
-  // ── KEYBOARD SLIDE NAV ────────────────────────────────────────
   document.addEventListener('keydown', e => {
     const current = Array.from(dots).findIndex(d => d.classList.contains('active'));
     if (e.key === 'ArrowDown' && current < slides.length - 1) scrollToSlide(current + 1);
-    if (e.key === 'ArrowUp' && current > 0) scrollToSlide(current - 1);
+    if (e.key === 'ArrowUp'   && current > 0)                 scrollToSlide(current - 1);
   });
 
   // ── CHART ─────────────────────────────────────────────────────
@@ -366,10 +403,8 @@
     tooltip.style.opacity = 1;
     const tw = tooltip.offsetWidth || 200;
     const th = tooltip.offsetHeight || 60;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    let left = x + 14;
-    let top  = y - th / 2;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    let left = x + 14, top = y - th / 2;
     if (left + tw > vw - 12) left = x - tw - 14;
     if (top < 8) top = 8;
     if (top + th > vh - 8) top = vh - th - 8;
@@ -391,7 +426,7 @@
     svg.selectAll('*').remove();
 
     const margin = { top: 20, right: 80, bottom: 50, left: 200 };
-    const W = container.clientWidth  || 800;
+    const W = container.clientWidth || 800;
     const H = Math.max(sorted.length * 44 + margin.top + margin.bottom, 400);
 
     svg.attr('viewBox', `0 0 ${W} ${H}`)
@@ -403,95 +438,76 @@
 
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-    const x = d3.scaleLinear()
-      .domain([0, 100])
-      .range([0, width])
-      .nice();
+    const x = d3.scaleLinear().domain([0, 100]).range([0, width]).nice();
 
     const y = d3.scaleBand()
       .domain(sorted.map(d => d.sector))
       .range([0, height])
       .padding(0.28);
 
-    // ── GRIDLINES (light, behind bars) ─────────────────────────
+    // Gridlines
     g.append('g')
-      .attr('class', 'grid')
-      .call(d3.axisBottom(x)
-        .tickValues([0, 25, 50, 75, 100])
-        .tickSize(height)
-        .tickFormat(''))
+      .call(d3.axisBottom(x).tickValues([0,25,50,75,100]).tickSize(height).tickFormat(''))
       .call(gg => {
         gg.select('.domain').remove();
-        gg.selectAll('line')
-          .attr('stroke', '#EDEDED')
-          .attr('stroke-dasharray', '3,3');
+        gg.selectAll('line').attr('stroke','#EDEDED').attr('stroke-dasharray','3,3');
       });
 
-    // ── Y AXIS ──────────────────────────────────────────────────
+    // Y axis
     g.append('g')
       .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
       .call(yy => {
         yy.select('.domain').remove();
         yy.selectAll('text')
-          .style('font-family', "'JetBrains Mono', monospace")
-          .style('font-size', '12px')
-          .style('fill', '#1B1B1B');
+          .style('font-family',"'JetBrains Mono', monospace")
+          .style('font-size','12px').style('fill','#1B1B1B');
       });
 
-    // ── X AXIS ──────────────────────────────────────────────────
+    // X axis
     g.append('g')
-      .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(x)
-        .tickValues([0, 25, 50, 75, 100])
-        .tickFormat(d => d + '%'))
+      .attr('transform',`translate(0,${height})`)
+      .call(d3.axisBottom(x).tickValues([0,25,50,75,100]).tickFormat(d => d+'%'))
       .call(xx => {
-        xx.select('.domain').attr('stroke', '#EDEDED');
-        xx.selectAll('tick line').attr('stroke', '#EDEDED');
+        xx.select('.domain').attr('stroke','#EDEDED');
         xx.selectAll('text')
-          .style('font-family', "'JetBrains Mono', monospace")
-          .style('font-size', '11px')
-          .style('fill', '#797C7F');
+          .style('font-family',"'JetBrains Mono', monospace")
+          .style('font-size','11px').style('fill','#797C7F');
       });
 
     // X axis label
     g.append('text')
-      .attr('x', width / 2)
-      .attr('y', height + 42)
-      .attr('text-anchor', 'middle')
-      .style('font-family', "'JetBrains Mono', monospace")
-      .style('font-size', '10px')
-      .style('fill', '#797C7F')
-      .style('letter-spacing', '0.08em')
+      .attr('x', width / 2).attr('y', height + 42)
+      .attr('text-anchor','middle')
+      .style('font-family',"'JetBrains Mono', monospace")
+      .style('font-size','10px').style('fill','#797C7F').style('letter-spacing','0.08em')
       .text('% OF ORGANIZATIONS USING AT LEAST ONE AI TOOL');
 
-    // ── BARS ────────────────────────────────────────────────────
-    // Color scale: below median (p3/blood-red tint) vs above (p2/walnut)
     const median = d3.median(sorted, d => d.adoption);
 
+    // Bars
     const bars = g.selectAll('.bar')
       .data(sorted, d => d.sector)
       .join('rect')
-        .attr('class', 'bar')
+        .attr('class','bar')
         .attr('x', 0)
         .attr('y', d => y(d.sector))
         .attr('height', y.bandwidth())
-        .attr('width', 0)                       // animate from 0
+        .attr('width', 0)
         .attr('fill', d => d.adoption < median ? '#7A0000' : '#5C3317')
-        .attr('tabindex', 0)
-        .attr('role', 'img')
+        .attr('tabindex', 0).attr('role','img')
         .attr('aria-label', d => `${d.sector}: ${d.adoption}% adoption — ${d.note}`)
-        .on('mousemove', function (event, d) {
+        .on('mousemove', function(event, d) {
           d3.select(this).attr('fill', d.adoption < median ? '#8B1C1C' : '#3D2210');
           showTip(
             `<strong>${d.sector}</strong><br>${d.adoption}% adopted<br><span style="opacity:.7;font-size:11px;">${d.note}</span>`,
             event.clientX, event.clientY
           );
         })
-        .on('mouseleave', function (event, d) {
+        .on('mouseleave', function(event, d) {
           d3.select(this).attr('fill', d.adoption < median ? '#7A0000' : '#5C3317');
           hideTip();
         })
-        .on('keydown', function (event, d) {
+        .on('keydown', function(event, d) {
           if (event.key === 'Enter' || event.key === ' ') {
             showTip(
               `<strong>${d.sector}</strong><br>${d.adoption}% adopted<br><span style="opacity:.7;font-size:11px;">${d.note}</span>`,
@@ -500,67 +516,47 @@
           }
         });
 
-    // Entrance animation
-    bars.transition()
-      .duration(750)
-      .delay((d, i) => i * 45)
-      .ease(d3.easeCubicOut)
-      .attr('width', d => x(d.adoption));
+    bars.transition().duration(750).delay((d,i) => i * 45).ease(d3.easeCubicOut)
+        .attr('width', d => x(d.adoption));
 
-    // Value labels (appear after bars animate)
-    const labels = g.selectAll('.bar-label')
+    // Value labels
+    g.selectAll('.bar-label')
       .data(sorted, d => d.sector)
       .join('text')
-        .attr('class', 'bar-label')
+        .attr('class','bar-label')
         .attr('x', d => x(d.adoption) + 6)
         .attr('y', d => y(d.sector) + y.bandwidth() / 2 + 4)
         .attr('opacity', 0)
-        .style('font-family', "'JetBrains Mono', monospace")
-        .style('font-size', '11px')
-        .style('font-weight', '600')
-        .style('fill', '#1B1B1B')
-        .text(d => d.adoption + '%');
+        .style('font-family',"'JetBrains Mono', monospace")
+        .style('font-size','11px').style('font-weight','600').style('fill','#1B1B1B')
+        .text(d => d.adoption + '%')
+      .transition().duration(300).delay((d,i) => i * 45 + 700)
+        .attr('opacity', 1);
 
-    labels.transition()
-      .duration(300)
-      .delay((d, i) => i * 45 + 700)
-      .attr('opacity', 1);
-
-    // ── MEDIAN LINE ─────────────────────────────────────────────
+    // Median line
     g.append('line')
       .attr('x1', x(median)).attr('x2', x(median))
       .attr('y1', -8).attr('y2', height)
-      .attr('stroke', '#797C7F')
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '5,4');
+      .attr('stroke','#797C7F').attr('stroke-width',1).attr('stroke-dasharray','5,4');
 
     g.append('text')
-      .attr('x', x(median) + 5)
-      .attr('y', -2)
-      .style('font-family', "'JetBrains Mono', monospace")
-      .style('font-size', '10px')
-      .style('fill', '#797C7F')
+      .attr('x', x(median) + 5).attr('y', -2)
+      .style('font-family',"'JetBrains Mono', monospace")
+      .style('font-size','10px').style('fill','#797C7F')
       .text('MEDIAN ' + Math.round(median) + '%');
 
-    // ── LEGEND ──────────────────────────────────────────────────
+    // Legend
     const legendData = [
-      { label: 'Above median', color: '#5C3317', pattern: 'solid' },
-      { label: 'Below median', color: '#7A0000', pattern: 'solid' }
+      { label: 'Above median', color: '#5C3317' },
+      { label: 'Below median', color: '#7A0000' }
     ];
-
-    const legend = g.append('g')
-      .attr('transform', `translate(${width - 148}, 0)`);
-
+    const legend = g.append('g').attr('transform',`translate(${width - 148}, 0)`);
     legendData.forEach((item, i) => {
-      const row = legend.append('g').attr('transform', `translate(0, ${i * 22})`);
-      row.append('rect')
-        .attr('width', 12).attr('height', 12)
-        .attr('fill', item.color);
-      row.append('text')
-        .attr('x', 18).attr('y', 10)
-        .style('font-family', "'JetBrains Mono', monospace")
-        .style('font-size', '10px')
-        .style('fill', '#4A4D4F')
+      const row = legend.append('g').attr('transform',`translate(0,${i * 22})`);
+      row.append('rect').attr('width',12).attr('height',12).attr('fill',item.color);
+      row.append('text').attr('x',18).attr('y',10)
+        .style('font-family',"'JetBrains Mono', monospace")
+        .style('font-size','10px').style('fill','#4A4D4F')
         .text(item.label);
     });
   }
@@ -570,13 +566,12 @@
     const data = json.data;
     buildChart(data, currentSort);
 
-    // Sort toggle
     document.getElementById('btn-value').addEventListener('click', () => {
       currentSort = 'value';
       document.getElementById('btn-value').classList.add('active');
       document.getElementById('btn-alpha').classList.remove('active');
-      document.getElementById('btn-value').setAttribute('aria-pressed', 'true');
-      document.getElementById('btn-alpha').setAttribute('aria-pressed', 'false');
+      document.getElementById('btn-value').setAttribute('aria-pressed','true');
+      document.getElementById('btn-alpha').setAttribute('aria-pressed','false');
       buildChart(data, 'value');
     });
 
@@ -584,12 +579,11 @@
       currentSort = 'alpha';
       document.getElementById('btn-alpha').classList.add('active');
       document.getElementById('btn-value').classList.remove('active');
-      document.getElementById('btn-alpha').setAttribute('aria-pressed', 'true');
-      document.getElementById('btn-value').setAttribute('aria-pressed', 'false');
+      document.getElementById('btn-alpha').setAttribute('aria-pressed','true');
+      document.getElementById('btn-value').setAttribute('aria-pressed','false');
       buildChart(data, 'alpha');
     });
 
-    // Responsive redraw
     let resizeTimer;
     const ro = new ResizeObserver(() => {
       clearTimeout(resizeTimer);

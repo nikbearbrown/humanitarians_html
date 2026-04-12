@@ -184,6 +184,45 @@
     .legend-swatch { width: 24px; height: 3px; }
     .legend-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--p3); background: transparent; }
 
+    /* ── CHART EXPLAINER ──────────────────────────────────── */
+    .chart-explainer {
+      margin-top: 28px;
+      border-top: 1px solid var(--p7);
+      padding-top: 22px;
+      max-width: 920px;
+    }
+
+    .explainer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 720px) {
+      .explainer-grid { grid-template-columns: 1fr; gap: 20px; }
+    }
+
+    .explainer-block h3 {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--p2);
+      margin-bottom: 10px;
+    }
+
+    .explainer-block p {
+      font-size: 12px;
+      color: var(--p5);
+      line-height: 1.8;
+      font-weight: 400;
+    }
+
+    .explainer-block strong {
+      color: var(--p1);
+      font-weight: 800;
+    }
+
     /* ── LEARN SLIDE ──────────────────────────────────────── */
     .slide-learn {
       background: #FAFAFA;
@@ -241,6 +280,16 @@
       line-height: 1.8;
     }
 
+    footer a {
+      color: var(--p6);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    footer a:hover {
+      color: var(--p2);
+    }
+
     /* ── KEYBOARD FOCUS ───────────────────────────────────── */
     [tabindex="0"]:focus-visible {
       outline: 2px solid var(--p2);
@@ -291,6 +340,20 @@
       <div class="legend-item"><div class="legend-dot"></div><span>Outliers</span></div>
     </div>
 
+    <!-- ── EXPLANATORY TEXT ──────────────────────────────── -->
+    <div class="chart-explainer">
+      <div class="explainer-grid">
+        <div class="explainer-block">
+          <h3>// About Box &amp; Whisker Plots</h3>
+          <p>A <strong>box and whisker plot</strong> encodes the five-number summary of any distribution in a single compact glyph. The box spans the <strong>interquartile range (IQR = Q3 − Q1)</strong>, capturing the middle 50% of observations. The thick line inside the box marks the <strong>median</strong> — its position within the box reveals distributional skew at a glance: a median pushed toward Q1 signals positive skew (a long upper tail); pushed toward Q3 signals negative skew. Whiskers extend to the most extreme values within <strong>1.5×IQR</strong> of the box edges (Tukey's 1977 fence rule); any points beyond are plotted individually as <strong>outliers</strong>. The small triangle (△) marks the mean, which often diverges visibly from the median in skewed data — a divergence that standard bar charts cannot show at all.</p>
+        </div>
+        <div class="explainer-block">
+          <h3>// About This Example</h3>
+          <p>This chart compares simulated <strong>annual household income (USD thousands)</strong> across five residential zones — Urban, Suburban, Rural, Coastal, and Mountain — with 80 observations per group. <strong>Coastal</strong> households show the highest median and widest spread, with a long upper whisker indicating a tail of high earners. <strong>Rural</strong> shows the lowest median and the most compact IQR. <strong>Suburban</strong>'s cluster of upper outliers reveals an affluent subpopulation that a bar chart showing only the mean would conceal entirely. Toggle between <strong>vertical and horizontal</strong> orientation to suit different reading contexts, enable <strong>notches</strong> to display 95% confidence intervals around each median, or toggle <strong>outlier visibility</strong> to see how extreme values shift the perceived scale of each distribution.</p>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <!-- ── SLIDE 2: LEARN PANEL ─────────────────────────────── -->
@@ -326,10 +389,26 @@
 
 <footer>
   <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
-  <p>boondoggling.ai &nbsp;·&nbsp; irreducibly.xyz &nbsp;·&nbsp; brutalist.art &nbsp;·&nbsp; bearbrown.co &nbsp;·&nbsp; frictional.xyz</p>
+  <p>
+    <a href="https://boondoggling.ai" target="_blank" rel="noopener">boondoggling.ai</a>
+    &nbsp;·&nbsp;
+    <a href="https://brutalist.art" target="_blank" rel="noopener">brutalist.art</a>
+    &nbsp;·&nbsp;
+    <a href="https://bearbrown.co" target="_blank" rel="noopener">bearbrown.co</a>
+    &nbsp;·&nbsp;
+    <a href="https://frictional.xyz" target="_blank" rel="noopener">frictional.xyz</a>
+    &nbsp;·&nbsp;
+    <a href="https://irreducibly.xyz" target="_blank" rel="noopener">irreducibly.xyz</a>
+    &nbsp;·&nbsp;
+    <a href="https://humanitarians.ai" target="_blank" rel="noopener">humanitarians.ai</a>
+    &nbsp;·&nbsp;
+    <a href="https://musinique.com" target="_blank" rel="noopener">musinique.com</a>
+    &nbsp;·&nbsp;
+    <a href="https://nikbearbrown.com" target="_blank" rel="noopener">nikbearbrown.com</a>
+  </p>
 </footer>
 
-<audio id="page-audio" src="./box-plot/audio.mp3"></audio>
+<audio id="page-audio" src="./box-plot/slide_1.mp3"></audio>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
@@ -533,9 +612,6 @@ function draw() {
         prev.focus();
       }
     });
-
-  function cx(d) { return orientation === 'vertical' ? scaleBand(d.group) + bw / 2 : scaleVal(d.med); }
-  function cy(d) { return orientation === 'vertical' ? scaleVal(d.med) : scaleBand(d.group) + bw / 2; }
 
   /* whisker stems */
   glyphs.append('line')
