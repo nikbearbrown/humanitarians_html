@@ -6,8 +6,7 @@
   :root {
     /* HAI palette — Le Monde / walnut
      * p1 #1B1B1B  obsidian   — primary text        17.22:1 AAA
-     * p2 #5C3317  walnut     — primary accent       10.82:1 AAA
-     * p3 #B52C2C  blood-red  — danger/emphasis       6.25:1 AA
+     * p2 #B52C2C  blood-red  — primary + danger       6.25:1 AA
      * p4 #A89068  warm-clay  — callout surface       3.06:1 AA large
      * p5 #4A4D4F  dim-gray   — secondary accent      8.52:1 AAA
      * p6 #797C7F  mist       — muted text            4.2:1  AA large
@@ -15,7 +14,6 @@
      * p8 #FFFFFF  pure-white — page background
      */
     --hai-obsidian:  #1B1B1B;
-    --hai-crimson:   #8B0000;
     --hai-blood-red: #B52C2C;
     --hai-warm-clay: #A89068;
     --hai-dim-gray:  #4A4D4F;
@@ -30,7 +28,7 @@
     --card-foreground:        0 0% 11%;
     --popover:                0 0% 100%;
     --popover-foreground:     0 0% 11%;
-    --primary:                0 100% 27%;   /* crimson #8B0000 */
+    --primary:                0 61% 44%;    /* blood-red #B52C2C */
     --primary-foreground:     0 0% 100%;
     --secondary:              38 40% 97%;   /* warm-white tint — section alt bg */
     --secondary-foreground:   0 0% 11%;
@@ -42,7 +40,7 @@
     --destructive-foreground: 0 0% 100%;
     --border:                 0 0% 56%;     /* silver #8F8F8F */
     --input:                  0 0% 56%;
-    --ring:                   0 100% 27%;   /* crimson     */
+    --ring:                   0 61% 44%;    /* blood-red   */
     --radius:                 0.5rem;
   }
 
@@ -53,7 +51,7 @@
     --card-foreground:        0 0% 96%;
     --popover:                204 3% 13%;
     --popover-foreground:     0 0% 96%;
-    --primary:                0 75% 45%;    /* lighter crimson for dark bg */
+    --primary:                0 65% 55%;    /* lighter blood-red for dark bg */
     --primary-foreground:     0 0% 100%;
     --secondary:              204 4% 20%;
     --secondary-foreground:   0 0% 96%;
@@ -65,7 +63,7 @@
     --destructive-foreground: 0 0% 100%;
     --border:                 204 4% 30%;
     --input:                  204 4% 30%;
-    --ring:                   0 75% 45%;
+    --ring:                   0 65% 55%;
   }
 }
 
