@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI in Humanitarian Work — Circle Packing</title>
+  <meta name="description" content="Zoomable circle packing chart showing the hierarchy and relative scale of AI applications across humanitarian domains.">
+  <meta name="keywords" content="circle packing, hierarchy, treemap, d3.js, data visualization, humanitarian, AI applications, zoomable">
+  <meta name="author" content="Nik Bear Brown">
+  <meta name="category" content="Humanitarians AI / Data Visualization">
+
+  <!--
+  ═══════════════════════════════════════════════════
+  PALETTE: hai — Humanitarians AI
+  ═══════════════════════════════════════════════════
+  WCAG AUDIT (text on bg #FFFFFF):
+    p1 #1B1B1B  18.2:1  AAA ✓
+    p2 #5C3317  10.7:1  AAA ✓
+    p3 #7A0000   5.8:1  AA  ✓
+    p5 #4A4D4F   9.4:1  AAA ✓
+    p6 #797C7F   4.6:1  AA  ✓
+    p4 #F7FAFD   1.1:1  FAIL — used only for structural block bg
+    p7 #EDEDED   1.4:1  FAIL — used only for separator lines
+
+  WCAG AUDIT (text on dark circle fills):
+    p8 #FFFFFF on p2 #5C3317:  10.7:1  AAA ✓
+    p8 #FFFFFF on p3 #7A0000:   5.8:1  AA  ✓
+    p8 #FFFFFF on p5 #4A4D4F:   9.4:1  AAA ✓
+    p8 #FFFFFF on p6 #797C7F:   4.6:1  AA  ✓ (borderline — used only on larger circles)
+
+  Labels on circle interiors use p8 (white) when circle fill is dark.
+  Labels omitted when circle diameter < label threshold (12px * char count).
+  ═══════════════════════════════════════════════════
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══ HAI PALETTE ═══ */
+    :root {
+      --p1: #1B1B1B;
+      --p2: #5C3317;
+      --p3: #7A0000;
+      --p4: #F7FAFD;
+      --p5: #4A4D4F;
+      --p6: #797C7F;
+      --p7: #EDEDED;
+      --p8: #FFFFFF;
+
+      /* Category palette — depth-1 nodes */
+      --cat-0: #5C3317;  /* walnut      — Crisis Response   */
+      --cat-1: #7A0000;  /* blood-red   — Healthcare        */
+      --cat-2: #4A4D4F;  /* dim-gray    — Education         */
+      --cat-3: #797C7F;  /* mist        — Food Security     */
+      --cat-4: #8B5E3C;  /* warm sienna — Climate Resilience */
+
+      --font:  'JetBrains Mono', monospace;
+      --pad:   clamp(20px, 3.5vw, 56px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+    body {
+      font-family: var(--font);
+      background: var(--p8);
+      color: var(--p1);
+      overflow-x: hidden;
+    }
+
+    /* ═══ SLIDES ═══ */
+    .slide {
+      min-height: 100vh;
+      padding: var(--pad);
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+      border-bottom: 2px solid var(--p1);
+      position: relative;
+    }
+
+    .slide-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--p6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .slide-num { font-size: 11px; color: var(--p6); }
+
+    .slide-title {
+      font-size: clamp(14px, 2.6vw, 27px);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.015em;
+      line-height: 1.1;
+      color: var(--p1);
+      margin-bottom: 20px;
+      border-left: 5px solid var(--p2);
+      padding-left: 16px;
+    }
+
+    /* ═══ CATEGORY LEGEND ═══ */
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--p5);
+      cursor: pointer;
+      padding: 3px 6px;
+      border: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+
+    .legend-item:hover  { border-color: var(--p5); }
+    .legend-item.active { border-color: var(--p1); }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ═══ VIZ CONTAINER ═══ */
+    .viz-container {
+      flex: 1;
+      position: relative;
+      min-height: 0;
+    }
+
+    #chart {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      cursor: pointer;
+    }
+
+    /* ═══ BREADCRUMB ═══ */
+    #breadcrumb {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 11px;
+      color: var(--p6);
+      letter-spacing: 0.06em;
+      pointer-events: none;
+    }
+
+    /* ═══ TOOLTIP ═══ */
+    #tooltip {
+      position: fixed;
+      background: var(--p1);
+      color: var(--p8);
+      font-family: var(--font);
+      font-size: 12px;
+      line-height: 1.65;
+      padding: 10px 14px;
+      border-left: 3px solid var(--p2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s;
+      z-index: 9999;
+      max-width: 220px;
+    }
+
+    #tooltip .tt-name {
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--p4);
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    /* ═══ CONTROLS ═══ */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--p7);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--p1);
+      background: transparent;
+      border: 1px solid var(--p5);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn:hover { background: var(--p1); color: var(--p8); }
+    .btn:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+    .controls .hint { margin-left: auto; font-size: 11px; color: var(--p6); }
+
+    /* ═══ NAV DOTS ═══ */
+    .nav-dots {
+      position: fixed;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--p5);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+
+    .nav-dot.active       { background: var(--p2); border-color: var(--p2); }
+    .nav-dot:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+    /* ═══ LEARN SLIDE ═══ */
+    .learn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px 48px;
+      max-width: 980px;
+    }
+
+    @media (max-width: 680px) { .learn-grid { grid-template-columns: 1fr; } }
+
+    .learn-block h2 {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--p2);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--p7);
+    }
+
+    .learn-block p {
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--p5);
+      margin-bottom: 6px;
+    }
+
+    .learn-full    { grid-column: 1 / -1; }
+
+    .framework-ref {
+      grid-column: 1 / -1;
+      border-left: 4px solid var(--p2);
+      background: var(--p4);
+      padding: 14px 18px;
+      margin-top: 4px;
+    }
+
+    .framework-ref .label { margin-bottom: 8px; display: block; }
+    .framework-ref p { color: var(--p1); font-size: 12px; line-height: 1.7; }
+
+    /* ═══ D3 ELEMENTS ═══ */
+    circle { transition: opacity 0.2s; }
+    circle.dimmed { opacity: 0.18; }
+
+    text.node-label {
+      font-family: 'JetBrains Mono', monospace;
+      pointer-events: none;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+
+    /* ═══ FOOTER ═══ */
+    footer {
+      border-top: 2px solid var(--p7);
+      padding: 14px var(--pad);
+      font-size: 11px;
+      color: var(--p6);
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV DOTS -->
+<nav class="nav-dots" aria-label="Slide navigation">
+  <button class="nav-dot active" data-slide="0" aria-label="Slide 1: Chart"></button>
+  <button class="nav-dot"        data-slide="1" aria-label="Slide 2: Learn panel"></button>
+</nav>
+
+<!-- TOOLTIP -->
+<div id="tooltip" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ════════════════════════════════════
+     SLIDE 01 — CHART
+     ════════════════════════════════════ -->
+<section class="slide" id="slide-01" aria-labelledby="chart-heading">
+  <div class="slide-meta">
+    <span class="label">// Humanitarians AI — Application Landscape</span>
+    <span class="slide-num">01 / 02</span>
+  </div>
+
+  <h1 class="slide-title" id="chart-heading">
+    Crisis Response and Healthcare dominate<br>
+    the AI humanitarian footprint
+  </h1>
+
+  <div class="legend" id="legend" aria-label="Category legend — click to highlight">
+    <!-- Populated by D3 -->
+  </div>
+
+  <div class="viz-container">
+    <div id="breadcrumb" aria-live="polite">// All domains</div>
+    <svg id="chart" role="img" aria-labelledby="svg-title svg-desc">
+      <title id="svg-title">AI in Humanitarian Work — Circle Packing</title>
+      <desc id="svg-desc">A zoomable circle packing chart showing five humanitarian domains — Crisis Response, Healthcare, Education, Food Security, and Climate Resilience — each containing nested circles sized by relative AI application investment. Click any circle to zoom in.</desc>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="reset-btn" aria-label="Reset to full view">↩ Reset view</button>
+    <button class="btn" id="audio-btn" aria-label="Play narration">▶ narration</button>
+    <span class="hint">click to zoom · tab to explore</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════
+     SLIDE 02 — LEARN
+     ════════════════════════════════════ -->
+<section class="slide" id="slide-02" aria-labelledby="learn-heading">
+  <div class="slide-meta">
+    <span class="label">// Learn — Circle Packing</span>
+    <span class="slide-num">02 / 02</span>
+  </div>
+
+  <h1 class="slide-title" id="learn-heading">
+    What this chart is and why it was chosen
+  </h1>
+
+  <div class="learn-grid">
+
+    <div class="learn-block">
+      <h2>What this chart is</h2>
+      <p>Circle packing encodes hierarchy through containment and quantitative value through area. Each parent circle contains its children; each leaf circle's area is proportional to its data value. The perceptual mechanism is two-channel: spatial containment communicates structure (which things belong together), while area communicates magnitude (which things are larger).</p>
+      <p>It is a circular variant of the Treemap. The structural encoding — containment — is actually stronger in circle packing than in a Treemap, because nested circles make parent-child relationships spatially unambiguous. The trade-off is space efficiency: circles pack poorly, leaving significant void between them. Treemaps fill their bounding rectangle completely.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>Why it was chosen here</h2>
+      <p>The data has two properties that make circle packing well-suited: a clear two-level hierarchy (domains → applications) and values that need to be read in relation to their category, not in relation to a global ranking. Containment communicates the category membership immediately — no legend lookup required to associate a leaf with its parent.</p>
+      <p>The zoomable interaction resolves the space-efficiency problem: at the top level, domain sizes are the story. Zooming in makes individual application sizes legible without requiring a separate chart.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>What the alternative would break</h2>
+      <p>A Treemap would show the same hierarchy with better space efficiency and more accurate area comparison (rectangles are easier to compare than circles). The trade-off: hierarchical structure is harder to read. When branches interlock in a Treemap, the parent boundary can be ambiguous — especially at three or more levels of depth. Circle packing makes nesting unambiguous at the cost of whitespace.</p>
+      <p>A grouped bar chart would show the magnitude comparison accurately but would lose all hierarchical containment encoding — the relationship between domain and application becomes a visual lookup task.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>Honest limitations</h2>
+      <p>Circle packing is among the least space-efficient chart types. Area comparison is also one of the weaker perceptual channels — humans are poor at judging the ratio between two circles of similar size. The chart compensates with interaction (click to zoom, hover for exact values) and redundant color encoding by category.</p>
+      <p>If precise magnitude comparison is the primary goal, a bar chart or dot plot will outperform circle packing every time. This chart earns its place when hierarchy revelation matters as much as magnitude comparison.</p>
+    </div>
+
+    <div class="framework-ref">
+      <span class="label">// Framework Reference</span>
+      <p>FT Visual Vocabulary category: <strong>Part-to-whole — Hierarchy</strong>. Abela quadrant: Composition (how a whole breaks into parts, with hierarchical structure). The design decision worth knowing: color is applied at depth 1 (the category level), not the leaf level. Leaves inherit their parent's hue. This means color encodes <em>membership</em>, not a third variable — keeping the encoding honest. Adding a third variable via color (e.g., saturation for performance) is possible but risks overloading a chart that already carries two visual channels.</p>
+    </div>
+
+  </div>
+</section>
+
+<audio id="page-audio" src="./circle-packing/audio.mp3" preload="none"></audio>
+
+<footer>
+  <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
+  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════
+// PALETTE
+// ════════════════════════════════════════════════
+const P = {
+  p1: '#1B1B1B', p2: '#5C3317', p3: '#7A0000',
+  p4: '#F7FAFD', p5: '#4A4D4F', p6: '#797C7F',
+  p7: '#EDEDED', p8: '#FFFFFF'
+};
+
+const CATEGORY_COLORS = [
+  '#5C3317',  // walnut      — Crisis Response
+  '#7A0000',  // blood-red   — Healthcare
+  '#4A4D4F',  // dim-gray    — Education
+  '#797C7F',  // mist        — Food Security
+  '#8B5E3C'   // warm sienna — Climate Resilience
+];
+
+// ════════════════════════════════════════════════
+// NAV DOTS
+// ════════════════════════════════════════════════
+const slides = document.querySelectorAll('.slide');
+const dots   = document.querySelectorAll('.nav-dot');
+
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    slides[+dot.dataset.slide].scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+slides.forEach(s => {
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...slides].indexOf(e.target);
+        dots.forEach((d, j) => d.classList.toggle('active', i === j));
+      }
+    });
+  }, { threshold: 0.5 }).observe(s);
+});
+
+// ════════════════════════════════════════════════
+// AUDIO
+// ════════════════════════════════════════════════
+const audio    = document.getElementById('page-audio');
+const audioBtn = document.getElementById('audio-btn');
+audioBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play().then(() => { audioBtn.textContent = '⏸ narration'; }).catch(() => {});
+  } else {
+    audio.pause();
+    audioBtn.textContent = '▶ narration';
+  }
+});
+
+// ════════════════════════════════════════════════
+// TOOLTIP
+// ════════════════════════════════════════════════
+const ttEl = document.getElementById('tooltip');
+
+function showTip(event, d) {
+  const name     = d.data.name;
+  const val      = d.value;
+  const isLeaf   = !d.children;
+  const category = d.depth === 1
+    ? d.data.name
+    : d.depth >= 2
+      ? d.ancestors().find(a => a.depth === 1)?.data.name || ''
+      : '';
+
+  ttEl.innerHTML = `
+    <span class="tt-name">${name}</span>
+    ${isLeaf ? `Value: <strong>${val}</strong><br>` : `Total: <strong>${val}</strong><br>`}
+    ${d.depth > 0 && d.depth < 1 ? '' : ''}
+    ${category && d.depth > 1 ? `Domain: ${category}` : ''}
+    ${d.children ? `<em style="color:var(--p6);font-size:10px">click to zoom in</em>` : ''}
+  `;
+  ttEl.style.opacity = '1';
+  moveTip(event);
+}
+
+function moveTip(event) {
+  const x  = event.clientX + 18;
+  const y  = event.clientY - 40;
+  const tw = ttEl.offsetWidth;
+  ttEl.style.left = (x + tw > window.innerWidth - 8 ? event.clientX - tw - 10 : x) + 'px';
+  ttEl.style.top  = Math.max(8, Math.min(y, window.innerHeight - ttEl.offsetHeight - 8)) + 'px';
+}
+
+function hideTip() { ttEl.style.opacity = '0'; }
+
+// ════════════════════════════════════════════════
+// CHART
+// ════════════════════════════════════════════════
+
+function buildChart(rawData) {
+  const container = document.getElementById('chart').closest('.viz-container');
+  const W = container.clientWidth  || 700;
+  const H = container.clientHeight || 500;
+  const R = Math.min(W, H) / 2 - 4;
+
+  // ── HIERARCHY ──
+  const root = d3.hierarchy(rawData)
+    .sum(d => d.value || 0)
+    .sort((a, b) => b.value - a.value);
+
+  d3.pack()
+    .size([W, H])
+    .padding(d => d.depth === 0 ? 12 : 4)
+  (root);
+
+  // ── COLOR MAP ──
+  const categories = root.children ? root.children.map(d => d.data.name) : [];
+  const colorMap   = new Map(categories.map((name, i) => [name, CATEGORY_COLORS[i % CATEGORY_COLORS.length]]));
+
+  function getColor(d) {
+    let node = d;
+    while (node.depth > 1 && node.parent) node = node.parent;
+    return colorMap.get(node.data.name) || P.p2;
+  }
+
+  function getFill(d) {
+    if (d.depth === 0) return 'none';
+    const base  = d3.color(getColor(d));
+    if (!d.children) return base.formatHex();        // leaf: solid
+    base.opacity = 0.12 + d.depth * 0.04;
+    return `rgba(${base.r},${base.g},${base.b},${base.opacity})`;
+  }
+
+  function getStroke(d) {
+    if (d.depth === 0) return P.p7;
+    const base = d3.color(getColor(d));
+    return `rgba(${base.r},${base.g},${base.b},${d.children ? 0.5 : 0.8})`;
+  }
+
+  // ── SVG ──
+  const svgEl = d3.select('#chart');
+  svgEl.selectAll('*').remove();
+  svgEl
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('width',  W)
+    .attr('height', H);
+
+  const g = svgEl.append('g');
+
+  // ── ZOOM STATE ──
+  let focus    = root;
+  let viewState = [root.x, root.y, root.r * 2 + 20];
+
+  // ── CIRCLES ──
+  const node = g.append('g')
+    .selectAll('circle')
+    .data(root.descendants())
+    .join('circle')
+      .attr('cx', d => d.x)
+      .attr('cy', d => d.y)
+      .attr('r',  d => d.r)
+      .attr('fill',          getFill)
+      .attr('stroke',        getStroke)
+      .attr('stroke-width',  d => d.depth === 0 ? 1.5 : d.children ? 1 : 0.8)
+      .attr('tabindex',      d => d.depth > 0 ? 0 : -1)
+      .attr('role',          'img')
+      .attr('aria-label',    d => {
+        if (d.depth === 0) return 'Root circle';
+        const cat = d.depth === 1 ? d.data.name
+          : d.ancestors().find(a => a.depth === 1)?.data.name || '';
+        return `${d.data.name}, value ${d.value}${cat && d.depth > 1 ? ', domain: ' + cat : ''}`;
+      })
+      .style('cursor',  d => d.children ? 'pointer' : 'default')
+      .style('opacity', 0)
+      .on('mouseover', (event, d) => {
+        if (d.depth === 0) return;
+        showTip(event, d);
+      })
+      .on('mousemove', moveTip)
+      .on('mouseout',  hideTip)
+      .on('click',     (event, d) => {
+        event.stopPropagation();
+        if (d.children) {
+          zoomTo(d);
+        }
+      })
+      .on('focus', (event, d) => {
+        if (d.depth === 0) return;
+        showTip(event, d);
+      })
+      .on('blur', hideTip)
+      .on('keydown', (event, d) => {
+        if ((event.key === 'Enter' || event.key === ' ') && d.children) {
+          zoomTo(d);
+          event.preventDefault();
+        }
+        if (event.key === 'Escape') {
+          zoomTo(focus.parent || root);
+          event.preventDefault();
+        }
+      });
+
+  // Entrance animation — staggered by depth
+  node.transition()
+    .duration(600)
+    .delay((d, i) => d.depth * 120 + i * 8)
+    .ease(d3.easeCubicOut)
+    .style('opacity', 1);
+
+  // ── LABELS ──
+  const label = g.append('g')
+    .selectAll('text')
+    .data(root.descendants().filter(d => d.depth > 0))
+    .join('text')
+      .attr('class',   'node-label')
+      .attr('x',       d => d.x)
+      .attr('y',       d => d.y)
+      .attr('fill',    d => d.children ? getColor(d) : P.p8)
+      .attr('font-size', d => {
+        if (d.depth === 1) return Math.max(10, Math.min(14, d.r / 4)) + 'px';
+        return Math.max(8, Math.min(11, d.r / 3)) + 'px';
+      })
+      .attr('font-weight', d => d.children ? '800' : '600')
+      .style('display', d => {
+        // Only show label if circle is large enough
+        const minR = d.children ? 28 : 22;
+        return d.r < minR ? 'none' : 'block';
+      })
+      .style('opacity', 0)
+      .text(d => {
+        // Truncate long names for small circles
+        const name = d.data.name;
+        const maxChars = Math.floor(d.r / 4);
+        return name.length > maxChars + 2 ? name.slice(0, maxChars) + '…' : name;
+      });
+
+  label.transition()
+    .duration(600)
+    .delay((d, i) => d.depth * 150 + i * 10)
+    .style('opacity', 1);
+
+  // ── ZOOM ──
+  const breadcrumb = document.getElementById('breadcrumb');
+
+  function applyZoom(v, transition) {
+    const k = Math.min(W, H) / v[2];
+
+    (transition ? node.transition(transition) : node)
+      .attr('cx', d => (d.x - v[0]) * k + W / 2)
+      .attr('cy', d => (d.y - v[1]) * k + H / 2)
+      .attr('r',  d => d.r * k);
+
+    (transition ? label.transition(transition) : label)
+      .attr('x', d => (d.x - v[0]) * k + W / 2)
+      .attr('y', d => (d.y - v[1]) * k + H / 2)
+      .attr('font-size', d => {
+        const scaledR = d.r * k;
+        if (d.depth === 1) return Math.max(10, Math.min(16, scaledR / 4)) + 'px';
+        return Math.max(8, Math.min(12, scaledR / 3)) + 'px';
+      })
+      .style('display', d => {
+        const scaledR = d.r * k;
+        const minR    = d.children ? 24 : 18;
+        return scaledR < minR ? 'none' : 'block';
+      });
+  }
+
+  function zoomTo(d) {
+    focus = d;
+    const v0 = viewState;
+    const v1 = [d.x, d.y, d.r * 2 + 20];
+    viewState = v1;
+
+    // Breadcrumb
+    const path = d.ancestors().reverse().map(a => a.data.name).join(' › ');
+    breadcrumb.textContent = '// ' + path;
+
+    const t = svgEl.transition().duration(700).ease(d3.easeCubicInOut);
+    const interp = d3.interpolate(v0, v1);
+    t.tween('zoom', () => tt => applyZoom(interp(tt)));
+
+    // Dim circles outside focus
+    node.classed('dimmed', n => {
+      if (d === root) return false;
+      // dim if not a descendant of focused node and not an ancestor
+      return !n.ancestors().includes(d) && !d.ancestors().includes(n) && n !== d;
+    });
+  }
+
+  // Click background / root to zoom out
+  svgEl.on('click', (event) => {
+    if (focus !== root) zoomTo(focus.parent || root);
+  });
+
+  document.getElementById('reset-btn').onclick = () => {
+    zoomTo(root);
+    node.classed('dimmed', false);
+  };
+
+  // Initial position
+  applyZoom(viewState);
+
+  // ── LEGEND ──
+  const legendEl = document.getElementById('legend');
+  legendEl.innerHTML = '';
+
+  if (root.children) {
+    root.children.forEach((cat, i) => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `
+        <div class="legend-dot" style="background:${CATEGORY_COLORS[i]}"></div>
+        <span>${cat.data.name}</span>
+      `;
+      item.addEventListener('click', () => {
+        item.classList.toggle('active');
+        zoomTo(cat);
+      });
+      legendEl.appendChild(item);
+    });
+  }
+
+  // ── KEYBOARD ROW NAVIGATION between depth-1 nodes ──
+  const focusableNodes = document.querySelectorAll('circle[tabindex="0"]');
+  focusableNodes.forEach((el, i) => {
+    el.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' && focusableNodes[i + 1]) {
+        focusableNodes[i + 1].focus();
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowLeft' && focusableNodes[i - 1]) {
+        focusableNodes[i - 1].focus();
+        e.preventDefault();
+      }
+    });
+  });
+}
+
+// ════════════════════════════════════════════════
+// RESPONSIVE REDRAW
+// ════════════════════════════════════════════════
+let master   = null;
+let resizeTimer;
+
+new ResizeObserver(() => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (master) buildChart(master);
+  }, 150);
+}).observe(document.getElementById('slide-01'));
+
+// ════════════════════════════════════════════════
+// DATA LOAD
+// ════════════════════════════════════════════════
+d3.json('./circle-packing/data.json')
+  .then(data => {
+    master = data;
+    buildChart(data);
+  })
+  .catch(err => {
+    console.warn('[circle-packing] data.json not found:', err);
+    d3.select('#chart')
+      .attr('viewBox', '0 0 600 80')
+      .attr('height', 80)
+      .append('text')
+        .attr('x', 300).attr('y', 40)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'JetBrains Mono, monospace')
+        .attr('font-size', 12)
+        .attr('fill', '#797C7F')
+        .text('// data not found — add ./circle-packing/data.json');
+  });
+</script>
+</body>
+</html>

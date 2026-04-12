@@ -1,0 +1,19 @@
+{
+  "_schema": {
+    "description": "Bilateral flow matrix between six sectors. matrix[i][j] = flow volume from entity i to entity j. Used to drive a D3 chord diagram.",
+    "fields": {
+      "names": "string[] — ordered list of entity/node labels. Length N.",
+      "matrix": "number[][] — NxN symmetric or asymmetric flow matrix. matrix[i][i] must be 0. Non-zero matrix[i][j] draws a ribbon between node i and node j whose width at each end is proportional to the directional value."
+    },
+    "replace": "Swap 'names' with your entity labels and 'matrix' with your real flow values. The matrix does not need to be symmetric — different values for matrix[i][j] vs matrix[j][i] represent asymmetric flows. Zero values suppress that ribbon entirely. Keep matrix[i][i] = 0."
+  },
+  "names": ["Technology", "Finance", "Healthcare", "Energy", "Education", "Policy"],
+  "matrix": [
+    [ 0,  28,  14,  19,  22,  11],
+    [28,   0,  32,  25,  10,  18],
+    [14,  32,   0,  12,  30,  24],
+    [19,  25,  12,   0,   8,  35],
+    [22,  10,  30,   8,   0,  20],
+    [11,  18,  24,  35,  20,   0]
+  ]
+}

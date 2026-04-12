@@ -16,7 +16,7 @@
     :root {
       --p1: #1B1B1B; /* obsidian — primary text          WCAG 18.2:1 */
       --p2: #5C3317; /* walnut — primary accent           WCAG 10.7:1 */
-      --p3: #B52C2C; /* blood-red — danger/emphasis       WCAG  5.8:1 */
+      --p3: #7A0000; /* blood-red — danger/emphasis       WCAG  5.8:1 */
       --p4: #F7FAFD; /* sky-faint — highlight/callout              — */
       --p5: #4A4D4F; /* dim-gray — secondary accent       WCAG  9.4:1 */
       --p6: #797C7F; /* mist — muted accent               WCAG  4.6:1 */
@@ -476,7 +476,7 @@
         .attr('y', d => y(d.sector))
         .attr('height', y.bandwidth())
         .attr('width', 0)                       // animate from 0
-        .attr('fill', d => d.adoption < median ? '#B52C2C' : '#5C3317')
+        .attr('fill', d => d.adoption < median ? '#7A0000' : '#5C3317')
         .attr('tabindex', 0)
         .attr('role', 'img')
         .attr('aria-label', d => `${d.sector}: ${d.adoption}% adoption — ${d.note}`)
@@ -488,7 +488,7 @@
           );
         })
         .on('mouseleave', function (event, d) {
-          d3.select(this).attr('fill', d.adoption < median ? '#B52C2C' : '#5C3317');
+          d3.select(this).attr('fill', d.adoption < median ? '#7A0000' : '#5C3317');
           hideTip();
         })
         .on('keydown', function (event, d) {
@@ -545,7 +545,7 @@
     // ── LEGEND ──────────────────────────────────────────────────
     const legendData = [
       { label: 'Above median', color: '#5C3317', pattern: 'solid' },
-      { label: 'Below median', color: '#B52C2C', pattern: 'solid' }
+      { label: 'Below median', color: '#7A0000', pattern: 'solid' }
     ];
 
     const legend = g.append('g')
@@ -598,7 +598,7 @@
     ro.observe(document.getElementById('chart-container'));
   }).catch(err => {
     document.getElementById('chart-container').innerHTML =
-      `<p style="padding:2rem;font-size:13px;color:#B52C2C;">Data file not found. Place data.json in ./bar-chart/data.json</p>`;
+      `<p style="padding:2rem;font-size:13px;color:#7A0000;">Data file not found. Place data.json in ./bar-chart/data.json</p>`;
     console.error('D3 data load error:', err);
   });
 
