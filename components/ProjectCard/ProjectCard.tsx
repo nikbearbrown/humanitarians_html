@@ -3,7 +3,7 @@ import type { Project } from "@/types"
 
 export default function ProjectCard({ project }: { project: Project }) {
   return (
-    <div className="flex flex-col h-full bg-black text-white dark:bg-gray-800 rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-black text-white dark:bg-neutral-800 rounded-lg overflow-hidden">
       <div className="relative h-[200px] w-full overflow-hidden">
         <div className="flex items-center justify-center h-full">
           {project.icon ? (

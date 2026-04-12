@@ -6,7 +6,7 @@
   :root {
     /* HAI palette — Le Monde / walnut
      * p1 #1B1B1B  obsidian   — primary text        17.22:1 AAA
-     * p2 #B52C2C  blood-red  — primary + danger       6.25:1 AA
+     * p2 #7A0000  blood-red  — primary + danger       11.5:1 AAA
      * p4 #A89068  warm-clay  — callout surface       3.06:1 AA large
      * p5 #4A4D4F  dim-gray   — secondary accent      8.52:1 AAA
      * p6 #797C7F  mist       — muted text            4.2:1  AA large
@@ -14,7 +14,7 @@
      * p8 #FFFFFF  pure-white — page background
      */
     --hai-obsidian:  #1B1B1B;
-    --hai-blood-red: #B52C2C;
+    --hai-blood-red: #7A0000;
     --hai-warm-clay: #A89068;
     --hai-dim-gray:  #4A4D4F;
     --hai-mist:      #797C7F;
@@ -28,42 +28,42 @@
     --card-foreground:        0 0% 11%;
     --popover:                0 0% 100%;
     --popover-foreground:     0 0% 11%;
-    --primary:                0 61% 44%;    /* blood-red #B52C2C */
+    --primary:                0 100% 24%;   /* blood-red #7A0000 */
     --primary-foreground:     0 0% 100%;
     --secondary:              38 40% 97%;   /* warm-white tint — section alt bg */
     --secondary-foreground:   0 0% 11%;
     --muted:                  38 40% 97%;   /* warm-white tint — section alt bg */
-    --muted-foreground:       211 2% 49%;   /* mist        */
+    --muted-foreground:       0 0% 49%;     /* mist        */
     --accent:                 38 27% 53%;   /* warm-clay   */
     --accent-foreground:      0 0% 11%;     /* obsidian (4.9:1 on warm-clay) */
-    --destructive:            0 61% 44%;    /* blood-red   */
+    --destructive:            0 100% 24%;   /* blood-red   */
     --destructive-foreground: 0 0% 100%;
     --border:                 0 0% 56%;     /* silver #8F8F8F */
     --input:                  0 0% 56%;
-    --ring:                   0 61% 44%;    /* blood-red   */
+    --ring:                   0 100% 24%;   /* blood-red   */
     --radius:                 0.5rem;
   }
 
   .dark {
     --background:             0 0% 9%;
     --foreground:             0 0% 96%;
-    --card:                   204 3% 13%;
+    --card:                   0 0% 13%;
     --card-foreground:        0 0% 96%;
-    --popover:                204 3% 13%;
+    --popover:                0 0% 13%;
     --popover-foreground:     0 0% 96%;
-    --primary:                0 65% 55%;    /* lighter blood-red for dark bg */
+    --primary:                0 100% 35%;   /* lighter blood-red for dark bg */
     --primary-foreground:     0 0% 100%;
-    --secondary:              204 4% 20%;
+    --secondary:              0 0% 20%;
     --secondary-foreground:   0 0% 96%;
-    --muted:                  204 4% 17%;
-    --muted-foreground:       211 3% 63%;
+    --muted:                  0 0% 17%;
+    --muted-foreground:       0 0% 63%;
     --accent:                 38 22% 32%;   /* muted warm-clay for dark */
     --accent-foreground:      0 0% 96%;
-    --destructive:            0 55% 50%;
+    --destructive:            0 100% 38%;
     --destructive-foreground: 0 0% 100%;
-    --border:                 204 4% 30%;
-    --input:                  204 4% 30%;
-    --ring:                   0 65% 55%;
+    --border:                 0 0% 30%;
+    --input:                  0 0% 30%;
+    --ring:                   0 100% 35%;
   }
 }
 

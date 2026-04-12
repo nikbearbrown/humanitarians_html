@@ -29,7 +29,7 @@ export default function CompliancePage() {
             </p>
             
             <div className="grid gap-4 mt-6">
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+              <div className="p-4 bg-white dark:bg-neutral-800 rounded-lg border border-primary/20">
                 <h3 className="text-xl font-bold mb-2 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -45,7 +45,7 @@ export default function CompliancePage() {
                 </ul>
               </div>
               
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+              <div className="p-4 bg-white dark:bg-neutral-800 rounded-lg border border-primary/20">
                 <h3 className="text-xl font-bold mb-2 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -59,7 +59,7 @@ export default function CompliancePage() {
                 </ul>
               </div>
               
-              <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-primary/20">
+              <div className="p-4 bg-white dark:bg-neutral-800 rounded-lg border border-primary/20">
                 <h3 className="text-xl font-bold mb-2 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -358,7 +358,7 @@ export default function CompliancePage() {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="mt-6 p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                   <h4 className="font-bold mb-2">Campaign Settings</h4>
                   <ul className="space-y-1">
                     <li><strong>Bidding Strategy:</strong> Maximize Conversions (conversion-based bidding)</li>
@@ -615,13 +615,13 @@ export default function CompliancePage() {
                   <h3 className="text-xl font-bold mb-4">1. Fellows Program</h3>
                   <p className="mb-4">Our fellowship program bridges the gap between graduation and career through hands-on AI experience, mentorship, and portfolio development.</p>
                   <div className="grid gap-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/mentors" className="text-primary hover:underline">Mentor Recruitment</a>
                       </h4>
                       <p className="text-sm">Targeting experienced AI professionals for volunteer mentorship roles</p>
                     </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/fellows" className="text-primary hover:underline">OPT Eligible Program</a>
                       </h4>
@@ -634,13 +634,13 @@ export default function CompliancePage() {
                   <h3 className="text-xl font-bold mb-4">2. AI for Good</h3>
                   <p className="mb-4">Research and software solutions that promote transparency, fairness, and accountability in AI systems.</p>
                   <div className="grid gap-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/consulting" className="text-primary hover:underline">Nonprofit AI Solutions</a>
                       </h4>
                       <p className="text-sm">Targeting organizations seeking technological assistance</p>
                     </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/projects" className="text-primary hover:underline">AI Projects</a>
                       </h4>
@@ -653,13 +653,13 @@ export default function CompliancePage() {
                   <h3 className="text-xl font-bold mb-4">3. Lyrical Literacy</h3>
                   <p className="mb-4">AI-powered tools that enhance language acquisition and cognitive development through music and singing.</p>
                   <div className="grid gap-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/cognitive-development" className="text-primary hover:underline">Cognitive Development</a>
                       </h4>
                       <p className="text-sm">YouTube videos and Spotify songs designed to "exercise the brain"</p>
                     </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/brain-music" className="text-primary hover:underline">Scientific Awareness</a>
                       </h4>
@@ -672,13 +672,13 @@ export default function CompliancePage() {
                   <h3 className="text-xl font-bold mb-4">4. Botspeak</h3>
                   <p className="mb-4">Framework and resources to become fluent in communicating with and utilizing AI systems effectively.</p>
                   <div className="grid gap-4">
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/graduate-ai-fluency" className="text-primary hover:underline">Graduate AI Fluency</a>
                       </h4>
                       <p className="text-sm">For recent graduates learning AI communication skills</p>
                     </div>
-                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="p-4 bg-gray-50 dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
                         <a href="https://www.humanitarians.ai/professional-ai-fluency" className="text-primary hover:underline">Professional AI Fluency</a>
                       </h4>

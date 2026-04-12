@@ -16,7 +16,7 @@ export default function ResumeDesign() {
         {/* ===== HERO SECTION ===== */}
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">The  Strategic Minimalism Resume Strategy</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+          <p className="text-xl text-gray-600 dark:text-neutral-400 mb-8">
             Designing for ATS Compliance and Human Persuasion in the Age of LLMs
           </p>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">

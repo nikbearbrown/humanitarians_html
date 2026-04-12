@@ -330,7 +330,7 @@ export default function EditFellowPage() {
                 Temp password — copy now. Cannot be recovered after leaving this page.
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-white dark:bg-gray-900 border rounded px-3 py-2 text-sm font-mono select-all">
+                <code className="flex-1 bg-white dark:bg-neutral-900 border rounded px-3 py-2 text-sm font-mono select-all">
                   {tempPassword}
                 </code>
                 <Button variant="outline" size="sm" onClick={copyPassword} className="gap-1">

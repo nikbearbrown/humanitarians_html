@@ -30,7 +30,7 @@ export default function FellowsFilter({
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             filter === "current"
               ? "bg-foreground text-background"
-              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-gray-100 dark:bg-neutral-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
           }`}
         >
           Current Fellows
@@ -40,7 +40,7 @@ export default function FellowsFilter({
           className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
             filter === "alumni"
               ? "bg-foreground text-background"
-              : "bg-gray-100 dark:bg-gray-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
+              : "bg-gray-100 dark:bg-neutral-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
           }`}
         >
           Alumni
@@ -74,7 +74,7 @@ export default function FellowsFilter({
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     project.open
                       ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+                      : "bg-gray-100 text-gray-600 dark:bg-neutral-700 dark:text-neutral-400"
                   }`}
                 >
                   {project.open ? "Open" : "Closed"}
@@ -121,7 +121,7 @@ export default function FellowsFilter({
                     return (
                       <div
                         key={fellow.id}
-                        className="border rounded-lg p-5 bg-background dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
+                        className="border rounded-lg p-5 bg-background dark:bg-neutral-800 hover:shadow-md transition-shadow flex flex-col"
                       >
                         <div className="flex items-center gap-3 mb-3">
                           {/* Avatar */}
@@ -132,7 +132,7 @@ export default function FellowsFilter({
                               className="w-10 h-10 rounded-full object-cover"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                               {getInitials(fellow.name)}
                             </div>
                           )}
@@ -150,7 +150,7 @@ export default function FellowsFilter({
                                 </span>
                               )}
                               {fellow.status === "alumni" && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-silver text-foreground dark:bg-neutral-700 dark:text-neutral-200">
                                   Alumni
                                 </span>
                               )}

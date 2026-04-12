@@ -206,7 +206,7 @@ export default function FellowDashboard() {
   return (
     <div className="flex flex-col w-full">
       {/* Profile Preview */}
-      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-neutral-800">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold tracking-tighter">My Profile</h1>
@@ -220,7 +220,7 @@ export default function FellowDashboard() {
                 {fellow.photo_url ? (
                   <img src={fellow.photo_url} alt={fellow.name} className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-lg font-medium text-muted-foreground flex-shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-lg font-medium text-muted-foreground flex-shrink-0">
                     {getInitials(fellow.name)}
                   </div>
                 )}
@@ -230,7 +230,7 @@ export default function FellowDashboard() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       fellow.status === 'current'
                         ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                        : 'bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200'
+                        : 'bg-silver text-foreground dark:bg-neutral-700 dark:text-neutral-200'
                     }`}>
                       {fellow.status === 'current' ? 'Current Fellow' : 'Alumni'}
                     </span>
@@ -266,7 +266,7 @@ export default function FellowDashboard() {
       </section>
 
       {/* Edit Profile */}
-      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-neutral-900">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -361,7 +361,7 @@ export default function FellowDashboard() {
       </section>
 
       {/* Submit Report */}
-      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-neutral-800">
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <Card>
             <CardHeader>
@@ -420,7 +420,7 @@ export default function FellowDashboard() {
                     : report.content
                   const project = myProjects.find((p) => p.id === report.project_id)
                   return (
-                    <div key={report.id} className="border rounded-lg p-4 bg-background dark:bg-gray-800">
+                    <div key={report.id} className="border rounded-lg p-4 bg-background dark:bg-neutral-800">
                       <div className="flex items-center gap-2 mb-1">
                         <time className="text-xs font-medium text-muted-foreground">
                           {new Date(report.created_at).toLocaleDateString('en-US', {
@@ -428,7 +428,7 @@ export default function FellowDashboard() {
                           })}
                         </time>
                         {project && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-neutral-700 text-gray-600 dark:text-neutral-400">
                             {project.name}
                           </span>
                         )}

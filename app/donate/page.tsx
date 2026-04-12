@@ -16,7 +16,7 @@ export default function DonatePage() {
         {/* Primary Donation Options - Card Layout */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           {/* GoFundMe Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
             <div className="text-center space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">GoFundMe Campaign</h2>
@@ -30,7 +30,7 @@ export default function DonatePage() {
             </div>
           </div>
           {/* PayPal Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow">
+          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
             <div className="text-center space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Direct Donation</h2>
@@ -45,7 +45,7 @@ export default function DonatePage() {
           </div>
         </div>
         {/* Additional Support Options */}
-        <div className="mt-16 bg-muted dark:bg-gray-800 p-8 rounded-lg border dark:border-gray-700">
+        <div className="mt-16 bg-muted dark:bg-neutral-800 p-8 rounded-lg border dark:border-neutral-700">
           <h2 className="text-2xl font-bold mb-4">Other Ways to Support</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
@@ -54,7 +54,7 @@ export default function DonatePage() {
                 Partner with us to support our mission and demonstrate your commitment to ethical AI.
               </p>
               <Link href="mailto:info@humanitarians.ai">
-                <Button variant="outline" className="dark:border-gray-700">
+                <Button variant="outline" className="dark:border-neutral-700">
                   Learn More
                 </Button>
               </Link>
@@ -65,7 +65,7 @@ export default function DonatePage() {
                 Contribute your skills and time to help us develop AI solutions for social good.
               </p>
               <Link href="https://www.humanitarians.ai/fellows">
-                <Button variant="outline" className="dark:border-gray-700">
+                <Button variant="outline" className="dark:border-neutral-700">
                   Get Involved
                 </Button>
               </Link>

@@ -36,7 +36,7 @@ export default async function ProjectFellows({
         {pms.map((pm) => (
           <div
             key={pm.id}
-            className="flex items-center gap-4 mb-8 p-4 border rounded-lg bg-muted dark:bg-gray-900"
+            className="flex items-center gap-4 mb-8 p-4 border rounded-lg bg-muted dark:bg-neutral-900"
           >
             {pm.photo_url ? (
               <img
@@ -45,7 +45,7 @@ export default async function ProjectFellows({
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                 {getInitials(pm.name)}
               </div>
             )}
@@ -74,7 +74,7 @@ export default async function ProjectFellows({
             {others.map((fellow) => (
               <div
                 key={fellow.id}
-                className="border rounded-lg p-5 bg-background dark:bg-gray-800 hover:shadow-md transition-shadow flex flex-col"
+                className="border rounded-lg p-5 bg-background dark:bg-neutral-800 hover:shadow-md transition-shadow flex flex-col"
               >
                 <div className="flex items-center gap-3 mb-3">
                   {fellow.photo_url ? (
@@ -84,7 +84,7 @@ export default async function ProjectFellows({
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-sm font-medium text-muted-foreground">
                       {getInitials(fellow.name)}
                     </div>
                   )}

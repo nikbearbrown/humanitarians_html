@@ -82,7 +82,7 @@ export default async function FellowProfilePage({
   return (
     <div className="flex flex-col w-full">
       {/* Profile Header */}
-      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-neutral-800">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <div className="flex items-start gap-5">
             {/* Avatar */}
@@ -93,7 +93,7 @@ export default async function FellowProfilePage({
                 className="w-20 h-20 rounded-full object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xl font-medium text-muted-foreground flex-shrink-0">
+              <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-neutral-700 flex items-center justify-center text-xl font-medium text-muted-foreground flex-shrink-0">
                 {getInitials(fellow.name)}
               </div>
             )}
@@ -106,7 +106,7 @@ export default async function FellowProfilePage({
                   className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                     fellow.status === "current"
                       ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                      : "bg-silver text-foreground dark:bg-gray-700 dark:text-gray-200"
+                      : "bg-silver text-foreground dark:bg-neutral-700 dark:text-neutral-200"
                   }`}
                 >
                   {fellow.status === "current" ? "Current Fellow" : "Alumni"}
@@ -159,7 +159,7 @@ export default async function FellowProfilePage({
       </section>
 
       {/* Projects Section */}
-      <section className="w-full py-12 md:py-20 bg-muted dark:bg-gray-900">
+      <section className="w-full py-12 md:py-20 bg-muted dark:bg-neutral-900">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold mb-6">Projects</h2>
           {fellow.projects.length === 0 ? (
@@ -174,7 +174,7 @@ export default async function FellowProfilePage({
                 return (
                   <div
                     key={fp.id}
-                    className="border rounded-lg p-5 bg-background dark:bg-gray-800"
+                    className="border rounded-lg p-5 bg-background dark:bg-neutral-800"
                   >
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <a
@@ -189,7 +189,7 @@ export default async function FellowProfilePage({
                         className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           project.open
                             ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+                            : "bg-gray-100 text-gray-600 dark:bg-neutral-700 dark:text-neutral-400"
                         }`}
                       >
                         {project.open ? "Open" : "Closed"}
@@ -207,7 +207,7 @@ export default async function FellowProfilePage({
       </section>
 
       {/* Reports Section */}
-      <section className="w-full py-12 md:py-20 bg-background dark:bg-gray-800">
+      <section className="w-full py-12 md:py-20 bg-background dark:bg-neutral-800">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold mb-6">Learning Reports</h2>
           {reports.length === 0 ? (
@@ -231,10 +231,10 @@ export default async function FellowProfilePage({
 
       {/* Alumni Contact Section (conditional) */}
       {fellow.status === "alumni" && fellow.willing_to_be_contacted && (
-        <section className="w-full py-12 bg-muted dark:bg-gray-900">
+        <section className="w-full py-12 bg-muted dark:bg-neutral-900">
           <div className="container px-4 md:px-6 mx-auto max-w-3xl">
             {viewer ? (
-              <div className="border rounded-lg p-6 bg-background dark:bg-gray-800">
+              <div className="border rounded-lg p-6 bg-background dark:bg-neutral-800">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
                   Open to connecting with current fellows
                 </p>

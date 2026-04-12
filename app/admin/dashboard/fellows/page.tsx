@@ -70,7 +70,7 @@ export default function FellowsAdminPage() {
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               statusFilter === s
                 ? 'bg-foreground text-background'
-                : 'bg-gray-100 dark:bg-gray-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700'
+                : 'bg-gray-100 dark:bg-neutral-800 text-muted-foreground hover:bg-gray-200 dark:hover:bg-gray-700'
             }`}
           >
             {s === 'all' ? 'All' : s === 'current' ? 'Current' : 'Alumni'}

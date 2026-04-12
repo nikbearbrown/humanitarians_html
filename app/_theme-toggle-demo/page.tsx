@@ -61,17 +61,17 @@ export default function ThemeToggleDemo() {
         </div>
 
         <div className="space-y-8">
-          <div className="p-6 bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700">
+          <div className="p-6 bg-white dark:bg-neutral-800 rounded-lg border dark:border-neutral-700">
             <h3 className="text-xl font-bold mb-2">Light and Dark Mode Example</h3>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-gray-700 dark:text-neutral-300">
               This box changes appearance based on the current theme. In light mode, it has a white background. In dark
               mode, it has a dark background.
             </p>
           </div>
 
-          <div className="p-6 bg-gray-100 dark:bg-gray-900 rounded-lg border dark:border-gray-700">
+          <div className="p-6 bg-gray-100 dark:bg-neutral-900 rounded-lg border dark:border-neutral-700">
             <h3 className="text-xl font-bold mb-2">Another Example</h3>
-            <p className="text-gray-700 dark:text-gray-300">
+            <p className="text-gray-700 dark:text-neutral-300">
               Different components can have different styling based on the theme.
             </p>
           </div>
