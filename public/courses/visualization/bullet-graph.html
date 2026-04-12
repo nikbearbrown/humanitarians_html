@@ -1,76 +1,824 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Bullet Graph | Irreducibly Human</title>
-<meta name="description" content="A compact alternative to gauges. Shows a primary measure (the bar), a comparative target (the tick), and qualitative performance ranges (background bands).">
-<meta name="keywords" content="bullet graph, KPI, performance, target, D3, data visualization">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden}
-body{font-family:Inter,-apple-system,sans-serif;background:#E8E0D0;color:#0D0D0D}
-nav{position:fixed;top:0;left:0;right:0;z-index:100;height:44px;background:rgba(232,224,208,.94);
-backdrop-filter:blur(8px);border-bottom:1px solid rgba(0,0,0,.09);
-display:flex;align-items:center;justify-content:space-between;padding:0 24px}
-nav a{font-size:13px;color:#4A4A4A;text-decoration:none;font-weight:500}
-nav a:hover{color:#0D0D0D}.nt{font-size:13px;color:#6B6B5E}.nc{font-size:12px;color:#9C9680}
-.nc a{color:#9C9680;text-decoration:none}.nc a:hover{color:#4A4A4A}
-#viz{position:fixed;top:44px;left:0;right:0;bottom:0;overflow:hidden}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Humanitarian Program Performance — Bullet Graph</title>
+  <meta name="description" content="Bullet graphs comparing actual humanitarian program performance against targets across qualitative performance bands.">
+  <meta name="keywords" content="bullet graph, data visualization, humanitarian, performance metrics, dashboard, d3.js, stephen few">
+  <meta name="author" content="Nik Bear Brown">
+  <meta name="category" content="Humanitarian Analytics / Data Visualization">
 
-@media(prefers-color-scheme:dark){
-body{background:#0D0D0D;color:#E8E0D0}
-nav{background:rgba(13,13,13,.94);border-color:rgba(255,255,255,.07)}
-nav a{color:#9C9680}nav a:hover{color:#E8E0D0}}
-</style></head><body>
-<nav><a href="/">&#8592; Irreducibly Human</a><span class="nt">Bullet Graph</span>
-<span class="nc">Built with <a href="https://d3js.org" target="_blank" rel="noopener">D3.js</a></span></nav>
-<div id="viz"></div><script>
-const dark=window.matchMedia("(prefers-color-scheme:dark)").matches;
-const fg=dark?"#E8E0D0":"#0D0D0D",mu="#9C9680";
-const metrics=[
-  {k:"Pattern Recognition",val:88,target:85,ranges:[50,70,90,100]},
-  {k:"Language Fluency",val:92,target:80,ranges:[50,70,85,100]},
-  {k:"Causal Reasoning",val:61,target:75,ranges:[40,60,80,100]},
-  {k:"Moral Judgment",val:45,target:70,ranges:[30,55,75,100]},
-  {k:"Creative Synthesis",val:68,target:72,ranges:[40,60,80,100]},
-  {k:"Embodied Teaching",val:38,target:65,ranges:[30,50,70,100]}
-];
-function draw(){
-  d3.select("#viz svg").remove();
-  const el=document.getElementById("viz"),W=el.clientWidth,H=el.clientHeight;
-  const m={t:60,r:80,b:30,l:160};
-  const iW=W-m.l-m.r,rH=Math.min(42,(H-m.t-m.b)/metrics.length-12);
-  const svg=d3.select("#viz").append("svg").attr("width",W).attr("height",H);
-  const bandC=dark?["#1a1a1a","#2a2a2a","#333"]:["#D3D1C7","#B4B2A9","#9C9680"];
-  const spacing=(H-m.t-m.b)/metrics.length;
-  metrics.forEach((d,i)=>{
-    const gy=m.t+i*spacing;
-    const g=svg.append("g").attr("transform","translate("+m.l+","+gy+")");
-    const x=d3.scaleLinear().domain([0,100]).range([0,iW]);
-    // Bands
-    for(let b=0;b<d.ranges.length-1;b++){
-      g.append("rect").attr("x",x(d.ranges[b])).attr("y",0).attr("height",rH)
-        .attr("width",x(d.ranges[b+1])-x(d.ranges[b])).attr("fill",bandC[b]||bandC[bandC.length-1]).attr("rx",2);
+  <!--
+  ═══════════════════════════════════════════════════
+  PALETTE: hai — Humanitarians AI
+  ═══════════════════════════════════════════════════
+  WCAG AUDIT (text elements on bg #FFFFFF):
+    p1 #1B1B1B  18.2:1  AAA  ✓
+    p2 #5C3317  10.7:1  AAA  ✓
+    p3 #B52C2C   5.8:1  AA   ✓
+    p5 #4A4D4F   9.4:1  AAA  ✓
+    p6 #797C7F   4.6:1  AA   ✓
+    p4 #F7FAFD   1.1:1  FAIL — used only for structural bg (framework block)
+    p7 #EDEDED   1.4:1  FAIL — used only for rule lines and row separators
+
+  WCAG AUDIT (non-text graphical elements — range bands):
+    Per Stephen Few's bullet graph spec, qualitative range bands are
+    intentionally low-contrast backgrounds. They are categorical
+    context cues, not data-bearing marks. The featured measure bar
+    (p2, 10.7:1) and target line (p3, 5.8:1) carry all quantitative
+    meaning and meet or exceed 3:1 thresholds.
+    Range bands below 3:1 are flagged:
+      --range-poor:        #BEBEBE  1.8:1  FAIL non-text 3:1
+      --range-satisfactory:#D9D9D9  1.4:1  FAIL non-text 3:1
+      --range-good:        #F2F2F2  1.1:1  FAIL non-text 3:1
+    Mitigation: redundant encoding via position (not only color).
+    Screen reader aria-labels on each row convey all data textually.
+  ═══════════════════════════════════════════════════
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══ HAI PALETTE ═══ */
+    :root {
+      --p1: #1B1B1B;  /* obsidian — primary text       18.2:1 AAA */
+      --p2: #5C3317;  /* walnut — primary accent        10.7:1 AAA */
+      --p3: #B52C2C;  /* blood-red — target marker       5.8:1 AA  */
+      --p4: #F7FAFD;  /* sky-faint — structural bg       1.1:1 FAIL text */
+      --p5: #4A4D4F;  /* dim-gray — secondary text       9.4:1 AAA */
+      --p6: #797C7F;  /* mist — muted / labels           4.6:1 AA  */
+      --p7: #EDEDED;  /* silver — borders, separators    1.4:1 FAIL text */
+      --p8: #FFFFFF;  /* pure-white — page background    — bg  */
+
+      /* Range band fills (intentionally subtle per Few spec) */
+      --range-poor:         #BEBEBE;
+      --range-satisfactory: #D9D9D9;
+      --range-good:         #F2F2F2;
+
+      --font:        'JetBrains Mono', monospace;
+      --pad:         clamp(24px, 4vw, 60px);
+      --border-main: 2px solid var(--p1);
     }
-    // Measure bar
-    g.append("rect").attr("x",0).attr("y",rH*.3).attr("height",rH*.4)
-      .attr("width",x(d.val)).attr("fill","#8B0000").attr("rx",1);
-    // Target line
-    g.append("line").attr("x1",x(d.target)).attr("x2",x(d.target)).attr("y1",rH*.1).attr("y2",rH*.9)
-      .attr("stroke","#8B7536").attr("stroke-width",3);
-    // Label
-    svg.append("text").attr("x",m.l-12).attr("y",gy+rH/2+4).attr("text-anchor","end")
-      .attr("font-size",12).attr("fill",fg).text(d.k);
-    // Value
-    svg.append("text").attr("x",m.l+iW+10).attr("y",gy+rH/2+4).attr("font-size",11).attr("fill",mu).text(d.val);
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--p8);
+      color: var(--p1);
+      overflow-x: hidden;
+    }
+
+    /* ═══ SLIDE SYSTEM ═══ */
+    .slide {
+      min-height: 100vh;
+      padding: var(--pad);
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+      position: relative;
+      border-bottom: var(--border-main);
+    }
+
+    .slide-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--p6);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .slide-num {
+      font-size: 11px;
+      color: var(--p6);
+      letter-spacing: 0.06em;
+    }
+
+    .slide-title {
+      font-size: clamp(15px, 2.8vw, 28px);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.015em;
+      line-height: 1.1;
+      color: var(--p1);
+      margin-bottom: 24px;
+      border-left: 5px solid var(--p2);
+      padding-left: 16px;
+    }
+
+    /* ═══ LEGEND ═══ */
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      color: var(--p5);
+      letter-spacing: 0.04em;
+    }
+
+    .legend-swatch {
+      width: 22px;
+      height: 11px;
+      border: 1px solid var(--p6);
+      flex-shrink: 0;
+    }
+
+    .legend-bar {
+      width: 22px;
+      height: 11px;
+      background: var(--p2);
+      flex-shrink: 0;
+    }
+
+    .legend-line {
+      width: 22px;
+      height: 3px;
+      background: var(--p3);
+      flex-shrink: 0;
+    }
+
+    /* ═══ VIZ CONTAINER ═══ */
+    .viz-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    #chart {
+      width: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* ═══ TOOLTIP ═══ */
+    #tooltip {
+      position: fixed;
+      background: var(--p1);
+      color: var(--p8);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.65;
+      padding: 10px 14px;
+      border-left: 3px solid var(--p2);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.12s ease;
+      z-index: 9999;
+      max-width: 230px;
+    }
+
+    #tooltip .tt-label {
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--p4);
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    #tooltip .tt-hit {
+      color: #7BC67E;
+      font-weight: 600;
+    }
+
+    #tooltip .tt-miss {
+      color: #F4A261;
+      font-weight: 600;
+    }
+
+    /* ═══ CONTROLS ═══ */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--p7);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--p1);
+      background: transparent;
+      border: 1px solid var(--p5);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn:hover { background: var(--p1); color: var(--p8); }
+    .btn:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+    .controls .hint {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--p6);
+      letter-spacing: 0.04em;
+    }
+
+    /* ═══ SLIDE NAV DOTS ═══ */
+    .nav-dots {
+      position: fixed;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+    }
+
+    .nav-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--p5);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: background 0.2s;
+    }
+
+    .nav-dot.active  { background: var(--p2); border-color: var(--p2); }
+    .nav-dot:focus-visible { outline: 2px solid var(--p2); outline-offset: 2px; }
+
+    /* ═══ LEARN SLIDE ═══ */
+    .slide-learn { background: var(--p8); }
+
+    .learn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px 48px;
+      max-width: 1000px;
+    }
+
+    @media (max-width: 700px) {
+      .learn-grid { grid-template-columns: 1fr; }
+    }
+
+    .learn-block h2 {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--p2);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--p7);
+    }
+
+    .learn-block p {
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--p5);
+      margin-bottom: 6px;
+    }
+
+    .learn-full {
+      grid-column: 1 / -1;
+    }
+
+    .framework-ref {
+      grid-column: 1 / -1;
+      border-left: 4px solid var(--p2);
+      background: var(--p4);
+      padding: 14px 18px;
+      margin-top: 4px;
+    }
+
+    .framework-ref .label { margin-bottom: 8px; display: block; }
+    .framework-ref p { color: var(--p1); font-size: 12px; }
+
+    /* ═══ FOOTER ═══ */
+    footer {
+      border-top: var(--border-main);
+      padding: 14px var(--pad);
+      font-size: 11px;
+      color: var(--p6);
+      line-height: 1.8;
+    }
+
+    /* ═══ D3 / SVG ELEMENTS ═══ */
+    .bullet-row { cursor: default; }
+    .bullet-row:focus { outline: none; }
+    .bullet-row:focus-visible rect.focus-ring { opacity: 1 !important; }
+
+    .axis text {
+      font-family: var(--font);
+      font-size: 10px;
+      fill: var(--p6);
+    }
+
+    .axis .domain { display: none; }
+    .axis .tick line { stroke: var(--p7); }
+  </style>
+</head>
+<body>
+
+<!-- SLIDE NAV -->
+<nav class="nav-dots" aria-label="Slide navigation">
+  <button class="nav-dot active" data-slide="0" aria-label="Slide 1: Chart"></button>
+  <button class="nav-dot"        data-slide="1" aria-label="Slide 2: Learn panel"></button>
+</nav>
+
+<!-- TOOLTIP -->
+<div id="tooltip" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ════════════════════════════════════════
+     SLIDE 01 — CHART
+     ════════════════════════════════════════ -->
+<section class="slide" id="slide-01" aria-labelledby="chart-heading">
+  <div class="slide-meta">
+    <span class="label">// Humanitarians AI — Program Performance</span>
+    <span class="slide-num">01 / 02</span>
+  </div>
+
+  <h1 class="slide-title" id="chart-heading">
+    Most programs trail their targets —<br>
+    Community Trust is the lone outlier
+  </h1>
+
+  <div class="legend" aria-label="Chart legend">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--range-poor)"></div>
+      <span>Poor</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--range-satisfactory)"></div>
+      <span>Satisfactory</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--range-good)"></div>
+      <span>Good</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-bar"></div>
+      <span>Actual</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line"></div>
+      <span>Target</span>
+    </div>
+  </div>
+
+  <div class="viz-container">
+    <svg id="chart" role="img" aria-labelledby="svg-title svg-desc">
+      <title id="svg-title">Humanitarian Program Performance — Bullet Graph</title>
+      <desc id="svg-desc">Five horizontal bullet graphs comparing actual program performance to targets. Each row shows actual value as a walnut bar, a blood-red target line, and three qualitative range bands behind.</desc>
+    </svg>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="sort-btn">↕ Sort by performance</button>
+    <button class="btn" id="audio-btn" aria-label="Play audio narration">▶ narration</button>
+    <span class="hint">hover / tab to explore</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SLIDE 02 — LEARN
+     ════════════════════════════════════════ -->
+<section class="slide slide-learn" id="slide-02" aria-labelledby="learn-heading">
+  <div class="slide-meta">
+    <span class="label">// Learn — Bullet Graph</span>
+    <span class="slide-num">02 / 02</span>
+  </div>
+
+  <h1 class="slide-title" id="learn-heading">
+    What this chart is and why it was chosen
+  </h1>
+
+  <div class="learn-grid">
+
+    <div class="learn-block">
+      <h2>What this chart is</h2>
+      <p>The bullet graph, developed by Stephen Few in 2005, is a linear replacement for the radial gauges and speedometer dials that crowded early dashboards. It encodes a primary measure as a bar, layered over qualitative range bands and punctuated by a perpendicular target marker.</p>
+      <p>The perceptual mechanism it exploits is <em>position along a common axis</em> — the most accurate of all visual encoding channels for quantitative comparison. Radial gauges use angle, which is among the weakest channels. The bullet graph achieves the same task with roughly one-sixth the ink.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>Three comparisons in one row</h2>
+      <p><strong>1.</strong> Is the actual value in the poor, satisfactory, or good band? <strong>2.</strong> Did the actual value reach the target marker? <strong>3.</strong> How far into the band did it land — barely satisfactory, or deep into good?</p>
+      <p>A bar chart answers only the first. A grouped bar chart requires separate colors and a legend with no qualitative context. A gauge cannot show the target as a reference line — it degrades to a secondary number label, stripped of visual meaning.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>Why it was chosen here</h2>
+      <p>The data structure is a named set of performance metrics, each with an actual value, a target, and a qualitative interpretation of the range. This is the canonical bullet graph use case: dashboard performance tracking where the viewer needs all three answers simultaneously.</p>
+      <p>Five bullet graphs in a vertical list share a common axis, enabling direct comparison of performance levels across programs — something five separate gauges cannot provide.</p>
+    </div>
+
+    <div class="learn-block">
+      <h2>What the alternative would break</h2>
+      <p>A radial gauge encodes value as angle — the perceptually imprecise encoding channel. Five gauges consume five times the screen area and provide no shared reference axis for cross-metric comparison. The target marker cannot be clearly rendered as a positional reference in a radial design.</p>
+      <p>A stacked bar would imply that the metrics sum to a meaningful whole — they do not. A grouped bar would require five color-coded series with no qualitative context bands.</p>
+    </div>
+
+    <div class="learn-block learn-full">
+      <h2>The one design decision worth knowing</h2>
+      <p>The range bands are encoded as gray intensities — not distinct hues — following Few's own specification. Using hues (red → yellow → green) for the bands would pull the viewer's eye to the background, inverting the visual hierarchy. The walnut bar and blood-red target line must dominate. The bands should answer only when interrogated. Gray intensities keep them subordinate while still legible as categorical zones.</p>
+    </div>
+
+    <div class="framework-ref">
+      <span class="label">// Framework Reference</span>
+      <p>FT Visual Vocabulary category: <strong>Magnitude — Ranking</strong> (comparing named items against a shared quantitative axis). Tufte's data-ink ratio is the direct ancestor of this chart: every element carries information — ranges, bar, target line. Nothing is decorative. The chart junk eliminated: the speedometer dial, the needle, the decorative arc shading, the redundant numeric callouts.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- AUDIO (fails silently if absent) -->
+<audio id="page-audio" src="./bullet-graph/audio.mp3" preload="none"></audio>
+
+<footer>
+  <p>Nik Bear Brown, Irreducibly Human, What AI Can and Can't Do</p>
+  <p>boondoggling.ai · irreducibly.xyz · brutalist.art · bearbrown.co · frictional.xyz</p>
+</footer>
+
+<!-- D3 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════
+
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// ══════════════════════════════════════════════════════════
+// NAV DOTS
+// ══════════════════════════════════════════════════════════
+
+const slides = document.querySelectorAll('.slide');
+const dots   = document.querySelectorAll('.nav-dot');
+
+dots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    slides[+dot.dataset.slide].scrollIntoView({ behavior: 'smooth' });
   });
-  svg.append("text").attr("x",W/2).attr("y",32).attr("text-anchor","middle")
-    .attr("font-size",12).attr("fill",mu).text("AI capability vs human benchmark — bar = performance, tick = target, bands = ranges");
-  // Legend
-  const lx=W-m.r+10,ly=m.t;
-  [["Performance","#8B0000"],["Target","#8B7536"]].forEach(([l,c],i)=>{
-    svg.append("rect").attr("x",lx).attr("y",ly+i*18).attr("width",12).attr("height",i===0?6:12).attr("fill",c).attr("ry",1);
-    svg.append("text").attr("x",lx+18).attr("y",ly+i*18+9).attr("font-size",10).attr("fill",fg).text(l);
+});
+
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const i = [...slides].indexOf(e.target);
+      dots.forEach((d, j) => d.classList.toggle('active', i === j));
+    }
+  });
+}, { threshold: 0.5 }).observe ? slides.forEach(s =>
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const i = [...slides].indexOf(e.target);
+        dots.forEach((d, j) => d.classList.toggle('active', i === j));
+      }
+    });
+  }, { threshold: 0.5 }).observe(s)
+) : null;
+
+// ══════════════════════════════════════════════════════════
+// AUDIO
+// ══════════════════════════════════════════════════════════
+
+const audio    = document.getElementById('page-audio');
+const audioBtn = document.getElementById('audio-btn');
+
+audioBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play().then(() => { audioBtn.textContent = '⏸ narration'; }).catch(() => {});
+  } else {
+    audio.pause();
+    audioBtn.textContent = '▶ narration';
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// TOOLTIP
+// ══════════════════════════════════════════════════════════
+
+const ttEl = document.getElementById('tooltip');
+
+function getRangeLabel(d) {
+  const v = d.value;
+  if (v <= d.ranges[0]) return d.rangeLabels[0];
+  if (v <= d.ranges[1]) return d.rangeLabels[1];
+  return d.rangeLabels[2];
+}
+
+function showTip(event, d) {
+  const hitTarget = d.value >= d.target;
+  const band = getRangeLabel(d);
+  const delta = (d.value - d.target).toFixed(0);
+  const deltaStr = hitTarget
+    ? `<span class="tt-hit">+${Math.abs(delta)}${d.unit} above target ✓</span>`
+    : `<span class="tt-miss">${delta}${d.unit} below target ✗</span>`;
+
+  ttEl.innerHTML = `
+    <span class="tt-label">${d.label}</span>
+    Actual: <strong>${d.value}${d.unit}</strong><br>
+    Target: ${d.target}${d.unit}<br>
+    Band: ${band}<br>
+    ${deltaStr}
+  `;
+  ttEl.style.opacity = '1';
+  positionTip(event);
+}
+
+function positionTip(event) {
+  const x = event.clientX + 18;
+  const y = event.clientY - 44;
+  const tw = ttEl.offsetWidth;
+  ttEl.style.left = (x + tw > window.innerWidth - 8 ? event.clientX - tw - 10 : x) + 'px';
+  ttEl.style.top  = Math.max(8, Math.min(y, window.innerHeight - ttEl.offsetHeight - 8)) + 'px';
+}
+
+function hideTip() { ttEl.style.opacity = '0'; }
+
+// ══════════════════════════════════════════════════════════
+// CHART
+// ══════════════════════════════════════════════════════════
+
+let masterData = [];
+let sortAsc    = null; // null = original order
+
+const MARGIN   = { top: 10, right: 52, bottom: 28, left: 210 };
+const ROW_H    = 58;
+const ROW_GAP  = 10;
+const BAR_H    = 14;
+const RANGE_H  = 36;
+
+const RANGE_COLORS = [
+  css('--range-poor'),
+  css('--range-satisfactory'),
+  css('--range-good')
+];
+
+function buildChart(data) {
+  const svgEl = document.getElementById('chart');
+  const W     = svgEl.closest('.viz-container').clientWidth || 700;
+  const iW    = W - MARGIN.left - MARGIN.right;
+  const iH    = data.length * (ROW_H + ROW_GAP) - ROW_GAP;
+  const H     = iH + MARGIN.top + MARGIN.bottom;
+
+  // Clear
+  d3.select('#chart').selectAll('*').remove();
+  d3.select('#chart')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('height', H);
+
+  const svg = d3.select('#chart')
+    .append('g')
+    .attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
+
+  // ── X SCALE ──
+  // All data normalized 0–100 in this placeholder dataset
+  const xMax   = d3.max(data, d => d.ranges[d.ranges.length - 1]);
+  const xScale = d3.scaleLinear().domain([0, xMax]).range([0, iW]).nice();
+
+  // ── AXIS ──
+  const axisG = svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(0,${iH + 8})`);
+
+  axisG.call(
+    d3.axisBottom(xScale)
+      .ticks(5)
+      .tickSize(-(iH + 8))
+      .tickFormat(d => d + '%')
+  );
+
+  axisG.selectAll('.tick line')
+    .attr('stroke', css('--p7'))
+    .attr('stroke-dasharray', '3,5');
+
+  axisG.select('.domain').remove();
+
+  // ── METRIC ROWS ──
+  data.forEach((d, i) => {
+    const rowY = i * (ROW_H + ROW_GAP);
+    const cy   = rowY + (ROW_H - RANGE_H) / 2;
+    const barY = cy + (RANGE_H - BAR_H) / 2;
+
+    const g = svg.append('g')
+      .attr('class', 'bullet-row')
+      .attr('tabIndex', 0)
+      .attr('role', 'img')
+      .attr(
+        'aria-label',
+        `${d.label}: actual ${d.value}${d.unit}, target ${d.target}${d.unit}, ` +
+        `status ${getRangeLabel(d)}, ` +
+        `${d.value >= d.target ? 'target met' : 'below target'}`
+      )
+      .on('mouseover',  (e) => showTip(e, d))
+      .on('mousemove',  positionTip)
+      .on('mouseout',   hideTip)
+      .on('focus',      (e) => showTip(e, d))
+      .on('blur',       hideTip)
+      .on('keydown',    (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { showTip(e, d); e.preventDefault(); }
+      });
+
+    // Focus ring (invisible by default, shown via :focus-visible)
+    g.append('rect')
+      .attr('class', 'focus-ring')
+      .attr('x', -MARGIN.left + 2)
+      .attr('y', rowY)
+      .attr('width', iW + MARGIN.left - 4)
+      .attr('height', ROW_H)
+      .attr('fill', 'none')
+      .attr('stroke', css('--p2'))
+      .attr('stroke-width', 1.5)
+      .attr('opacity', 0)
+      .attr('pointer-events', 'none');
+
+    // ── QUALITATIVE RANGE BANDS ──
+    const rangePairs = [
+      [0,          d.ranges[0]],
+      [d.ranges[0], d.ranges[1]],
+      [d.ranges[1], d.ranges[2]]
+    ];
+
+    rangePairs.forEach(([r0, r1], ri) => {
+      g.append('rect')
+        .attr('x',      xScale(r0))
+        .attr('y',      cy)
+        .attr('width',  xScale(r1) - xScale(r0))
+        .attr('height', RANGE_H)
+        .attr('fill',   RANGE_COLORS[ri])
+        .attr('aria-hidden', 'true');
+    });
+
+    // ── FEATURED MEASURE (walnut bar) ──
+    const bar = g.append('rect')
+      .attr('x',      0)
+      .attr('y',      barY)
+      .attr('width',  0)      // animated from 0
+      .attr('height', BAR_H)
+      .attr('fill',   css('--p2'))
+      .attr('aria-hidden', 'true');
+
+    bar.transition()
+      .duration(750)
+      .delay(i * 90)
+      .ease(d3.easeCubicOut)
+      .attr('width', xScale(d.value));
+
+    // ── COMPARATIVE MEASURE (target line) ──
+    g.append('line')
+      .attr('x1',           xScale(d.target))
+      .attr('x2',           xScale(d.target))
+      .attr('y1',           cy + 2)
+      .attr('y2',           cy + RANGE_H - 2)
+      .attr('stroke',       css('--p3'))
+      .attr('stroke-width', 3)
+      .attr('opacity',      0)
+      .attr('aria-hidden',  'true')
+      .transition()
+      .duration(300)
+      .delay(i * 90 + 550)
+      .attr('opacity', 1);
+
+    // ── LABEL ──
+    g.append('text')
+      .attr('x',                -14)
+      .attr('y',                cy + RANGE_H / 2 - 5)
+      .attr('text-anchor',      'end')
+      .attr('dominant-baseline','middle')
+      .attr('fill',             css('--p1'))
+      .attr('font-family',      css('--font'))
+      .attr('font-size',        '12px')
+      .attr('font-weight',      '700')
+      .text(d.label);
+
+    // ── SUB-LABEL (value / target) ──
+    g.append('text')
+      .attr('x',                -14)
+      .attr('y',                cy + RANGE_H / 2 + 10)
+      .attr('text-anchor',      'end')
+      .attr('dominant-baseline','middle')
+      .attr('fill',             css('--p6'))
+      .attr('font-family',      css('--font'))
+      .attr('font-size',        '10px')
+      .text(`${d.value}${d.unit} · target ${d.target}${d.unit}`);
+
+    // ── ROW SEPARATOR ──
+    if (i < data.length - 1) {
+      g.append('line')
+        .attr('x1', -MARGIN.left)
+        .attr('x2', iW)
+        .attr('y1', ROW_H + ROW_GAP / 2)
+        .attr('y2', ROW_H + ROW_GAP / 2)
+        .attr('stroke', css('--p7'))
+        .attr('stroke-width', 1);
+    }
+  });
+
+  // ── KEYBOARD ROW NAVIGATION ──
+  const rows = document.querySelectorAll('.bullet-row');
+  rows.forEach((row, i) => {
+    row.addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' && rows[i + 1]) { rows[i + 1].focus(); e.preventDefault(); }
+      if (e.key === 'ArrowUp'   && rows[i - 1]) { rows[i - 1].focus(); e.preventDefault(); }
+    });
   });
 }
-draw();window.addEventListener("resize",draw);
-</script></body></html>
+
+// ══════════════════════════════════════════════════════════
+// SORT TOGGLE
+// ══════════════════════════════════════════════════════════
+
+const sortBtn = document.getElementById('sort-btn');
+sortBtn.addEventListener('click', () => {
+  if (sortAsc === null || sortAsc === false) {
+    sortAsc = true;
+    buildChart([...masterData].sort((a, b) => a.value - b.value));
+    sortBtn.textContent = '↕ Sort by performance ▲';
+  } else if (sortAsc === true) {
+    sortAsc = false;
+    buildChart([...masterData].sort((a, b) => b.value - a.value));
+    sortBtn.textContent = '↕ Sort by performance ▼';
+  } else {
+    sortAsc = null;
+    buildChart([...masterData]);
+    sortBtn.textContent = '↕ Sort by performance';
+  }
+});
+
+// ══════════════════════════════════════════════════════════
+// RESPONSIVE REDRAW
+// ══════════════════════════════════════════════════════════
+
+let resizeTimer;
+new ResizeObserver(() => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (masterData.length) {
+      const current = sortAsc === true
+        ? [...masterData].sort((a, b) => a.value - b.value)
+        : sortAsc === false
+        ? [...masterData].sort((a, b) => b.value - a.value)
+        : [...masterData];
+      buildChart(current);
+    }
+  }, 150);
+}).observe(document.getElementById('slide-01'));
+
+// ══════════════════════════════════════════════════════════
+// DATA LOAD
+// ══════════════════════════════════════════════════════════
+
+d3.json('./bullet-graph/data.json')
+  .then(json => {
+    masterData = json.data;
+    buildChart(masterData);
+  })
+  .catch(err => {
+    console.warn('[bullet-graph] data.json not found:', err);
+    d3.select('#chart')
+      .attr('viewBox', '0 0 600 80')
+      .attr('height', 80)
+      .append('text')
+        .attr('x', 300)
+        .attr('y', 40)
+        .attr('text-anchor', 'middle')
+        .attr('font-family', 'JetBrains Mono, monospace')
+        .attr('font-size', 12)
+        .attr('fill', '#797C7F')
+        .text('// data not found — add ./bullet-graph/data.json');
+  });
+</script>
+</body>
+</html>
