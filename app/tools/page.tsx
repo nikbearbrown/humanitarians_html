@@ -89,6 +89,27 @@ export default async function ToolsPage() {
           </p>
         </div>
 
+        {/* Summer 2026 Course Schedule */}
+        <div className="rounded-lg border bg-card p-6 mb-8">
+          <h2 className="text-2xl font-semibold tracking-tight mb-4">Summer 2026 Courses</h2>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-md border p-4">
+              <p className="text-xs text-muted-foreground mb-1">INFO 7375 · CRN 54612</p>
+              <h3 className="font-semibold">ST: Computational Skepticism</h3>
+              <p className="text-sm text-muted-foreground mt-1">Tuesday &amp; Thursday · 1:30 PM – 3:10 PM EST</p>
+              <p className="text-sm text-muted-foreground">Boston Campus · Snell Library · Room 009</p>
+              <p className="text-sm text-muted-foreground">05/06/2026 – 08/16/2026</p>
+            </div>
+            <div className="rounded-md border p-4">
+              <p className="text-xs text-muted-foreground mb-1">INFO 7375 · CRN 54614</p>
+              <h3 className="font-semibold">ST: Branding and AI</h3>
+              <p className="text-sm text-muted-foreground mt-1">Saturday · 12:00 PM – 3:20 PM EST</p>
+              <p className="text-sm text-muted-foreground">Online · Virtual Space</p>
+              <p className="text-sm text-muted-foreground">Instructor: Nina Harris (Primary), Nicholas Brown</p>
+            </div>
+          </div>
+        </div>
+
         <ToolsBrowser tools={allTools} filterTags={filterTags} />
       </div>
     </div>
