@@ -68,7 +68,7 @@ export default async function ToolsPage() {
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-md border p-4">
-              <h3 className="font-semibold">Tuesday</h3>
+              <h3 className="font-semibold">Wednesday</h3>
               <p className="text-sm text-muted-foreground">Office Hours</p>
               <p className="text-sm font-medium">12:30 PM – 1:30 PM EST</p>
             </div>
