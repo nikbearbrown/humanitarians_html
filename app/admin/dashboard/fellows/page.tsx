@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Plus, Upload, Pencil } from 'lucide-react'
+import { Plus, Upload, Pencil, FileText } from 'lucide-react'
 
 interface FellowRow {
   id: string
@@ -103,7 +103,12 @@ export default function FellowsAdminPage() {
                     {fellow.email} · Joined {formatDate(fellow.joined_date)}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 ml-4 flex-wrap">
+                  <Link href={`/admin/dashboard/reports?fellow=${fellow.id}`}>
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <FileText className="h-3.5 w-3.5" /> View Reports
+                    </Button>
+                  </Link>
                   <Link href={`/admin/dashboard/fellows/${fellow.id}/edit`}>
                     <Button variant="outline" size="sm" className="gap-1">
                       <Pencil className="h-3.5 w-3.5" /> Edit

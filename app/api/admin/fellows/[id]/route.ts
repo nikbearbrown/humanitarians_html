@@ -33,6 +33,9 @@ export async function PATCH(
       if (typeof body.willing_to_be_contacted === 'string') {
         body.willing_to_be_contacted = body.willing_to_be_contacted === 'true'
       }
+      if (typeof body.is_admin === 'string') {
+        body.is_admin = body.is_admin === 'true'
+      }
     } else {
       body = await req.json()
     }
@@ -40,6 +43,7 @@ export async function PATCH(
     const {
       name, email, bio, photo_url, status, joined_date,
       linkedin_url, employer, employer_role, willing_to_be_contacted,
+      is_admin: isAdminFlag,
       project_ids, pm_project_id,
     } = body as Record<string, string | boolean | string[] | null | undefined>
 
@@ -55,7 +59,8 @@ export async function PATCH(
         linkedin_url = ${linkedin_url as string ?? null},
         employer = ${employer as string ?? null},
         employer_role = ${employer_role as string ?? null},
-        willing_to_be_contacted = COALESCE(${willing_to_be_contacted as boolean ?? null}, willing_to_be_contacted)
+        willing_to_be_contacted = COALESCE(${willing_to_be_contacted as boolean ?? null}, willing_to_be_contacted),
+        is_admin = COALESCE(${isAdminFlag as boolean ?? null}, is_admin)
       WHERE id = ${id}
     `
 

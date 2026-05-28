@@ -7,11 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Copy, Check } from 'lucide-react'
-
-interface ProjectOption {
-  id: string
-  name: string
-}
+import FellowAssignmentControls, { OTHER_PLACEHOLDER_ID, type ProjectOption } from '../FellowAssignmentControls'
 
 export default function NewFellowPage() {
   const router = useRouter()
@@ -23,6 +19,7 @@ export default function NewFellowPage() {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([])
   const [isPm, setIsPm] = useState(false)
   const [pmProjectId, setPmProjectId] = useState('')
+  const [isAdminFlag, setIsAdminFlag] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [tempPassword, setTempPassword] = useState('')
@@ -49,8 +46,9 @@ export default function NewFellowPage() {
           email,
           status,
           joined_date: joinedDate,
-          project_ids: selectedProjects,
+          project_ids: selectedProjects.filter((id) => id !== OTHER_PLACEHOLDER_ID),
           pm_project_id: isPm ? pmProjectId : null,
+          is_admin: isAdminFlag,
         }),
       })
       const data = await res.json()
@@ -61,12 +59,6 @@ export default function NewFellowPage() {
     } finally {
       setSubmitting(false)
     }
-  }
-
-  function toggleProject(id: string) {
-    setSelectedProjects((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    )
   }
 
   async function copyPassword() {
@@ -144,59 +136,17 @@ export default function NewFellowPage() {
           <Input id="joined" type="date" value={joinedDate} onChange={(e) => setJoinedDate(e.target.value)} />
         </div>
 
-        <div className="space-y-2">
-          <Label>Assign to Projects</Label>
-          <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
-            {projects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No active projects</p>
-            ) : (
-              projects.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedProjects.includes(p.id)}
-                    onChange={() => toggleProject(p.id)}
-                    className="rounded"
-                  />
-                  {p.name}
-                </label>
-              ))
-            )}
-          </div>
-        </div>
-
-        {selectedProjects.length > 0 && (
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={isPm}
-                onChange={(e) => { setIsPm(e.target.checked); if (!e.target.checked) setPmProjectId('') }}
-                className="rounded"
-              />
-              This fellow is a Project Manager
-            </label>
-            {isPm && (
-              <div className="ml-6 space-y-1">
-                {selectedProjects.map((pid) => {
-                  const proj = projects.find((p) => p.id === pid)
-                  return (
-                    <label key={pid} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="pm_project"
-                        value={pid}
-                        checked={pmProjectId === pid}
-                        onChange={() => setPmProjectId(pid)}
-                      />
-                      {proj?.name}
-                    </label>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        <FellowAssignmentControls
+          allProjects={projects}
+          selectedProjects={selectedProjects}
+          onSelectedChange={setSelectedProjects}
+          isPm={isPm}
+          onIsPmChange={setIsPm}
+          pmProjectId={pmProjectId}
+          onPmProjectIdChange={setPmProjectId}
+          isAdminFlag={isAdminFlag}
+          onIsAdminChange={setIsAdminFlag}
+        />
 
         <Button type="submit" disabled={submitting}>
           {submitting ? 'Creating...' : 'Create Fellow'}
