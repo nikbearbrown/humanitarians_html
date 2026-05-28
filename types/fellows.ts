@@ -34,6 +34,8 @@ export type Fellow = {
   bio: string | null
   photo_url: string | null
   status: 'current' | 'alumni'
+  is_admin: boolean
+  is_super_admin: boolean
   joined_date: string
   linkedin_url: string | null
   employer: string | null
@@ -53,12 +55,13 @@ export type FellowProject = {
 export type Report = {
   id: string
   fellow_id: string
-  project_id: string           // required — always linked to a project
+  project_id: string | null
   content: string              // markdown
+  filed_date: string           // YYYY-MM-DD — Monday of the work week this report is for
   created_at: string
 }
 
-export type PublicFellow = Omit<Fellow, 'password_hash' | 'email'>
+export type PublicFellow = Omit<Fellow, 'password_hash' | 'email' | 'is_admin' | 'is_super_admin'>
 
 export type AlumniFellow = PublicFellow & {
   employer: string | null

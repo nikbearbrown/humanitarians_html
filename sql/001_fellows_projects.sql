@@ -27,6 +27,8 @@ CREATE TABLE fellows (
   photo_url               text,
   status                  text        NOT NULL DEFAULT 'current'
                                       CHECK (status IN ('current', 'alumni')),
+  is_admin                boolean     NOT NULL DEFAULT false,
+  is_super_admin          boolean     NOT NULL DEFAULT false,
   joined_date             timestamptz NOT NULL DEFAULT now(),
   linkedin_url            text,
   employer                text,
@@ -46,12 +48,15 @@ CREATE TABLE fellow_projects (
   UNIQUE (fellow_id, project_id)
 );
 
--- Weekly Addams reports: markdown learning documentation submitted by fellows
+-- Weekly Addams reports: markdown learning documentation submitted by fellows.
+-- filed_date stores the WORK WEEK the report is for (Monday of that week).
+-- A work week runs Monday → Sunday. Default is the Monday of the current week.
 CREATE TABLE reports (
   id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   fellow_id  uuid        NOT NULL REFERENCES fellows(id)  ON DELETE CASCADE,
   project_id uuid                 REFERENCES projects(id) ON DELETE SET NULL,
   content    text        NOT NULL,
+  filed_date date        NOT NULL DEFAULT (date_trunc('week', now()))::date,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -59,8 +64,12 @@ CREATE TABLE reports (
 CREATE INDEX idx_fellows_slug       ON fellows (slug);
 CREATE INDEX idx_fellows_email      ON fellows (email);
 CREATE INDEX idx_fellows_status     ON fellows (status);
+CREATE INDEX idx_fellows_is_admin       ON fellows (is_admin);
+CREATE INDEX idx_fellows_is_super_admin ON fellows (is_super_admin);
 CREATE INDEX idx_fp_fellow_id       ON fellow_projects (fellow_id);
 CREATE INDEX idx_fp_project_id      ON fellow_projects (project_id);
 CREATE INDEX idx_reports_fellow_id  ON reports (fellow_id);
+CREATE INDEX idx_reports_filed_date ON reports (filed_date);
+CREATE INDEX idx_reports_created_at ON reports (created_at);
 
 COMMIT;
