@@ -4,6 +4,7 @@ import SecondaryButton from "@/components/ui/secondary-button"
 import { Users, FolderOpen, DoorOpen, GraduationCap } from "lucide-react"
 import FellowsFilter from './FellowsFilter'
 import { getAllProjectsWithFellows } from '@/lib/fellows'
+import { getFellowFromCookies } from '@/lib/fellow-auth'
 
 export const metadata: Metadata = {
   title: "Fellows Program - Humanitarians AI",
@@ -13,7 +14,15 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function FellowsPage() {
-  const projects = await getAllProjectsWithFellows()
+  const [projects, viewer] = await Promise.all([
+    getAllProjectsWithFellows(),
+    getFellowFromCookies(),
+  ])
+  const portalHref = viewer
+    ? viewer.is_super_admin
+      ? '/admin/dashboard'
+      : '/portal/me'
+    : '/portal/login'
 
   // Calculate stats from live data
   const allFellowIds = new Set<string>()
@@ -91,6 +100,14 @@ export default async function FellowsPage() {
               <SecondaryButton href="/projects">View Projects</SecondaryButton>
               <SecondaryButton href="/donate">Support Fellows</SecondaryButton>
             </div>
+
+            {/* Team Portal entry — for existing fellows */}
+            <div className="mt-10 pt-8 border-t border-border max-w-md mx-auto">
+              <p className="text-sm text-muted-foreground mb-3">
+                Already part of the organization?
+              </p>
+              <SecondaryButton href={portalHref}>Team Portal</SecondaryButton>
+            </div>
           </div>
         </div>
       </section>
@@ -144,7 +161,7 @@ export default async function FellowsPage() {
         </div>
       </section>
 
-      {/* Fellows Directory */}
+      {/* Project directory with fellow counts */}
       <section className="w-full py-12 md:py-20 bg-muted dark:bg-neutral-900">
         <div className="container px-4 md:px-6 mx-auto">
           <FellowsFilter projects={projects} />
