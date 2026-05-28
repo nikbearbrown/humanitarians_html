@@ -15,6 +15,8 @@ export async function GET(req: NextRequest) {
     bio: fellow.bio,
     photo_url: fellow.photo_url,
     status: fellow.status,
+    is_admin: fellow.is_admin,
+    is_super_admin: fellow.is_super_admin,
     joined_date: fellow.joined_date,
     linkedin_url: fellow.linkedin_url,
     employer: fellow.employer,
