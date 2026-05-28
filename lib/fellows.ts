@@ -213,12 +213,12 @@ export async function getFellowReports(
   fellowId: string
 ): Promise<ReportWithProject[]> {
   const rows = await sql`
-    SELECT r.id, r.fellow_id, r.project_id, r.content, r.created_at,
+    SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
            p.id AS p_id, p.name AS p_name, p.slug AS p_slug
     FROM reports r
     JOIN projects p ON p.id = r.project_id
     WHERE r.fellow_id = ${fellowId}
-    ORDER BY r.created_at DESC
+    ORDER BY r.filed_date DESC, r.created_at DESC
   `
   return rows.map((row) => {
     const r = row as Record<string, unknown>
@@ -227,12 +227,66 @@ export async function getFellowReports(
       fellow_id: r.fellow_id as string,
       project_id: r.project_id as string,
       content: r.content as string,
+      filed_date: r.filed_date instanceof Date
+        ? r.filed_date.toISOString().slice(0, 10)
+        : String(r.filed_date),
       created_at: r.created_at as string,
       project: {
         id: r.p_id as string,
         name: r.p_name as string,
         slug: r.p_slug as string,
       },
+    }
+  })
+}
+
+export type AdminReport = {
+  id: string
+  fellow_id: string
+  fellow_name: string
+  fellow_slug: string
+  project_id: string | null
+  project_name: string | null
+  content: string
+  filed_date: string
+  created_at: string
+}
+
+export async function getAllReports(fellowId?: string): Promise<AdminReport[]> {
+  const rows = fellowId
+    ? await sql`
+        SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
+               f.name AS f_name, f.slug AS f_slug,
+               p.name AS p_name
+        FROM reports r
+        JOIN fellows f ON f.id = r.fellow_id
+        LEFT JOIN projects p ON p.id = r.project_id
+        WHERE r.fellow_id = ${fellowId}
+        ORDER BY r.filed_date DESC, r.created_at DESC
+      `
+    : await sql`
+        SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
+               f.name AS f_name, f.slug AS f_slug,
+               p.name AS p_name
+        FROM reports r
+        JOIN fellows f ON f.id = r.fellow_id
+        LEFT JOIN projects p ON p.id = r.project_id
+        ORDER BY r.filed_date DESC, r.created_at DESC
+      `
+  return rows.map((row) => {
+    const r = row as Record<string, unknown>
+    return {
+      id: r.id as string,
+      fellow_id: r.fellow_id as string,
+      fellow_name: r.f_name as string,
+      fellow_slug: r.f_slug as string,
+      project_id: (r.project_id as string | null) ?? null,
+      project_name: (r.p_name as string | null) ?? null,
+      content: r.content as string,
+      filed_date: r.filed_date instanceof Date
+        ? r.filed_date.toISOString().slice(0, 10)
+        : String(r.filed_date),
+      created_at: r.created_at as string,
     }
   })
 }

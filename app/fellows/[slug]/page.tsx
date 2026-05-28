@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { Linkedin } from "lucide-react"
 import { getFellowBySlug, getFellowReports, getAllProjects } from "@/lib/fellows"
 import { getFellowFromCookies } from "@/lib/fellow-auth"
-import MarkdownReport from "./MarkdownReport"
+import MarkdownReport from "@/components/MarkdownReport"
 
 export const dynamic = "force-dynamic"
 
@@ -52,6 +52,13 @@ export default async function FellowProfilePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+
+  // Admin-only gate (temporary). Non-admins are bounced to the portal login.
+  const viewer = await getFellowFromCookies()
+  if (!viewer?.is_admin) {
+    redirect("/portal/login")
+  }
+
   const fellow = await getFellowBySlug(slug)
   if (!fellow) notFound()
 
@@ -68,16 +75,6 @@ export default async function FellowProfilePage({
     .filter((fp) => fp.role === "pm")
     .map((fp) => projectMap.get(fp.project_id))
     .filter(Boolean)
-
-  // Auth check for alumni contact section
-  let viewer = null
-  if (fellow.status === "alumni" && fellow.willing_to_be_contacted) {
-    try {
-      viewer = await getFellowFromCookies()
-    } catch {
-      // no session
-    }
-  }
 
   return (
     <div className="flex flex-col w-full">
