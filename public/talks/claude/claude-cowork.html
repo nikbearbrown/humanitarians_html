@@ -1,0 +1,1093 @@
+<!-- ASSUMPTIONS: none — all inputs confirmed via intake -->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Cowork — Build Your Job Pipeline, Then Build Everything Else</title>
+<meta name="description" content="Decompose any repeatable personal workflow into Claude Cowork components and build a working prototype, using an automated job application pipeline as the reference implementation.">
+<meta name="keywords" content="claude cowork, ai agents, workflow automation, job search pipeline, skills, connectors, scheduled tasks, sub-agents, claude desktop, backwards design">
+<meta name="author" content="Nik Bear Brown">
+<meta name="category" content="AI Tools">
+<meta name="slide-count" content="34">
+<meta name="audio" content="true">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:hsl(43, 10%, 94%);--fg:hsl(0,0%,4%);--accent:#5C3317;--muted:hsl(0,0%,40%);
+--muted-bg:hsl(40,10%,85%);--card-bg:hsl(40,15%,89%);--font:'JetBrains Mono',monospace;
+--green:#16a34a;
+}
+[data-theme="dark"]{
+--bg:hsl(0,0%,6%);--fg:hsl(43,23%,93%);--muted:hsl(0,0%,55%);
+--muted-bg:hsl(0,0%,12%);--card-bg:hsl(0,0%,10%);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--font);}
+.slide{display:none;flex-direction:column;height:100vh;padding:32px 48px 60px;position:relative;overflow-y:auto;}
+.slide.active{display:flex;}
+.smeta{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.lbl{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);}
+.lbl-o{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);}
+.sdiv{flex:1;height:1px;background:var(--muted);opacity:.3;}
+.dot8{width:8px;height:8px;background:var(--accent);}
+.ab{animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.stitle{font-size:clamp(15px,2.8vw,30px);font-weight:800;text-transform:uppercase;max-width:960px;line-height:1.15;margin-bottom:20px;}
+.stitle .o{color:var(--accent);}
+.cb{border:2px solid var(--fg);background:var(--card-bg);padding:24px;flex:1;overflow-y:auto;}
+.txs{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.15em;}
+.tsm{font-size:13px;color:var(--muted);line-height:1.65;}
+.txl{font-size:clamp(34px,6vw,80px);font-weight:800;line-height:1.05;}
+.t2xl{font-size:clamp(50px,10vw,136px);font-weight:800;line-height:1;}
+.oc{color:var(--accent);}
+.gc{color:var(--green);}
+.bo{font-weight:800;}
+.mu{color:var(--muted);}
+
+/* Tables */
+.bt{width:100%;border-collapse:collapse;font-size:12px;}
+.bt thead{background:var(--fg);color:var(--bg);}
+.bt th{padding:10px 14px;text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;font-size:10px;}
+.bt td{padding:10px 14px;border-bottom:1px solid var(--muted-bg);vertical-align:top;}
+.bt tr:nth-child(even){background:var(--muted-bg);}
+
+/* Two-column */
+.twoc{display:grid;grid-template-columns:1fr 1fr;gap:0;height:100%;}
+.col{padding:20px;}
+.col:first-child{border-right:2px solid var(--fg);}
+.clbl{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:block;}
+
+/* Stat pair */
+.spair{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.sb{text-align:center;}
+.sl{font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:var(--muted);margin-top:6px;}
+.sv{font-size:clamp(32px,5vw,72px);font-weight:800;}
+
+/* Numbered blocks */
+.nbs{display:flex;flex-direction:column;gap:16px;}
+.nb{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;}
+.nbnum{font-size:28px;font-weight:800;color:var(--accent);line-height:1;}
+.nbb strong{font-size:13px;font-weight:700;display:block;margin-bottom:4px;}
+.nbb p{font-size:12px;color:var(--muted);line-height:1.5;}
+
+/* Quote */
+.qt{border-left:4px solid var(--accent);padding:16px 24px;font-size:clamp(16px,2vw,24px);font-weight:600;line-height:1.4;}
+
+/* Callout */
+.ca{border:1px solid var(--accent);padding:14px 18px;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;}
+
+/* List */
+.ul li{list-style:none;padding:6px 0;font-size:13px;color:var(--muted);}
+.ul li::before{content:'› ';color:var(--accent);font-weight:800;}
+
+/* Comparison cards */
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch;}
+.cmp-card{border:1px solid var(--muted);padding:18px;font-size:12px;}
+.cmp-card.accent{border-color:var(--accent);}
+.cmp-vs{display:flex;align-items:center;justify-content:center;padding:0 12px;font-size:11px;color:var(--muted);}
+.cmp-title{font-size:10px;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;font-weight:700;}
+.cmp-card.accent .cmp-title{color:var(--accent);}
+.cmp-item{padding:4px 0;font-size:12px;line-height:1.5;}
+.cmp-item.bad::before{content:'✕ ';color:var(--accent);}
+.cmp-item.good::before{content:'✓ ';color:var(--green);}
+
+/* Pipeline */
+.pipeline{display:flex;align-items:center;gap:0;justify-content:center;flex-wrap:wrap;padding:12px 0;}
+.pipe-step{text-align:center;padding:12px 16px;border:2px solid var(--fg);background:var(--card-bg);min-width:100px;}
+.pipe-step.highlight{border-color:var(--accent);background:rgba(234,88,12,0.08);}
+.pipe-step .pipe-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;}
+.pipe-step .pipe-sub{font-size:9px;color:var(--muted);margin-top:4px;}
+.pipe-arrow{font-size:18px;color:var(--accent);padding:0 4px;font-weight:800;}
+
+/* Grid cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.g-card{border:1px solid var(--muted);padding:16px;background:var(--card-bg);}
+.g-card.accent{border-color:var(--accent);}
+.g-card-title{font-size:11px;font-weight:700;margin-bottom:6px;}
+.g-card-body{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* Code block */
+.code-block{background:hsl(0,0%,8%);color:hsl(43,23%,88%);padding:18px;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;border:1px solid hsl(0,0%,20%);}
+.code-block .hl{color:var(--accent);}
+.code-block .cm{color:hsl(0,0%,45%);}
+.code-block .kw{color:#a78bfa;}
+
+/* Hierarchy */
+.hierarchy{display:flex;flex-direction:column;gap:8px;}
+.h-tier{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--muted);}
+.h-tier.top{border-color:var(--green);background:rgba(22,163,74,0.05);}
+.h-tier.mid{border-color:var(--accent);background:rgba(234,88,12,0.05);}
+.h-tier.bot{border-color:var(--muted);}
+.h-tier-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;font-weight:700;}
+.h-tier-body{font-size:11px;color:var(--muted);}
+
+/* Dark slide */
+.sdark{background:hsl(0,0%,4%) !important;}
+.sdark .stitle,.sdark .txl,.sdark .t2xl{color:hsl(43,23%,93%);}
+.sdark .smeta .lbl{color:hsl(0,0%,40%);}
+.sdark .sdiv{background:hsl(0,0%,25%);}
+.sdark .cb{background:hsl(0,0%,8%);border-color:hsl(0,0%,20%);}
+.sdark .tsm{color:hsl(0,0%,55%);}
+
+/* Layers diagram */
+.layers{display:flex;flex-direction:column;gap:6px;}
+.layer-band{padding:12px 16px;border:1px solid var(--muted);font-size:11px;}
+.layer-band .layer-name{font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px;}
+.layer-band .layer-items{color:var(--muted);font-size:11px;}
+.layer-band:nth-child(1){border-color:var(--accent);background:rgba(234,88,12,0.06);}
+.layer-band:nth-child(2){border-color:hsl(0,0%,50%);}
+.layer-band:nth-child(3){border-color:hsl(0,0%,50%);}
+.layer-band:nth-child(4){border-color:hsl(0,0%,35%);background:var(--muted-bg);}
+
+/* Navigation */
+.nav-bar{position:fixed;bottom:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bg);border-top:1px solid var(--muted-bg);z-index:100;padding:0 48px;}
+.dot{width:8px;height:8px;border:1px solid var(--muted);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--accent);border-color:var(--accent);}
+.dot:hover{border-color:var(--accent);}
+.progress{position:fixed;bottom:47px;left:0;height:2px;background:var(--accent);transition:width .3s;z-index:101;}
+
+/* Controls */
+.controls{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:200;}
+.ctrl-btn{width:36px;height:36px;border:1px solid var(--muted);background:var(--bg);color:var(--fg);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--font);}
+.ctrl-btn:hover{border-color:var(--accent);}
+.sound-btn{position:relative;}
+.sound-btn.pulse::after{content:'';position:absolute;inset:-4px;border:2px solid var(--accent);animation:pulse-ring 2s infinite;pointer-events:none;}
+@keyframes pulse-ring{0%,100%{opacity:0;transform:scale(1);}50%{opacity:.6;transform:scale(1.15);}}
+.sound-tip{position:absolute;top:calc(100% + 6px);right:0;font-size:9px;color:var(--accent);white-space:nowrap;letter-spacing:0.1em;}
+
+/* Footer author */
+.slide-footer{position:absolute;bottom:54px;left:48px;right:48px;display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--muted);letter-spacing:0.05em;}
+.slide-footer a{color:var(--muted);text-decoration:none;transition:color .2s;}
+.slide-footer a:hover{color:var(--accent);}
+
+/* Countdown strip */
+.countdown-strip{position:fixed;bottom:49px;left:0;height:3px;background:var(--green);z-index:102;transition:none;}
+
+/* Responsive */
+@media(max-width:768px){
+.slide{padding:20px 20px 60px;}
+.twoc{grid-template-columns:1fr;}.col:first-child{border-right:none;border-bottom:2px solid var(--fg);}
+.cmp{grid-template-columns:1fr;}.cmp-vs{padding:8px 0;}
+.pipeline{flex-direction:column;}.pipe-arrow{transform:rotate(90deg);}
+.nav-bar{padding:0 16px;}.slide-footer{left:20px;right:20px;}
+.card-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:480px){.card-grid{grid-template-columns:1fr;}}
+
+/* Scramble animation */
+.scramble-char{display:inline-block;animation:scrambleIn .05s ease-out forwards;opacity:0;}
+@keyframes scrambleIn{0%{opacity:0;transform:translateY(4px);}100%{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<!-- ======================================== SLIDE 01 — HOOK ======================================== -->
+<div class="slide active" data-section="THE PROBLEM">
+<div class="smeta"><span class="lbl">// SLIDE 01 — THE PROBLEM</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">8 hours a day applying. <span class="o">That's the problem.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;">
+<div class="spair" style="max-width:500px;width:100%;">
+<div class="sb"><div class="sv" style="color:var(--accent);">30%</div><div class="sl">of job postings are ghost jobs</div></div>
+<div class="sb"><div class="sv" style="color:var(--accent);">75%</div><div class="sl">of résumés rejected by ATS before human eyes</div></div>
+</div>
+<p class="tsm" style="max-width:560px;">Past 80 applications, your success rate <em>drops</em> — from 31% to 20%. More volume makes you <em>less</em> likely to get hired. Meanwhile, 85% of jobs are never publicly posted. You're spending 8 hours a day on the 15% of the market that's visible.</p>
+<p class="tsm" style="max-width:560px;color:var(--accent);">This isn't a hustle problem. It's an allocation problem. And it has a solution.</p>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 02 — THE 3-3-2 SPLIT ======================================== -->
+<div class="slide" data-section="THE 3-3-2 SPLIT">
+<div class="smeta"><span class="lbl">// SLIDE 02 — THE FRAMEWORK</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">The 3-3-2 split. <span class="o">Cowork makes it possible.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:20px;">
+<p class="tsm">54% of workers are hired through connections. 85% of jobs are never posted. Referred candidates are 4–10× more likely to be hired. The data says: stop spending 8 hours applying. Reallocate.</p>
+<div class="card-grid" style="grid-template-columns:repeat(3,1fr);">
+<div class="g-card accent" style="text-align:center;">
+<div style="font-size:clamp(28px,4vw,48px);font-weight:800;color:var(--accent);">3 hrs</div>
+<div class="g-card-title" style="margin-top:8px;">NETWORKING</div>
+<div class="g-card-body">Informational interviews, alumni outreach, relationship building. This is where 54% of hires come from.</div>
+</div>
+<div class="g-card" style="text-align:center;">
+<div style="font-size:clamp(28px,4vw,48px);font-weight:800;">3 hrs</div>
+<div class="g-card-title" style="margin-top:8px;">PORTFOLIO</div>
+<div class="g-card-body">Build proof. Ship projects. Document failures. AI skills = 56% wage premium. Certificates = 9%.</div>
+</div>
+<div class="g-card" style="text-align:center;border-color:var(--green);">
+<div style="font-size:clamp(28px,4vw,48px);font-weight:800;color:var(--green);">2 hrs</div>
+<div class="g-card-title" style="margin-top:8px;">RESEARCH + APPLY</div>
+<div class="g-card-body">5–10 high-quality applications. Each one customized. 25% response rate vs. 3% for spray-and-pray.</div>
+</div>
+</div>
+<div class="ca" style="text-align:center;">Cowork compresses the "2 hours" pillar. What used to take 8 hours of manual research, tailoring, and formatting now takes 1–2 hours — freeing you to network and build.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 03 — THE PIPELINE ======================================== -->
+<div class="slide" data-section="THE PIPELINE">
+<div class="smeta"><span class="lbl">// SLIDE 03 — THE PIPELINE</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">One pipeline. <span class="o">Every feature.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:24px;">
+<div class="pipeline">
+<div class="pipe-step"><div class="pipe-label">Monitor</div><div class="pipe-sub">Scan boards</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Research</div><div class="pipe-sub">Company intel</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Generate</div><div class="pipe-sub">CV + Cover</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step highlight"><div class="pipe-label">Review</div><div class="pipe-sub">Human gate</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Apply</div><div class="pipe-sub">Send + log</div></div>
+</div>
+<div class="nbs">
+<div class="nb"><div class="nbnum">1</div><div class="nbb"><strong>One thing to build</strong><p>An automated job application pipeline — Cowork handles the research, tailoring, and formatting so each application takes minutes, not hours.</p></div></div>
+<div class="nb"><div class="nbnum">2</div><div class="nbb"><strong>Every feature along the way</strong><p>All 20 Cowork features, not as abstract concepts, but as components in that pipeline.</p></div></div>
+<div class="nb"><div class="nbnum">3</div><div class="nbb"><strong>The architecture is the real deliverable</strong><p>The job pipeline is the reference implementation. The same architecture builds any workflow.</p></div></div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 04 — LEARNING OUTCOMES ======================================== -->
+<div class="slide" data-section="LEARNING OUTCOMES">
+<div class="smeta"><span class="lbl">// SLIDE 04 — LEARNING OUTCOMES</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">What you'll be able to <span class="o">do</span> after this deck.</div>
+<div class="cb">
+<table class="bt">
+<thead><tr><th>By the end of this, you will be able to…</th><th>Bloom's Level</th></tr></thead>
+<tbody>
+<tr><td>Identify all 20 Cowork components and explain each in one sentence</td><td>Remember / Understand</td></tr>
+<tr><td>Map any repeatable workflow onto the Cowork component stack</td><td>Apply</td></tr>
+<tr><td>Design a CLAUDE.md that encodes role, rules, and domain context</td><td>Create</td></tr>
+<tr><td>Build a custom skill that chains search, file generation, and connector output</td><td>Create</td></tr>
+<tr><td>Construct a working job pipeline prototype with a human approval gate</td><td>Create</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 05 — ARCHITECTURE MAP ======================================== -->
+<div class="slide" data-section="ARCHITECTURE MAP">
+<div class="smeta"><span class="lbl">// SLIDE 05 — ARCHITECTURE MAP</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">20 features. <span class="o">4 layers.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:12px;">
+<div class="layers">
+<div class="layer-band"><div class="layer-name" style="color:var(--accent);">Automation Layer</div><div class="layer-items">Skills · Slash Commands · Plugins · Connectors · Chrome Extension · Computer Use · Scheduled Tasks · Dispatch Mode · Sub-Agents</div></div>
+<div class="layer-band"><div class="layer-name">Output Layer</div><div class="layer-items">Artifacts · Projects · Bash Tool</div></div>
+<div class="layer-band"><div class="layer-name">Perception Layer</div><div class="layer-items">Multimodal · Web Search · Extended Thinking</div></div>
+<div class="layer-band"><div class="layer-name">Foundation Layer</div><div class="layer-items">Workspace Folder · CLAUDE.md · Global Instructions · Memory · Context Window</div></div>
+</div>
+<div class="ca" style="margin-top:8px;">Every layer builds on the one below it. You can't automate what you haven't structured.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 06 — WORKSPACE FOLDER ======================================== -->
+<div class="slide" data-section="WORKSPACE FOLDER">
+<div class="smeta"><span class="lbl">// SLIDE 06 — CONCEPT 01 · FOUNDATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Your files. <span class="o">Claude's desk.</span></div>
+<div class="cb">
+<div class="twoc">
+<div class="col">
+<span class="clbl">Your workspace folder</span>
+<div class="code-block" style="font-size:12px;">
+job-search/
+├── <span class="hl">master-cv.md</span>
+├── <span class="hl">targets.json</span>
+├── generated/
+│   ├── boston-dynamics/
+│   ├── tesla-robotics/
+│   └── ...
+└── logs/
+    └── applications.csv</div>
+</div>
+<div class="col">
+<span class="clbl">Pipeline role</span>
+<p class="tsm" style="margin-bottom:12px;">The workspace folder is a real directory on your computer that Claude can read from and write to.</p>
+<p class="tsm" style="margin-bottom:12px;">Everything Claude generates — CVs, cover letters, research briefs, scripts — lands here. Every input it reads starts here.</p>
+<div class="ca" style="margin-top:16px;">Create a dedicated folder. Don't point Claude at your whole desktop.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 07 — CLAUDE.MD ======================================== -->
+<div class="slide" data-section="CLAUDE.MD">
+<div class="smeta"><span class="lbl">// SLIDE 07 — CONCEPT 02 · FOUNDATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">The file that makes Claude <span class="o">yours.</span></div>
+<div class="cb">
+<div class="twoc">
+<div class="col" style="display:flex;flex-direction:column;gap:16px;">
+<span class="clbl">How it works</span>
+<div class="pipeline" style="justify-content:flex-start;">
+<div class="pipe-step"><div class="pipe-label">CLAUDE.md</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Read every session</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Personalized Claude</div></div>
+</div>
+<p class="tsm">A markdown file in your workspace folder, loaded at the start of every session. It defines who you are, how Claude should operate, and what rules to follow.</p>
+<p class="tsm">Think of it as a system prompt you own and version-control.</p>
+</div>
+<div class="col">
+<span class="clbl">Example: Job Search CLAUDE.md</span>
+<div class="code-block"><span class="cm"># Who I am</span>
+MS Software Engineering Systems, NEU 2026
+Focus: robotics, controls, mechatronics
+
+<span class="cm"># Target roles</span>
+Robotics Engineer, Controls Engineer
+Mechatronics, Automation, R&D
+
+<span class="cm"># Top projects (quantified)</span>
+- 6-DOF arm: <span class="hl">0.3mm repeatability</span>
+- SLAM pipeline: <span class="hl">40% faster</span> vs baseline
+- Motor controller: <span class="hl">$200 BOM, open-source</span>
+
+<span class="cm"># Rules</span>
+<span class="hl">Never fabricate experience</span>
+Always quantify achievements
+Tone: confident, specific, no filler
+One-page CV maximum</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 08 — GLOBAL INSTRUCTIONS ======================================== -->
+<div class="slide" data-section="GLOBAL INSTRUCTIONS">
+<div class="smeta"><span class="lbl">// SLIDE 08 — CONCEPT 03 · FOUNDATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Set it once. <span class="o">It follows you everywhere.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="cmp">
+<div class="cmp-card">
+<div class="cmp-title">CLAUDE.MD</div>
+<div class="cmp-item">Lives in a specific project folder</div>
+<div class="cmp-item">Only applies to that project</div>
+<div class="cmp-item">Different rules per workspace</div>
+<div class="cmp-item">Cowork only</div>
+</div>
+<div class="cmp-vs">vs</div>
+<div class="cmp-card accent">
+<div class="cmp-title">GLOBAL INSTRUCTIONS</div>
+<div class="cmp-item">Set once in Claude settings</div>
+<div class="cmp-item">Follows you <em>everywhere</em> — mobile, web, every chat</div>
+<div class="cmp-item">Works across all of Claude</div>
+<div class="cmp-item" style="color:var(--accent);font-style:italic;">"My name is Alex. Direct. No filler."</div>
+</div>
+</div>
+<div class="ca">CLAUDE.md = project brain. Global Instructions = permanent identity across all of Claude.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 09 — MEMORY ======================================== -->
+<div class="slide" data-section="MEMORY">
+<div class="smeta"><span class="lbl">// SLIDE 09 — CONCEPT 04 · FOUNDATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Correct Claude once. <span class="o">It remembers forever.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="cmp">
+<div class="cmp-card">
+<div class="cmp-title">SESSION MEMORY</div>
+<div class="cmp-item">Everything Claude knows in <em>this</em> conversation.</div>
+<div class="cmp-item" style="margin-top:8px;">✕ Cleared when session ends.</div>
+<div class="cmp-item">Files, context, and history — gone.</div>
+</div>
+<div class="cmp-vs">vs</div>
+<div class="cmp-card accent">
+<div class="cmp-title">MEMORY.MD</div>
+<div class="cmp-item">Key facts saved to a permanent file.</div>
+<div class="cmp-item" style="margin-top:8px;color:var(--accent);">"Target roles updated March 2026"</div>
+<div class="cmp-item" style="color:var(--accent);">"Prefers one-page CVs"</div>
+<div class="cmp-item" style="color:var(--accent);">"Got offer from Boston Dynamics — remove from targets"</div>
+<div class="cmp-item" style="margin-top:8px;">Loads into every future session automatically.</div>
+</div>
+</div>
+<div class="ca">You correct Claude once. It remembers forever. "Save that to memory" forces persistence.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 10 — CONTEXT WINDOW ======================================== -->
+<div class="slide" data-section="CONTEXT WINDOW">
+<div class="smeta"><span class="lbl">// SLIDE 10 — CONCEPT 05 · FOUNDATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">1M tokens. <span class="o">Not infinite.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+<div class="t2xl">1M</div>
+<p class="tsm" style="text-align:center;">tokens — Claude's active working memory<br><span style="color:var(--muted);">~750,000 words · ~2,500 pages · an entire novel series</span></p>
+<div class="card-grid" style="width:100%;max-width:700px;">
+<div class="g-card"><div class="g-card-title">📝 Instructions</div><div class="g-card-body">CLAUDE.md, MEMORY.md, system prompt</div></div>
+<div class="g-card"><div class="g-card-title">💬 Conversation</div><div class="g-card-body">Every message, in and out</div></div>
+<div class="g-card"><div class="g-card-title">📄 Files & Docs</div><div class="g-card-body">Attachments, PDFs, spreadsheets, code</div></div>
+<div class="g-card"><div class="g-card-title">⚡ Tool Output</div><div class="g-card-body">Search results, bash, connector data</div></div>
+</div>
+<div class="ca" style="max-width:700px;">Think of it as Claude's RAM, not a hard drive. When it fills up, the oldest stuff drops off first — so structure matters.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 11 — PAUSE 1 ======================================== -->
+<div class="slide" data-section="PAUSE & REFLECT">
+<div class="smeta"><span class="lbl">// SLIDE 11 — FOUNDATION CHECK</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Foundation <span class="o">check.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;">
+<div class="txl">PAUSE.</div>
+<p class="tsm" style="max-width:540px;">You're setting up a Cowork workspace for your job search. What goes in CLAUDE.md vs. Global Instructions vs. Memory? Give one example of each.</p>
+<div class="lbl-o">// CHECK FOR UNDERSTANDING</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 12 — MULTIMODAL ======================================== -->
+<div class="slide" data-section="MULTIMODAL">
+<div class="smeta"><span class="lbl">// SLIDE 12 — CONCEPT 06 · PERCEPTION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Don't type it out. <span class="o">Show Claude.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Claude can see and process images, PDFs, charts, and screenshots — not just text. "Multimodal" means multiple input types are understood natively.</p>
+<div class="card-grid">
+<div class="g-card accent"><div class="g-card-title">Screenshots</div><div class="g-card-body">Drop a job posting screenshot — Claude reads it directly.</div></div>
+<div class="g-card accent"><div class="g-card-title">PDFs & Docs</div><div class="g-card-body">Upload your transcript — Claude extracts the data.</div></div>
+<div class="g-card"><div class="g-card-title">Photos</div><div class="g-card-body">Whiteboard of target companies? Just photograph it.</div></div>
+<div class="g-card"><div class="g-card-title">Charts & Graphs</div><div class="g-card-body">Salary data visualization? Claude interprets it.</div></div>
+</div>
+<div class="ca">Don't type it out. Just show Claude. It'll figure out the rest.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 13 — WEB SEARCH ======================================== -->
+<div class="slide" data-section="WEB SEARCH">
+<div class="smeta"><span class="lbl">// SLIDE 13 — CONCEPT 07 · PERCEPTION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Claude's knowledge has a cutoff. <span class="o">Web search doesn't.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="cmp">
+<div class="cmp-card">
+<div class="cmp-title">WITHOUT WEB SEARCH</div>
+<div class="cmp-item bad">Knowledge cuts off at training date</div>
+<div class="cmp-item bad">Doesn't know new postings</div>
+<div class="cmp-item bad">Can't see current company news</div>
+<div class="cmp-item bad">May hallucinate outdated facts</div>
+</div>
+<div class="cmp-vs">vs</div>
+<div class="cmp-card accent">
+<div class="cmp-title">WITH WEB SEARCH</div>
+<div class="cmp-item good">Reads today's job boards</div>
+<div class="cmp-item good">Verifies company details before writing</div>
+<div class="cmp-item good">Checks if role is still open</div>
+<div class="cmp-item good">Facts are confirmed, not guessed</div>
+</div>
+</div>
+<div class="ca">Your pipeline's first rule: research before writing anything.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 14 — EXTENDED THINKING ======================================== -->
+<div class="slide" data-section="EXTENDED THINKING">
+<div class="smeta"><span class="lbl">// SLIDE 14 — CONCEPT 08 · PERCEPTION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Hard problems deserve <span class="o">more time.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="cmp">
+<div class="cmp-card">
+<div class="cmp-title">NORMAL RESPONSE</div>
+<div class="cmp-item">Claude answers immediately</div>
+<div class="cmp-item">Works for most requests</div>
+<div class="cmp-item">Fast — done in seconds</div>
+<div class="cmp-item">Best-guess approach</div>
+</div>
+<div class="cmp-vs">vs</div>
+<div class="cmp-card accent">
+<div class="cmp-title">EXTENDED THINKING</div>
+<div class="cmp-item">Claude reasons through it first</div>
+<div class="cmp-item">Catches its own mistakes</div>
+<div class="cmp-item">Takes longer — worth it for hard tasks</div>
+<div class="cmp-item" style="color:var(--accent);font-style:italic;">Like asking someone to "take your time"</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+<div class="tsm"><span class="bo" style="color:var(--fg);">Matching your experience to job requirements</span> — step-by-step reasoning matters</div>
+<div class="tsm"><span class="bo" style="color:var(--fg);">Analyzing 10 job descriptions at once</span> — deeper synthesis, fewer misses</div>
+<div class="tsm"><span class="bo" style="color:var(--fg);">Deciding which projects to highlight</span> — think it through, don't rush</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 15 — ARTIFACTS ======================================== -->
+<div class="slide" data-section="ARTIFACTS">
+<div class="smeta"><span class="lbl">// SLIDE 15 — CONCEPT 09 · OUTPUT</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Claude doesn't just answer. <span class="o">It builds.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Artifacts are interactive outputs generated inside Claude — HTML dashboards, charts, React components, formatted documents. Not just text in a chat window — real, usable, downloadable objects.</p>
+<div class="card-grid">
+<div class="g-card accent"><div class="g-card-title">🌐 HTML Tools</div><div class="g-card-body">Interactive dashboards, calculators, apps — open in any browser</div></div>
+<div class="g-card accent"><div class="g-card-title">⚡ React Components</div><div class="g-card-body">Fully functional UI components you can drop into a codebase</div></div>
+<div class="g-card"><div class="g-card-title">📊 Charts & Visuals</div><div class="g-card-body">Data visualizations built from your numbers — export-ready</div></div>
+<div class="g-card"><div class="g-card-title">📄 Documents</div><div class="g-card-body">Reports, CVs, cover letters — saved right to your workspace folder</div></div>
+</div>
+<div class="ca">Your application tracker, your formatted CVs, your pipeline dashboard — all artifacts. This slide deck is an artifact.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 16 — PROJECTS ======================================== -->
+<div class="slide" data-section="PROJECTS">
+<div class="smeta"><span class="lbl">// SLIDE 16 — CONCEPT 10 · OUTPUT</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Separate brains. <span class="o">One workspace.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Each project has its own memory, instructions, and conversations. Zero bleed between them.</p>
+<div class="card-grid" style="grid-template-columns:repeat(3,1fr);">
+<div class="g-card accent">
+<div class="g-card-title">🎯 Job Search</div>
+<div class="g-card-body">CLAUDE.md: target roles, resume data, application rules<br><br>Memory: applied companies, interview feedback</div>
+</div>
+<div class="g-card">
+<div class="g-card-title">📚 Thesis</div>
+<div class="g-card-body">CLAUDE.md: advisor preferences, citation style<br><br>Memory: literature review progress</div>
+</div>
+<div class="g-card">
+<div class="g-card-title">🔧 Side Project</div>
+<div class="g-card-body">CLAUDE.md: tech stack, deployment targets<br><br>Memory: feature backlog</div>
+</div>
+</div>
+<div class="ca">Switch projects — Claude's entire context switches with you. Zero bleed between them.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 17 — BASH TOOL ======================================== -->
+<div class="slide" data-section="BASH TOOL">
+<div class="smeta"><span class="lbl">// SLIDE 17 — CONCEPT 11 · OUTPUT</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Claude writes code and <span class="o">runs it.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="cmp">
+<div class="cmp-card">
+<div class="cmp-title">WHAT YOU THINK HAPPENS</div>
+<div class="cmp-item">Claude writes code</div>
+<div class="cmp-item">Pastes it into the chat</div>
+<div class="cmp-item">You copy it, run it yourself</div>
+<div class="cmp-item">Hope it works</div>
+</div>
+<div class="cmp-vs">vs</div>
+<div class="cmp-card accent">
+<div class="cmp-title">WHAT ACTUALLY HAPPENS</div>
+<div class="cmp-item">Claude writes the code</div>
+<div class="cmp-item">Claude runs it in its own terminal</div>
+<div class="cmp-item">Claude fixes any errors itself</div>
+<div class="cmp-item" style="color:var(--accent);">Finished file lands in your folder</div>
+</div>
+</div>
+<div class="code-block"><span class="hl">→</span> Parse Greenhouse API response — structured JSON in 8 seconds
+<span class="hl">→</span> Batch-generate 15 tailored CVs — done while you eat lunch
+<span class="hl">→</span> Merge application data from 4 sources — clean CSV in your folder
+<span class="hl">→</span> Convert master CV to PDF — formatted and saved automatically</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 18 — PAUSE 2 ======================================== -->
+<div class="slide" data-section="PAUSE & REFLECT">
+<div class="smeta"><span class="lbl">// SLIDE 18 — PERCEPTION + OUTPUT CHECK</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Perception + output <span class="o">check.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;">
+<div class="txl">PAUSE.</div>
+<p class="tsm" style="max-width:540px;">You want Claude to research a company before writing your cover letter, then save the research as a reusable brief. Which three features make that possible, and in what order?</p>
+<div class="lbl-o">// CHECK FOR UNDERSTANDING</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 19 — AUTOMATION INTRO ======================================== -->
+<div class="slide sdark" data-section="AUTOMATION LAYER">
+<div class="smeta"><span class="lbl">// SLIDE 19 — AUTOMATION LAYER</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle" style="color:hsl(43,23%,93%);">Foundation set. <span class="o">Now we automate.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px;">
+<div class="txl" style="color:hsl(43,23%,93%);">9 features.</div>
+<p class="tsm" style="max-width:520px;">Everything before was infrastructure — the workspace, the instructions, the capabilities. The next 9 features are the automation layer — where one-time actions become repeatable systems.</p>
+<p class="tsm" style="max-width:520px;color:var(--accent);">This is where the job pipeline stops being "Claude helps me write a cover letter" and becomes "Claude runs my entire application process while I work on my portfolio."</p>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 20 — SKILLS ======================================== -->
+<div class="slide" data-section="SKILLS">
+<div class="smeta"><span class="lbl">// SLIDE 20 — CONCEPT 12 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">One command. <span class="o">Done.</span></div>
+<div class="cb">
+<div class="twoc">
+<div class="col">
+<span class="clbl">What is a skill?</span>
+<p class="tsm" style="margin-bottom:16px;">A markdown file containing instructions for a specific multi-step workflow. Claude reads the skill, follows the steps, delivers the output — every time, consistently.</p>
+<p class="tsm" style="margin-bottom:16px;">Skills are the atomic unit of automation in Cowork. Everything else builds on them.</p>
+<div class="pipeline" style="justify-content:flex-start;">
+<div class="pipe-step"><div class="pipe-label">/command</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Workflow</div></div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step"><div class="pipe-label">Done</div></div>
+</div>
+</div>
+<div class="col">
+<span class="clbl">Beyond job search</span>
+<div class="nbs">
+<div class="nb"><div class="nbnum" style="font-size:18px;">🌅</div><div class="nbb"><strong style="color:var(--accent);">/morning-briefing</strong><p>Pulls calendar + email + news. Drops a report in your folder.</p></div></div>
+<div class="nb"><div class="nbnum" style="font-size:18px;">🔬</div><div class="nbb"><strong style="color:var(--accent);">/literature-scan</strong><p>Searches ArXiv for papers matching your research keywords.</p></div></div>
+<div class="nb"><div class="nbnum" style="font-size:18px;">📦</div><div class="nbb"><strong style="color:var(--accent);">/lab-order</strong><p>Checks inventory, generates purchase order, emails supplier.</p></div></div>
+<div class="nb"><div class="nbnum" style="font-size:18px;">🧾</div><div class="nbb"><strong style="color:var(--accent);">/receipt-scanner</strong><p>Reads a folder of PDFs. Outputs a categorized expense report.</p></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 21 — THE REFERENCE SKILL ======================================== -->
+<div class="slide" data-section="REFERENCE SKILL">
+<div class="smeta"><span class="lbl">// SLIDE 21 — /APPLY-TO-JOB</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">/apply-to-job — <span class="o">the reference skill.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:12px;">
+<div class="code-block"><span class="cm"># /apply-to-job</span>
+<span class="kw">You are a job application specialist.</span>
+
+<span class="cm">## Inputs</span>
+- Job URL or pasted description
+- Target company name
+
+<span class="cm">## Workflow</span>
+ <span class="hl">1.</span> Research company via web search (news, culture, tech stack)
+ <span class="hl">2.</span> Extract role requirements from posting
+ <span class="hl">3.</span> Read CLAUDE.md for candidate profile
+ <span class="hl">4.</span> Generate tailored CV (one page, PDF)
+ <span class="hl">5.</span> Generate cover letter (specific to role + company research)
+ <span class="hl">6.</span> Draft application email
+ <span class="hl">7.</span> <span style="color:#f59e0b;font-weight:700;">STOP — present all materials for human review</span>
+ <span class="hl">8.</span> On approval: save to /generated/[company-name]/
+ <span class="hl">9.</span> Log application to tracker dashboard
+<span class="hl">10.</span> Update memory: "Applied to [company] on [date]"</div>
+<p class="tsm" style="margin-top:4px;">Each run takes 10–15 minutes instead of 45–60. Run it 5–10 times during your 2-hour application window. You review and approve — Claude handles the research, tailoring, and formatting. That's the "2" in 3-3-2.</p>
+<div class="ca" style="text-align:center;">Step 7 is the human gate. Nothing ships without your approval. Quality, not volume.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 22 — SLASH COMMANDS ======================================== -->
+<div class="slide" data-section="SLASH COMMANDS">
+<div class="smeta"><span class="lbl">// SLIDE 22 — CONCEPT 13 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">A keyword that triggers <span class="o">a workflow.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+<div style="text-align:center;">
+<div style="font-size:clamp(14px,2vw,20px);font-weight:600;font-family:var(--font);color:var(--accent);letter-spacing:-0.02em;margin-bottom:8px;">/apply-to-job https://greenhouse.io/roles/12345</div>
+<div class="pipe-arrow" style="font-size:28px;">↓</div>
+<div class="tsm">7-step workflow executes automatically</div>
+</div>
+<div style="width:100%;max-width:560px;">
+<div class="nbs">
+<div class="nb"><div class="nbnum" style="font-size:16px;color:var(--accent);">/</div><div class="nbb"><strong style="color:var(--accent);">check-postings</strong><p>Scans target companies for new openings</p></div></div>
+<div class="nb"><div class="nbnum" style="font-size:16px;color:var(--accent);">/</div><div class="nbb"><strong style="color:var(--accent);">update-tracker</strong><p>Refreshes your application dashboard</p></div></div>
+<div class="nb"><div class="nbnum" style="font-size:16px;color:var(--accent);">/</div><div class="nbb"><strong style="color:var(--accent);">prep-interview [company]</strong><p>Generates company brief + likely interview questions</p></div></div>
+</div>
+</div>
+<p class="tsm">Slash commands are the front door to a skill. The skill does the work.</p>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 23 — PLUGINS ======================================== -->
+<div class="slide" data-section="PLUGINS">
+<div class="smeta"><span class="lbl">// SLIDE 23 — CONCEPT 14 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">A bundle of skills. <span class="o">One install.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:20px;">
+<div class="twoc" style="border:none;">
+<div class="col" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;">
+<div style="font-size:14px;font-weight:700;border:2px solid var(--fg);padding:12px 24px;">job-search-plugin.zip</div>
+<div class="pipe-arrow" style="font-size:24px;">↓</div>
+<div class="card-grid" style="grid-template-columns:1fr 1fr;gap:6px;width:100%;">
+<div class="g-card" style="padding:8px;text-align:center;"><div class="g-card-title" style="font-size:9px;color:var(--accent);">apply-to-job</div></div>
+<div class="g-card" style="padding:8px;text-align:center;"><div class="g-card-title" style="font-size:9px;color:var(--accent);">check-postings</div></div>
+<div class="g-card" style="padding:8px;text-align:center;"><div class="g-card-title" style="font-size:9px;color:var(--accent);">prep-interview</div></div>
+<div class="g-card" style="padding:8px;text-align:center;"><div class="g-card-title" style="font-size:9px;color:var(--accent);">update-tracker</div></div>
+</div>
+</div>
+<div class="col" style="display:flex;flex-direction:column;justify-content:center;">
+<p class="tsm" style="margin-bottom:16px;">A plugin packages multiple skills, connectors, and slash commands into one installable unit.</p>
+<p class="tsm" style="margin-bottom:16px;">Anthropic maintains built-in plugins for legal, marketing, design. You can create and share your own.</p>
+<div class="qt" style="font-size:14px;">Think of it as <span class="oc">npm install</span> for workflows. One package. Every skill. Ready to run.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 24 — CONNECTORS ======================================== -->
+<div class="slide" data-section="CONNECTORS">
+<div class="smeta"><span class="lbl">// SLIDE 24 — CONCEPT 15 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Your apps. <span class="o">Claude's hands.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Connectors link Claude to your external apps — Gmail, Google Calendar, Google Drive, Slack, Notion, and many more. For apps not in the built-in list, use Zapier MCP or a custom MCP server.</p>
+<div class="card-grid" style="grid-template-columns:repeat(3,1fr);">
+<div class="g-card accent"><div class="g-card-title">📧 Gmail</div><div class="g-card-body">Send application emails, draft follow-ups</div></div>
+<div class="g-card accent"><div class="g-card-title">📅 Google Calendar</div><div class="g-card-body">Schedule interviews, set follow-up reminders</div></div>
+<div class="g-card accent"><div class="g-card-title">📁 Google Drive</div><div class="g-card-body">Store and share application materials</div></div>
+<div class="g-card"><div class="g-card-title">💬 Slack</div><div class="g-card-body">Notifications when new jobs match your criteria</div></div>
+<div class="g-card"><div class="g-card-title">🌿 Greenhouse / Lever</div><div class="g-card-body">Monitor ATS job boards via MCP server</div></div>
+<div class="g-card"><div class="g-card-title">🔗 LinkedIn</div><div class="g-card-body">Research companies and contacts</div></div>
+</div>
+<div class="ca">Connectors are the best integration path. Chrome extension is the fallback. Computer use is the last resort.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 25 — CHROME EXTENSION ======================================== -->
+<div class="slide" data-section="CHROME EXTENSION">
+<div class="smeta"><span class="lbl">// SLIDE 25 — CONCEPT 16 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">When there's no connector, <span class="o">use the browser.</span></div>
+<div class="cb">
+<div class="twoc">
+<div class="col" style="display:flex;flex-direction:column;justify-content:center;gap:16px;">
+<p class="tsm">Claude in Chrome is a Chrome extension that lets Cowork interact with websites directly — clicking, filling forms, navigating, extracting data.</p>
+<p class="tsm">Install from Chrome Web Store, toggle on in Cowork connectors. "Act without asking" mode for trusted tasks.</p>
+</div>
+<div class="col">
+<span class="clbl">Use when</span>
+<div class="nbs">
+<div class="nb"><div class="nbnum">1</div><div class="nbb"><strong>No connector exists</strong><p>The target app isn't in Claude's built-in list or MCP registry</p></div></div>
+<div class="nb"><div class="nbnum">2</div><div class="nbb"><strong>Web form application</strong><p>The company has a custom portal, not Greenhouse/Lever</p></div></div>
+<div class="nb"><div class="nbnum">3</div><div class="nbb"><strong>Data extraction</strong><p>You need to scrape info from a page Claude can't search</p></div></div>
+</div>
+<div class="ca" style="margin-top:12px;">Slower than a connector. But works on anything with a URL.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 26 — COMPUTER USE ======================================== -->
+<div class="slide" data-section="COMPUTER USE">
+<div class="smeta"><span class="lbl">// SLIDE 26 — CONCEPT 17 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Claude on your desktop. <span class="o">Hands off the keyboard.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Computer use lets Claude control your actual computer — not just the browser, but any desktop application. Find files, open apps, drag and drop, fill forms in native software.</p>
+<div class="hierarchy">
+<div class="h-tier top"><div class="h-tier-label" style="color:var(--green);">CONNECTORS</div><div class="h-tier-body">API-level integration. Fast, reliable, predictable. <strong>First choice.</strong></div></div>
+<div class="h-tier mid"><div class="h-tier-label" style="color:var(--accent);">CHROME EXT</div><div class="h-tier-body">Browser automation. Moderate speed. Works on any website. <strong>Second choice.</strong></div></div>
+<div class="h-tier bot"><div class="h-tier-label">COMPUTER USE</div><div class="h-tier-body">Full desktop control. Slow but universal. <strong>Last resort.</strong></div></div>
+</div>
+<div class="ca">Computer use is the nuclear option. Powerful, but save it for when nothing else works. Same tradeoff as REST API vs. Selenium vs. RPA.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 27 — PAUSE 3 ======================================== -->
+<div class="slide" data-section="PAUSE & REFLECT">
+<div class="smeta"><span class="lbl">// SLIDE 27 — AUTOMATION CHECK</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Automation <span class="o">check.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:20px;">
+<div class="txl">PAUSE.</div>
+<p class="tsm" style="max-width:540px;">You want to monitor Greenhouse for new postings at 5 target companies, then auto-generate application materials for any match. Which features do you need, and what's the trigger?</p>
+<div class="lbl-o">// CHECK FOR UNDERSTANDING</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 28 — SCHEDULED TASKS ======================================== -->
+<div class="slide" data-section="SCHEDULED TASKS">
+<div class="smeta"><span class="lbl">// SLIDE 28 — CONCEPT 18 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Set the schedule. <span class="o">Walk away.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<p class="tsm">Scheduled tasks trigger skills or prompts at set times — daily, weekly, monthly. The desktop app must be open for them to run. If closed, they execute on next open.</p>
+<table class="bt">
+<thead><tr><th>Time</th><th>Task</th><th>What it does</th><th>Output</th></tr></thead>
+<tbody>
+<tr><td>Daily 8am</td><td style="color:var(--accent);">/check-postings</td><td>Scans Greenhouse + target companies</td><td>Slack notification</td></tr>
+<tr><td>Daily 6pm</td><td style="color:var(--accent);">/daily-wrap-up</td><td>Summarizes today's application activity</td><td>HTML dashboard</td></tr>
+<tr><td>Weekly Mon 9am</td><td style="color:var(--accent);">/weekly-report</td><td>Pipeline health check — apps, responses, interviews</td><td>Markdown report</td></tr>
+<tr><td>Monthly 1st</td><td style="color:var(--accent);">/refresh-targets</td><td>Re-evaluates target company list</td><td>Updated targets.json</td></tr>
+</tbody>
+</table>
+<div class="ca">The pipeline runs on schedule. New matches surface while you're networking or building your portfolio. Review, approve, move on. That's the 3-3-2 split in practice.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 29 — DISPATCH MODE ======================================== -->
+<div class="slide" data-section="DISPATCH MODE">
+<div class="smeta"><span class="lbl">// SLIDE 29 — CONCEPT 19 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Control your desk <span class="o">from your phone.</span></div>
+<div class="cb">
+<div class="twoc">
+<div class="col" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;">
+<div style="font-size:32px;">📱</div>
+<div class="code-block" style="text-align:left;font-size:11px;max-width:320px;margin:0 auto;">"Read the email from recruiter@
+company.com. Generate a response
+and attach my latest CV from the
+job search folder."</div>
+<div class="pipe-arrow" style="font-size:24px;">↓</div>
+<div style="font-size:32px;">💻</div>
+<p class="tsm">Claude executes on your desktop</p>
+</div>
+<div class="col" style="display:flex;flex-direction:column;justify-content:center;gap:12px;">
+<p class="tsm">Dispatch mode lets you send tasks to your desktop Claude from your phone. Claude executes on your computer — accesses files, runs skills, uses connectors.</p>
+<p class="tsm">Conversations sync between phone and desktop — unified interface.</p>
+<p class="tsm" style="color:var(--accent);">You're at the gym. A recruiter emails. Dispatch the response from your phone. Claude handles it on your laptop.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 30 — SUB-AGENTS ======================================== -->
+<div class="slide" data-section="SUB-AGENTS">
+<div class="smeta"><span class="lbl">// SLIDE 30 — CONCEPT 20 · AUTOMATION</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Multiple workers. <span class="o">One prompt.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+<div style="text-align:center;font-size:13px;font-weight:600;margin-bottom:8px;">"Prepare applications for these 5 new postings."</div>
+<div class="pipe-arrow" style="font-size:20px;">↓</div>
+<div class="card-grid" style="grid-template-columns:repeat(5,1fr);gap:6px;max-width:700px;">
+<div class="g-card" style="text-align:center;padding:10px;"><div class="g-card-title" style="font-size:9px;">Agent 1</div><div class="g-card-body" style="font-size:9px;">Boston Dynamics</div></div>
+<div class="g-card" style="text-align:center;padding:10px;"><div class="g-card-title" style="font-size:9px;">Agent 2</div><div class="g-card-body" style="font-size:9px;">Tesla Robotics</div></div>
+<div class="g-card" style="text-align:center;padding:10px;"><div class="g-card-title" style="font-size:9px;">Agent 3</div><div class="g-card-body" style="font-size:9px;">Rivian</div></div>
+<div class="g-card" style="text-align:center;padding:10px;"><div class="g-card-title" style="font-size:9px;">Agent 4</div><div class="g-card-body" style="font-size:9px;">Apple SPG</div></div>
+<div class="g-card" style="text-align:center;padding:10px;"><div class="g-card-title" style="font-size:9px;">Agent 5</div><div class="g-card-body" style="font-size:9px;">SpaceX</div></div>
+</div>
+<div class="pipe-arrow" style="font-size:20px;">↓</div>
+<div style="border:2px solid var(--accent);padding:12px 24px;text-align:center;font-size:13px;font-weight:700;color:var(--accent);">5 applications ready for review</div>
+<p class="tsm" style="max-width:520px;text-align:center;">Claude decides when to parallelize based on task complexity. You don't have to ask for it. 5 applications in the time it takes to make 1 manually.</p>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 31 — FULL PIPELINE ======================================== -->
+<div class="slide" data-section="FULL PIPELINE">
+<div class="smeta"><span class="lbl">// SLIDE 31 — THE COMPLETE PIPELINE</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">The complete pipeline. <span class="o">Every feature in play.</span></div>
+<div class="cb" style="display:flex;flex-direction:column;gap:16px;">
+<div class="pipeline">
+<div class="pipe-step">
+<div class="pipe-label">Monitor</div>
+<div class="pipe-sub">Scheduled Task<br>+ Greenhouse<br>Connector</div>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step">
+<div class="pipe-label">Research</div>
+<div class="pipe-sub">Web Search<br>+ Extended<br>Thinking</div>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step">
+<div class="pipe-label">Generate</div>
+<div class="pipe-sub">Bash Tool<br>+ CLAUDE.md<br>+ Skill</div>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step highlight">
+<div class="pipe-label">Review</div>
+<div class="pipe-sub">Human<br>Approval<br>Gate</div>
+</div>
+<div class="pipe-arrow">→</div>
+<div class="pipe-step">
+<div class="pipe-label">Apply</div>
+<div class="pipe-sub">Gmail<br>Connector<br>+ Tracker</div>
+</div>
+</div>
+<table class="bt" style="font-size:11px;">
+<thead><tr><th>Layer</th><th>Features in the pipeline</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:700;">Foundation</td><td>Workspace Folder · CLAUDE.md · Global Instructions · Memory · Context Window</td></tr>
+<tr><td style="font-weight:700;">Perception</td><td>Multimodal · Web Search · Extended Thinking</td></tr>
+<tr><td style="font-weight:700;">Output</td><td>Artifacts (tracker) · Projects (isolation) · Bash Tool (file generation)</td></tr>
+<tr><td style="font-weight:700;">Automation</td><td>Skill · Slash Commands · Plugin · Connectors · Chrome · Scheduled Tasks · Sub-Agents</td></tr>
+</tbody>
+</table>
+<div class="ca" style="text-align:center;">This is the "2" in your 3-3-2 split — automated, high-quality, human-approved. The other 6 hours go to networking and building.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 32 — BEYOND THE PIPELINE ======================================== -->
+<div class="slide" data-section="GENERALIZATION">
+<div class="smeta"><span class="lbl">// SLIDE 32 — BEYOND THE PIPELINE</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">The job pipeline is one workflow. <span class="o">The architecture is infinite.</span></div>
+<div class="cb">
+<table class="bt">
+<thead><tr><th>Workflow</th><th>Monitor</th><th>Generate</th><th>Deliver</th></tr></thead>
+<tbody>
+<tr><td style="font-weight:700;">Lab Procurement</td><td>Supplier catalog RSS</td><td>Purchase orders + spec comparisons</td><td>Email to supplier via Gmail</td></tr>
+<tr><td style="font-weight:700;">Conference Submissions</td><td>Scan CFP aggregators</td><td>Abstracts matched to your research</td><td>Submit via Chrome extension</td></tr>
+<tr><td style="font-weight:700;">Freelance Pipeline</td><td>Job board monitoring</td><td>Proposals tailored to client needs</td><td>Send via platform connector</td></tr>
+<tr><td style="font-weight:700;">Thesis Management</td><td>ArXiv daily scan</td><td>Literature review updates</td><td>Notify advisor via Slack</td></tr>
+</tbody>
+</table>
+<div class="ca" style="margin-top:16px;text-align:center;">Same architecture. Different CLAUDE.md. Different skills. Same 20 features.</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 33 — FIRST 30 MINUTES ======================================== -->
+<div class="slide" data-section="GET STARTED">
+<div class="smeta"><span class="lbl">// SLIDE 33 — YOUR FIRST 30 MINUTES</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle">Start here. <span class="o">30 minutes to a working prototype.</span></div>
+<div class="cb">
+<div class="nbs">
+<div class="nb"><div class="nbnum">1</div><div class="nbb"><strong>Minutes 0–5 · Set up</strong><p>Download Claude desktop app. Create a workspace folder called "job-search". Toggle to Cowork.</p></div></div>
+<div class="nb"><div class="nbnum">2</div><div class="nbb"><strong>Minutes 5–15 · Write CLAUDE.md</strong><p>Name, degree, target roles, top 5 projects with quantified results, formatting rules, hard constraints.</p></div></div>
+<div class="nb"><div class="nbnum">3</div><div class="nbb"><strong>Minutes 15–20 · Connect apps</strong><p>Connect Gmail and Google Calendar. Install Claude in Chrome extension.</p></div></div>
+<div class="nb"><div class="nbnum">4</div><div class="nbb"><strong>Minutes 20–25 · Create your first skill</strong><p>Start with /apply-to-job — simplified: research company, generate CV + cover letter, save to folder.</p></div></div>
+<div class="nb"><div class="nbnum">5</div><div class="nbb"><strong>Minutes 25–30 · Test with a real posting</strong><p>Paste one real job URL. Review the output. Refine CLAUDE.md based on what's wrong.</p></div></div>
+<div class="nb"><div class="nbnum">6</div><div class="nbb"><strong>Tomorrow · Schedule + reallocate</strong><p>Add a scheduled task for /check-postings. Then reallocate: 3 hours networking, 3 hours portfolio, 2 hours applying with Cowork. The system is live.</p></div></div>
+</div>
+</div>
+</div>
+
+<!-- ======================================== SLIDE 34 — CLOSE ======================================== -->
+<div class="slide sdark" data-section="CLOSE">
+<div class="smeta"><span class="lbl">// SLIDE 34 — CLOSE</span><div class="sdiv"></div><span class="dot8 ab"></span></div>
+<div class="stitle" style="color:hsl(43,23%,93%);">Stop applying harder. <span class="o">Start allocating smarter.</span></div>
+<div class="cb" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:24px;background:transparent;border-color:transparent;">
+<div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;align-items:baseline;">
+<div style="text-align:center;"><div style="font-size:clamp(36px,6vw,72px);font-weight:800;color:var(--accent);">3</div><div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.15em;">Network</div></div>
+<div style="text-align:center;"><div style="font-size:clamp(36px,6vw,72px);font-weight:800;color:hsl(43,23%,93%);">3</div><div style="font-size:10px;color:hsl(0,0%,55%);text-transform:uppercase;letter-spacing:0.15em;">Build</div></div>
+<div style="text-align:center;"><div style="font-size:clamp(36px,6vw,72px);font-weight:800;color:var(--green);">2</div><div style="font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:0.15em;">Apply</div></div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+<span style="color:var(--green);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--green);">PORTFOLIO TIME</span>
+<span style="color:var(--green);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--green);">NETWORKING TIME</span>
+<span style="color:var(--green);font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--green);">INTERVIEW TIME</span>
+</div>
+<p class="tsm" style="max-width:480px;color:hsl(0,0%,55%);">Cowork compresses the "2" so you can invest in the "3 + 3" — the work that actually gets you hired. 20 features. One architecture. Any workflow you build next.</p>
+</div>
+<div class="slide-footer" style="color:hsl(0,0%,40%);">
+<span>Nik Bear Brown</span>
+<span>
+<a href="https://bearbrown.co" target="_blank">bearbrown.co</a> ·
+<a href="https://boondoggling.ai" target="_blank">boondoggling.ai</a> ·
+<a href="https://brutalist.art" target="_blank">brutalist.art</a> ·
+<a href="https://frictional.xyz" target="_blank">frictional.xyz</a> ·
+<a href="https://humanitarians.ai" target="_blank">humanitarians.ai</a> ·
+<a href="https://hypothetical.ai" target="_blank">hypothetical.ai</a> ·
+<a href="https://irreducibly.xyz" target="_blank">irreducibly.xyz</a> ·
+<a href="https://medhavy.com" target="_blank">medhavy.com</a> ·
+<a href="https://nikbearbrown.com" target="_blank">nikbearbrown.com</a> ·
+<a href="https://skepticism.ai" target="_blank">skepticism.ai</a> ·
+<a href="https://theorist.ai" target="_blank">theorist.ai</a>
+</span>
+</div>
+</div>
+
+<!-- ======================================== NAV ======================================== -->
+<div class="progress" id="progress"></div>
+<div class="nav-bar" id="navBar"></div>
+<div class="controls">
+<button class="ctrl-btn" id="themeBtn" title="Toggle theme">☀</button>
+<button class="ctrl-btn sound-btn pulse" id="soundBtn" title="Toggle sound">🔇<span class="sound-tip">▶ tap for audio</span></button>
+</div>
+<div class="countdown-strip" id="countdown" style="width:0;"></div>
+
+<!-- ======================================== FOOTER ON EACH SLIDE ======================================== -->
+
+<script>
+(function(){
+// Slides
+const slides=document.querySelectorAll('.slide');
+const total=slides.length;
+let cur=0;
+let soundOn=false;
+let firstSoundInteraction=false;
+let audio=null;
+let countdownTimer=null;
+const countdownEl=document.getElementById('countdown');
+
+// Add footer to each slide except last (which has its own)
+slides.forEach((s,i)=>{
+if(i<total-1){
+const f=document.createElement('div');
+f.className='slide-footer';
+f.innerHTML=`<span>Nik Bear Brown</span><span style="font-size:8px;">
+<a href="https://bearbrown.co" target="_blank">bearbrown.co</a> ·
+<a href="https://brutalist.art" target="_blank">brutalist.art</a> ·
+<a href="https://humanitarians.ai" target="_blank">humanitarians.ai</a> ·
+<a href="https://nikbearbrown.com" target="_blank">nikbearbrown.com</a>
+</span>`;
+s.appendChild(f);
+}
+});
+
+// Nav dots
+const nav=document.getElementById('navBar');
+for(let i=0;i<total;i++){
+const d=document.createElement('div');
+d.className='dot'+(i===0?' active':'');
+d.addEventListener('click',()=>go(i));
+nav.appendChild(d);
+}
+const dots=nav.querySelectorAll('.dot');
+
+function go(n){
+if(n<0||n>=total)return;
+slides[cur].classList.remove('active');
+dots[cur].classList.remove('active');
+cur=n;
+slides[cur].classList.add('active');
+dots[cur].classList.add('active');
+document.getElementById('progress').style.width=((cur/(total-1))*100)+'%';
+cancelCountdown();
+if(soundOn)playAudio(cur);
+}
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(cur+1);}
+if(e.key==='ArrowLeft'){e.preventDefault();go(cur-1);}
+if(e.key==='Home'){e.preventDefault();go(0);}
+if(e.key==='End'){e.preventDefault();go(total-1);}
+if(e.key.toLowerCase()==='m'){e.preventDefault();toggleSound();}
+});
+
+// Touch
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.changedTouches[0].screenX;},{passive:true});
+document.addEventListener('touchend',e=>{
+const dx=e.changedTouches[0].screenX-tx;
+if(Math.abs(dx)>50){dx<0?go(cur+1):go(cur-1);}
+},{passive:true});
+
+// Theme
+const tb=document.getElementById('themeBtn');
+tb.addEventListener('click',()=>{
+const h=document.documentElement;
+const dark=h.getAttribute('data-theme')==='dark';
+h.setAttribute('data-theme',dark?'light':'dark');
+tb.textContent=dark?'☀':'☽';
+});
+
+// Sound
+const sb=document.getElementById('soundBtn');
+function toggleSound(){
+soundOn=!soundOn;
+sb.textContent=soundOn?'🔊':'🔇';
+if(!firstSoundInteraction){
+firstSoundInteraction=true;
+sb.classList.remove('pulse');
+const tip=sb.querySelector('.sound-tip');
+if(tip)tip.remove();
+}
+if(soundOn){playAudio(cur);}
+else{stopAudio();cancelCountdown();}
+}
+sb.addEventListener('click',toggleSound);
+
+// Audio
+function getSlugFromPath(){
+const p=window.location.pathname;
+const m=p.match(/\/([^\/]+)\.html$/);
+return m?m[1]:'claude-cowork';
+}
+function playAudio(idx){
+stopAudio();
+const slug=getSlugFromPath();
+const file='./'+slug+'/slide-'+String(idx+1).padStart(2,'0')+'.mp3';
+audio=new Audio(file);
+audio.addEventListener('ended',()=>{startCountdown();});
+audio.addEventListener('error',()=>{/* silence */});
+audio.play().catch(()=>{});
+}
+function stopAudio(){if(audio){audio.pause();audio=null;}}
+
+function startCountdown(){
+if(!soundOn)return;
+countdownEl.style.transition='none';
+countdownEl.style.width='100%';
+requestAnimationFrame(()=>{
+requestAnimationFrame(()=>{
+countdownEl.style.transition='width 3s linear';
+countdownEl.style.width='0%';
+});
+});
+countdownTimer=setTimeout(()=>{go(cur+1);},3000);
+}
+function cancelCountdown(){
+clearTimeout(countdownTimer);
+countdownEl.style.transition='none';
+countdownEl.style.width='0';
+}
+
+// Scramble animation on first slide title
+const firstTitle=slides[0].querySelector('.stitle');
+if(firstTitle){
+const text=firstTitle.innerHTML;
+// Simple entrance — keep it clean for brutalist aesthetic
+}
+})();
+</script>
+</body>
+</html>
