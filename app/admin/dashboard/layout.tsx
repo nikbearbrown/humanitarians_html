@@ -13,7 +13,10 @@ export default async function AdminDashboardLayout({
   if (!viewer) {
     redirect('/portal/login')
   }
-  if (!viewer.is_super_admin) {
+  // Both admin tiers can enter the dashboard. Page-level gates restrict
+  // super-admin-only views (Overview, Projects, Substack, Videos, Tools, Blog, Notes,
+  // and the New/Edit fellow pages).
+  if (!viewer.is_admin && !viewer.is_super_admin) {
     redirect('/portal/me')
   }
 
@@ -29,7 +32,7 @@ export default async function AdminDashboardLayout({
         <div className="grid lg:grid-cols-[220px_1fr] gap-8">
           {/* Sidebar */}
           <aside className="lg:sticky lg:top-8 lg:self-start">
-            <DashboardNav />
+            <DashboardNav isSuperAdmin={viewer.is_super_admin} />
           </aside>
 
           {/* Main content */}

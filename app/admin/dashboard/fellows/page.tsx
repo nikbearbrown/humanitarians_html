@@ -5,11 +5,21 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Plus, Upload, Pencil, FileText } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Plus, Upload, Pencil, FileText, Lock } from 'lucide-react'
 
 interface FellowRow {
   id: string
   name: string
+  slug: string
   email: string
   status: string
   joined_date: string
@@ -25,6 +35,8 @@ export default function FellowsAdminPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'current' | 'alumni'>('all')
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [editBlockedOpen, setEditBlockedOpen] = useState(false)
 
   const fetchFellows = useCallback(async () => {
     try {
@@ -38,7 +50,13 @@ export default function FellowsAdminPage() {
     }
   }, [])
 
-  useEffect(() => { fetchFellows() }, [fetchFellows])
+  useEffect(() => {
+    fetchFellows()
+    fetch('/api/fellows/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((me) => setIsSuperAdmin(me?.is_super_admin === true))
+      .catch(() => {})
+  }, [fetchFellows])
 
   const filtered = statusFilter === 'all'
     ? fellows
@@ -51,14 +69,16 @@ export default function FellowsAdminPage() {
           <h2 className="text-2xl font-bold tracking-tighter">Fellows</h2>
           <p className="text-sm text-muted-foreground">Manage fellows, assign projects, reset passwords</p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/admin/dashboard/fellows/bulk">
-            <Button variant="outline" className="gap-2"><Upload className="h-4 w-4" />Bulk Upload CSV</Button>
-          </Link>
-          <Link href="/admin/dashboard/fellows/new">
-            <Button className="gap-2"><Plus className="h-4 w-4" />Add Fellow</Button>
-          </Link>
-        </div>
+        {isSuperAdmin && (
+          <div className="flex gap-2">
+            <Link href="/admin/dashboard/fellows/bulk">
+              <Button variant="outline" className="gap-2"><Upload className="h-4 w-4" />Bulk Upload CSV</Button>
+            </Link>
+            <Link href="/admin/dashboard/fellows/new">
+              <Button className="gap-2"><Plus className="h-4 w-4" />Add Fellow</Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Status filter */}
@@ -91,7 +111,12 @@ export default function FellowsAdminPage() {
               <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4">
                 <div className="space-y-1 min-w-0 flex-1">
                   <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-                    {fellow.name}
+                    <Link
+                      href={`/fellows/${fellow.slug}`}
+                      className="hover:underline underline-offset-4"
+                    >
+                      {fellow.name}
+                    </Link>
                     <Badge variant={fellow.status === 'current' ? 'default' : 'secondary'}>
                       {fellow.status}
                     </Badge>
@@ -109,17 +134,44 @@ export default function FellowsAdminPage() {
                       <FileText className="h-3.5 w-3.5" /> View Reports
                     </Button>
                   </Link>
-                  <Link href={`/admin/dashboard/fellows/${fellow.id}/edit`}>
-                    <Button variant="outline" size="sm" className="gap-1">
-                      <Pencil className="h-3.5 w-3.5" /> Edit
+                  {isSuperAdmin ? (
+                    <Link href={`/admin/dashboard/fellows/${fellow.id}/edit`}>
+                      <Button variant="outline" size="sm" className="gap-1">
+                        <Pencil className="h-3.5 w-3.5" /> Edit
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() => setEditBlockedOpen(true)}
+                    >
+                      <Lock className="h-3.5 w-3.5" /> Edit
                     </Button>
-                  </Link>
+                  )}
                 </div>
               </CardHeader>
             </Card>
           ))}
         </div>
       )}
+
+      <AlertDialog open={editBlockedOpen} onOpenChange={setEditBlockedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Super-admin only</AlertDialogTitle>
+            <AlertDialogDescription>
+              Editing fellows requires super-admin access. You can still use{' '}
+              <span className="font-medium text-foreground">View Reports</span> to read submissions,
+              or click a fellow&apos;s name to see their public profile.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Got it</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

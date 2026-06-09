@@ -63,11 +63,15 @@ export default function MyProfileSection({ fellow }: { fellow: FellowProfile }) 
                 >
                   {fellow.status === 'current' ? 'Current Fellow' : 'Alumni'}
                 </span>
-                {fellow.is_super_admin && (
+                {fellow.is_super_admin ? (
                   <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                     Super Admin
                   </span>
-                )}
+                ) : fellow.is_admin ? (
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    Admin
+                  </span>
+                ) : null}
               </div>
               {fellow.bio && <p className="text-sm text-muted-foreground mb-3">{fellow.bio}</p>}
             </div>

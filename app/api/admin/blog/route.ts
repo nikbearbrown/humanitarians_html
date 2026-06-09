@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 
 export async function GET() {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await isSuperAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const data = await sql`SELECT id, title, subtitle, slug, excerpt, published, published_at, tags, created_at, updated_at FROM blog_posts ORDER BY created_at DESC`
     return NextResponse.json(data)
@@ -13,7 +13,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await isSuperAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json()
   const { title, subtitle, slug, byline, cover_image, content, excerpt, published, tags } = body
   if (!title || !slug || !content) return NextResponse.json({ error: 'Title, slug, and content are required' }, { status: 400 })

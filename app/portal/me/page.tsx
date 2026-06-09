@@ -88,7 +88,7 @@ export default function FellowDashboard() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
         <h1 className="text-3xl font-bold tracking-tighter">My Portal</h1>
         <div className="flex items-center gap-2">
-          {fellow.is_super_admin && (
+          {(fellow.is_admin || fellow.is_super_admin) && (
             <Button asChild variant="outline" size="sm">
               <Link href="/admin/dashboard">Admin Dashboard</Link>
             </Button>

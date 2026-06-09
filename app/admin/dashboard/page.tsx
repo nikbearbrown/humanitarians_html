@@ -1,5 +1,7 @@
+import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, FileText, UserPlus } from 'lucide-react'
+import { isSuperAdmin } from '@/lib/admin-auth'
 import { getOverviewStats, getWeeklyChart } from '@/lib/fellows'
 import OverviewChart from './OverviewChart'
 
@@ -15,6 +17,12 @@ function formatWorkWeek(weekStart: string): string {
 }
 
 export default async function AdminDashboardPage() {
+  // Overview is super-admin-only. Admins (non-super) get bounced to Fellows
+  // (the only landing page they're allowed to see).
+  if (!(await isSuperAdmin())) {
+    redirect('/admin/dashboard/fellows')
+  }
+
   const [stats, chartData] = await Promise.all([
     getOverviewStats(),
     getWeeklyChart(12),

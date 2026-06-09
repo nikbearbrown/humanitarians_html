@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 import AdmZip from 'adm-zip'
 
 export async function GET(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await isSuperAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const tagsParam = req.nextUrl.searchParams.get('tags') || ''
     const filterTags = tagsParam.split(',').map(t => t.trim()).filter(Boolean)
