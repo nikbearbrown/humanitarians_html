@@ -94,7 +94,7 @@ export default function OverviewChart({ data }: { data: WeeklyChartPoint[] }) {
             <Line
               type="monotone"
               dataKey="byFiledDate"
-              name="Work-week submission count"
+              name="Reports About This Week"
               stroke="#2563eb"
               strokeWidth={2}
               dot={{ r: 3 }}
@@ -103,7 +103,7 @@ export default function OverviewChart({ data }: { data: WeeklyChartPoint[] }) {
             <Line
               type="monotone"
               dataKey="bySubmittedAt"
-              name="Actual submission activity"
+              name="Reports Submitted This Week"
               stroke="#f59e0b"
               strokeWidth={2}
               dot={{ r: 3 }}
@@ -116,12 +116,12 @@ export default function OverviewChart({ data }: { data: WeeklyChartPoint[] }) {
       <div className="text-xs text-muted-foreground space-y-1">
         <p>
           <span className="inline-block w-3 h-0.5 align-middle mr-1.5 bg-[#2563eb]" />
-          <strong>Work-week submission count</strong> — reports counted by the work week they
+          <strong>Reports About This Week</strong> — reports counted by the work week they
           are <em>for</em> (includes backdated submissions).
         </p>
         <p>
           <span className="inline-block w-3 h-0.5 align-middle mr-1.5 bg-[#f59e0b]" />
-          <strong>Actual submission activity</strong> — reports counted by the week they were
+          <strong>Reports Submitted This Week</strong> — reports counted by the week they were
           actually submitted in.
         </p>
       </div>
