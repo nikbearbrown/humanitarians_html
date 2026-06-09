@@ -14,17 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import MarkdownReport from '@/components/MarkdownReport'
+
+const OTHER_PROJECT = '__other__'
 
 interface ProjectOption {
   id: string
@@ -90,7 +82,6 @@ export default function ReportingSection({
   onSubmitted: () => void
 }) {
   const workWeeks = getRecentWorkWeeks(8)
-  const [projectInput, setProjectInput] = useState('')
   const [filedDate, setFiledDate] = useState<string>(workWeeks[0].value) // default: current Monday
   const [markdownSource, setMarkdownSource] = useState('')
   const [previewSource, setPreviewSource] = useState('')
@@ -98,13 +89,8 @@ export default function ReportingSection({
   const [successMsg, setSuccessMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
   const [expandedReportId, setExpandedReportId] = useState<string | null>(null)
-  const [mismatchOpen, setMismatchOpen] = useState(false)
-
-  function findMatchedProject(): ProjectOption | null {
-    const normalized = projectInput.trim().toLowerCase()
-    if (!normalized) return null
-    return myProjects.find((p) => p.name.toLowerCase() === normalized) ?? null
-  }
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('')
+  const [otherProjectName, setOtherProjectName] = useState('')
 
   function fireConfetti() {
     confetti({
@@ -138,7 +124,8 @@ export default function ReportingSection({
       )
       setMarkdownSource('')
       setPreviewSource('')
-      setProjectInput('')
+      setSelectedProjectId('')
+      setOtherProjectName('')
       setFiledDate(workWeeks[0].value)
       fireConfetti()
       onSubmitted()
@@ -159,23 +146,24 @@ export default function ReportingSection({
       return
     }
 
-    // Empty project field is allowed — submits as "no specific project".
-    if (!projectInput.trim()) {
+    if (selectedProjectId === OTHER_PROJECT) {
+      if (!otherProjectName.trim()) {
+        setErrorMsg('Enter a project name (or pick one from the list).')
+        return
+      }
+      // TODO: when a fellow files under "Other", email hr@humanitarians.ai
+      // with the typed project name + fellow info so HR can either create the
+      // project or correct the assignment.
       submitReport(null)
       return
     }
 
-    const match = findMatchedProject()
-    if (match) {
-      submitReport(match.id)
-    } else {
-      setMismatchOpen(true)
+    if (!selectedProjectId) {
+      submitReport(null)
+      return
     }
-  }
 
-  function confirmMismatch() {
-    setMismatchOpen(false)
-    submitReport(null)
+    submitReport(selectedProjectId)
   }
 
   return (
@@ -203,25 +191,33 @@ export default function ReportingSection({
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="report-project">Project</Label>
-                <Input
-                  id="report-project"
-                  list="my-projects-list"
-                  value={projectInput}
-                  onChange={(e) => setProjectInput(e.target.value)}
-                  placeholder={
-                    myProjects.length === 0
-                      ? 'No assigned projects — leave blank or type a name'
-                      : 'Start typing a project name…'
-                  }
-                  autoComplete="off"
-                />
-                <datalist id="my-projects-list">
-                  {myProjects.map((p) => (
-                    <option key={p.id} value={p.name} />
-                  ))}
-                </datalist>
+                <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
+                  <SelectTrigger id="report-project">
+                    <SelectValue placeholder={
+                      myProjects.length === 0
+                        ? 'No assigned projects — pick Other'
+                        : 'Pick one of your projects'
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {myProjects.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value={OTHER_PROJECT}>Other…</SelectItem>
+                  </SelectContent>
+                </Select>
+                {selectedProjectId === OTHER_PROJECT && (
+                  <Input
+                    placeholder="Type the project name"
+                    value={otherProjectName}
+                    onChange={(e) => setOtherProjectName(e.target.value)}
+                    autoComplete="off"
+                  />
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Leave blank if this report isn&apos;t tied to a specific project.
+                  Pick from your assigned projects, or use &ldquo;Other&rdquo; for an external or new project.
                 </p>
               </div>
 
@@ -352,30 +348,6 @@ export default function ReportingSection({
         </div>
       )}
 
-      {/* Project mismatch confirmation */}
-      <AlertDialog open={mismatchOpen} onOpenChange={setMismatchOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Project not recognized</AlertDialogTitle>
-            <AlertDialogDescription>
-              <span className="font-medium text-foreground">&ldquo;{projectInput}&rdquo;</span>{' '}
-              doesn&apos;t match any of your assigned projects. Submit anyway?
-              {myProjects.length > 0 && (
-                <span className="block mt-2 text-xs">
-                  Your projects:{' '}
-                  {myProjects.map((p) => p.name).join(', ')}
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Go back and edit</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmMismatch}>
-              Yes, submit anyway
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }
