@@ -60,23 +60,27 @@ export default async function ToolsPage() {
         <h1 className="text-4xl font-bold tracking-tighter mb-4">Tools</h1>
         <p className="text-muted-foreground mb-4">A curated directory of AI tools for educators, students, and professionals.</p>
 
-        {/* Professor Bear Office Hours */}
+        {/* Professor Bear Summer Schedule */}
         <div className="rounded-lg border bg-card p-6 mb-8">
-          <h2 className="text-2xl font-semibold tracking-tight mb-2">Professor Bear Office Hours</h2>
+          <h2 className="text-2xl font-semibold tracking-tight mb-2">Professor Bear Summer Schedule</h2>
           <p className="text-muted-foreground mb-4">
-            You should be meeting with your project managers every week. If you come to Professor Bear office hours you should be prepared with questions that the group cannot solve. Ask Rishabh Madani or HR for the Zoom. The Zoom is always the same for all meetings.
+            Reach out to the TAs for the Zoom link. The Zoom is always the same for all meetings.
           </p>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-md border p-4">
               <h3 className="font-semibold">Wednesday</h3>
               <p className="text-sm text-muted-foreground">Office Hours</p>
-              <p className="text-sm font-medium">12:30 PM – 1:30 PM EST</p>
+              <p className="text-sm font-medium">2:00 PM – 3:00 PM EST</p>
             </div>
             <div className="rounded-md border p-4">
               <h3 className="font-semibold">Friday</h3>
               <p className="text-sm text-muted-foreground">Office Hours</p>
               <p className="text-sm font-medium">1:00 PM – 2:00 PM EST</p>
             </div>
+          </div>
+          <div className="mt-3 rounded-md border p-4">
+            <h3 className="font-semibold">Private Meetings</h3>
+            <p className="text-sm font-medium mt-1">Wed 1–2 PM · Wed 4–5 PM · Mon 1:30–2:30 PM · Thu 4–5 PM EST</p>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
             <a href="https://youtu.be/ay1TaY1Cdew?si=dVTZTDKZ1CEhO8pR" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">My Email Policy (Professor Bear)</a>
