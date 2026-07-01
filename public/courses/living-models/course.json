@@ -1,0 +1,5 @@
+{
+  "title": "Living Models: Causal Reasoning",
+  "description": "Construct DAGs and reason about confounders, mediators, colliders, and the backdoor criterion — the causal identification layer that AI tools cannot perform for you.",
+  "keywords": ["causal reasoning", "DAG", "confounders", "backdoor criterion", "identification"]
+}

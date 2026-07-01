@@ -1,13 +1,14 @@
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { getFellowFromCookies } from '@/lib/fellow-auth'
 
 export default async function AdminPage() {
-  const cookieStore = await cookies()
-  const session = cookieStore.get('admin_session')
+  const viewer = await getFellowFromCookies()
 
-  if (session?.value) {
-    redirect('/admin/dashboard')
-  } else {
-    redirect('/admin/login')
+  if (!viewer) {
+    redirect('/portal/login')
   }
+  if (!viewer.is_super_admin) {
+    redirect('/portal/me')
+  }
+  redirect('/admin/dashboard')
 }

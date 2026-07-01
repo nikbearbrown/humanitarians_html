@@ -1,37 +1,44 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { getFellowFromCookies } from '@/lib/fellow-auth'
+import DashboardNav from './DashboardNav'
+import DashboardUserMenu from './DashboardUserMenu'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/lib/utils'
+export default async function AdminDashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const viewer = await getFellowFromCookies()
 
-const NAV_ITEMS = [
-  { name: 'Overview', href: '/admin/dashboard' },
-  { name: 'Blog', href: '/admin/dashboard/blog' },
-  { name: 'Tools', href: '/admin/dashboard/tools' },
-  { name: 'Notes', href: '/admin/dashboard/notes' },
-  { name: 'Substack', href: '/admin/dashboard/substack' },
-  { name: 'Videos', href: '/admin/dashboard/videos' },
-  { name: 'Fellows', href: '/admin/dashboard/fellows' },
-  { name: 'Projects', href: '/admin/dashboard/projects' },
-]
+  if (!viewer) {
+    redirect('/portal/login')
+  }
+  // Both admin tiers can enter the dashboard. Page-level gates restrict
+  // super-admin-only views (Overview, Projects, Substack, Videos, Tools, Blog, Notes,
+  // and the New/Edit fellow pages).
+  if (!viewer.is_admin && !viewer.is_super_admin) {
+    redirect('/portal/me')
+  }
 
-export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
   return (
-    <div className="container px-4 md:px-6 mx-auto py-8">
-      <div className="flex flex-col gap-8">
-        <div>
+    <section className="w-full bg-background dark:bg-neutral-900 py-8 md:py-12">
+      <div className="container px-4 md:px-6 mx-auto">
+        {/* Top bar */}
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
           <h1 className="text-3xl font-bold tracking-tighter">Admin Dashboard</h1>
-          <nav className="flex gap-4 mt-4 border-b pb-2">
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className={cn('text-sm font-medium px-3 py-1.5 rounded-md transition-colors', pathname === item.href ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-muted-foreground hover:text-foreground')}>
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+          <DashboardUserMenu name={viewer.name} />
         </div>
-        {children}
+
+        <div className="grid lg:grid-cols-[220px_1fr] gap-8">
+          {/* Sidebar */}
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <DashboardNav isSuperAdmin={viewer.is_super_admin} />
+          </aside>
+
+          {/* Main content */}
+          <main className="min-w-0">{children}</main>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

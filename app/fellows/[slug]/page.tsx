@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { Linkedin } from "lucide-react"
 import { getFellowBySlug, getFellowReports, getAllProjects } from "@/lib/fellows"
 import { getFellowFromCookies } from "@/lib/fellow-auth"
-import MarkdownReport from "./MarkdownReport"
+import LatestReport from "./LatestReport"
 
 export const dynamic = "force-dynamic"
 
@@ -20,16 +20,6 @@ function getInitials(name: string): string {
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr)
   return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-}
-
-function formatReportDate(dateStr: string): string {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  })
 }
 
 export async function generateMetadata({
@@ -52,6 +42,13 @@ export default async function FellowProfilePage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+
+  // Admin-only gate (temporary). Non-admins are bounced to the portal login.
+  const viewer = await getFellowFromCookies()
+  if (!viewer?.is_admin) {
+    redirect("/portal/login")
+  }
+
   const fellow = await getFellowBySlug(slug)
   if (!fellow) notFound()
 
@@ -68,16 +65,6 @@ export default async function FellowProfilePage({
     .filter((fp) => fp.role === "pm")
     .map((fp) => projectMap.get(fp.project_id))
     .filter(Boolean)
-
-  // Auth check for alumni contact section
-  let viewer = null
-  if (fellow.status === "alumni" && fellow.willing_to_be_contacted) {
-    try {
-      viewer = await getFellowFromCookies()
-    } catch {
-      // no session
-    }
-  }
 
   return (
     <div className="flex flex-col w-full">
@@ -206,25 +193,31 @@ export default async function FellowProfilePage({
         </div>
       </section>
 
-      {/* Reports Section */}
+      {/* Reports Section — latest report only, collapsed by default */}
       <section className="w-full py-12 md:py-20 bg-background dark:bg-neutral-800">
         <div className="container px-4 md:px-6 mx-auto max-w-3xl">
-          <h2 className="text-2xl font-bold mb-6">Learning Reports</h2>
+          <div className="flex items-end justify-between flex-wrap gap-2 mb-6">
+            <h2 className="text-2xl font-bold">Learning Reports</h2>
+            {reports.length > 0 && viewer?.is_super_admin && (
+              <Link
+                href={`/admin/dashboard/reports?fellow=${fellow.id}`}
+                className="text-sm underline underline-offset-4 text-muted-foreground hover:text-foreground"
+              >
+                View all {reports.length} report{reports.length === 1 ? '' : 's'} →
+              </Link>
+            )}
+          </div>
           {reports.length === 0 ? (
             <p className="text-sm text-muted-foreground italic">
               No reports submitted yet.
             </p>
           ) : (
-            <div className="space-y-8">
-              {reports.map((report) => (
-                <article key={report.id} className="border-b pb-8 last:border-0">
-                  <time className="text-sm font-medium text-muted-foreground mb-3 block">
-                    {formatReportDate(report.created_at)}
-                  </time>
-                  <MarkdownReport content={report.content} />
-                </article>
-              ))}
-            </div>
+            <LatestReport
+              reportId={reports[0].id}
+              filedDate={reports[0].filed_date}
+              createdAt={reports[0].created_at}
+              content={reports[0].content}
+            />
           )}
         </div>
       </section>

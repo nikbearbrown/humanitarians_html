@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 import { hashPassword } from '@/lib/fellow-auth'
 import Papa from 'papaparse'
 import crypto from 'crypto'
@@ -27,7 +27,7 @@ interface OutputRow {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await isSuperAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const formData = await req.formData()

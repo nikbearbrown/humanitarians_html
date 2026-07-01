@@ -17,12 +17,32 @@ interface Video {
 
 const PAGE_SIZE = 10
 
+type SortMode = 'az' | 'za' | 'newest'
+
+function sortVideos(list: Video[], mode: SortMode): Video[] {
+  const arr = [...list]
+  if (mode === 'newest') {
+    return arr.sort((a, b) => {
+      const ta = a.published_at ? Date.parse(a.published_at) : 0
+      const tb = b.published_at ? Date.parse(b.published_at) : 0
+      return tb - ta
+    })
+  }
+  arr.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }))
+  return mode === 'za' ? arr.reverse() : arr
+}
+
 export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; videos: Video[] }) {
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState<string | null>(null)
+  const [sort, setSort] = useState<SortMode>('az')
   const [page, setPage] = useState(1)
 
-  const allVideos = [...pinned, ...videos]
+  // Sort within each group so pinned videos always stay on top.
+  const allVideos = useMemo(
+    () => [...sortVideos(pinned, sort), ...sortVideos(videos, sort)],
+    [pinned, videos, sort],
+  )
 
   const allTags = useMemo(() => {
     const set = new Set<string>()
@@ -59,23 +79,40 @@ export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; vid
     setPage(1)
   }
 
+  function handleSortChange(mode: SortMode) {
+    setSort(mode)
+    setPage(1)
+  }
+
   return (
     <>
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="Search videos…"
-          className="w-full pl-10 pr-10 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
-        />
-        {query && (
-          <button onClick={() => handleQueryChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
-        )}
+      {/* Search + sort */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            placeholder="Search videos…"
+            className="w-full pl-10 pr-10 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-1 focus:ring-ring"
+          />
+          {query && (
+            <button onClick={() => handleQueryChange('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <select
+          value={sort}
+          onChange={(e) => handleSortChange(e.target.value as SortMode)}
+          aria-label="Sort videos"
+          className="text-sm border rounded-md bg-background px-3 py-2 focus:outline-none focus:ring-1 focus:ring-ring sm:w-48"
+        >
+          <option value="az">Title: A–Z</option>
+          <option value="za">Title: Z–A</option>
+          <option value="newest">Newest first</option>
+        </select>
       </div>
 
       {/* Tag filter */}

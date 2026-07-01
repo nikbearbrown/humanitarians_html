@@ -17,7 +17,13 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'New password must be at least 8 characters' }, { status: 400 })
     }
 
-    const valid = await verifyPassword(current_password, fellow.password_hash)
+    const hashRows = await sql`SELECT password_hash FROM fellows WHERE id = ${fellow.id} LIMIT 1`
+    const passwordHash = hashRows[0]?.password_hash as string | undefined
+    if (!passwordHash) {
+      return NextResponse.json({ error: 'Account has no password set' }, { status: 400 })
+    }
+
+    const valid = await verifyPassword(current_password, passwordHash)
     if (!valid) {
       return NextResponse.json({ error: 'Current password is incorrect' }, { status: 401 })
     }

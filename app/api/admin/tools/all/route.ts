@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import { join } from 'path'
 import { sql } from '@/lib/db'
 import { scanHtmlDir } from '@/lib/html-meta'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 
 /**
  * Returns ALL tools: filesystem artifacts merged with DB tools.
  * Filesystem artifact tags are merged with any DB tags for the same slug.
  */
 export async function GET() {
-  if (!(await isAdmin())) {
+  if (!(await isSuperAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

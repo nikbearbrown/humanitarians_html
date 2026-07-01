@@ -7,7 +7,7 @@ export async function GET() {
 
   try {
     const rows = await sql`
-      SELECT f.id, f.name, f.email, f.status, f.joined_date,
+      SELECT f.id, f.name, f.slug, f.email, f.status, f.joined_date,
              COUNT(fp.id)::int AS project_count
       FROM fellows f
       LEFT JOIN fellow_projects fp ON fp.fellow_id = f.id

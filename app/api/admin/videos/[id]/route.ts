@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAdmin())) {
+  if (!(await isSuperAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -59,7 +59,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAdmin())) {
+  if (!(await isSuperAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

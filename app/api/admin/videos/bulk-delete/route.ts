@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await isSuperAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

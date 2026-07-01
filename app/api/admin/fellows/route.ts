@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 import { hashPassword } from '@/lib/fellow-auth'
 import crypto from 'crypto'
 
@@ -9,11 +9,11 @@ function generateTempPassword(): string {
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await isSuperAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const body = await req.json()
-    const { name, email, status, joined_date, project_ids, pm_project_id } = body
+    const { name, email, status, joined_date, project_ids, pm_project_id, is_admin: isAdminFlag } = body
 
     if (!name || !email) {
       return NextResponse.json({ error: 'Name and email are required' }, { status: 400 })
@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
 
     // Insert fellow
     const rows = await sql`
-      INSERT INTO fellows (name, slug, email, password_hash, status, joined_date)
-      VALUES (${name}, ${slug}, ${email}, ${password_hash}, ${fellowStatus}, ${joinedDate})
+      INSERT INTO fellows (name, slug, email, password_hash, status, joined_date, is_admin)
+      VALUES (${name}, ${slug}, ${email}, ${password_hash}, ${fellowStatus}, ${joinedDate}, ${Boolean(isAdminFlag)})
       RETURNING id
     `
     const fellowId = (rows[0] as Record<string, unknown>).id as string

@@ -1,17 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Copy, Check, AlertTriangle } from 'lucide-react'
-
-interface ProjectOption {
-  id: string
-  name: string
-}
+import { Copy, Check, AlertTriangle, FolderOpen } from 'lucide-react'
+import FellowAssignmentControls, { OTHER_PLACEHOLDER_ID, type ProjectOption } from '../../FellowAssignmentControls'
 
 interface FellowData {
   id: string
@@ -20,6 +16,7 @@ interface FellowData {
   bio: string | null
   photo_url: string | null
   status: string
+  is_admin: boolean
   joined_date: string
   linkedin_url: string | null
   employer: string | null
@@ -53,6 +50,8 @@ export default function EditFellowPage() {
   const [selectedProjects, setSelectedProjects] = useState<string[]>([])
   const [isPm, setIsPm] = useState(false)
   const [pmProjectId, setPmProjectId] = useState('')
+  const [isAdminFlag, setIsAdminFlag] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Password reset
   const [tempPassword, setTempPassword] = useState('')
@@ -80,6 +79,7 @@ export default function EditFellowPage() {
         setEmployer(fellow.employer || '')
         setEmployerRole(fellow.employer_role || '')
         setWillingToBeContacted(fellow.willing_to_be_contacted)
+        setIsAdminFlag(Boolean(fellow.is_admin))
 
         const projectIds = fellow.projects?.map((fp) => fp.project_id) || []
         setSelectedProjects(projectIds)
@@ -109,7 +109,9 @@ export default function EditFellowPage() {
       formData.set('employer', employer)
       formData.set('employer_role', employerRole)
       formData.set('willing_to_be_contacted', String(willingToBeContacted))
-      formData.set('project_ids', JSON.stringify(selectedProjects))
+      formData.set('is_admin', String(isAdminFlag))
+      const realProjectIds = selectedProjects.filter((id) => id !== OTHER_PLACEHOLDER_ID)
+      formData.set('project_ids', JSON.stringify(realProjectIds))
       formData.set('pm_project_id', isPm ? pmProjectId : '')
       if (photoFile) formData.set('photo', photoFile)
 
@@ -164,12 +166,6 @@ export default function EditFellowPage() {
     }
   }
 
-  function toggleProject(pid: string) {
-    setSelectedProjects((prev) =>
-      prev.includes(pid) ? prev.filter((p) => p !== pid) : [...prev, pid]
-    )
-  }
-
   if (loading) return <p className="text-muted-foreground">Loading...</p>
 
   return (
@@ -204,11 +200,31 @@ export default function EditFellowPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="photo">Photo</Label>
-          {photoUrl && (
+          <Label>Photo</Label>
+          {photoUrl && !photoFile && (
             <img src={photoUrl} alt="Current photo" className="w-16 h-16 rounded-full object-cover mb-2" />
           )}
-          <Input id="photo" type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium hover:bg-muted transition-colors"
+            >
+              <FolderOpen className="h-4 w-4" />
+              Browse...
+            </button>
+            <span className="text-sm text-muted-foreground">
+              {photoFile ? photoFile.name : 'No file selected'}
+            </span>
+            <input
+              ref={fileInputRef}
+              id="photo"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -256,59 +272,17 @@ export default function EditFellowPage() {
           <Input id="linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} />
         </div>
 
-        <div className="space-y-2">
-          <Label>Assign to Projects</Label>
-          <div className="border rounded-md p-3 space-y-2 max-h-48 overflow-y-auto">
-            {allProjects.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No active projects</p>
-            ) : (
-              allProjects.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={selectedProjects.includes(p.id)}
-                    onChange={() => toggleProject(p.id)}
-                    className="rounded"
-                  />
-                  {p.name}
-                </label>
-              ))
-            )}
-          </div>
-        </div>
-
-        {selectedProjects.length > 0 && (
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={isPm}
-                onChange={(e) => { setIsPm(e.target.checked); if (!e.target.checked) setPmProjectId('') }}
-                className="rounded"
-              />
-              This fellow is a Project Manager
-            </label>
-            {isPm && (
-              <div className="ml-6 space-y-1">
-                {selectedProjects.map((pid) => {
-                  const proj = allProjects.find((p) => p.id === pid)
-                  return (
-                    <label key={pid} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="pm_project"
-                        value={pid}
-                        checked={pmProjectId === pid}
-                        onChange={() => setPmProjectId(pid)}
-                      />
-                      {proj?.name}
-                    </label>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
+        <FellowAssignmentControls
+          allProjects={allProjects}
+          selectedProjects={selectedProjects}
+          onSelectedChange={setSelectedProjects}
+          isPm={isPm}
+          onIsPmChange={setIsPm}
+          pmProjectId={pmProjectId}
+          onPmProjectIdChange={setPmProjectId}
+          isAdminFlag={isAdminFlag}
+          onIsAdminChange={setIsAdminFlag}
+        />
 
         <Button type="submit" disabled={submitting}>
           {submitting ? 'Saving...' : 'Save Changes'}

@@ -28,14 +28,14 @@ export default async function VideosPage() {
       SELECT id, title, description, youtube_id, tags, pinned, published_at
       FROM videos
       WHERE published = true AND pinned = true
-      ORDER BY published_at DESC
+      ORDER BY LOWER(title) ASC
     `
     pinned = pinnedRows as unknown as Video[]
     const videoRows = await sql`
       SELECT id, title, description, youtube_id, tags, pinned, published_at
       FROM videos
       WHERE published = true AND pinned = false
-      ORDER BY published_at DESC
+      ORDER BY LOWER(title) ASC
     `
     videos = videoRows as unknown as Video[]
   } catch (err) {

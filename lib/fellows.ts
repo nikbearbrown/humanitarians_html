@@ -213,12 +213,12 @@ export async function getFellowReports(
   fellowId: string
 ): Promise<ReportWithProject[]> {
   const rows = await sql`
-    SELECT r.id, r.fellow_id, r.project_id, r.content, r.created_at,
+    SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
            p.id AS p_id, p.name AS p_name, p.slug AS p_slug
     FROM reports r
     JOIN projects p ON p.id = r.project_id
     WHERE r.fellow_id = ${fellowId}
-    ORDER BY r.created_at DESC
+    ORDER BY r.filed_date DESC, r.created_at DESC
   `
   return rows.map((row) => {
     const r = row as Record<string, unknown>
@@ -227,6 +227,9 @@ export async function getFellowReports(
       fellow_id: r.fellow_id as string,
       project_id: r.project_id as string,
       content: r.content as string,
+      filed_date: r.filed_date instanceof Date
+        ? r.filed_date.toISOString().slice(0, 10)
+        : String(r.filed_date),
       created_at: r.created_at as string,
       project: {
         id: r.p_id as string,
@@ -235,6 +238,142 @@ export async function getFellowReports(
       },
     }
   })
+}
+
+export type AdminReport = {
+  id: string
+  fellow_id: string
+  fellow_name: string
+  fellow_slug: string
+  project_id: string | null
+  project_name: string | null
+  content: string
+  filed_date: string
+  created_at: string
+}
+
+export async function getAllReports(fellowId?: string): Promise<AdminReport[]> {
+  const rows = fellowId
+    ? await sql`
+        SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
+               f.name AS f_name, f.slug AS f_slug,
+               p.name AS p_name
+        FROM reports r
+        JOIN fellows f ON f.id = r.fellow_id
+        LEFT JOIN projects p ON p.id = r.project_id
+        WHERE r.fellow_id = ${fellowId}
+        ORDER BY r.filed_date DESC, r.created_at DESC
+      `
+    : await sql`
+        SELECT r.id, r.fellow_id, r.project_id, r.content, r.filed_date, r.created_at,
+               f.name AS f_name, f.slug AS f_slug,
+               p.name AS p_name
+        FROM reports r
+        JOIN fellows f ON f.id = r.fellow_id
+        LEFT JOIN projects p ON p.id = r.project_id
+        ORDER BY r.filed_date DESC, r.created_at DESC
+      `
+  return rows.map((row) => {
+    const r = row as Record<string, unknown>
+    return {
+      id: r.id as string,
+      fellow_id: r.fellow_id as string,
+      fellow_name: r.f_name as string,
+      fellow_slug: r.f_slug as string,
+      project_id: (r.project_id as string | null) ?? null,
+      project_name: (r.p_name as string | null) ?? null,
+      content: r.content as string,
+      filed_date: r.filed_date instanceof Date
+        ? r.filed_date.toISOString().slice(0, 10)
+        : String(r.filed_date),
+      created_at: r.created_at as string,
+    }
+  })
+}
+
+// ── Admin overview stats ───────────────────────────────────────────────────────
+
+export type OverviewStats = {
+  activeFellows: number
+  reportsThisWeek: number
+  newFellowsThisWeek: number
+  submittedThisWeek: number // distinct fellows who filed for current week
+  currentWeekStart: string // YYYY-MM-DD Monday
+}
+
+export type WeeklyChartPoint = {
+  weekStart: string // YYYY-MM-DD Monday
+  byFiledDate: number // Line 1: reports whose filed_date falls in this week
+  bySubmittedAt: number // Line 2: reports actually submitted during this week
+}
+
+export async function getOverviewStats(): Promise<OverviewStats> {
+  const [active, reports, newFellows, submitted, weekStart] = await Promise.all([
+    sql`SELECT COUNT(*)::int AS c FROM fellows WHERE status = 'current'`,
+    sql`SELECT COUNT(*)::int AS c FROM reports WHERE filed_date = (date_trunc('week', now())::date)`,
+    sql`SELECT COUNT(*)::int AS c FROM fellows WHERE joined_date >= date_trunc('week', now()) AND status = 'current'`,
+    sql`SELECT COUNT(DISTINCT fellow_id)::int AS c FROM reports WHERE filed_date = (date_trunc('week', now())::date)`,
+    sql`SELECT (date_trunc('week', now())::date)::text AS d`,
+  ])
+  const cell = (rows: unknown[]): number => Number((rows[0] as { c: number }).c)
+  const dateCell = (rows: unknown[]): string => String((rows[0] as { d: string }).d)
+  return {
+    activeFellows: cell(active),
+    reportsThisWeek: cell(reports),
+    newFellowsThisWeek: cell(newFellows),
+    submittedThisWeek: cell(submitted),
+    currentWeekStart: dateCell(weekStart),
+  }
+}
+
+export async function getWeeklyChart(months: number = 12): Promise<WeeklyChartPoint[]> {
+  // Fetch raw counts grouped by Monday-of-week for both metrics.
+  const [filedRows, submittedRows] = await Promise.all([
+    sql`
+      SELECT (date_trunc('week', filed_date)::date)::text AS week, COUNT(*)::int AS c
+      FROM reports
+      WHERE filed_date >= (date_trunc('week', now()) - make_interval(months => ${months}))::date
+      GROUP BY 1
+      ORDER BY 1
+    `,
+    sql`
+      SELECT (date_trunc('week', created_at)::date)::text AS week, COUNT(*)::int AS c
+      FROM reports
+      WHERE created_at >= (date_trunc('week', now()) - make_interval(months => ${months}))
+      GROUP BY 1
+      ORDER BY 1
+    `,
+  ])
+
+  const filedMap = new Map<string, number>(
+    (filedRows as Array<{ week: string; c: number }>).map((r) => [r.week, Number(r.c)])
+  )
+  const submittedMap = new Map<string, number>(
+    (submittedRows as Array<{ week: string; c: number }>).map((r) => [r.week, Number(r.c)])
+  )
+
+  // Generate every Monday in the range so weeks with zero reports still appear.
+  const out: WeeklyChartPoint[] = []
+  const now = new Date()
+  const currentMonday = new Date(now)
+  const day = currentMonday.getDay()
+  currentMonday.setDate(currentMonday.getDate() + (day === 0 ? -6 : 1 - day))
+  currentMonday.setHours(0, 0, 0, 0)
+
+  const totalWeeks = Math.round((months * 30) / 7) + 1
+  for (let i = totalWeeks - 1; i >= 0; i--) {
+    const d = new Date(currentMonday)
+    d.setDate(currentMonday.getDate() - i * 7)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
+      d.getDate()
+    ).padStart(2, '0')}`
+    out.push({
+      weekStart: key,
+      byFiledDate: filedMap.get(key) ?? 0,
+      bySubmittedAt: submittedMap.get(key) ?? 0,
+    })
+  }
+  return out
 }
 
 // ── Admin queries — include email, never expose to public pages ────────────────

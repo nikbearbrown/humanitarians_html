@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/admin-auth'
+import { isSuperAdmin } from '@/lib/admin-auth'
 import { parseYouTubeInput, fetchChannelPlaylists } from '@/lib/youtube'
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await isSuperAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

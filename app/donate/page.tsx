@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button"
-import GoFundMeWidget from "@/components/GoFundMeWidget"
 import PayPalDonateButton from "@/components/PayPalDonateButton"
 import Link from "next/link"
 export default function DonatePage() {
@@ -15,22 +14,8 @@ export default function DonatePage() {
         </div>
         {/* Primary Donation Options - Card Layout */}
         <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {/* GoFundMe Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
-            <div className="text-center space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">GoFundMe Campaign</h2>
-                <p className="text-muted-foreground">
-                  Join our active fundraising campaign and see real-time progress toward our goals.
-                </p>
-              </div>
-              <div className="flex justify-center">
-                <GoFundMeWidget size="medium" />
-              </div>
-            </div>
-          </div>
           {/* PayPal Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
+          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow md:col-span-2 md:max-w-md md:mx-auto md:w-full">
             <div className="text-center space-y-6">
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Direct Donation</h2>
