@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Six Dots Make 31, Not 32: When Patterns Break</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    color: #545454;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .layout {
+    display: flex;
+    gap: 18px;
+    width: 100%;
+    max-width: 970px;
+    align-items: flex-start;
+  }
+  .left-col { flex: 0 0 460px; }
+  .right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .box {
+    border: 2px solid #D4D4D4;
+    padding: 12px;
+  }
+  .box-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  button.action {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 16px;
+    border: 2px solid #2A1A0E;
+    background: #2A1A0E;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+  button.action:hover { background: #C8102E; border-color: #C8102E; }
+  button.action.secondary {
+    background: #fff;
+    color: #2A1A0E;
+  }
+  button.action.secondary:hover { background: #2A1A0E; color: #fff; }
+  input[type=range] { width: 100%; accent-color: #C8102E; margin: 6px 0; }
+  .n-display {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #C8102E;
+    text-align: center;
+    line-height: 1;
+  }
+  .n-sublabel {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+  }
+  th {
+    background: #2A1A0E;
+    color: #fff;
+    padding: 5px 6px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  th:first-child { text-align: center; }
+  td {
+    padding: 5px 6px;
+    text-align: right;
+    border-bottom: 1px solid #F0F0F0;
+    font-weight: 600;
+  }
+  td:first-child { text-align: center; font-weight: 700; }
+  tr.highlight td { background: #FFF0F0; color: #C8102E; font-weight: 900; }
+  tr.active-row td { background: #F8F8E8; }
+  .formula-box {
+    background: #FAFAFA;
+    border: 1.5px solid #D4D4D4;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .formula {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 4px;
+  }
+  .formula span { color: #C8102E; }
+  .formula-sub {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #545454;
+  }
+  .counts-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .count-chip {
+    padding: 4px 10px;
+    background: #F0F0F0;
+    border: 1.5px solid #D4D4D4;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .count-chip.red { background: #FFF0F0; border-color: #C8102E; color: #C8102E; }
+  .region-count {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #C8102E;
+    text-align: center;
+    line-height: 1;
+    margin: 8px 0 2px;
+  }
+  .region-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #545454;
+    text-align: center;
+  }
+  .pascal-row {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 3px;
+  }
+  .pascal-cell {
+    width: 26px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border: 1.5px solid transparent;
+  }
+  .pascal-cell.active { border-color: #C8102E; background: #FFF0F0; color: #C8102E; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Six Dots Make 31, Not 32: When Patterns Break</h1>
+<div class="subtitle">1, 2, 4, 8, 16... then 31. The pattern breaks exactly when it seems most trustworthy.</div>
+
+<div class="layout">
+  <!-- Left: chord diagram -->
+  <div class="left-col">
+    <div class="box">
+      <div class="box-title">Chord Diagram — Points on a Circle</div>
+      <svg id="circSvg" width="436" height="436"></svg>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+        <button class="action" id="addBtn">+ Add Point</button>
+        <button class="action secondary" id="resetBtn">Reset</button>
+        <div style="flex:1;">
+          <input type="range" id="nSlider" min="1" max="8" value="1">
+          <div style="display:flex;justify-content:space-between;font-size:0.62rem;font-weight:600;color:#545454;">
+            <span>1</span><span>8</span>
+          </div>
+        </div>
+      </div>
+      <div class="counts-row">
+        <div class="count-chip">Points: <span id="chipN">1</span></div>
+        <div class="count-chip">Chords: <span id="chipC">0</span></div>
+        <div class="count-chip">Crossings: <span id="chipX">0</span></div>
+        <div class="count-chip red">Regions: <span id="chipR">1</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: formula + table + Pascal -->
+  <div class="right-col">
+    <!-- Region count big display -->
+    <div class="box" style="text-align:center;">
+      <div class="box-title">Regions in the Circle</div>
+      <div class="region-count" id="regionBig">1</div>
+      <div class="region-label" id="regionLabel">n = 1 point</div>
+      <div style="font-size:0.72rem;font-weight:700;color:#545454;margin-top:6px;" id="regionNote"></div>
+    </div>
+
+    <!-- Formula -->
+    <div class="box">
+      <div class="box-title">Formula</div>
+      <div class="formula-box">
+        <div class="formula">R(n) = 1 + <span>C(n,2)</span> + <span>C(n,4)</span></div>
+        <div class="formula-sub">Chords = C(n,2) &nbsp;|&nbsp; Interior crossings = C(n,4)</div>
+        <div class="formula-sub" style="margin-top:3px;">(Assumes no 3 chords concurrent — generic placement)</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="box">
+      <div class="box-title">Pattern Table</div>
+      <table>
+        <thead>
+          <tr>
+            <th>n</th>
+            <th>C(n,2)</th>
+            <th>C(n,4)</th>
+            <th>R = 1+C₂+C₄</th>
+            <th>2^(n−1)?</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pascal triangle -->
+    <div class="box">
+      <div class="box-title">Pascal's Triangle — Highlighted Entries Used in R(n)</div>
+      <div id="pascalDiv"></div>
+      <div style="font-size:0.65rem;font-weight:600;color:#545454;margin-top:6px;">
+        R(n) uses row n entries at columns 0, 2, 4 (i.e. C(n,0)+C(n,2)+C(n,4) = 1+C(n,2)+C(n,4))
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BG = '#FFFFFF', INK = '#2A1A0E', RED = '#C8102E', SLATE = '#545454', HAIR = '#D4D4D4';
+
+function C(n, k) {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  let r = 1;
+  for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1);
+  return Math.round(r);
+}
+
+function regions(n) { return 1 + C(n, 2) + C(n, 4); }
+
+// Region colors — visually distinct
+const REGION_COLORS = [
+  '#E8F4FD', '#FFF3E0', '#F3E5F5', '#E8F5E9', '#FFF8E1',
+  '#FCE4EC', '#E0F2F1', '#EDE7F6', '#F1F8E9', '#FBE9E7',
+  '#E3F2FD', '#F9FBE7', '#EFEBE9', '#E8EAF6', '#F3E5F5',
+  '#E0F7FA', '#F9FBE7', '#FFF3E0', '#E8F5E9', '#FCE4EC',
+  '#E1F5FE', '#EDE7F6', '#F3F3F3', '#FFF9C4', '#DCEDC8',
+  '#CFD8DC', '#D7CCC8', '#C8E6C9', '#B3E5FC', '#F8BBD9',
+  '#FFECB3',
+];
+
+let currentN = 1;
+const SVG_SIZE = 436;
+const CX = SVG_SIZE / 2, CY = SVG_SIZE / 2, CR = 180;
+
+function pointOnCircle(i, n) {
+  // Slightly randomized to avoid concurrent chords — place at prime-angle offsets
+  const offsets = [0, 0.12, 0.08, 0.06, 0.04, 0.03, 0.025, 0.02];
+  const offset = offsets[Math.min(n - 1, offsets.length - 1)] || 0;
+  const angle = (2 * Math.PI * i / n) - Math.PI / 2 + offset * Math.PI;
+  return { x: CX + CR * Math.cos(angle), y: CY + CR * Math.sin(angle) };
+}
+
+function segmentsIntersect(p1, p2, p3, p4) {
+  const d1 = { x: p2.x - p1.x, y: p2.y - p1.y };
+  const d2 = { x: p4.x - p3.x, y: p4.y - p3.y };
+  const cross = d1.x * d2.y - d1.y * d2.x;
+  if (Math.abs(cross) < 1e-10) return null;
+  const t = ((p3.x - p1.x) * d2.y - (p3.y - p1.y) * d2.x) / cross;
+  const u = ((p3.x - p1.x) * d1.y - (p3.y - p1.y) * d1.x) / cross;
+  if (t > 0.01 && t < 0.99 && u > 0.01 && u < 0.99) {
+    return { x: p1.x + t * d1.x, y: p1.y + t * d1.y };
+  }
+  return null;
+}
+
+function drawCircle(n) {
+  const svg = d3.select('#circSvg');
+  svg.selectAll('*').remove();
+
+  const pts = [];
+  for (let i = 0; i < n; i++) pts.push(pointOnCircle(i, n));
+
+  // Build all chords
+  const chords = [];
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++)
+      chords.push([i, j]);
+
+  // Planar graph: draw segments colored by region (approx via angle-sector coloring)
+  // For visual: flood-fill approximate — draw colored sectors between chords
+  // Strategy: draw polygon regions via ray casting — but complex; instead just draw with
+  // alternating fills using the chord arrangement to approximate region polygons.
+  // Simpler approach that looks good: draw each chord-bounded wedge using the formula count,
+  // and fill the circle interior with colored segments.
+
+  // Build a canvas-like approach: use SVG clipPath + arcs
+  // For n<=8 regions: use the formula R = 1+C(n,2)+C(n,4)
+  // Visual: draw radial segments and color them
+
+  const R = regions(n);
+
+  // Draw filled regions using d3's voronoi-like approach won't work cleanly.
+  // Best approach: for each bounded region, find its color by angle.
+  // We'll use a simplified planar map construction.
+
+  // Circle outline
+  svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', CR)
+    .attr('fill', '#F8F8F8').attr('stroke', INK).attr('stroke-width', 2);
+
+  // Color approach: divide circle into sectors and sub-sectors
+  // For small n: manually compute region polygons using sweep
+  if (n >= 2) {
+    // Compute all intersection points inside circle
+    const intersections = [];
+    for (let i = 0; i < chords.length; i++) {
+      for (let j = i + 1; j < chords.length; j++) {
+        const p = segmentsIntersect(pts[chords[i][0]], pts[chords[i][1]], pts[chords[j][0]], pts[chords[j][1]]);
+        if (p) intersections.push(p);
+      }
+    }
+
+    // Color approach: paint alternating colors using triangulation fan from center
+    // Use the chord lines to partition — create "cells" by sampling grid
+    // For a clean look, sample a fine grid and assign each point a region based on
+    // which side of each chord it falls on (binary signature → color index)
+    const cellSize = 6;
+    const colorMap = new Map();
+    for (let px = CX - CR; px <= CX + CR; px += cellSize) {
+      for (let py = CY - CR; py <= CY + CR; py += cellSize) {
+        const dx = px - CX, dy = py - CY;
+        if (dx * dx + dy * dy > (CR - 3) * (CR - 3)) continue;
+        // Compute signature: for each chord, which side?
+        let sig = 0;
+        for (let c = 0; c < chords.length; c++) {
+          const a = pts[chords[c][0]], b = pts[chords[c][1]];
+          const side = (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
+          sig = (sig * 2 + (side >= 0 ? 1 : 0));
+        }
+        if (!colorMap.has(sig)) colorMap.set(sig, colorMap.size);
+      }
+    }
+
+    // Draw colored cells
+    const colorAssign = new Map();
+    let colorIdx = 0;
+    for (const [sig] of colorMap) {
+      colorAssign.set(sig, colorIdx++ % REGION_COLORS.length);
+    }
+
+    for (let px = CX - CR; px <= CX + CR; px += cellSize) {
+      for (let py = CY - CR; py <= CY + CR; py += cellSize) {
+        const dx = px - CX, dy = py - CY;
+        if (dx * dx + dy * dy > (CR - 3) * (CR - 3)) continue;
+        let sig = 0;
+        for (let c = 0; c < chords.length; c++) {
+          const a = pts[chords[c][0]], b = pts[chords[c][1]];
+          const side = (b.x - a.x) * (py - a.y) - (b.y - a.y) * (px - a.x);
+          sig = (sig * 2 + (side >= 0 ? 1 : 0));
+        }
+        const ci = colorAssign.get(sig) ?? 0;
+        svg.append('rect')
+          .attr('x', px - cellSize / 2).attr('y', py - cellSize / 2)
+          .attr('width', cellSize).attr('height', cellSize)
+          .attr('fill', REGION_COLORS[ci]);
+      }
+    }
+
+    // Clip to circle
+    svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', CR)
+      .attr('fill', 'none').attr('stroke', 'white').attr('stroke-width', 6);
+    svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', CR)
+      .attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 2);
+  }
+
+  // Chords
+  chords.forEach(([i, j]) => {
+    svg.append('line')
+      .attr('x1', pts[i].x).attr('y1', pts[i].y)
+      .attr('x2', pts[j].x).attr('y2', pts[j].y)
+      .attr('stroke', INK).attr('stroke-width', 1.5).attr('opacity', 0.9);
+  });
+
+  // Points on circle
+  pts.forEach((p, i) => {
+    svg.append('circle').attr('cx', p.x).attr('cy', p.y).attr('r', 8)
+      .attr('fill', RED).attr('stroke', '#fff').attr('stroke-width', 2);
+    svg.append('text').attr('x', p.x).attr('y', p.y + 4)
+      .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+      .attr('font-size', '9px').attr('font-weight', '700').attr('fill', '#fff')
+      .text(i + 1);
+  });
+
+  // Region count label
+  const nChords = C(n, 2);
+  const nCross = C(n, 4);
+  const nRegions = R;
+
+  document.getElementById('chipN').textContent = n;
+  document.getElementById('chipC').textContent = nChords;
+  document.getElementById('chipX').textContent = nCross;
+  document.getElementById('chipR').textContent = nRegions;
+
+  document.getElementById('regionBig').textContent = nRegions;
+  document.getElementById('regionLabel').textContent = `n = ${n} point${n > 1 ? 's' : ''}`;
+  if (n === 6) {
+    document.getElementById('regionNote').innerHTML = '<span style="color:#C8102E;font-weight:900;">31, not 32! The pattern breaks here.</span>';
+  } else if (n <= 5) {
+    document.getElementById('regionNote').innerHTML = `Matches 2<sup>${n - 1}</sup> = ${Math.pow(2, n - 1)} ✓`;
+  } else {
+    document.getElementById('regionNote').innerHTML = `Formula: 1 + ${nChords} + ${nCross} = <strong>${nRegions}</strong>`;
+  }
+}
+
+function buildTable(currentN) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  for (let n = 1; n <= 8; n++) {
+    const c2 = C(n, 2), c4 = C(n, 4), r = regions(n), pow2 = Math.pow(2, n - 1);
+    const tr = document.createElement('tr');
+    if (n === 6) tr.className = 'highlight';
+    else if (n === currentN) tr.className = 'active-row';
+    const match = r === pow2 ? `${pow2} ✓` : `≠ ${pow2} ✗`;
+    tr.innerHTML = `<td>${n}</td><td>${c2}</td><td>${c4}</td><td>${r}</td><td>${match}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+function buildPascal(n) {
+  const div = document.getElementById('pascalDiv');
+  div.innerHTML = '';
+  const rows = 9; // 0..8
+  for (let row = 0; row <= Math.min(8, rows - 1); row++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'pascal-row';
+    for (let col = 0; col <= row; col++) {
+      const cell = document.createElement('div');
+      cell.className = 'pascal-cell';
+      // Highlight: in row=n, cols 0,2,4 contribute to R(n)
+      if (row === n && (col === 0 || col === 2 || col === 4)) {
+        cell.classList.add('active');
+      }
+      cell.textContent = C(row, col);
+      rowDiv.appendChild(cell);
+    }
+    div.appendChild(rowDiv);
+  }
+}
+
+function update(n) {
+  currentN = n;
+  document.getElementById('nSlider').value = n;
+  drawCircle(n);
+  buildTable(n);
+  buildPascal(n);
+}
+
+document.getElementById('addBtn').addEventListener('click', () => {
+  if (currentN < 8) update(currentN + 1);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => { update(1); });
+
+document.getElementById('nSlider').addEventListener('input', function () {
+  update(parseInt(this.value));
+});
+
+// Init
+update(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variational Bound Optimizer</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    padding: 16px 24px 4px;
+    border-bottom: 2px solid #2A1A0E;
+  }
+  h1 span { color: #C8102E; }
+  .subtitle {
+    padding: 4px 24px 12px;
+    font-size: 0.81rem;
+    color: #545454;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 0 20px;
+    padding: 0 24px 16px;
+    flex: 1;
+  }
+  .panel-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin: 12px 0 4px;
+  }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    grid-column: 1 / 3;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin: 10px 0 6px;
+    padding: 12px 14px;
+    background: #f7f5f2;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+  }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+  }
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .ctrl-row label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    min-width: 80px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    height: 4px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    width: 150px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+  }
+  .val-display {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 36px;
+  }
+  .toggle-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .toggle-btn {
+    padding: 4px 12px;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 3px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-family: Inter, Helvetica, sans-serif;
+    font-weight: 600;
+    color: #2A1A0E;
+    transition: background 0.15s;
+  }
+  .toggle-btn.active {
+    background: #2A1A0E;
+    color: #fff;
+  }
+  .info-panel {
+    background: #f7f5f2;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    line-height: 1.9;
+  }
+  .info-panel .row { display: flex; justify-content: space-between; gap: 12px; }
+  .info-panel .key { color: #545454; }
+  .info-panel .val { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .info-panel .excess { color: #C8102E; font-weight: 700; }
+  .console-box {
+    background: #f7f5f2;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 0.77rem;
+    line-height: 1.7;
+    font-family: "Courier New", monospace;
+    margin-top: 8px;
+    grid-column: 1 / 3;
+  }
+  .pass { color: #1a7a1a; font-weight: 700; }
+  .label { color: #545454; }
+  .eq-box {
+    background: #f7f5f2;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    margin: 4px 0 8px;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    grid-column: 1 / 3;
+  }
+  .eq-box .math { font-family: "Courier New", monospace; font-size: 0.85rem; }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin: 4px 0 4px;
+    font-size: 0.78rem;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 22px; height: 2.5px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Variational Principle: <span>⟨H⟩ ≥ E₀</span></h1>
+<div class="subtitle">1D harmonic oscillator H = −½∂²/∂x² + ½x² (ħ=m=ω=1), exact E₀ = 0.5. Trial ψ always upper-bounds ground state.</div>
+
+<div class="layout">
+
+  <div class="eq-box">
+    <span class="math">Gaussian: ψ=N·exp(−αx²) → ⟨H⟩=α/2+1/(8α), min at α=½ → ⟨H⟩=0.5=E₀</span> &nbsp;|&nbsp;
+    <span class="math">Top-hat: ⟨H⟩=π²/(24a²)+a²/6</span> &nbsp;|&nbsp;
+    <span class="math">Parabola: ⟨H⟩=5/(4a²)+a²/14</span>
+  </div>
+
+  <!-- LEFT: Energy curve -->
+  <div>
+    <div class="panel-label">⟨H⟩ vs parameter (variational curve)</div>
+    <svg id="energy-svg"></svg>
+    <div class="legend" id="energy-legend"></div>
+    <div style="margin-top:10px;" id="info-panel" class="info-panel"></div>
+  </div>
+
+  <!-- RIGHT: Wavefunction -->
+  <div>
+    <div class="panel-label">Trial ψ(x) vs exact ψ₀(x) = π^{−1/4}·exp(−x²/2)</div>
+    <svg id="wf-svg"></svg>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#C8102E;"></div> Trial ψ (current param)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#2A1A0E; border-bottom: 2px dashed #2A1A0E;"></div> Exact ψ₀</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#545454; opacity:0.4;"></div> V(x)/10</div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="ctrl-group">
+      <div class="ctrl-row">
+        <label>Trial type:</label>
+        <div class="toggle-group" id="type-toggle">
+          <button class="toggle-btn active" data-type="gaussian">Gaussian</button>
+          <button class="toggle-btn" data-type="tophat">Top-hat</button>
+          <button class="toggle-btn" data-type="parabola">Parabola</button>
+        </div>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-row" id="param-row">
+        <label id="param-label">α:</label>
+        <input type="range" id="param-slider" min="0.1" max="3.0" step="0.01" value="0.5">
+        <span class="val-display" id="param-val">0.50</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHYSICS CONSOLE -->
+  <div class="console-box" id="physics-console">
+    <div><span class="label">Physics checks:</span></div>
+    <div id="pc1"></div>
+    <div id="pc2"></div>
+    <div id="pc3"></div>
+  </div>
+</div>
+
+<script>
+// ─── palette ───────────────────────────────────────────────────────────────
+const BG='#FFFFFF', INK='#2A1A0E', RED='#C8102E', SLATE='#545454';
+
+// ─── physics ────────────────────────────────────────────────────────────────
+const E0 = 0.5;
+
+// Gaussian: ψ = (2α/π)^(1/4) exp(-αx²)
+// <T> = α/2, <V> = 1/(8α), <H> = α/2 + 1/(8α)
+function gaussianE(alpha) { return alpha/2 + 1/(8*alpha); }
+function gaussianMinParam() { return 0.5; }
+
+// Top-hat: ψ = 1/√(2a) for |x|<a, 0 else
+// <T> = π²/(24a²), <V> = a²/6
+function tophatE(a) { return Math.PI*Math.PI/(24*a*a) + a*a/6; }
+
+// Parabola: ψ = N(a²-x²) for |x|<a, N²·2∫₀ᵃ(a²-x²)²dx = 1
+// ∫₀ᵃ(a²-x²)² dx = a⁵(1-2/3+1/5) = 8a⁵/15 → N²=15/(16a⁵)
+// <T> = N²·2∫₀ᵃ(-1/2)(a²-x²)·(-2) dx ... let me be careful
+// ψ = N(a²-x²), ψ''= -2N, so -½ψ'' = N
+// <T> = -½∫ψ*ψ''dx = -½∫N(a²-x²)·(-2N)dx = N²∫_{-a}^{a}(a²-x²)dx
+//      = N²·2∫₀ᵃ(a²-x²)dx = N²·2[a³-a³/3] = N²·4a³/3
+// N² = 15/(16a⁵), so <T> = 15/(16a⁵)·4a³/3 = 15/(16a⁵)·4a³/3 = 5/(4a²)
+// <V> = ½N²·2∫₀ᵃ x²(a²-x²)²dx
+//      = N²∫₀ᵃ x²(a⁴-2a²x²+x⁴)dx = N²[a⁴x³/3 - 2a²x⁵/5 + x⁷/7]₀ᵃ
+//      = N²·a⁷(1/3 - 2/5 + 1/7) = N²·a⁷·(35-42+15)/105 = N²·a⁷·8/105
+// <V> = 15/(16a⁵)·8a⁷/105 = 15·8/(16·105)·a² = 120/(1680)·a² = 1/14·a²
+function parabolaE(a) { return 5/(4*a*a) + a*a/14; }
+
+function getEnergy(type, param) {
+  if (type==='gaussian') return gaussianE(param);
+  if (type==='tophat') return tophatE(param);
+  if (type==='parabola') return parabolaE(param);
+}
+
+function getKinetic(type, param) {
+  if (type==='gaussian') return param/2;
+  if (type==='tophat') return Math.PI*Math.PI/(24*param*param);
+  if (type==='parabola') return 5/(4*param*param);
+}
+
+function getPotential(type, param) {
+  if (type==='gaussian') return 1/(8*param);
+  if (type==='tophat') return param*param/6;
+  if (type==='parabola') return param*param/14;
+}
+
+// Wavefunction evaluations
+function norm_gaussian(alpha) { return Math.pow(2*alpha/Math.PI, 0.25); }
+function psi_gaussian(x, alpha) { return norm_gaussian(alpha) * Math.exp(-alpha*x*x); }
+
+function norm_tophat(a) { return 1/Math.sqrt(2*a); }
+function psi_tophat(x, a) { return Math.abs(x)<=a ? norm_tophat(a) : 0; }
+
+function norm_parabola(a) { return Math.sqrt(15/(16*Math.pow(a,5))); }
+function psi_parabola(x, a) { return Math.abs(x)<=a ? norm_parabola(a)*(a*a-x*x) : 0; }
+
+function psi_exact(x) { return Math.pow(Math.PI, -0.25) * Math.exp(-x*x/2); }
+
+function getTrial(type, x, param) {
+  if (type==='gaussian') return psi_gaussian(x, param);
+  if (type==='tophat') return psi_tophat(x, param);
+  if (type==='parabola') return psi_parabola(x, param);
+}
+
+// ─── state ──────────────────────────────────────────────────────────────────
+let trialType = 'gaussian';
+let paramVal = 0.5;
+
+const paramConfig = {
+  gaussian: { min: 0.1, max: 3.0, step: 0.01, default: 0.5, label: 'α' },
+  tophat:   { min: 0.2, max: 5.0, step: 0.05, default: 1.5, label: 'a' },
+  parabola: { min: 0.3, max: 5.0, step: 0.05, default: 1.8, label: 'a' },
+};
+
+// ─── energy curve plot ───────────────────────────────────────────────────────
+function drawEnergyCurve() {
+  const svg = d3.select('#energy-svg');
+  svg.selectAll('*').remove();
+
+  const m = {top:12, right:16, bottom:40, left:52};
+  const W = 380 - m.left - m.right;
+  const H = 220 - m.top - m.bottom;
+  svg.attr('width',W+m.left+m.right).attr('height',H+m.top+m.bottom);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const cfg = paramConfig[trialType];
+  const pRange = d3.range(cfg.min, cfg.max+cfg.step/2, (cfg.max-cfg.min)/300);
+  const data = pRange.map(p => ({p, E: getEnergy(trialType, p)}));
+
+  const xScale = d3.scaleLinear().domain([cfg.min, cfg.max]).range([0,W]);
+  const yMin = 0.4, yMax = d3.max(data, d=>d.E)*1.1;
+  const yScale = d3.scaleLinear().domain([Math.min(yMin, E0*0.9), Math.min(yMax, 4)]).range([H,0]);
+
+  // grid
+  [0.5,1,1.5,2,2.5,3].forEach(yv => {
+    if (yv <= Math.min(yMax,4)) {
+      g.append('line').attr('x1',0).attr('x2',W).attr('y1',yScale(yv)).attr('y2',yScale(yv))
+       .attr('stroke','#eee').attr('stroke-width',1);
+    }
+  });
+
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(xScale).ticks(6))
+   .selectAll('text').style('font-size','11px');
+  g.append('g').call(d3.axisLeft(yScale).ticks(6))
+   .selectAll('text').style('font-size','11px');
+
+  // axis labels
+  g.append('text').attr('x',W/2).attr('y',H+32).attr('text-anchor','middle')
+   .attr('font-size',12).attr('fill',INK).text(cfg.label);
+  g.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-38)
+   .attr('text-anchor','middle').attr('font-size',12).attr('fill',INK).text('⟨H⟩');
+
+  // E0 dashed line
+  if (yScale(E0) >= 0 && yScale(E0) <= H) {
+    g.append('line').attr('x1',0).attr('x2',W).attr('y1',yScale(E0)).attr('y2',yScale(E0))
+     .attr('stroke',INK).attr('stroke-width',1.5).attr('stroke-dasharray','5,3');
+    g.append('text').attr('x',W-2).attr('y',yScale(E0)-4).attr('text-anchor','end')
+     .attr('font-size',10).attr('fill',INK).text('E₀=0.5');
+  }
+
+  // energy curve (RED)
+  const lineGen = d3.line().x(d=>xScale(d.p)).y(d=>yScale(Math.min(d.E,4))).curve(d3.curveCatmullRom.alpha(0.5));
+  g.append('path').datum(data).attr('fill','none').attr('stroke',RED).attr('stroke-width',2.5).attr('d',lineGen);
+
+  // minimum marker
+  let minP, minE;
+  if (trialType==='gaussian') {
+    minP = 0.5; minE = gaussianE(0.5);
+  } else {
+    // Numerical minimum
+    const minD = data.reduce((a,b) => a.E<b.E ? a : b);
+    minP = minD.p; minE = minD.E;
+  }
+  if (yScale(minE) >= 0 && yScale(minE) <= H) {
+    g.append('circle').attr('cx',xScale(minP)).attr('cy',yScale(minE))
+     .attr('r',6).attr('fill',RED).attr('stroke','#fff').attr('stroke-width',2);
+    g.append('text').attr('x',xScale(minP)+10).attr('y',yScale(minE)+4)
+     .attr('font-size',10).attr('fill',RED)
+     .text(`min ⟨H⟩=${minE.toFixed(4)}`);
+  }
+
+  // current param marker
+  const curE = getEnergy(trialType, paramVal);
+  if (yScale(curE) >= 0 && yScale(curE) <= H && xScale(paramVal) >= 0 && xScale(paramVal) <= W) {
+    g.append('circle').attr('cx',xScale(paramVal)).attr('cy',yScale(Math.min(curE,4)))
+     .attr('r',5).attr('fill',INK).attr('stroke','#fff').attr('stroke-width',2);
+    // drop line to x-axis
+    g.append('line')
+     .attr('x1',xScale(paramVal)).attr('x2',xScale(paramVal))
+     .attr('y1',yScale(Math.min(curE,4))).attr('y2',H)
+     .attr('stroke',INK).attr('stroke-width',1).attr('stroke-dasharray','3,2');
+  }
+
+  // legend
+  document.getElementById('energy-legend').innerHTML = `
+    <div class="legend-item"><div class="legend-swatch" style="background:${RED};height:3px;"></div> ⟨H⟩(${cfg.label}) — ${trialType}</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:${INK};height:2px;border-top:2px dashed ${INK};"></div> E₀=0.5</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:${INK};border-radius:50%;width:10px;height:10px;"></div> current</div>
+  `;
+}
+
+// ─── wavefunction plot ────────────────────────────────────────────────────────
+function drawWavefunction() {
+  const svg = d3.select('#wf-svg');
+  svg.selectAll('*').remove();
+
+  const m = {top:12, right:16, bottom:40, left:52};
+  const W = 380 - m.left - m.right;
+  const H = 220 - m.top - m.bottom;
+  svg.attr('width',W+m.left+m.right).attr('height',H+m.top+m.bottom);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const xRange = [-5, 5];
+  const N = 500;
+  const xs = d3.range(N+1).map(i => xRange[0] + (xRange[1]-xRange[0])*i/N);
+
+  const trialData = xs.map(x => ({x, y: getTrial(trialType, x, paramVal)}));
+  const exactData = xs.map(x => ({x, y: psi_exact(x)}));
+  const potData   = xs.map(x => ({x, y: 0.5*x*x}));
+
+  const xScale = d3.scaleLinear().domain(xRange).range([0,W]);
+  const yMax = d3.max(trialData, d=>d.y) * 1.1;
+  const yScale = d3.scaleLinear().domain([-0.05, Math.max(yMax, psi_exact(0)*1.1, 0.8)]).range([H,0]);
+
+  // potential (faint, scaled)
+  const potScale = d3.scaleLinear().domain([0, 5]).range([H, 0]);
+  const potLine = d3.line().x(d=>xScale(d.x)).y(d=>potScale(d.y)).defined(d=>d.y<=5);
+  g.append('path').datum(potData).attr('fill','none').attr('stroke',SLATE)
+   .attr('stroke-width',1).attr('opacity',0.3).attr('d',potLine);
+
+  // axes
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(xScale).ticks(6))
+   .selectAll('text').style('font-size','11px');
+  g.append('g').call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('.2f')))
+   .selectAll('text').style('font-size','11px');
+
+  g.append('text').attr('x',W/2).attr('y',H+32).attr('text-anchor','middle')
+   .attr('font-size',12).attr('fill',INK).text('x');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-38)
+   .attr('text-anchor','middle').attr('font-size',12).attr('fill',INK).text('ψ(x)');
+
+  // exact (dashed INK)
+  const exactLine = d3.line().x(d=>xScale(d.x)).y(d=>yScale(d.y)).curve(d3.curveCatmullRom.alpha(0.5));
+  g.append('path').datum(exactData).attr('fill','none').attr('stroke',INK)
+   .attr('stroke-width',1.8).attr('stroke-dasharray','6,3').attr('d',exactLine);
+
+  // trial (RED solid)
+  const trialLine = d3.line().x(d=>xScale(d.x)).y(d=>yScale(d.y))
+    .defined(d => d.y >= -0.01)
+    .curve(d3.curveCatmullRom.alpha(0.5));
+  g.append('path').datum(trialData).attr('fill','none').attr('stroke',RED)
+   .attr('stroke-width',2.5).attr('d',trialLine);
+
+  // zero line
+  g.append('line').attr('x1',0).attr('x2',W).attr('y1',yScale(0)).attr('y2',yScale(0))
+   .attr('stroke','#ddd').attr('stroke-width',1);
+}
+
+// ─── info panel ──────────────────────────────────────────────────────────────
+function updateInfo() {
+  const T = getKinetic(trialType, paramVal);
+  const V = getPotential(trialType, paramVal);
+  const E = getEnergy(trialType, paramVal);
+  const excess = (E - E0)/E0 * 100;
+  const cfg = paramConfig[trialType];
+  document.getElementById('info-panel').innerHTML = `
+    <div class="row"><span class="key">${cfg.label} (param)</span><span class="val">${paramVal.toFixed(3)}</span></div>
+    <div class="row"><span class="key">⟨T⟩ kinetic</span><span class="val">${T.toFixed(5)}</span></div>
+    <div class="row"><span class="key">⟨V⟩ potential</span><span class="val">${V.toFixed(5)}</span></div>
+    <div class="row"><span class="key">⟨H⟩ = ⟨T⟩+⟨V⟩</span><span class="val">${E.toFixed(5)}</span></div>
+    <div class="row"><span class="key">Exact E₀</span><span class="val">0.50000</span></div>
+    <div class="row"><span class="key">Excess above E₀</span><span class="excess">+${Math.max(0,excess).toFixed(2)}%</span></div>
+  `;
+}
+
+// ─── physics console ─────────────────────────────────────────────────────────
+function updateConsole() {
+  // P1: Gaussian at α=0.5 → ⟨H⟩=0.5
+  const p1 = gaussianE(0.5);
+  const p1ok = Math.abs(p1 - 0.5) < 1e-10;
+  document.getElementById('pc1').innerHTML =
+    `<span class="label">P1: Gaussian α=0.5 → ⟨H⟩=${p1.toFixed(6)} = E₀=0.5</span> ${p1ok?'<span class="pass">✓</span>':'✗'}`;
+
+  // P2: Gaussian at α=1.0 → ⟨H⟩=0.625 > 0.5
+  const p2 = gaussianE(1.0);
+  const p2ok = Math.abs(p2 - 0.625) < 1e-10 && p2 > E0;
+  document.getElementById('pc2').innerHTML =
+    `<span class="label">P2: Gaussian α=1.0 → ⟨H⟩=${p2.toFixed(6)} > E₀ (excess ${((p2-E0)/E0*100).toFixed(1)}%)</span> ${p2ok?'<span class="pass">✓</span>':'✗'}`;
+
+  // P3: all trial functions have min ≥ E0
+  // Top-hat minimum: d/da[π²/(24a²)+a²/6]=0 → -π²/(12a³)+2a/6=0 → a⁴=π²/4 → a=√(π/2)≈1.2533
+  const aTopHatMin = Math.pow(Math.PI*Math.PI/4, 0.25);
+  const topMin = tophatE(aTopHatMin);
+  // Parabola minimum: d/da[5/(4a²)+a²/14]=0 → -5/(2a³)+2a/14=0 → a⁴=35/2 → a=(35/2)^(1/4)
+  const aParMin = Math.pow(35/2, 0.25);
+  const parMin = parabolaE(aParMin);
+  const p3ok = topMin >= E0-1e-9 && parMin >= E0-1e-9 && gaussianE(0.5) >= E0-1e-9;
+  document.getElementById('pc3').innerHTML =
+    `<span class="label">P3: min⟨H⟩: Gauss=${gaussianE(0.5).toFixed(4)}, TopHat=${topMin.toFixed(4)}, Parabola=${parMin.toFixed(4)} — all ≥ E₀=0.5</span> ${p3ok?'<span class="pass">✓</span>':'✗'}`;
+}
+
+// ─── render all ──────────────────────────────────────────────────────────────
+function render() {
+  drawEnergyCurve();
+  drawWavefunction();
+  updateInfo();
+  updateConsole();
+}
+
+// ─── events ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    trialType = this.dataset.type;
+    const cfg = paramConfig[trialType];
+    const slider = document.getElementById('param-slider');
+    slider.min = cfg.min;
+    slider.max = cfg.max;
+    slider.step = cfg.step;
+    slider.value = cfg.default;
+    paramVal = cfg.default;
+    document.getElementById('param-label').textContent = cfg.label + ':';
+    document.getElementById('param-val').textContent = cfg.default.toFixed(2);
+    render();
+  });
+});
+
+document.getElementById('param-slider').addEventListener('input', function() {
+  paramVal = +this.value;
+  document.getElementById('param-val').textContent = paramVal.toFixed(2);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

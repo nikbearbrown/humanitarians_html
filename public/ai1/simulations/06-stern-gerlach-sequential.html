@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sequential Stern-Gerlach — Born Rule & Measurement Disturbance</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #545454; margin-bottom: 20px; }
+
+  .layout {
+    display: flex; gap: 20px; align-items: flex-start;
+    width: 100%; max-width: 980px;
+  }
+  #diagram-area { flex: 1 1 auto; min-width: 0; }
+  .side-panel {
+    flex: 0 0 240px;
+    border: 1px solid #E0D8D0; border-radius: 6px;
+    padding: 16px; font-size: 13px;
+  }
+  .side-panel h2 {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.6px; margin-bottom: 10px; color: #545454;
+  }
+  .prob-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 0; border-bottom: 1px solid #F0EBE5; font-size: 12px;
+  }
+  .prob-row:last-child { border-bottom: none; }
+  .prob-key { color: #545454; max-width: 140px; line-height: 1.4; }
+  .prob-val { font-family: 'Courier New', monospace; font-weight: 600; font-size: 12px; }
+  .prob-val.red { color: #C8102E; }
+  .prob-val.ink { color: #2A1A0E; }
+  .classical-note {
+    margin-top: 10px; padding: 8px; background: #F7F3EF;
+    border-radius: 4px; font-size: 11px; color: #545454; line-height: 1.5;
+    border-left: 3px solid #C8102E;
+  }
+
+  .controls {
+    width: 100%; max-width: 980px;
+    display: flex; gap: 16px; align-items: center;
+    margin-top: 14px; flex-wrap: wrap;
+  }
+  .slider-group {
+    display: flex; align-items: center; gap: 10px; flex: 1;
+  }
+  .slider-group label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .slider-group input[type=range] { flex: 1; accent-color: #C8102E; cursor: pointer; }
+  .slider-val { font-size: 13px; font-family: 'Courier New', monospace; min-width: 42px; text-align: right; color: #545454; }
+
+  .btn {
+    padding: 8px 16px; border: 1.5px solid #2A1A0E; background: #fff;
+    border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;
+    font-family: Inter, Helvetica, sans-serif; color: #2A1A0E;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: #F7F3EF; }
+  .btn.active { background: #C8102E; border-color: #C8102E; color: #fff; }
+
+  .toggle-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600;
+  }
+  .toggle-row input[type=checkbox] { accent-color: #C8102E; width: 16px; height: 16px; cursor: pointer; }
+
+  #histogram-area {
+    width: 100%; max-width: 980px; margin-top: 16px;
+  }
+  .hist-label {
+    font-size: 12px; font-weight: 600; color: #545454; margin-bottom: 6px;
+  }
+
+  /* SG box styles */
+  .sg-box { fill: #F7F3EF; stroke: #2A1A0E; stroke-width: 2; }
+  .sg-box-label { font-size: 12px; font-weight: 700; fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; }
+  .sg-axis-label { font-size: 11px; fill: #545454; font-family: Inter, Helvetica, sans-serif; }
+  .beam-plus { stroke: #C8102E; }
+  .beam-minus { stroke: #545454; }
+  .blocked { fill: none; stroke: #2A1A0E; stroke-width: 2; stroke-dasharray: 4,3; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<h1>Sequential Stern-Gerlach</h1>
+<p class="subtitle">Measurement disturbs quantum state: SG<sub>z</sub> → SG<sub>γ</sub> → SG<sub>z</sub></p>
+
+<div class="layout">
+  <div id="diagram-area"></div>
+  <div class="side-panel">
+    <h2>Probabilities</h2>
+    <div id="prob-table"></div>
+    <div class="classical-note" id="classical-note"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="slider-group">
+    <label for="gamma-slider">γ (angle)</label>
+    <input type="range" id="gamma-slider" min="0" max="180" step="1" value="90">
+    <span class="slider-val" id="gamma-val">90°</span>
+  </div>
+  <button class="btn" id="send-btn">Send 50 Atoms</button>
+  <div class="toggle-row">
+    <input type="checkbox" id="remove-sg2">
+    <label for="remove-sg2">Remove SG₂ (no disturbance)</label>
+  </div>
+</div>
+
+<div id="histogram-area">
+  <div class="hist-label" id="hist-label">Monte Carlo results (SG₃ final): — atoms sent</div>
+</div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+let gamma_deg = 90;
+let removeSG2 = false;
+let mc_counts = { pp: 0, pm: 0, mp: 0, mm: 0 };  // (SG2 outcome, SG3 outcome)
+let mc_total  = 0;
+let animating = false;
+
+// ─── SVG for diagram ────────────────────────────────────────────────────────
+const W = 640, H = 300;
+const svg = d3.select('#diagram-area')
+  .append('svg').attr('width', W).attr('height', H)
+  .style('display', 'block');
+
+// ─── SVG for histogram ──────────────────────────────────────────────────────
+const HW = 640, HH = 120;
+const hsvg = d3.select('#histogram-area')
+  .append('svg').attr('width', HW).attr('height', HH)
+  .style('display', 'block');
+
+// ─── Layout geometry ────────────────────────────────────────────────────────
+// Three SG boxes: SG1 at x=60, SG2 at x=250, SG3 at x=440
+// Beam enters from left at y=150 (center)
+const boxW = 80, boxH = 60;
+const sg1x = 60,  sg1y = 120;
+const sg2x = 250, sg2y = 120;
+const sg3x = 440, sg3y = 120;
+const cy   = 150;  // center beam y
+
+// ─── Draw static elements ──────────────────────────────────────────────────
+// Source beam (incoming)
+const sourceBeam = svg.append('line')
+  .attr('x1', 0).attr('y1', cy)
+  .attr('x2', sg1x).attr('y2', cy)
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 3)
+  .attr('marker-end', 'url(#arrow-ink)');
+
+// Arrow defs
+const defs = svg.append('defs');
+['ink', 'red', 'slate'].forEach(name => {
+  const color = name === 'ink' ? '#2A1A0E' : name === 'red' ? '#C8102E' : '#545454';
+  const marker = defs.append('marker')
+    .attr('id', `arrow-${name}`)
+    .attr('viewBox', '0 -4 8 8')
+    .attr('refX', 7).attr('refY', 0)
+    .attr('markerWidth', 6).attr('markerHeight', 6)
+    .attr('orient', 'auto');
+  marker.append('path').attr('d', 'M0,-4L8,0L0,4Z').attr('fill', color);
+});
+
+// ─── SG Box drawing helper ─────────────────────────────────────────────────
+function drawBox(sx, sy, label, axisLabel) {
+  svg.append('rect')
+    .attr('x', sx).attr('y', sy).attr('width', boxW).attr('height', boxH)
+    .attr('rx', 4).attr('class', 'sg-box');
+  svg.append('text')
+    .attr('x', sx + boxW / 2).attr('y', sy + 22)
+    .attr('text-anchor', 'middle').attr('class', 'sg-box-label')
+    .text(label);
+  svg.append('text')
+    .attr('x', sx + boxW / 2).attr('y', sy + 40)
+    .attr('text-anchor', 'middle').attr('class', 'sg-axis-label')
+    .text(axisLabel);
+  // N/S poles
+  svg.append('text').attr('x', sx + 4).attr('y', sy + 14)
+    .attr('font-size', 9).attr('fill', '#C8102E').attr('font-weight', 700).text('N');
+  svg.append('text').attr('x', sx + 4).attr('y', sy + boxH - 4)
+    .attr('font-size', 9).attr('fill', '#545454').attr('font-weight', 700).text('S');
+}
+
+drawBox(sg1x, sg1y, 'SG₁', 'ẑ-axis');
+drawBox(sg3x, sg3y, 'SG₃', 'ẑ-axis');
+
+// SG2 box (dynamic, might be hidden)
+const sg2Group = svg.append('g').attr('id', 'sg2-group');
+sg2Group.append('rect')
+  .attr('x', sg2x).attr('y', sg2y).attr('width', boxW).attr('height', boxH)
+  .attr('rx', 4).attr('class', 'sg-box');
+sg2Group.append('text')
+  .attr('x', sg2x + boxW / 2).attr('y', sg2y + 22)
+  .attr('text-anchor', 'middle').attr('class', 'sg-box-label')
+  .text('SG₂');
+const sg2AxisLabel = sg2Group.append('text')
+  .attr('x', sg2x + boxW / 2).attr('y', sg2y + 40)
+  .attr('text-anchor', 'middle').attr('class', 'sg-axis-label')
+  .text('γ = 90°');
+sg2Group.append('text').attr('x', sg2x + 4).attr('y', sg2y + 14)
+  .attr('font-size', 9).attr('fill', '#C8102E').attr('font-weight', 700).text('N');
+sg2Group.append('text').attr('x', sg2x + 4).attr('y', sg2y + boxH - 4)
+  .attr('font-size', 9).attr('fill', '#545454').attr('font-weight', 700).text('S');
+
+// ─── Dynamic beam elements ─────────────────────────────────────────────────
+// SG1 → top (|+z⟩ selected) and bottom (|−z⟩ blocked)
+const beamSG1plus = svg.append('line').attr('stroke-width', 4).attr('class', 'beam-plus');
+const beamSG1minus = svg.append('line').attr('stroke-width', 2).attr('class', 'beam-minus')
+  .attr('stroke-dasharray', '5,3').attr('opacity', 0.4);
+const blockedMark1 = svg.append('text').attr('font-size', 16).attr('fill', '#C8102E')
+  .attr('text-anchor', 'middle').attr('font-weight', 700).text('✗');
+
+// SG2 beams
+const beamSG2plus  = svg.append('line').attr('stroke-width', 3).attr('class', 'beam-plus');
+const beamSG2minus = svg.append('line').attr('stroke-width', 2).attr('class', 'beam-minus').attr('opacity', 0.5);
+
+// SG3 results — two paths (from SG2+ and SG2-)
+const beamSG3_pp = svg.append('line').attr('stroke-width', 2).attr('class', 'beam-plus');
+const beamSG3_pm = svg.append('line').attr('stroke-width', 2).attr('class', 'beam-minus').attr('opacity', 0.6);
+const beamSG3_mp = svg.append('line').attr('stroke-width', 2).attr('stroke', '#C8102E').attr('opacity', 0.5);
+const beamSG3_mm = svg.append('line').attr('stroke-width', 2).attr('stroke', '#545454').attr('opacity', 0.4);
+
+// Result labels at far right
+const resLabel_pp = svg.append('text').attr('font-size', 11).attr('font-weight', 600).attr('fill', '#C8102E');
+const resLabel_pm = svg.append('text').attr('font-size', 11).attr('font-weight', 600).attr('fill', '#545454');
+const resLabel_mp = svg.append('text').attr('font-size', 11).attr('font-weight', 600).attr('fill', '#C8102E').attr('opacity', 0.6);
+const resLabel_mm = svg.append('text').attr('font-size', 11).attr('font-weight', 600).attr('fill', '#545454').attr('opacity', 0.6);
+
+// ─── Physics helpers ───────────────────────────────────────────────────────
+function probs(g_deg) {
+  const g = g_deg * Math.PI / 180;
+  const c2 = Math.cos(g / 2) ** 2;
+  const s2 = Math.sin(g / 2) ** 2;
+  return { c2, s2 };
+}
+
+// ─── Diagram update ────────────────────────────────────────────────────────
+function updateDiagram() {
+  const g = gamma_deg;
+  sg2AxisLabel.text(`γ = ${g}°`);
+  sg2Group.attr('opacity', removeSG2 ? 0.2 : 1);
+
+  const { c2, s2 } = probs(g);
+
+  // SG1 exit: top = |+z⟩, bottom blocked
+  const sg1outX = sg1x + boxW;
+  const sg1topY  = sg1y + 12;
+  const sg1botY  = sg1y + boxH - 12;
+
+  beamSG1plus
+    .attr('x1', sg1outX).attr('y1', cy)
+    .attr('x2', removeSG2 ? sg3x : sg2x).attr('y2', cy)
+    .attr('stroke-width', 5);
+  beamSG1minus
+    .attr('x1', sg1outX).attr('y1', cy)
+    .attr('x2', sg1outX + 30).attr('y2', sg1botY + 20);
+  blockedMark1
+    .attr('x', sg1outX + 38).attr('y', sg1botY + 28);
+
+  // SG2 beams (only if not removed)
+  const sg2outX = sg2x + boxW;
+  const sg2plusY  = cy - 15;  // slightly upward
+  const sg2minusY = cy + 25;  // downward
+
+  if (!removeSG2) {
+    const w_plus  = Math.max(1, 5 * c2);
+    const w_minus = Math.max(0.5, 5 * s2);
+
+    beamSG2plus
+      .attr('x1', sg2outX).attr('y1', cy)
+      .attr('x2', sg3x).attr('y2', sg2plusY)
+      .attr('stroke-width', w_plus).attr('opacity', 1);
+    beamSG2minus
+      .attr('x1', sg2outX).attr('y1', cy)
+      .attr('x2', sg3x).attr('y2', sg2minusY)
+      .attr('stroke-width', w_minus).attr('opacity', s2 > 0.01 ? 0.7 : 0.1);
+  } else {
+    beamSG2plus.attr('stroke-width', 0);
+    beamSG2minus.attr('stroke-width', 0);
+  }
+
+  // SG3 outputs
+  const sg3outX = sg3x + boxW;
+  const sg3plusY  = cy - 25;
+  const sg3minusY = cy + 35;
+
+  if (!removeSG2) {
+    // From SG2+: P(+z) = c², P(-z) = s²
+    const ppW = Math.max(0.5, 4 * c2 * c2);
+    const pmW = Math.max(0.5, 4 * c2 * s2);
+    // From SG2-: P(+z) = s², P(-z) = c²  (|−n̂⟩ gives complementary probs)
+    const mpW = Math.max(0.5, 4 * s2 * s2);
+    const mmW = Math.max(0.5, 4 * s2 * c2);
+
+    beamSG3_pp
+      .attr('x1', sg3outX).attr('y1', sg2plusY + (sg3y - sg2plusY) * 0.5 + 10)
+      .attr('x2', sg3outX + 60).attr('y2', sg3plusY - 8)
+      .attr('stroke-width', ppW).attr('opacity', 1);
+    beamSG3_pm
+      .attr('x1', sg3outX).attr('y1', sg2plusY + (sg3y - sg2plusY) * 0.5 + 10)
+      .attr('x2', sg3outX + 60).attr('y2', sg3minusY - 10)
+      .attr('stroke-width', pmW).attr('opacity', s2 > 0.02 ? 0.8 : 0.1);
+    beamSG3_mp
+      .attr('x1', sg3outX).attr('y1', sg2minusY + (sg3y - sg2minusY) * 0.5 + 15)
+      .attr('x2', sg3outX + 60).attr('y2', sg3plusY + 5)
+      .attr('stroke-width', mpW).attr('opacity', s2 > 0.02 ? 0.5 : 0.05);
+    beamSG3_mm
+      .attr('x1', sg3outX).attr('y1', sg2minusY + (sg3y - sg2minusY) * 0.5 + 15)
+      .attr('x2', sg3outX + 60).attr('y2', sg3minusY + 5)
+      .attr('stroke-width', mmW).attr('opacity', s2 > 0.02 ? 0.5 : 0.05);
+
+    resLabel_pp.attr('x', sg3outX + 66).attr('y', sg3plusY - 4).text(`+z (${(c2*c2*100).toFixed(0)}%)`);
+    resLabel_pm.attr('x', sg3outX + 66).attr('y', sg3minusY - 6).text(`−z (${(c2*s2*100).toFixed(0)}%)`);
+    resLabel_mp.attr('x', sg3outX + 66).attr('y', sg3plusY + 9).text(`+z (${(s2*s2*100).toFixed(0)}%)`);
+    resLabel_mm.attr('x', sg3outX + 66).attr('y', sg3minusY + 9).text(`−z (${(s2*c2*100).toFixed(0)}%)`);
+  } else {
+    // Direct: 100% +z
+    beamSG3_pp
+      .attr('x1', sg3outX).attr('y1', cy)
+      .attr('x2', sg3outX + 60).attr('y2', sg3plusY)
+      .attr('stroke-width', 4).attr('opacity', 1);
+    beamSG3_pm.attr('stroke-width', 0);
+    beamSG3_mp.attr('stroke-width', 0);
+    beamSG3_mm.attr('stroke-width', 0);
+    resLabel_pp.attr('x', sg3outX + 66).attr('y', sg3plusY + 4).text('+z (100%)');
+    resLabel_pm.text('');
+    resLabel_mp.text('');
+    resLabel_mm.text('');
+  }
+
+  updatePanel();
+}
+
+// ─── Probability panel ────────────────────────────────────────────────────
+function updatePanel() {
+  const { c2, s2 } = probs(gamma_deg);
+  const table = document.getElementById('prob-table');
+  table.innerHTML = '';
+
+  let rows;
+  if (removeSG2) {
+    rows = [
+      ['SG₁ → |+z⟩', '100%', 'ink'],
+      ['SG₃ output: +z', '100%', 'red'],
+      ['SG₃ output: −z', '0%', 'ink'],
+    ];
+  } else {
+    rows = [
+      ['SG₂(+): P(+n̂)', `${(c2*100).toFixed(1)}%`, 'red'],
+      ['SG₂(−): P(−n̂)', `${(s2*100).toFixed(1)}%`, 'ink'],
+      ['SG₂+ → SG₃(+z)', `${(c2*c2*100).toFixed(1)}%`, 'red'],
+      ['SG₂+ → SG₃(−z)', `${(c2*s2*100).toFixed(1)}%`, 'ink'],
+      ['SG₂− → SG₃(+z)', `${(s2*s2*100).toFixed(1)}%`, 'red'],
+      ['SG₂− → SG₃(−z)', `${(s2*c2*100).toFixed(1)}%`, 'ink'],
+    ];
+  }
+
+  rows.forEach(([k, v, cls]) => {
+    const row = document.createElement('div');
+    row.className = 'prob-row';
+    row.innerHTML = `<span class="prob-key">${k}</span><span class="prob-val ${cls}">${v}</span>`;
+    table.appendChild(row);
+  });
+
+  const note = document.getElementById('classical-note');
+  if (removeSG2) {
+    note.innerHTML = '<b>No disturbance:</b> SG₃ sees original |+z⟩ state → 100% spin-up. Classical and quantum agree.';
+  } else {
+    const classicPc = 100;
+    const quantumPc = (c2 * c2 * 100).toFixed(1);
+    note.innerHTML = `<b>Classical:</b> no disturbance → 100% +z in SG₃<br><b>Quantum:</b> ${quantumPc}% via SG₂+ path<br>SG₂ collapses the state!`;
+  }
+}
+
+// ─── Histogram ────────────────────────────────────────────────────────────
+const histMargin = { top: 14, right: 120, bottom: 32, left: 16 };
+const histInnerW = HW - histMargin.left - histMargin.right;
+const histInnerH = HH - histMargin.top  - histMargin.bottom;
+
+const hg = hsvg.append('g').attr('transform', `translate(${histMargin.left},${histMargin.top})`);
+
+// Bars: four outcomes
+const barLabels = ['SG₂+, SG₃+', 'SG₂+, SG₃−', 'SG₂−, SG₃+', 'SG₂−, SG₃−'];
+const barColors = ['#C8102E', '#2A1A0E', '#C8102E', '#2A1A0E'];
+const barOpacity = [1, 1, 0.5, 0.5];
+
+const xBand = d3.scaleBand().domain(barLabels).range([0, histInnerW]).padding(0.2);
+const yHistScale = d3.scaleLinear().domain([0, 1]).range([histInnerH, 0]);
+
+hg.append('g').attr('transform', `translate(0,${histInnerH})`)
+  .call(d3.axisBottom(xBand).tickSize(0))
+  .call(ax => ax.select('.domain').attr('stroke', '#C0B8B0'))
+  .call(ax => ax.selectAll('text').attr('fill', '#545454').attr('font-size', 10));
+
+const histBars = hg.selectAll('.hist-bar')
+  .data(barLabels)
+  .join('rect')
+  .attr('class', 'hist-bar')
+  .attr('x', d => xBand(d))
+  .attr('y', histInnerH)
+  .attr('width', xBand.bandwidth())
+  .attr('height', 0)
+  .attr('fill', (d, i) => barColors[i])
+  .attr('opacity', (d, i) => barOpacity[i]);
+
+const histBarsExpected = hg.selectAll('.hist-bar-exp')
+  .data(barLabels)
+  .join('line')
+  .attr('class', 'hist-bar-exp')
+  .attr('stroke', '#C0B8B0').attr('stroke-width', 2)
+  .attr('stroke-dasharray', '4,2');
+
+const histLabels = hg.selectAll('.hist-num')
+  .data(barLabels)
+  .join('text')
+  .attr('class', 'hist-num')
+  .attr('fill', '#2A1A0E').attr('font-size', 10).attr('text-anchor', 'middle');
+
+// Legend
+const legendG = hsvg.append('g').attr('transform', `translate(${HW - 110}, 14)`);
+legendG.append('text').attr('font-size', 10).attr('fill', '#545454').attr('y', 0).text('Observed');
+legendG.append('rect').attr('x', 0).attr('y', 8).attr('width', 14).attr('height', 10)
+  .attr('fill', '#C8102E').attr('opacity', 0.9);
+legendG.append('text').attr('x', 18).attr('y', 18).attr('font-size', 10).attr('fill', '#545454').text('+z outcomes');
+legendG.append('rect').attr('x', 0).attr('y', 24).attr('width', 14).attr('height', 10)
+  .attr('fill', '#2A1A0E').attr('opacity', 0.9);
+legendG.append('text').attr('x', 18).attr('y', 34).attr('font-size', 10).attr('fill', '#545454').text('−z outcomes');
+legendG.append('line').attr('x1', 0).attr('x2', 14).attr('y1', 44).attr('y2', 44)
+  .attr('stroke', '#C0B8B0').attr('stroke-width', 2).attr('stroke-dasharray', '4,2');
+legendG.append('text').attr('x', 18).attr('y', 48).attr('font-size', 10).attr('fill', '#545454').text('Expected');
+
+function updateHistogram() {
+  const { c2, s2 } = probs(gamma_deg);
+  const expected = removeSG2
+    ? [1, 0, 0, 0]
+    : [c2 * c2, c2 * s2, s2 * s2, s2 * c2];
+
+  const total = mc_total || 1;
+  const observed = [mc_counts.pp, mc_counts.pm, mc_counts.mp, mc_counts.mm].map(v => v / total);
+
+  // update y scale
+  const ymax = Math.max(0.5, d3.max(observed), d3.max(expected));
+  yHistScale.domain([0, Math.min(1, ymax * 1.1 + 0.05)]);
+
+  histBars
+    .attr('y', (d, i) => yHistScale(observed[i]))
+    .attr('height', (d, i) => histInnerH - yHistScale(observed[i]));
+
+  histBarsExpected
+    .attr('x1', d => xBand(d))
+    .attr('x2', d => xBand(d) + xBand.bandwidth())
+    .attr('y1', (d, i) => yHistScale(expected[i]))
+    .attr('y2', (d, i) => yHistScale(expected[i]));
+
+  histLabels
+    .attr('x', d => xBand(d) + xBand.bandwidth() / 2)
+    .attr('y', (d, i) => yHistScale(observed[i]) - 2)
+    .text((d, i) => mc_total > 0 ? [mc_counts.pp, mc_counts.pm, mc_counts.mp, mc_counts.mm][i] : '');
+
+  document.getElementById('hist-label').textContent =
+    `Monte Carlo results (SG₃ final): ${mc_total} atoms sent`;
+}
+
+// ─── Monte Carlo simulation ────────────────────────────────────────────────
+let atomInterval = null;
+
+document.getElementById('send-btn').addEventListener('click', () => {
+  if (animating) return;
+  animating = true;
+  const btn = document.getElementById('send-btn');
+  btn.classList.add('active');
+  btn.textContent = 'Sending…';
+
+  const N = 50;
+  let sent = 0;
+
+  function sendAtom() {
+    if (sent >= N) {
+      animating = false;
+      btn.classList.remove('active');
+      btn.textContent = 'Send 50 Atoms';
+      return;
+    }
+
+    const { c2, s2 } = probs(gamma_deg);
+
+    if (removeSG2) {
+      // Direct: always +z
+      mc_counts.pp++;
+    } else {
+      const sg2out = Math.random() < c2 ? '+' : '-';
+      if (sg2out === '+') {
+        const sg3out = Math.random() < c2 ? '+' : '-';
+        if (sg3out === '+') mc_counts.pp++; else mc_counts.pm++;
+      } else {
+        const sg3out = Math.random() < s2 ? '+' : '-';
+        if (sg3out === '+') mc_counts.mp++; else mc_counts.mm++;
+      }
+    }
+    mc_total++;
+    updateHistogram();
+    sent++;
+    setTimeout(sendAtom, 60);
+  }
+
+  sendAtom();
+});
+
+// ─── Slider + checkbox ─────────────────────────────────────────────────────
+document.getElementById('gamma-slider').addEventListener('input', function() {
+  gamma_deg = +this.value;
+  document.getElementById('gamma-val').textContent = gamma_deg + '°';
+  updateDiagram();
+  updateHistogram();
+});
+
+document.getElementById('remove-sg2').addEventListener('change', function() {
+  removeSG2 = this.checked;
+  mc_counts = { pp: 0, pm: 0, mp: 0, mm: 0 };
+  mc_total = 0;
+  updateDiagram();
+  updateHistogram();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+updateDiagram();
+updateHistogram();
+</script>
+</body>
+</html>

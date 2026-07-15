@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uncertainty Principle Sandbox</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    padding: 24px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .sub { font-size: 0.8rem; color: #545454; margin-bottom: 20px; line-height: 1.5; max-width: 700px; }
+  .panels { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .panel-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .panel-label { font-size: 0.7rem; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.08em; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 18px; margin: 18px 0;
+    padding: 14px 18px; border: 1.5px solid #2A1A0E; background: #fafafa;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  .ctrl-group label { font-size: 0.75rem; font-weight: 600; }
+  input[type=range] {
+    -webkit-appearance: none; width: 220px; height: 4px;
+    background: #2A1A0E; border-radius: 2px; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: #C8102E; cursor: pointer;
+  }
+  .toggle-group { display: flex; gap: 0; border: 1.5px solid #2A1A0E; border-radius: 3px; overflow: hidden; align-self: flex-end; }
+  .toggle-btn {
+    padding: 5px 16px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+    background: #fff; color: #2A1A0E; border: none; font-family: inherit;
+    letter-spacing: 0.03em; transition: background 0.12s;
+  }
+  .toggle-btn.active { background: #2A1A0E; color: #fff; }
+  .readout-box {
+    border: 2.5px solid #2A1A0E; padding: 12px 18px;
+    font-size: 0.95rem; font-weight: 700; letter-spacing: 0.01em;
+    text-align: center; margin-top: 4px; line-height: 1.8;
+  }
+  .floor { font-size: 0.75rem; color: #545454; font-weight: 400; }
+  .red-text { color: #C8102E; }
+</style>
+</head>
+<body>
+
+<h1>Uncertainty Principle Sandbox — σ<sub>x</sub> · σ<sub>p</sub> = ℏ/2 for the Gaussian</h1>
+<p class="sub">
+  Squeeze the position wavepacket and the momentum spread explodes.
+  The Gaussian is the unique minimum-uncertainty state: any other shape gives σ<sub>x</sub>·σ<sub>p</sub> &gt; ℏ/2.
+</p>
+
+<div class="panels">
+  <div class="panel-wrap">
+    <div class="panel-label">|ψ(x)|² — position space</div>
+    <svg id="pos-svg"></svg>
+  </div>
+  <div class="panel-wrap">
+    <div class="panel-label">|φ̃(p)|² — momentum space</div>
+    <svg id="mom-svg"></svg>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>a = <span id="a-val">1.00</span> nm (Gaussian width parameter)</label>
+    <input type="range" id="a-slider" min="0" max="1" step="0.001" value="0.5">
+  </div>
+  <div class="ctrl-group" style="justify-content:flex-end;">
+    <label>Wavepacket shape</label>
+    <div class="toggle-group">
+      <button class="toggle-btn active" id="btn-gauss" onclick="setMode('gaussian')">Gaussian</button>
+      <button class="toggle-btn" id="btn-tophat" onclick="setMode('tophat')">Top-hat</button>
+    </div>
+  </div>
+</div>
+
+<div class="readout-box" id="readout">
+  σ<sub>x</sub> = — nm &nbsp;×&nbsp; σ<sub>p</sub> = — ℏ/nm &nbsp;=&nbsp; — ℏ
+  <br><span class="floor">(floor = 0.500 ℏ)</span>
+</div>
+
+<script>
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+
+// Log slider → a in nm (0.1 to 5)
+const A_MIN = 0.1, A_MAX = 5.0;
+function sliderToA(v){ return A_MIN * Math.pow(A_MAX/A_MIN, v); }
+function aToSlider(a){ return Math.log(a/A_MIN)/Math.log(A_MAX/A_MIN); }
+
+let mode = 'gaussian'; // or 'tophat'
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function sigX_gauss(a)   { return a / Math.SQRT2; }
+function sigP_gauss(a)   { return 1 / (a * Math.SQRT2); }
+function sigX_tophat(a)  { return a / Math.sqrt(3); }
+// top-hat FT: sinc(p·a) — σ_p is formally infinite (long tails), show bandwidth
+function halfPowerBW(a)  { return 1.3916 / a; } // sinc(x)=1/√2 at x≈1.3916 → p≈1.3916/a
+
+// Gaussian probability densities
+function posGauss(x, a)  { return (1/(Math.sqrt(Math.PI)*a)) * Math.exp(-x*x/(a*a)); }
+function momGauss(p, a)  { return (a/Math.sqrt(Math.PI)) * Math.exp(-a*a*p*p); }
+
+// Top-hat position density: flat over [-a, a]
+function posTopHat(x, a) { return Math.abs(x) <= a ? 1/(2*a) : 0; }
+// Top-hat momentum density: sinc² (normalized so integral = 1)
+function momSinc2(p, a)  {
+  const pa = p*a;
+  const s  = Math.abs(pa) < 1e-6 ? 1 : Math.sin(pa)/pa;
+  return (a/Math.PI) * s*s; // ∫ = 1 by Parseval
+}
+
+// ── SVG setup ────────────────────────────────────────────────────────────────
+const W = 360, H = 240;
+const mg = {top:20, right:16, bottom:42, left:52};
+const iW = W - mg.left - mg.right;
+const iH = H - mg.top  - mg.bottom;
+
+function makeSvg(sel){
+  const svg = d3.select(sel).attr('width',W).attr('height',H);
+  const g   = svg.append('g').attr('transform',`translate(${mg.left},${mg.top})`);
+  svg.append('defs').append('clipPath').attr('id',sel.replace('#','')+'clip')
+    .append('rect').attr('width',iW).attr('height',iH);
+  return {svg, g};
+}
+
+const {svg: posSvg, g: posG} = makeSvg('#pos-svg');
+const {svg: momSvg, g: momG} = makeSvg('#mom-svg');
+
+// Static axis groups (recreated on update due to dynamic domains)
+const posXAxisG = posG.append('g').attr('transform',`translate(0,${iH})`);
+const posYAxisG = posG.append('g');
+posG.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle')
+  .attr('font-size','10px').attr('fill',INK).text('x (nm)');
+posG.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-40)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('|ψ(x)|² (nm⁻¹)');
+
+const momXAxisG = momG.append('g').attr('transform',`translate(0,${iH})`);
+const momYAxisG = momG.append('g');
+momG.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle')
+  .attr('font-size','10px').attr('fill',INK).text('p (ℏ/nm)');
+momG.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-40)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('|φ̃(p)|² (nm/ℏ)');
+
+// Path/fill elements
+const posFill = posG.append('path').attr('clip-path','url(#pos-svgclip)');
+const posLine = posG.append('path').attr('clip-path','url(#pos-svgclip)')
+  .attr('fill','none').attr('stroke-width',2);
+const posBracketG = posG.append('g');
+const posSigLabel = posG.append('text').attr('font-size','9px').attr('font-weight','700');
+
+const momFill = momG.append('path').attr('clip-path','url(#mom-svgclip)');
+const momLine = momG.append('path').attr('clip-path','url(#mom-svgclip)')
+  .attr('fill','none').attr('stroke-width',2);
+const momBracketG = momG.append('g');
+const momSigLabel = momG.append('text').attr('font-size','9px').attr('font-weight','700');
+
+// ── Draw bracket ─────────────────────────────────────────────────────────────
+function drawBracket(g, xScale, yScale, x0, x1, yVal, label, col){
+  g.selectAll('*').remove();
+  const y = yScale(yVal);
+  // arrow line
+  g.append('line').attr('x1',xScale(x0)).attr('x2',xScale(x1))
+    .attr('y1',y).attr('y2',y).attr('stroke',col).attr('stroke-width',1.5);
+  // ticks
+  [x0,x1].forEach(xv=>{
+    g.append('line').attr('x1',xScale(xv)).attr('x2',xScale(xv))
+      .attr('y1',y-4).attr('y2',y+4).attr('stroke',col).attr('stroke-width',1.5);
+  });
+  g.append('text').attr('x',(xScale(x0)+xScale(x1))/2).attr('y',y-7)
+    .attr('text-anchor','middle').attr('font-size','9px').attr('fill',col).attr('font-weight','700')
+    .text(label);
+}
+
+// ── Main update ───────────────────────────────────────────────────────────────
+function update(){
+  const a = sliderToA(+document.getElementById('a-slider').value);
+  document.getElementById('a-val').textContent = a.toFixed(2);
+
+  const isGauss = mode === 'gaussian';
+
+  // --- Position panel ---
+  const xRange = [-5*a, 5*a];
+  const xScale = d3.scaleLinear().domain(xRange).range([0, iW]);
+
+  const NP = 300;
+  const xPts = d3.range(NP).map(i => xRange[0] + i*(xRange[1]-xRange[0])/(NP-1));
+
+  let posVals, posMax;
+  if(isGauss){
+    posVals = xPts.map(x => posGauss(x, a));
+    posMax  = posGauss(0, a);
+  } else {
+    posVals = xPts.map(x => posTopHat(x, a));
+    posMax  = 1/(2*a);
+  }
+  const yMaxPos = posMax * 1.3;
+  const yScalePos = d3.scaleLinear().domain([0, yMaxPos]).range([iH, 0]);
+
+  posXAxisG.call(d3.axisBottom(xScale).ticks(5).tickSize(4))
+    .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+  posYAxisG.call(d3.axisLeft(yScalePos).ticks(4).tickSize(4))
+    .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+
+  const fillCol = isGauss ? INK : RED;
+  const fillOpacity = 0.12;
+
+  const areaGen = d3.area()
+    .x((d,i) => xScale(xPts[i]))
+    .y0(yScalePos(0)).y1(d => yScalePos(d));
+  const lineGen = d3.line()
+    .x((d,i) => xScale(xPts[i]))
+    .y(d => yScalePos(d));
+
+  posFill.datum(posVals)
+    .attr('d', areaGen)
+    .attr('fill', fillCol).attr('fill-opacity', fillOpacity);
+  posLine.datum(posVals)
+    .attr('d', lineGen)
+    .attr('stroke', fillCol);
+
+  // Bracket
+  const sx = isGauss ? sigX_gauss(a) : sigX_tophat(a);
+  const bracketY = posMax * 0.35;
+  const bracketCol = isGauss ? INK : RED;
+  const sigLabel = isGauss
+    ? `σ_x=a/√2=${sx.toFixed(3)} nm`
+    : `σ_x=a/√3=${sx.toFixed(3)} nm`;
+  drawBracket(posBracketG, xScale, yScalePos, -sx, sx, bracketY, sigLabel, bracketCol);
+
+  // --- Momentum panel ---
+  const pMax5 = 5/a;
+  const pRange = [-pMax5, pMax5];
+  const pScale = d3.scaleLinear().domain(pRange).range([0, iW]);
+
+  const pPts = d3.range(NP).map(i => pRange[0] + i*(pRange[1]-pRange[0])/(NP-1));
+  let momVals, momPeak;
+  if(isGauss){
+    momVals = pPts.map(p => momGauss(p, a));
+    momPeak = momGauss(0, a);
+  } else {
+    momVals = pPts.map(p => momSinc2(p, a));
+    momPeak = momSinc2(0, a);
+  }
+  const yMaxMom = momPeak * 1.3;
+  const yScaleMom = d3.scaleLinear().domain([0, yMaxMom]).range([iH, 0]);
+
+  momXAxisG.call(d3.axisBottom(pScale).ticks(5).tickSize(4))
+    .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+  momYAxisG.call(d3.axisLeft(yScaleMom).ticks(4).tickSize(4))
+    .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+
+  const momFillCol = isGauss ? INK : RED;
+
+  const areaGenM = d3.area().x((d,i)=>pScale(pPts[i])).y0(yScaleMom(0)).y1(d=>yScaleMom(d));
+  const lineGenM = d3.line().x((d,i)=>pScale(pPts[i])).y(d=>yScaleMom(d));
+
+  momFill.datum(momVals).attr('d',areaGenM).attr('fill',momFillCol).attr('fill-opacity',fillOpacity);
+  momLine.datum(momVals).attr('d',lineGenM).attr('stroke',momFillCol);
+
+  // σ_p bracket
+  const sp = isGauss ? sigP_gauss(a) : halfPowerBW(a);
+  const spBracketY = momPeak * 0.35;
+  const spLabel = isGauss
+    ? `σ_p=1/(a√2)=${sp.toFixed(3)} ℏ/nm`
+    : `BW≈${sp.toFixed(3)} ℏ/nm`;
+  const spBracketCol = isGauss ? INK : RED;
+  // clamp to axis
+  const spLeft  = Math.max(-sp, pRange[0]);
+  const spRight = Math.min( sp, pRange[1]);
+  drawBracket(momBracketG, pScale, yScaleMom, spLeft, spRight, spBracketY, spLabel, spBracketCol);
+
+  // ── Readout ───────────────────────────────────────────────────────────────
+  const prod = sigX_gauss(a) * sigP_gauss(a); // always 0.5 for Gaussian
+  if(isGauss){
+    document.getElementById('readout').innerHTML =
+      `σ<sub>x</sub> = ${sx.toFixed(3)} nm &nbsp;×&nbsp; σ<sub>p</sub> = ${sigP_gauss(a).toFixed(3)} ℏ/nm &nbsp;=&nbsp; <b>${prod.toFixed(3)} ℏ</b>` +
+      `<br><span class="floor">(floor = 0.500 ℏ — Gaussian achieves the minimum)</span>`;
+  } else {
+    document.getElementById('readout').innerHTML =
+      `<span class="red-text">Top-hat</span>: σ<sub>x</sub> = ${sigX_tophat(a).toFixed(3)} nm &nbsp;|&nbsp; σ<sub>p</sub> (RMS: ∞ for exact top-hat; half-power bandwidth ≈ ${halfPowerBW(a).toFixed(3)} ℏ/nm)` +
+      `<br><span class="floor">(σ<sub>x</sub>·σ<sub>p</sub> &gt; 0.500 ℏ — top-hat is NOT a minimum-uncertainty state)</span>`;
+  }
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('btn-gauss').classList.toggle('active', m==='gaussian');
+  document.getElementById('btn-tophat').classList.toggle('active', m==='tophat');
+  update();
+}
+
+// Init
+document.getElementById('a-slider').value = aToSlider(1.0);
+document.getElementById('a-slider').addEventListener('input', update);
+update();
+
+// ── Console assertions ────────────────────────────────────────────────────────
+(function runTests(){
+  function sigX(a){ return a/Math.SQRT2; }
+  function sigP(a){ return 1/(a*Math.SQRT2); }
+  const a_test = 2.0;
+  const prod = sigX(a_test)*sigP(a_test);
+  console.assert(Math.abs(prod-0.5)<1e-10, 'P1: σ_x·σ_p=0.5 for any a: '+prod);
+
+  const a2 = 4.0;
+  console.assert(Math.abs(sigX(a2)/sigX(a_test)-2)<1e-10,
+    'P2a: σ_x doubles when a doubles: ratio='+(sigX(a2)/sigX(a_test)));
+  console.assert(Math.abs(sigP(a2)/sigP(a_test)-0.5)<1e-10,
+    'P2b: σ_p halves when a doubles: ratio='+(sigP(a2)/sigP(a_test)));
+
+  function sigX_tophat(a){ return a/Math.sqrt(3); }
+  console.assert(sigX_tophat(1)<sigX(1),
+    'P3: top-hat σ_x < Gaussian σ_x for same a: '+sigX_tophat(1).toFixed(4)+' vs '+sigX(1).toFixed(4));
+
+  console.log('Uncertainty: P1 product=', prod,
+    'P2 ratio=', sigX(a2)/sigX(a_test),
+    'P3 tophat σ_x=', sigX_tophat(1).toFixed(4),
+    'Gauss σ_x=', sigX(1).toFixed(4));
+})();
+</script>
+</body>
+</html>

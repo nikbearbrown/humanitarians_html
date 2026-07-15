@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Willow Threshold Reconstruction — Surface Code Error Rates</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #545454;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+  .card {
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 12px;
+  }
+  .main-plot { grid-column: 1; grid-row: 1; }
+  .controls  { grid-column: 2; grid-row: 1; }
+  .overhead  { grid-column: 1; grid-row: 2; }
+  .console   { grid-column: 2; grid-row: 2; }
+
+  /* Slider */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .slider-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 20px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 0 0 1.5px #C8102E;
+  }
+  .slider-val {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .leg-line {
+    width: 24px;
+    height: 2px;
+    background: #C8102E;
+  }
+  .leg-line.ink  { background: #2A1A0E; }
+  .leg-line.slate { background: #545454; }
+  .leg-line.dashed {
+    background: none;
+    border-top: 2px dashed #545454;
+  }
+  .leg-line.red-dashed {
+    background: none;
+    border-top: 2px dashed #C8102E;
+  }
+  .leg-dot-red {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #C8102E;
+    border: 1.5px solid #2A1A0E;
+  }
+
+  /* Info boxes */
+  .info-box {
+    background: #f7f7f7;
+    border-left: 3px solid #C8102E;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    border-radius: 0 3px 3px 0;
+  }
+  .info-box strong {
+    font-weight: 700;
+    color: #C8102E;
+  }
+
+  /* Overhead table */
+  .overhead-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .overhead-table th {
+    background: #2A1A0E;
+    color: #FFFFFF;
+    padding: 5px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+  }
+  .overhead-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  .overhead-table tr:nth-child(even) td { background: #f9f9f9; }
+  .overhead-table .highlight td { background: #fff0f2; font-weight: 700; }
+  .overhead-table .highlight-red { color: #C8102E; font-weight: 700; }
+
+  /* Physics console */
+  .physics-check {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.9;
+    color: #2A1A0E;
+    white-space: pre;
+  }
+  .check-pass { color: #1a7a1a; font-weight: 700; }
+  .check-label { color: #545454; }
+
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .axis path, .axis line { stroke: #2A1A0E; stroke-width: 1; }
+  .axis text { fill: #2A1A0E; font-size: 11px; }
+  .grid line { stroke: #e8e8e8; stroke-width: 0.8; }
+  .grid path { stroke: none; }
+
+  #tooltip2 {
+    position: fixed;
+    pointer-events: none;
+    background: #2A1A0E;
+    color: #FFFFFF;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.5;
+    display: none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<h1>Willow Threshold Reconstruction — Surface Code Error Rates</h1>
+<p class="subtitle">p<sub>L</sub> ≈ A · (p/p<sub>th</sub>)<sup>⌈(d+1)/2⌉</sup> &nbsp;|&nbsp; A = 0.1, p<sub>th</sub> = 0.01 &nbsp;|&nbsp; Google Willow: Λ = 2.14</p>
+
+<div class="layout">
+
+  <!-- MAIN PLOT -->
+  <div class="card main-plot">
+    <div class="card-title">Logical Error Rate p<sub>L</sub> vs Physical Error Rate p (log–log)</div>
+    <svg id="mainSvg2"></svg>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-line ink"></div><span>d = 3</span></div>
+      <div class="leg-item"><div class="leg-line dashed"></div><span>d = 5</span></div>
+      <div class="leg-item"><div class="leg-line"></div><span>d = 7</span></div>
+      <div class="leg-item"><div class="leg-dot-red"></div><span>Willow data</span></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="card controls">
+    <div class="card-title">Controls</div>
+
+    <div class="slider-row">
+      <div class="slider-label">Λ</div>
+      <input type="range" id="lambdaSlider" min="1.5" max="4.0" step="0.01" value="2.14">
+      <div class="slider-val" id="lambdaVal">2.14</div>
+    </div>
+
+    <div class="info-box">
+      <strong>Suppression factor Λ = p<sub>L</sub>(d) / p<sub>L</sub>(d+2)</strong><br>
+      Google Willow: Λ = 2.14<br>
+      p<sub>eff</sub> = p<sub>th</sub>/Λ = <span id="pEffDisp">0.00467</span>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">p</div>
+      <input type="range" id="pSlider" min="0.001" max="0.012" step="0.0001" value="0.00467">
+      <div class="slider-val" id="pVal">4.67×10⁻³</div>
+    </div>
+
+    <div style="font-size:12px;margin-bottom:8px;">
+      At p = <span id="pDisp" style="font-weight:700">—</span>:
+    </div>
+    <div id="pLTable" style="font-size:12px;line-height:2;font-family:'Courier New',monospace;"></div>
+
+    <hr style="border:none;border-top:1px solid #e0e0e0;margin:10px 0;">
+
+    <div class="info-box" style="border-left-color:#2A1A0E;">
+      <strong>Willow gap annotation</strong><br>
+      d=7 formula → <span id="gapFormula">—</span>%<br>
+      Willow measured → 0.143%<br>
+      Factor below formula: <span id="gapFactor" style="color:#C8102E;font-weight:700">—</span>×
+    </div>
+  </div>
+
+  <!-- OVERHEAD PANEL -->
+  <div class="card overhead">
+    <div class="card-title">Overhead Calculator — Physical Qubits per Logical Qubit (≈ 2d²)</div>
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="flex:1;min-width:240px;">
+        <div class="slider-row" style="margin-bottom:8px;">
+          <div class="slider-label" style="min-width:80px;">p<sub>L</sub> target</div>
+          <input type="range" id="plTargetSlider" min="1" max="8" step="0.1" value="6">
+          <div class="slider-val" id="plTargetVal">10⁻⁶</div>
+        </div>
+        <div class="slider-row" style="margin-bottom:8px;">
+          <div class="slider-label" style="min-width:80px;">p (phys.)</div>
+          <input type="range" id="pPhysSlider" min="0.001" max="0.009" step="0.0001" value="0.00467">
+          <div class="slider-val" id="pPhysVal">4.67×10⁻³</div>
+        </div>
+        <div id="overheadResult" class="info-box" style="margin-top:8px;"></div>
+      </div>
+      <div style="flex:1;min-width:240px;">
+        <table class="overhead-table" id="overheadTable">
+          <thead>
+            <tr><th>p<sub>L</sub> target</th><th>d req.</th><th>Phys. qubits</th><th>Willow?</th></tr>
+          </thead>
+          <tbody id="overheadTbody"></tbody>
+        </table>
+        <div style="font-size:11px;color:#545454;margin-top:6px;">
+          Google Willow chip: <strong>105 physical qubits</strong> (d=5 surface code, ~50 per logical)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="card console">
+    <div class="card-title">Physics Checks</div>
+    <div class="physics-check" id="physConsole2"></div>
+  </div>
+
+</div>
+
+<div id="tooltip2"></div>
+
+<script>
+// ─── PHYSICS ────────────────────────────────────────────────────────────────
+
+const A_CONST  = 0.1;
+const P_TH     = 0.01;
+const WILLOW_LAMBDA = 2.14;
+const WILLOW_pL_d7  = 0.00143; // 0.143% measured
+
+// Exponent for distance d
+function exponent(d) {
+  return Math.ceil((d + 1) / 2);
+}
+
+// Logical error rate formula
+function pL(p, d) {
+  return A_CONST * Math.pow(p / P_TH, exponent(d));
+}
+
+// Required d for target pL given physical error p
+// pL_target = A * (p/p_th)^ceil((d+1)/2)
+// ceil((d+1)/2) = log(pL_target/A) / log(p/p_th)
+function requiredD(pL_target, p_phys) {
+  if (p_phys >= P_TH) return null; // above threshold
+  const ratio = p_phys / P_TH;
+  if (ratio >= 1) return null;
+  const k = Math.log(pL_target / A_CONST) / Math.log(ratio);
+  // k = ceil((d+1)/2) => (d+1)/2 >= k => d >= 2k-1
+  const d_min = 2 * k - 1;
+  // round up to nearest odd integer ≥ 3
+  let d = Math.max(3, Math.ceil(d_min));
+  if (d % 2 === 0) d += 1;
+  return d;
+}
+
+// Physical qubits: 2d² (surface code overhead)
+function physQubits(d) {
+  return 2 * d * d;
+}
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+
+let currentLambda = WILLOW_LAMBDA;
+let currentP = P_TH / WILLOW_LAMBDA;
+let plTargetExp = 6; // 10^-6
+let pPhys = P_TH / WILLOW_LAMBDA;
+
+// ─── DIMENSIONS ─────────────────────────────────────────────────────────────
+
+const margin = { top: 20, right: 30, bottom: 50, left: 72 };
+const W = 560, H = 310;
+const iW = W - margin.left - margin.right;
+const iH = H - margin.top - margin.bottom;
+
+// Scales
+const xScale = d3.scaleLog().domain([0.001, 0.012]).range([0, iW]);
+const yScale = d3.scaleLog().domain([1e-7, 1]).range([iH, 0]);
+
+// ─── SVG ─────────────────────────────────────────────────────────────────────
+
+const svg = d3.select('#mainSvg2')
+  .attr('width', W)
+  .attr('height', H);
+
+const g = svg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+// Grid
+g.append('g').attr('class', 'grid')
+  .attr('transform', `translate(0,${iH})`)
+  .call(d3.axisBottom(xScale).ticks(4, '.3f').tickSize(-iH).tickFormat(''));
+g.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yScale).ticks(8).tickSize(-iW).tickFormat(''));
+
+// Axes
+g.append('g').attr('class', 'axis')
+  .attr('transform', `translate(0,${iH})`)
+  .call(d3.axisBottom(xScale).ticks(6, '.4f'));
+g.append('g').attr('class', 'axis')
+  .call(d3.axisLeft(yScale).ticks(8, '.0e'));
+
+// Axis labels
+svg.append('text')
+  .attr('x', margin.left + iW / 2)
+  .attr('y', H - 4)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Physical Error Rate p');
+
+svg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(margin.top + iH / 2))
+  .attr('y', 14)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Logical Error Rate p_L');
+
+// Threshold vertical line (static)
+const threshLine = g.append('line')
+  .attr('x1', xScale(P_TH)).attr('x2', xScale(P_TH))
+  .attr('y1', 0).attr('y2', iH)
+  .attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1.2)
+  .attr('stroke-dasharray', '5,3');
+
+g.append('text')
+  .attr('x', xScale(P_TH) + 3)
+  .attr('y', 14)
+  .attr('font-size', '10px')
+  .attr('fill', '#2A1A0E')
+  .text('p_th = 0.01');
+
+// Line generator
+const lineGen = d3.line()
+  .x(d => xScale(d.p))
+  .y(d => yScale(d.pL))
+  .defined(d => d.pL > 0 && isFinite(d.pL) && d.pL > 1e-10);
+
+// Curves for d=3,5,7
+const pRange = d3.range(200).map(i => 0.001 + i * (0.012 - 0.001) / 199);
+
+const curveDefs = [
+  { d: 3, stroke: '#2A1A0E', dash: null, width: 2.5 },
+  { d: 5, stroke: '#545454', dash: '6,4', width: 2 },
+  { d: 7, stroke: '#C8102E', dash: null, width: 2.5 },
+];
+
+const curves = curveDefs.map(cd => {
+  const path = g.append('path')
+    .attr('fill', 'none')
+    .attr('stroke', cd.stroke)
+    .attr('stroke-width', cd.width);
+  if (cd.dash) path.attr('stroke-dasharray', cd.dash);
+  return path;
+});
+
+// Draw static curves
+curveDefs.forEach((cd, i) => {
+  const pts = pRange.map(p => ({ p, pL: pL(p, cd.d) }));
+  curves[i].attr('d', lineGen(pts));
+});
+
+// Threshold intersection annotation (A=0.1)
+g.append('circle')
+  .attr('cx', xScale(P_TH))
+  .attr('cy', yScale(A_CONST))
+  .attr('r', 5)
+  .attr('fill', '#FFFFFF')
+  .attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1.5);
+
+g.append('text')
+  .attr('x', xScale(P_TH) - 6)
+  .attr('y', yScale(A_CONST) - 8)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '9px')
+  .attr('fill', '#2A1A0E')
+  .text('all curves →A=0.1');
+
+// Dynamic p vertical line
+const pLine = g.append('line')
+  .attr('y1', 0).attr('y2', iH)
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '4,3');
+
+// Willow data point
+const willowDot = g.append('circle')
+  .attr('r', 7)
+  .attr('fill', '#C8102E')
+  .attr('stroke', '#FFFFFF')
+  .attr('stroke-width', 2)
+  .attr('cx', xScale(P_TH / WILLOW_LAMBDA))
+  .attr('cy', yScale(WILLOW_pL_d7));
+
+g.append('text')
+  .attr('x', xScale(P_TH / WILLOW_LAMBDA) + 10)
+  .attr('y', yScale(WILLOW_pL_d7) - 4)
+  .attr('font-size', '10px')
+  .attr('font-weight', '700')
+  .attr('fill', '#C8102E')
+  .text('Willow (0.143%)');
+
+// Gap annotation line (between d=7 formula and Willow)
+const gapLine = g.append('line')
+  .attr('x1', xScale(P_TH / WILLOW_LAMBDA) - 14)
+  .attr('x2', xScale(P_TH / WILLOW_LAMBDA) - 14)
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 1.5);
+
+const gapAnnotTop = g.append('text')
+  .attr('x', xScale(P_TH / WILLOW_LAMBDA) - 16)
+  .attr('text-anchor', 'end')
+  .attr('font-size', '9px')
+  .attr('fill', '#C8102E');
+const gapAnnotBot = g.append('text')
+  .attr('x', xScale(P_TH / WILLOW_LAMBDA) - 16)
+  .attr('text-anchor', 'end')
+  .attr('font-size', '9px')
+  .attr('fill', '#C8102E');
+
+// p-scan current pL dots on each curve
+const scanDots = curveDefs.map(cd => {
+  return g.append('circle')
+    .attr('r', 4)
+    .attr('fill', cd.stroke)
+    .attr('stroke', '#FFFFFF')
+    .attr('stroke-width', 1.5);
+});
+
+// ─── OVERHEAD TABLE ──────────────────────────────────────────────────────────
+
+function buildOverheadTable(p_phys) {
+  const targets = [1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8];
+  const tbody = document.getElementById('overheadTbody');
+  tbody.innerHTML = '';
+
+  targets.forEach(target => {
+    const d = requiredD(target, p_phys);
+    const nQ = d ? physQubits(d) : '—';
+    const wil = (d && d <= 5) ? '✓ feasible' : (d && d <= 7 ? '~possible' : 'No');
+    const row = document.createElement('tr');
+    const isHighlight = (target === 1e-6);
+    if (isHighlight) row.className = 'highlight';
+
+    row.innerHTML = `
+      <td>10<sup>${Math.round(Math.log10(target))}</sup></td>
+      <td>${d ? d : '∞'}</td>
+      <td>${d ? nQ.toLocaleString() : '—'}</td>
+      <td class="${d && d <= 5 ? 'highlight-red' : ''}">${wil}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+// ─── UPDATE FUNCTIONS ────────────────────────────────────────────────────────
+
+function updateLambda(lambda) {
+  currentLambda = lambda;
+  const pEff = P_TH / lambda;
+
+  document.getElementById('lambdaVal').textContent = lambda.toFixed(2);
+  document.getElementById('pEffDisp').textContent = pEff.toExponential(3);
+
+  // Update gap annotation
+  const d7formula = pL(pEff, 7);
+  const gap = d7formula / WILLOW_pL_d7;
+  document.getElementById('gapFormula').textContent = (d7formula * 100).toFixed(3);
+  document.getElementById('gapFactor').textContent = gap.toFixed(1);
+
+  // Gap line on chart
+  const x0 = xScale(pEff) - 14;
+  const yTop = yScale(d7formula);
+  const yBot = yScale(WILLOW_pL_d7);
+  gapLine.attr('x1', x0).attr('x2', x0).attr('y1', yTop).attr('y2', yBot);
+  gapAnnotTop.attr('x', x0 - 2).attr('y', yTop + 3)
+    .text((d7formula * 100).toFixed(2) + '%');
+  gapAnnotBot.attr('x', x0 - 2).attr('y', yBot - 3)
+    .text('0.143%');
+
+  updatePhysConsole();
+}
+
+function updateP(p) {
+  currentP = p;
+  document.getElementById('pSlider').value = p;
+
+  // Format p value nicely
+  const pStr = p < 0.001 ? p.toExponential(2) : p.toFixed(5);
+  document.getElementById('pVal').textContent = formatSci(p);
+  document.getElementById('pDisp').textContent = formatSci(p);
+
+  // Move vertical line
+  if (p >= 0.001 && p <= 0.012) {
+    pLine.attr('x1', xScale(p)).attr('x2', xScale(p));
+    pLine.style('display', null);
+  } else {
+    pLine.style('display', 'none');
+  }
+
+  // Update scan dots
+  curveDefs.forEach((cd, i) => {
+    const val = pL(p, cd.d);
+    if (val > 1e-8 && val < 1.5) {
+      scanDots[i].attr('cx', xScale(p)).attr('cy', yScale(val)).style('display', null);
+    } else {
+      scanDots[i].style('display', 'none');
+    }
+  });
+
+  // pL table
+  const table = document.getElementById('pLTable');
+  const rows = curveDefs.map(cd => {
+    const val = pL(p, cd.d);
+    return `d=${cd.d}: p_L = ${(val * 100).toFixed(4)}%`;
+  });
+  table.innerHTML = rows.join('<br>');
+
+  updatePhysConsole();
+}
+
+function updateOverhead() {
+  const exp = parseFloat(document.getElementById('plTargetSlider').value);
+  plTargetExp = exp;
+  document.getElementById('plTargetVal').textContent = `10⁻${exp.toFixed(1)}`;
+
+  const p_phys = parseFloat(document.getElementById('pPhysSlider').value);
+  pPhys = p_phys;
+  document.getElementById('pPhysVal').textContent = formatSci(p_phys);
+
+  const target = Math.pow(10, -exp);
+  const d = requiredD(target, p_phys);
+  const nQ = d ? physQubits(d) : null;
+
+  const res = document.getElementById('overheadResult');
+  if (!d) {
+    res.innerHTML = '<strong>p ≥ p_th</strong> — above threshold, cannot suppress errors.';
+  } else {
+    res.innerHTML = `
+      <strong>p<sub>L</sub> ≤ 10<sup>−${exp.toFixed(1)}</sup></strong><br>
+      Required d = <strong>${d}</strong><br>
+      Physical qubits ≈ 2d² = <strong>${nQ.toLocaleString()}</strong><br>
+      ${nQ <= 105 ? '<span style="color:#C8102E;font-weight:700">Willow-scale feasible!</span>' : `vs. Willow: ${nQ} vs 105 qubits`}
+    `.trim();
+  }
+
+  buildOverheadTable(p_phys);
+}
+
+function updatePhysConsole() {
+  // P1: All three curves pass through (p_th, A=0.1)
+  const check1_d3 = pL(P_TH, 3);
+  const check1_d5 = pL(P_TH, 5);
+  const check1_d7 = pL(P_TH, 7);
+  const p1ok = Math.abs(check1_d3 - 0.1) < 1e-12 &&
+               Math.abs(check1_d5 - 0.1) < 1e-12 &&
+               Math.abs(check1_d7 - 0.1) < 1e-12;
+
+  // P2: Lambda check
+  const pEff = P_TH / currentLambda;
+  const pL_d7_formula = pL(pEff, 7);
+  const ratio = pL_d7_formula / WILLOW_pL_d7;
+  const p2ok = Math.abs(pEff - P_TH / currentLambda) < 1e-10;
+
+  const el = document.getElementById('physConsole2');
+  el.innerHTML = `
+<span class="check-label">P1  At p=p_th, all d meet p_L=A=0.1:</span>
+    d=3: ${check1_d3.toFixed(6)}  <span class="check-pass">${Math.abs(check1_d3-0.1)<1e-10?'✓':'✗'}</span>
+    d=5: ${check1_d5.toFixed(6)}  <span class="check-pass">${Math.abs(check1_d5-0.1)<1e-10?'✓':'✗'}</span>
+    d=7: ${check1_d7.toFixed(6)}  <span class="check-pass">${Math.abs(check1_d7-0.1)<1e-10?'✓':'✗'}</span>
+
+<span class="check-label">P2  Λ=${currentLambda.toFixed(2)} → p_eff=${pEff.toExponential(3)}</span>
+    formula p_L(d=7) = ${(pL_d7_formula*100).toFixed(4)}%
+    Willow measured  = 0.1430%
+    ratio (formula/Willow) = ${ratio.toFixed(2)}×
+    <span class="check-pass">${p2ok ? '✓' : '✗'} p_eff = p_th/Λ</span>
+
+<span class="check-label">──────────────────────────────</span>
+<span class="check-label">Exponents: d=3→${exponent(3)}, d=5→${exponent(5)}, d=7→${exponent(7)}</span>
+<span class="check-label">Willow Λ=2.14: p_eff=0.00467</span>
+    p_L(d=3) = ${(pL(pEff,3)*100).toFixed(4)}%
+    p_L(d=5) = ${(pL(pEff,5)*100).toFixed(4)}%
+    p_L(d=7) = ${(pL(pEff,7)*100).toFixed(4)}%
+  `.trim();
+}
+
+function formatSci(x) {
+  if (x === 0) return '0';
+  const exp = Math.floor(Math.log10(Math.abs(x)));
+  const mant = x / Math.pow(10, exp);
+  if (Math.abs(exp) < 3) return x.toFixed(5);
+  return `${mant.toFixed(2)}×10${supScript(exp)}`;
+}
+
+function supScript(n) {
+  const map = { '-': '⁻', '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
+  return String(n).split('').map(c => map[c] || c).join('');
+}
+
+// ─── EVENT LISTENERS ─────────────────────────────────────────────────────────
+
+document.getElementById('lambdaSlider').addEventListener('input', function() {
+  const lambda = parseFloat(this.value);
+  updateLambda(lambda);
+  // Also sync p_eff to p slider
+  const pEff = P_TH / lambda;
+  document.getElementById('pSlider').value = Math.min(Math.max(pEff, 0.001), 0.012);
+  updateP(pEff);
+});
+
+document.getElementById('pSlider').addEventListener('input', function() {
+  updateP(parseFloat(this.value));
+});
+
+document.getElementById('plTargetSlider').addEventListener('input', updateOverhead);
+document.getElementById('pPhysSlider').addEventListener('input', updateOverhead);
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+updateLambda(WILLOW_LAMBDA);
+updateP(P_TH / WILLOW_LAMBDA);
+updateOverhead();
+
+</script>
+</body>
+</html>

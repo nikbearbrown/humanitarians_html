@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exchange Symmetry & Pauli Exclusion Node</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 24px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+  .toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .toggle-btn {
+    padding: 7px 18px;
+    border: 1.5px solid #2A1A0E;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .toggle-btn.active {
+    background: #C8102E;
+    border-color: #C8102E;
+    color: #FFFFFF;
+  }
+  #heatmap-container {
+    position: relative;
+  }
+  .heatmap-label {
+    font-size: 11px;
+    color: #545454;
+    margin-top: 6px;
+    text-align: center;
+  }
+  .correlation-box {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid #e0dbd6;
+    border-radius: 4px;
+    background: #fafaf9;
+  }
+  .correlation-box .corr-label {
+    font-size: 12px;
+    color: #545454;
+    margin-bottom: 6px;
+  }
+  .corr-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2A1A0E;
+  }
+  .corr-value span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #545454;
+    margin-left: 6px;
+  }
+
+  /* Right panel */
+  .right-panel {}
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .slider-row label {
+    font-size: 13px;
+    white-space: nowrap;
+    min-width: 70px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 140px;
+    height: 3px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: #C8102E;
+    min-width: 44px;
+  }
+
+  /* Console */
+  .console {
+    margin-top: 28px;
+    border: 1px solid #e0dbd6;
+    border-radius: 4px;
+    padding: 12px 14px;
+    background: #fafaf9;
+  }
+  .console-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  .check-row {
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+    font-family: 'Courier New', monospace;
+  }
+  .check-pass { color: #2A1A0E; }
+  .check-mark { color: #C8102E; font-weight: 700; }
+
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+
+<h1>Exchange Symmetry &amp; Pauli Exclusion Node</h1>
+<p class="subtitle">Two identical particles in a 1D infinite square well — bosonic bunching vs. fermionic exclusion</p>
+
+<div class="layout">
+  <!-- LEFT: Heatmap -->
+  <div>
+    <div class="panel-title">Probability Density |ψ(x₁, x₂)|²</div>
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="btn-fermion" onclick="setMode('fermion')">Fermions (ψ₋)</button>
+      <button class="toggle-btn" id="btn-boson" onclick="setMode('boson')">Bosons (ψ₊)</button>
+    </div>
+    <div id="heatmap-container"></div>
+    <div class="heatmap-label" id="heatmap-caption">
+      Fermion ψ₋: Pauli exclusion node along x₁ = x₂ diagonal
+    </div>
+    <div class="correlation-box">
+      <div class="corr-label">Spatial correlation ⟨(x₁ − x₂)²⟩ / L²</div>
+      <div id="corr-fermion" class="corr-value">— <span>Fermions (ψ₋)</span></div>
+      <div id="corr-boson" class="corr-value" style="margin-top:4px">— <span>Bosons (ψ₊)</span></div>
+      <div id="corr-indep" class="corr-value" style="margin-top:4px">— <span>Independent (no symmetrization)</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Energy diagram + K slider -->
+  <div class="right-panel">
+    <div class="panel-title">Energy Level Diagram</div>
+    <div class="slider-row">
+      <label>Exchange K:</label>
+      <input type="range" id="k-slider" min="-50" max="50" value="20" step="1">
+      <span class="slider-val" id="k-display">0.20</span>
+    </div>
+    <div id="energy-diagram"></div>
+    <div class="console">
+      <div class="console-title">Physics Checks</div>
+      <div class="check-row" id="p1">P1: Fermion ψ₋(x,x) = 0 for all x — <span class="check-mark">checking…</span></div>
+      <div class="check-row" id="p2">P2: |ψ₊(L/2,L/2)|² > |ψ₊(L/4,3L/4)|² — <span class="check-mark">checking…</span></div>
+      <div class="check-row" id="p3">P3: K&gt;0 → E₊ &lt; E₋ — <span class="check-mark">checking…</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Physics ───────────────────────────────────────────────────────────────────
+const L = 1.0;
+const N = 50;
+
+function phi1(x) { return Math.sqrt(2 / L) * Math.sin(Math.PI * x / L); }
+function phi2(x) { return Math.sqrt(2 / L) * Math.sin(2 * Math.PI * x / L); }
+
+function psiPlus(x1, x2) {
+  return (1 / Math.sqrt(2)) * (phi1(x1) * phi2(x2) + phi2(x1) * phi1(x2));
+}
+function psiMinus(x1, x2) {
+  return (1 / Math.sqrt(2)) * (phi1(x1) * phi2(x2) - phi2(x1) * phi1(x2));
+}
+
+// Build grid
+const xs = d3.range(N).map(i => (i + 0.5) * L / N);
+
+function buildGrid(modeFn) {
+  const data = [];
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const v = modeFn(xs[i], xs[j]);
+      data.push({ i, j, val: v * v });
+    }
+  }
+  return data;
+}
+
+// Compute correlations numerically
+function computeCorrelation(modeFn) {
+  const dx = L / N;
+  let sum = 0;
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      const v = modeFn(xs[i], xs[j]);
+      sum += v * v * (xs[i] - xs[j]) ** 2 * dx * dx;
+    }
+  }
+  return sum / (L * L);
+}
+
+// ── Heatmap ───────────────────────────────────────────────────────────────────
+const heatW = 320, heatH = 320;
+const heatMargin = { top: 10, right: 60, bottom: 40, left: 44 };
+const innerW = heatW - heatMargin.left - heatMargin.right;
+const innerH = heatH - heatMargin.top - heatMargin.bottom;
+
+const svgHeat = d3.select('#heatmap-container')
+  .append('svg')
+  .attr('width', heatW)
+  .attr('height', heatH);
+
+const gHeat = svgHeat.append('g')
+  .attr('transform', `translate(${heatMargin.left},${heatMargin.top})`);
+
+// Scales
+const xScale = d3.scaleLinear([0, L], [0, innerW]);
+const yScale = d3.scaleLinear([0, L], [innerH, 0]);
+const cellW = innerW / N;
+const cellH = innerH / N;
+
+// Color scale (white → red)
+const colorScale = d3.scaleSequential()
+  .interpolator(d3.interpolateRgb('#FFFFFF', '#C8102E'));
+
+// Axes
+gHeat.append('g')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xScale).ticks(4).tickFormat(d => `${d}L`))
+  .selectAll('text').style('font-size', '11px').style('fill', '#545454');
+
+gHeat.append('g')
+  .call(d3.axisLeft(yScale).ticks(4).tickFormat(d => `${d}L`))
+  .selectAll('text').style('font-size', '11px').style('fill', '#545454');
+
+// Axis lines styling
+gHeat.selectAll('.domain').style('stroke', '#2A1A0E');
+gHeat.selectAll('.tick line').style('stroke', '#2A1A0E');
+
+// Axis labels
+gHeat.append('text')
+  .attr('x', innerW / 2).attr('y', innerH + 34)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('x₁ / L');
+
+gHeat.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -innerH / 2).attr('y', -32)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('x₂ / L');
+
+// Color bar
+const cbW = 14, cbH = innerH;
+const cbG = svgHeat.append('g')
+  .attr('transform', `translate(${heatMargin.left + innerW + 10},${heatMargin.top})`);
+
+const cbDefs = svgHeat.append('defs');
+const cbGrad = cbDefs.append('linearGradient')
+  .attr('id', 'cbGrad').attr('x1', 0).attr('y1', 1).attr('x2', 0).attr('y2', 0);
+cbGrad.append('stop').attr('offset', '0%').attr('stop-color', '#FFFFFF');
+cbGrad.append('stop').attr('offset', '100%').attr('stop-color', '#C8102E');
+
+cbG.append('rect')
+  .attr('width', cbW).attr('height', cbH)
+  .style('fill', 'url(#cbGrad)')
+  .style('stroke', '#e0dbd6').style('stroke-width', 0.5);
+
+cbG.append('text')
+  .attr('x', cbW + 3).attr('y', cbH).attr('text-anchor', 'start')
+  .style('font-size', '10px').style('fill', '#545454').text('0');
+cbG.append('text')
+  .attr('x', cbW + 3).attr('y', 4).attr('text-anchor', 'start')
+  .style('font-size', '10px').style('fill', '#545454').text('max');
+
+// Cells group
+const cellsG = gHeat.append('g');
+
+// Diagonal line
+const diagLine = gHeat.append('line')
+  .attr('x1', xScale(0)).attr('y1', yScale(0))
+  .attr('x2', xScale(L)).attr('y2', yScale(L))
+  .style('stroke', 'rgba(84,84,84,0.5)')
+  .style('stroke-width', 1)
+  .style('stroke-dasharray', '4,3');
+
+// Diagonal label
+const diagLabel = gHeat.append('text')
+  .attr('x', xScale(0.72)).attr('y', yScale(0.72) - 7)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '10px')
+  .style('fill', '#545454');
+
+let currentMode = 'fermion';
+
+function drawHeatmap(mode) {
+  const fn = mode === 'fermion' ? psiMinus : psiPlus;
+  const data = buildGrid(fn);
+  const maxVal = d3.max(data, d => d.val);
+  colorScale.domain([0, maxVal]);
+
+  const cells = cellsG.selectAll('rect').data(data);
+  cells.enter().append('rect')
+    .merge(cells)
+    .attr('x', d => xScale(xs[d.i]))
+    .attr('y', d => yScale(xs[d.j]) - cellH)
+    .attr('width', cellW)
+    .attr('height', cellH)
+    .attr('fill', d => colorScale(d.val));
+
+  diagLabel.text(mode === 'fermion' ? 'x₁ = x₂ node' : 'x₁ = x₂ bunching');
+
+  // Caption
+  d3.select('#heatmap-caption').text(
+    mode === 'fermion'
+      ? 'Fermion ψ₋: Pauli exclusion node along x₁ = x₂ diagonal'
+      : 'Boson ψ₊: enhanced probability (bunching) along x₁ = x₂ diagonal'
+  );
+}
+
+// ── Correlations ──────────────────────────────────────────────────────────────
+function displayCorrelations() {
+  const corrF = computeCorrelation(psiMinus);
+  const corrB = computeCorrelation(psiPlus);
+  // Independent (distinguishable): phi1(x1)*phi2(x2)
+  const corrI = computeCorrelation((x1, x2) => phi1(x1) * phi2(x2));
+
+  d3.select('#corr-fermion').html(
+    `${corrF.toFixed(4)} <span>Fermions (ψ₋)</span>`
+  );
+  d3.select('#corr-boson').html(
+    `${corrB.toFixed(4)} <span>Bosons (ψ₊)</span>`
+  );
+  d3.select('#corr-indep').html(
+    `${corrI.toFixed(4)} <span>Independent (no symmetrization)</span>`
+  );
+}
+
+// ── Energy Diagram ────────────────────────────────────────────────────────────
+// E₁ = 1, E₂ = 4 (in units of ħ²π²/2mL²)
+const E1 = 1, E2 = 4;
+const J = 0.1; // fixed Coulomb (illustrative)
+
+const eDiagW = 320, eDiagH = 260;
+const eDiagM = { top: 20, right: 30, bottom: 40, left: 70 };
+const eInnerW = eDiagW - eDiagM.left - eDiagM.right;
+const eInnerH = eDiagH - eDiagM.top - eDiagM.bottom;
+
+const svgE = d3.select('#energy-diagram')
+  .append('svg')
+  .attr('width', eDiagW)
+  .attr('height', eDiagH);
+
+const gE = svgE.append('g')
+  .attr('transform', `translate(${eDiagM.left},${eDiagM.top})`);
+
+// K from slider
+let K = 0.20;
+
+function getEnergies(K) {
+  return {
+    Eplus: E1 + E2 + J + K,
+    Eminus: E1 + E2 + J - K
+  };
+}
+
+// Y scale for energy
+const eScaleY = d3.scaleLinear()
+  .domain([E1 + E2 + J - 0.7, E1 + E2 + J + 0.7])
+  .range([eInnerH, 0]);
+
+gE.append('g')
+  .attr('transform', `translate(0,${eInnerH})`)
+  .call(d3.axisBottom(d3.scaleLinear([0, 1], [0, eInnerW])).ticks(0))
+  .select('.domain').style('stroke', '#2A1A0E');
+
+const eAxisG = gE.append('g').call(
+  d3.axisLeft(eScaleY).ticks(5).tickFormat(d => d.toFixed(1))
+);
+eAxisG.selectAll('text').style('font-size', '11px').style('fill', '#545454');
+eAxisG.select('.domain').style('stroke', '#2A1A0E');
+eAxisG.selectAll('.tick line').style('stroke', '#e0dbd6');
+
+// Y-axis label
+gE.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -eInnerH / 2).attr('y', -56)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '11px').style('fill', '#545454')
+  .text('Energy (units: E₁)');
+
+// Gridlines
+eScaleY.ticks(5).forEach(t => {
+  gE.append('line')
+    .attr('x1', 0).attr('x2', eInnerW)
+    .attr('y1', eScaleY(t)).attr('y2', eScaleY(t))
+    .style('stroke', '#f0ede8').style('stroke-width', 1);
+});
+
+// Energy bars
+const barXCenter = eInnerW / 2;
+const barW = 100;
+
+const eBarPlus = gE.append('line')
+  .attr('x1', barXCenter - barW / 2).attr('x2', barXCenter + barW / 2)
+  .style('stroke', '#C8102E').style('stroke-width', 3);
+
+const eBarMinus = gE.append('line')
+  .attr('x1', barXCenter - barW / 2).attr('x2', barXCenter + barW / 2)
+  .style('stroke', '#2A1A0E').style('stroke-width', 3);
+
+const eLabelPlus = gE.append('text')
+  .attr('x', barXCenter + barW / 2 + 6)
+  .attr('text-anchor', 'start')
+  .style('font-size', '11px').style('fill', '#C8102E').style('font-weight', '600');
+
+const eLabelMinus = gE.append('text')
+  .attr('x', barXCenter + barW / 2 + 6)
+  .attr('text-anchor', 'start')
+  .style('font-size', '11px').style('fill', '#2A1A0E').style('font-weight', '600');
+
+// Brace / K-arrow
+const kArrow = gE.append('line')
+  .style('stroke', '#545454').style('stroke-width', 1.5)
+  .style('stroke-dasharray', '3,2');
+
+const kLabel = gE.append('text')
+  .attr('text-anchor', 'middle')
+  .style('font-size', '11px').style('fill', '#545454');
+
+// J baseline
+const eJ = gE.append('line')
+  .attr('x1', 0).attr('x2', eInnerW)
+  .style('stroke', '#d0cbc4').style('stroke-width', 1).style('stroke-dasharray', '5,3');
+
+const eJLabel = gE.append('text')
+  .attr('x', eInnerW - 2).attr('text-anchor', 'end')
+  .style('font-size', '10px').style('fill', '#a09890');
+
+function updateEnergyDiagram(K) {
+  const { Eplus, Eminus } = getEnergies(K);
+  const Ebase = E1 + E2 + J;
+
+  eBarPlus.attr('y1', eScaleY(Eplus)).attr('y2', eScaleY(Eplus));
+  eBarMinus.attr('y1', eScaleY(Eminus)).attr('y2', eScaleY(Eminus));
+
+  eLabelPlus
+    .attr('y', eScaleY(Eplus) + 4)
+    .text(`E₊ = ${Eplus.toFixed(2)}  (bosons/singlet)`);
+
+  eLabelMinus
+    .attr('y', eScaleY(Eminus) + 4)
+    .text(`E₋ = ${Eminus.toFixed(2)}  (fermions/triplet)`);
+
+  // K-arrow between bars
+  const midY = (eScaleY(Eplus) + eScaleY(Eminus)) / 2;
+  kArrow
+    .attr('x1', barXCenter - barW / 2 - 16).attr('y1', eScaleY(Eplus))
+    .attr('x2', barXCenter - barW / 2 - 16).attr('y2', eScaleY(Eminus));
+
+  kLabel
+    .attr('x', barXCenter - barW / 2 - 28)
+    .attr('y', midY + 4)
+    .text('2K');
+
+  // J baseline
+  eJ.attr('y1', eScaleY(Ebase)).attr('y2', eScaleY(Ebase));
+  eJLabel.attr('y', eScaleY(Ebase) - 3).text('E₁+E₂+J');
+}
+
+// ── Physics Checks ────────────────────────────────────────────────────────────
+function runPhysicsChecks(K) {
+  // P1: psiMinus(x,x) = 0 for all x
+  const sampleXs = [0.1, 0.25, 0.5, 0.75, 0.9];
+  const maxDiag = Math.max(...sampleXs.map(x => Math.abs(psiMinus(x, x))));
+  const p1pass = maxDiag < 1e-12;
+  d3.select('#p1').html(
+    `P1: Fermion ψ₋(x,x) = 0 for all x &nbsp;→ max|ψ₋(x,x)| = ${maxDiag.toExponential(1)} &nbsp;<span class="check-mark">${p1pass ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+
+  // P2: |ψ₊(L/2,L/2)|² > |ψ₊(L/4,3L/4)|²
+  const center = psiPlus(0.5, 0.5) ** 2;
+  const offdiag = psiPlus(0.25, 0.75) ** 2;
+  const p2pass = center > offdiag;
+  d3.select('#p2').html(
+    `P2: |ψ₊(½,½)|²=${center.toFixed(3)} > |ψ₊(¼,¾)|²=${offdiag.toFixed(3)} &nbsp;<span class="check-mark">${p2pass ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+
+  // P3: K > 0 → E₊ < E₋
+  const { Eplus, Eminus } = getEnergies(K);
+  const p3pass = K > 0 ? Eplus < Eminus : (K < 0 ? Eplus > Eminus : Eplus === Eminus);
+  d3.select('#p3').html(
+    `P3: K=${K.toFixed(2)} → E₊=${Eplus.toFixed(2)}, E₋=${Eminus.toFixed(2)} &nbsp;<span class="check-mark">${p3pass ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  drawHeatmap(mode);
+  d3.select('#btn-fermion').classed('active', mode === 'fermion');
+  d3.select('#btn-boson').classed('active', mode === 'boson');
+}
+
+d3.select('#k-slider').on('input', function () {
+  K = +this.value / 100;
+  d3.select('#k-display').text(K.toFixed(2));
+  updateEnergyDiagram(K);
+  runPhysicsChecks(K);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+drawHeatmap('fermion');
+displayCorrelations();
+updateEnergyDiagram(K);
+runPhysicsChecks(K);
+</script>
+</body>
+</html>

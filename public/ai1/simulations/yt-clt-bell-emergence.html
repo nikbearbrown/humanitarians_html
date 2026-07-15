@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Central Limit Theorem: Any Shape Becomes a Bell</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    color: #545454;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .layout {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 960px;
+    align-items: flex-start;
+  }
+  .left-col {
+    flex: 0 0 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .right-col { flex: 1; }
+  .box {
+    border: 2px solid #D4D4D4;
+    padding: 12px;
+  }
+  .box-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  .dist-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border: 2px solid #D4D4D4;
+    background: #fff;
+    color: #545454;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    margin-bottom: 6px;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .dist-btn.active, .dist-btn:hover {
+    border-color: #2A1A0E;
+    background: #2A1A0E;
+    color: #fff;
+  }
+  button.action {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 14px;
+    border: 2px solid #2A1A0E;
+    background: #2A1A0E;
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 6px;
+    transition: all 0.15s;
+  }
+  button.action:hover, button.action.active { background: #C8102E; border-color: #C8102E; }
+  input[type=range] { width: 100%; accent-color: #C8102E; }
+  .slider-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #545454;
+    margin-bottom: 2px;
+  }
+  .n-display {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #C8102E;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .n-sublabel {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #545454;
+    text-align: center;
+  }
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    padding: 3px 0;
+    border-bottom: 1px solid #F0F0F0;
+    font-weight: 600;
+  }
+  .stat-item .v { font-weight: 700; color: #2A1A0E; }
+  .interval-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 10px;
+    background: #FAFAFA;
+    border: 1.5px solid #D4D4D4;
+    margin-top: 8px;
+  }
+  .interval-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #545454;
+  }
+  .interval-val {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #2A1A0E;
+  }
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<h1>The Central Limit Theorem: Any Shape Becomes a Bell</h1>
+<div class="subtitle">5,000 samples of n draws each — watch any distribution converge to a Gaussian</div>
+
+<div class="layout">
+  <!-- Left column -->
+  <div class="left-col">
+    <div class="box">
+      <div class="box-title">Source Distribution</div>
+      <button class="dist-btn active" data-dist="die">Fair Die (1–6)<br><span style="font-size:0.62rem;font-weight:600;color:#888;">Uniform · μ=3.5</span></button>
+      <button class="dist-btn" data-dist="exp">Exponential (λ=1)<br><span style="font-size:0.62rem;font-weight:600;color:#888;">Skewed right · μ=1</span></button>
+      <button class="dist-btn" data-dist="bimodal">Bimodal (1 & 5)<br><span style="font-size:0.62rem;font-weight:600;color:#888;">Two peaks · μ=3</span></button>
+      <svg id="sourceSvg" width="196" height="100" style="margin-top:8px;"></svg>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Sample Size n</div>
+      <div class="n-display" id="nDisplay">1</div>
+      <div class="n-sublabel">draws per sample</div>
+      <input type="range" id="nSlider" min="1" max="200" value="1" style="margin-top:6px;">
+      <div class="slider-row"><span>1</span><span>200</span></div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Controls</div>
+      <button class="action" id="genBtn">Generate</button>
+      <button class="action" id="autoBtn">Auto (1 fps)</button>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Statistics</div>
+      <div class="stat-item"><span>μ of sums</span><span class="v" id="statMu">—</span></div>
+      <div class="stat-item"><span>σ of sums</span><span class="v" id="statSig">—</span></div>
+      <div class="stat-item"><span>n·μ (theory)</span><span class="v" id="statNmu">—</span></div>
+      <div class="stat-item"><span>σ·√n (theory)</span><span class="v" id="statSqrt">—</span></div>
+    </div>
+  </div>
+
+  <!-- Right column: histogram -->
+  <div class="right-col">
+    <div class="box">
+      <div class="box-title">Distribution of <span id="mainTitle">1</span>-Sample Sums (5,000 simulated)</div>
+      <svg id="mainSvg" width="680" height="400"></svg>
+      <div class="interval-bar">
+        <div class="interval-label">95% Interval: [n·μ − 2σ√n, n·μ + 2σ√n]</div>
+        <div class="interval-val" id="intervalVal">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BG = '#FFFFFF', INK = '#2A1A0E', RED = '#C8102E', SLATE = '#545454', HAIR = '#D4D4D4';
+const N_SAMPLES = 5000;
+
+// Distributions
+const dists = {
+  die: {
+    name: 'Fair Die (1–6)',
+    mu: 3.5,
+    sigma: Math.sqrt(35 / 12),
+    sample: () => Math.floor(Math.random() * 6) + 1,
+    range: [1, 6]
+  },
+  exp: {
+    name: 'Exponential (λ=1)',
+    mu: 1,
+    sigma: 1,
+    sample: () => -Math.log(1 - Math.random()),
+    range: [0, 6]
+  },
+  bimodal: {
+    name: 'Bimodal',
+    mu: 3,
+    sigma: Math.sqrt(((1 - 3) ** 2 + (5 - 3) ** 2) / 2),
+    sample: () => Math.random() < 0.5 ? 1 + Math.random() * 0.6 - 0.3 : 5 + Math.random() * 0.6 - 0.3,
+    range: [0, 6]
+  }
+};
+
+let currentDist = 'die';
+let currentN = 1;
+let autoInterval = null;
+let autoActive = false;
+
+function sampleSum(distKey, n) {
+  const d = dists[distKey];
+  let s = 0;
+  for (let i = 0; i < n; i++) s += d.sample();
+  return s;
+}
+
+function generateSamples() {
+  const sums = [];
+  for (let i = 0; i < N_SAMPLES; i++) sums.push(sampleSum(currentDist, currentN));
+  return sums;
+}
+
+function normalPdf(x, mu, sigma) {
+  return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((x - mu) / sigma) ** 2);
+}
+
+function drawSourceDist() {
+  const svg = d3.select('#sourceSvg');
+  svg.selectAll('*').remove();
+  const W = 196, H = 100;
+  const margin = { top: 8, right: 8, bottom: 20, left: 28 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const d = dists[currentDist];
+
+  if (currentDist === 'die') {
+    const bars = [1, 2, 3, 4, 5, 6];
+    const x = d3.scaleBand().domain(bars.map(String)).range([0, pw]).padding(0.2);
+    const y = d3.scaleLinear().domain([0, 0.25]).range([ph, 0]);
+    g.selectAll('rect').data(bars).join('rect')
+      .attr('x', b => x(String(b))).attr('y', y(1 / 6))
+      .attr('width', x.bandwidth()).attr('height', ph - y(1 / 6))
+      .attr('fill', INK);
+    g.append('g').attr('transform', `translate(0,${ph})`).call(d3.axisBottom(x).tickSize(2))
+      .selectAll('text').attr('font-size', '8px').attr('font-family', 'Montserrat');
+  } else if (currentDist === 'exp') {
+    const xs = d3.range(0, 5, 0.1);
+    const y = d3.scaleLinear().domain([0, 1.1]).range([ph, 0]);
+    const x = d3.scaleLinear().domain([0, 5]).range([0, pw]);
+    const line = d3.line().x(v => x(v)).y(v => y(Math.exp(-v)));
+    g.append('path').datum(xs).attr('d', line).attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 2);
+    g.append('g').attr('transform', `translate(0,${ph})`).call(d3.axisBottom(x).ticks(3).tickSize(2))
+      .selectAll('text').attr('font-size', '8px').attr('font-family', 'Montserrat');
+  } else {
+    // Bimodal: two spikes
+    const xs = [1, 5];
+    const x = d3.scaleLinear().domain([0, 6]).range([0, pw]);
+    const y = d3.scaleLinear().domain([0, 0.6]).range([ph, 0]);
+    xs.forEach(v => {
+      g.append('rect').attr('x', x(v) - 6).attr('y', y(0.5)).attr('width', 12).attr('height', ph - y(0.5)).attr('fill', INK);
+    });
+    g.append('g').attr('transform', `translate(0,${ph})`).call(d3.axisBottom(x).ticks(3).tickSize(2))
+      .selectAll('text').attr('font-size', '8px').attr('font-family', 'Montserrat');
+  }
+}
+
+function drawMain(sums) {
+  const d = dists[currentDist];
+  const mu_theory = currentN * d.mu;
+  const sigma_theory = d.sigma * Math.sqrt(currentN);
+
+  // Update stats
+  const mu_emp = d3.mean(sums);
+  const sigma_emp = d3.deviation(sums);
+  document.getElementById('statMu').textContent = mu_emp.toFixed(2);
+  document.getElementById('statSig').textContent = sigma_emp ? sigma_emp.toFixed(2) : '—';
+  document.getElementById('statNmu').textContent = mu_theory.toFixed(2);
+  document.getElementById('statSqrt').textContent = sigma_theory.toFixed(2);
+  document.getElementById('mainTitle').textContent = currentN;
+
+  const lo = mu_theory - 2 * sigma_theory, hi = mu_theory + 2 * sigma_theory;
+  document.getElementById('intervalVal').textContent =
+    `[${lo.toFixed(1)}, ${hi.toFixed(1)}] — width: ${(2 * 2 * sigma_theory).toFixed(1)}`;
+
+  // Draw histogram
+  const svg = d3.select('#mainSvg');
+  svg.selectAll('*').remove();
+  const W = 680, H = 400;
+  const margin = { top: 20, right: 20, bottom: 44, left: 52 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const ext = d3.extent(sums);
+  const pad = Math.max((ext[1] - ext[0]) * 0.08, 0.5);
+  const xDomain = [ext[0] - pad, ext[1] + pad];
+  const x = d3.scaleLinear().domain(xDomain).range([0, pw]);
+
+  // Bins
+  const nBins = Math.min(80, Math.max(20, Math.round(Math.sqrt(N_SAMPLES))));
+  const bins = d3.histogram().domain(x.domain()).thresholds(x.ticks(nBins))(sums);
+  const binW = bins[0] ? (bins[0].x1 - bins[0].x0) : 1;
+  const maxDensity = d3.max(bins, b => b.length / (N_SAMPLES * binW));
+
+  // Normal density max
+  const normalMax = normalPdf(mu_theory, mu_theory, sigma_theory);
+  const yMax = Math.max(maxDensity, normalMax) * 1.15;
+  const y = d3.scaleLinear().domain([0, yMax]).range([ph, 0]);
+
+  // Grid
+  g.append('g').attr('class', 'grid').call(d3.axisLeft(y).ticks(5).tickSize(-pw).tickFormat(''))
+    .selectAll('line').attr('stroke', HAIR).attr('stroke-width', 0.7);
+
+  // 95% interval shading
+  g.append('rect')
+    .attr('x', Math.max(0, x(lo))).attr('y', 0)
+    .attr('width', Math.min(pw, x(hi)) - Math.max(0, x(lo)))
+    .attr('height', ph).attr('fill', '#F8F0F0').attr('opacity', 0.7);
+
+  // Histogram bars
+  g.selectAll('.bar').data(bins).join('rect')
+    .attr('class', 'bar')
+    .attr('x', b => x(b.x0) + 0.5)
+    .attr('y', b => y(b.length / (N_SAMPLES * binW)))
+    .attr('width', b => Math.max(0, x(b.x1) - x(b.x0) - 1))
+    .attr('height', b => ph - y(b.length / (N_SAMPLES * binW)))
+    .attr('fill', INK).attr('opacity', 0.75);
+
+  // Normal overlay
+  if (currentN >= 2 && sigma_theory > 0) {
+    const normalLine = d3.line()
+      .x(v => x(v)).y(v => y(normalPdf(v, mu_theory, sigma_theory)))
+      .curve(d3.curveCatmullRom);
+    const xs = d3.range(xDomain[0], xDomain[1], (xDomain[1] - xDomain[0]) / 200);
+    g.append('path').datum(xs).attr('d', normalLine)
+      .attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 2.5);
+  }
+
+  // 95% interval markers
+  [lo, hi].forEach(v => {
+    g.append('line').attr('x1', x(v)).attr('x2', x(v)).attr('y1', 0).attr('y2', ph)
+      .attr('stroke', RED).attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+  });
+  g.append('text').attr('x', x(mu_theory)).attr('y', -6)
+    .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+    .attr('font-size', '10px').attr('font-weight', '700').attr('fill', RED)
+    .text('← 95% interval →');
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${ph})`).call(d3.axisBottom(x).ticks(8))
+    .selectAll('text').attr('font-size', '10px').attr('font-family', 'Montserrat').attr('fill', SLATE);
+  g.append('g').call(d3.axisLeft(y).ticks(5).tickFormat(d3.format('.3f')))
+    .selectAll('text').attr('font-size', '10px').attr('font-family', 'Montserrat').attr('fill', SLATE);
+
+  g.append('text').attr('x', pw / 2).attr('y', ph + 36).attr('text-anchor', 'middle')
+    .attr('font-family', 'Montserrat').attr('font-size', '11px').attr('font-weight', '700').attr('fill', INK)
+    .text(`Sum of ${currentN} draws from ${d.name}`);
+  g.append('text').attr('transform', 'rotate(-90)').attr('x', -ph / 2).attr('y', -40)
+    .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+    .attr('font-size', '10px').attr('font-weight', '700').attr('fill', INK).text('Density');
+
+  // Normal label
+  if (currentN >= 2) {
+    g.append('text').attr('x', pw - 4).attr('y', 16)
+      .attr('text-anchor', 'end').attr('font-family', 'Montserrat')
+      .attr('font-size', '10px').attr('font-weight', '700').attr('fill', RED)
+      .text('— Normal fit');
+  }
+
+  // CLT note
+  if (currentN >= 30) {
+    g.append('text').attr('x', pw / 2).attr('y', 18)
+      .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+      .attr('font-size', '10px').attr('font-weight', '700').attr('fill', SLATE)
+      .text('n ≥ 30: CLT well-established ✓');
+  }
+}
+
+function generate() {
+  const sums = generateSamples();
+  drawMain(sums);
+}
+
+document.querySelectorAll('.dist-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.dist-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentDist = this.dataset.dist;
+    drawSourceDist();
+    generate();
+  });
+});
+
+document.getElementById('nSlider').addEventListener('input', function () {
+  currentN = parseInt(this.value);
+  document.getElementById('nDisplay').textContent = currentN;
+  generate();
+});
+
+document.getElementById('genBtn').addEventListener('click', generate);
+
+document.getElementById('autoBtn').addEventListener('click', function () {
+  if (autoActive) {
+    clearInterval(autoInterval);
+    autoActive = false;
+    this.textContent = 'Auto (1 fps)';
+    this.classList.remove('active');
+  } else {
+    autoActive = true;
+    this.textContent = 'Stop Auto';
+    this.classList.add('active');
+    autoInterval = setInterval(() => {
+      currentN = Math.min(200, currentN + 1);
+      document.getElementById('nSlider').value = currentN;
+      document.getElementById('nDisplay').textContent = currentN;
+      generate();
+      if (currentN >= 200) {
+        clearInterval(autoInterval);
+        autoActive = false;
+        document.getElementById('autoBtn').textContent = 'Auto (1 fps)';
+        document.getElementById('autoBtn').classList.remove('active');
+      }
+    }, 1000);
+  }
+});
+
+// Init
+drawSourceDist();
+generate();
+</script>
+</body>
+</html>

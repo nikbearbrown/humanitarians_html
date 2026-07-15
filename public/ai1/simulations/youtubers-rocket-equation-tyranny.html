@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Equation Tyranny</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #545454; font-size: 0.875rem; margin-bottom: 24px; }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 32px; }
+  .panel { background: #FFFFFF; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #545454; margin-bottom: 8px;
+  }
+  .control-group { margin-bottom: 20px; }
+  label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] {
+    flex: 1; accent-color: #C8102E; height: 4px; cursor: pointer;
+  }
+  .slider-val {
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 0.85rem; min-width: 60px; text-align: right;
+    color: #2A1A0E;
+  }
+  .ve-labels {
+    display: flex; justify-content: space-between;
+    font-size: 0.65rem; color: #545454; margin-top: 2px;
+    padding: 0 2px;
+  }
+  .metric-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .metric-card {
+    border: 1.5px solid #D4D4D4; border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .metric-label { font-size: 0.7rem; color: #545454; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .metric-value {
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 1.5rem; font-weight: 700; color: #C8102E;
+  }
+  .bar-section { margin-bottom: 20px; }
+  .bar-container {
+    width: 100%; height: 200px; border: 1.5px solid #D4D4D4;
+    border-radius: 4px; overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .bar-fuel { background: #C8102E; flex: 1; display: flex; align-items: center; justify-content: center; }
+  .bar-structure { background: #545454; display: flex; align-items: center; justify-content: center; }
+  .bar-payload { background: #2A1A0E; display: flex; align-items: center; justify-content: center; }
+  .bar-label { color: #fff; font-size: 0.75rem; font-weight: 600; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .toggle-btn {
+    padding: 6px 14px; border: 1.5px solid #2A1A0E; border-radius: 4px;
+    background: #FFFFFF; color: #2A1A0E; font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .toggle-btn.active { background: #2A1A0E; color: #fff; }
+  .staging-info {
+    font-size: 0.8rem; color: #545454; background: #f8f8f8;
+    border: 1px solid #D4D4D4; border-radius: 4px; padding: 10px;
+    display: none;
+  }
+  .staging-info.visible { display: block; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>The Tyranny of the Rocket Equation</h1>
+<p class="subtitle">Tsiolkovsky: ΔV = v<sub>e</sub> · ln(m₀/m_f) — exponential physics, brutal consequences</p>
+
+<div class="layout">
+  <div class="panel">
+    <div class="section-label">Controls</div>
+
+    <div class="control-group">
+      <label>Delta-V (ΔV): <span id="dv-display">9.4</span> km/s</label>
+      <div class="slider-row">
+        <input type="range" id="dv-slider" min="0" max="30" step="0.1" value="9.4">
+        <span class="slider-val" id="dv-val">9.4</span>
+      </div>
+      <div class="ve-labels">
+        <span>0</span><span>LEO 9.4</span><span>Moon 13.4</span><span>Mars 21</span><span>30</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Exhaust velocity (v<sub>e</sub>): <span id="ve-display">4.4</span> km/s</label>
+      <div class="slider-row">
+        <input type="range" id="ve-slider" min="1.5" max="9" step="0.1" value="4.4">
+        <span class="slider-val" id="ve-val">4.4</span>
+      </div>
+      <div class="ve-labels">
+        <span>Chemical 2–4</span><span>H₂/O₂ 4.4</span><span>Nuclear ~8</span>
+      </div>
+    </div>
+
+    <div class="metric-cards">
+      <div class="metric-card">
+        <div class="metric-label">Mass Ratio</div>
+        <div class="metric-value" id="mass-ratio">8.47</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Payload Fraction</div>
+        <div class="metric-value" id="payload-frac">11.8%</div>
+      </div>
+    </div>
+
+    <div class="bar-section">
+      <div class="section-label">Mass Breakdown</div>
+      <div class="bar-container" id="bar-container">
+        <div class="bar-fuel" id="bar-fuel" style="flex:8.47"><span class="bar-label" id="fuel-label">Fuel+Structure 88.2%</span></div>
+        <div class="bar-payload" id="bar-payload" style="flex:1"><span class="bar-label" id="payload-label">Payload 11.8%</span></div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn" id="staging-btn" onclick="toggleStaging()">Toggle Staging</button>
+    </div>
+    <div class="staging-info" id="staging-info">
+      <strong>Two-Stage Rocket</strong> (10% structural mass per stage shed)<br>
+      Stage 1: provides ΔV/2 → ratio₁ = <span id="s1-ratio">—</span><br>
+      Stage 2: provides ΔV/2 → ratio₂ = <span id="s2-ratio">—</span><br>
+      <strong>Effective payload fraction: <span id="s-payload" style="color:#C8102E">—</span></strong>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Mass Ratio vs ΔV — Exponential Curve</div>
+    <svg id="curve-svg" width="100%" viewBox="0 0 560 400" style="border:1.5px solid #D4D4D4;border-radius:4px;"></svg>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+let stagingOn = false;
+let currentDV = 9.4, currentVE = 4.4;
+
+const dvSlider = document.getElementById('dv-slider');
+const veSlider = document.getElementById('ve-slider');
+
+function toggleStaging() {
+  stagingOn = !stagingOn;
+  document.getElementById('staging-btn').classList.toggle('active', stagingOn);
+  document.getElementById('staging-info').classList.toggle('visible', stagingOn);
+  update();
+}
+
+function update() {
+  currentDV = parseFloat(dvSlider.value);
+  currentVE = parseFloat(veSlider.value);
+
+  document.getElementById('dv-display').textContent = currentDV.toFixed(1);
+  document.getElementById('dv-val').textContent = currentDV.toFixed(1);
+  document.getElementById('ve-display').textContent = currentVE.toFixed(1);
+  document.getElementById('ve-val').textContent = currentVE.toFixed(1);
+
+  const massRatio = Math.exp(currentDV / currentVE);
+  const payloadFrac = 100 / massRatio;
+
+  document.getElementById('mass-ratio').textContent = massRatio < 1000 ? massRatio.toFixed(2) : massRatio.toExponential(2);
+  document.getElementById('payload-frac').textContent = payloadFrac.toFixed(2) + '%';
+
+  // bar
+  const fuelFrac = 100 - payloadFrac;
+  document.getElementById('bar-fuel').style.flex = Math.max(fuelFrac, 0);
+  document.getElementById('bar-payload').style.flex = Math.max(payloadFrac, 0.5);
+  document.getElementById('fuel-label').textContent = `Fuel+Structure ${fuelFrac.toFixed(1)}%`;
+  document.getElementById('payload-label').textContent = `Payload ${payloadFrac.toFixed(2)}%`;
+
+  // staging calc
+  if (stagingOn) {
+    const dv1 = currentDV / 2, dv2 = currentDV / 2;
+    const structFrac = 0.10;
+    const r1 = Math.exp(dv1 / currentVE);
+    const r2 = Math.exp(dv2 / currentVE);
+    // Stage 1: payload fraction after stage1 considering struct mass
+    const pf1 = (1/r1 - structFrac) / (1 - structFrac);
+    const pf2 = (1/r2 - structFrac) / (1 - structFrac);
+    const eff = pf1 * pf2 * 100;
+    document.getElementById('s1-ratio').textContent = r1.toFixed(3);
+    document.getElementById('s2-ratio').textContent = r2.toFixed(3);
+    document.getElementById('s-payload').textContent = (eff > 0 ? eff.toFixed(2) : '< 0') + '%';
+  }
+
+  drawCurve();
+}
+
+// D3 Curve
+const margin = { top: 20, right: 30, bottom: 60, left: 70 };
+const W = 560 - margin.left - margin.right;
+const H = 400 - margin.top - margin.bottom;
+
+const svg = d3.select('#curve-svg')
+  .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().domain([0, 30]).range([0, W]);
+const yScale = d3.scaleLinear().domain([1, 200]).range([H, 0]);
+
+const xAxis = svg.append('g').attr('transform', `translate(0,${H})`);
+const yAxis = svg.append('g');
+
+svg.append('text').attr('x', W/2).attr('y', H+48).attr('text-anchor','middle')
+  .style('font-size','12px').style('fill','#545454').text('ΔV (km/s)');
+svg.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-55)
+  .attr('text-anchor','middle').style('font-size','12px').style('fill','#545454').text('Mass Ratio (m₀/m_f)');
+
+// Reference lines
+const refs = [{v: 9.4, label: 'LEO'}, {v: 13.4, label: 'Moon'}, {v: 21, label: 'Mars'}];
+refs.forEach(r => {
+  svg.append('line').attr('class','ref-line-'+r.label)
+    .attr('x1', xScale(r.v)).attr('x2', xScale(r.v))
+    .attr('y1', 0).attr('y2', H)
+    .style('stroke','#D4D4D4').style('stroke-dasharray','4,3').style('stroke-width',1);
+  svg.append('text').attr('class','ref-text-'+r.label)
+    .attr('x', xScale(r.v)+3).attr('y', 14)
+    .style('font-size','10px').style('fill','#545454').text(r.label);
+});
+
+// Curve path
+const curvePath = svg.append('path').style('fill','none').style('stroke-width',2);
+// Dot
+const dot = svg.append('circle').attr('r', 7).style('fill','#C8102E').style('stroke','#fff').style('stroke-width',2);
+
+// Annotation
+const annotation = svg.append('text').attr('text-anchor','start').style('font-size','11px').style('fill','#2A1A0E');
+
+function drawCurve() {
+  const ve = currentVE;
+  const maxY = Math.exp(30 / ve);
+  const clampY = Math.min(maxY, 5000);
+  const yMax = Math.min(clampY, 500);
+
+  yScale.domain([1, yMax]);
+  xAxis.call(d3.axisBottom(xScale).ticks(6).tickFormat(d => d));
+  yAxis.call(d3.axisLeft(yScale).ticks(6).tickFormat(d => d >= 1000 ? d3.format('.2s')(d) : d));
+
+  // Apply axis styles
+  [xAxis, yAxis].forEach(ax => {
+    ax.selectAll('line,path').style('stroke','#D4D4D4');
+    ax.selectAll('text').style('fill','#545454').style('font-size','11px');
+  });
+
+  const dvVals = d3.range(0, 30.1, 0.25);
+  const line = d3.line()
+    .x(d => xScale(d))
+    .y(d => yScale(Math.min(Math.exp(d / ve), yMax * 1.05)))
+    .curve(d3.curveBasis);
+
+  curvePath.datum(dvVals).attr('d', line).style('stroke','#C8102E');
+
+  // Dot position
+  const mr = Math.exp(currentDV / ve);
+  const dotY = mr > yMax ? 0 : yScale(mr);
+  dot.attr('cx', xScale(currentDV)).attr('cy', dotY > H ? H : (dotY < 0 ? 0 : dotY));
+
+  // Annotation
+  const pf = (100 / mr).toFixed(1);
+  const mrStr = mr < 1000 ? mr.toFixed(1) : mr.toExponential(1);
+  annotation.attr('x', Math.min(xScale(currentDV) + 12, W - 130)).attr('y', Math.max(dotY - 10, 12))
+    .text(`ratio=${mrStr}, payload=${pf}%`);
+}
+
+dvSlider.addEventListener('input', update);
+veSlider.addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>

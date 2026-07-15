@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Braess's Paradox: The Road That Slows Everyone</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    color: #545454;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .main-layout {
+    display: flex;
+    gap: 18px;
+    width: 100%;
+    max-width: 960px;
+    align-items: flex-start;
+  }
+  .left-panel {
+    flex: 0 0 560px;
+  }
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .box {
+    border: 2px solid #D4D4D4;
+    padding: 12px;
+  }
+  .box-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 16px;
+    border: 2px solid #2A1A0E;
+    background: #2A1A0E;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  button:hover { background: #C8102E; border-color: #C8102E; }
+  button.active { background: #C8102E; border-color: #C8102E; }
+  input[type=range] {
+    width: 100%;
+    accent-color: #C8102E;
+    margin: 6px 0;
+  }
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #545454;
+  }
+  .time-display {
+    padding: 10px;
+    background: #FAFAFA;
+    border: 1.5px solid #D4D4D4;
+    margin-bottom: 8px;
+  }
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .time-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #545454;
+    text-transform: uppercase;
+  }
+  .time-val {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #2A1A0E;
+  }
+  .time-val.nash { color: #C8102E; }
+  .gap-annotation {
+    padding: 8px 10px;
+    background: #FFF0F0;
+    border: 2px solid #C8102E;
+    text-align: center;
+  }
+  .gap-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #C8102E;
+    letter-spacing: 0.06em;
+  }
+  .gap-val {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #C8102E;
+  }
+  svg { display: block; }
+  .legend-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #545454;
+    margin-top: 4px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+</head>
+<body>
+
+<h1>Braess's Paradox: The Road That Slows Everyone</h1>
+<div class="subtitle">Adding a FREE road increases everyone's commute. Total cars: 100</div>
+
+<div class="main-layout">
+  <!-- Network diagram -->
+  <div class="left-panel">
+    <div class="box">
+      <div class="box-title">Road Network (S → T)</div>
+      <svg id="networkSvg" width="536" height="380"></svg>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-dot" style="background:#2A6EBB"></div> Congestion road (time = n×t₀)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#545454"></div> Constant road (45 min)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#C8102E"></div> Free road V→W (0 min)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls + time display -->
+  <div class="right-panel">
+    <div class="box">
+      <div class="box-title">New Road Toggle</div>
+      <button id="newRoadBtn">Add Free Road V→W</button>
+      <div style="font-size:0.7rem;font-weight:600;color:#545454;" id="newRoadStatus">Free road: ABSENT</div>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Traffic Split (without new road)</div>
+      <div class="slider-label">
+        <span>All via S→V (top)</span>
+        <span>All via S→W (bottom)</span>
+      </div>
+      <input type="range" id="splitSlider" min="0" max="100" value="50">
+      <div style="text-align:center;font-size:0.78rem;font-weight:700;margin:4px 0;" id="splitDisplay">
+        50 cars top / 50 cars bottom
+      </div>
+      <button id="nashBtn" style="margin-top:4px;">Find Nash Equilibrium</button>
+    </div>
+
+    <div class="box">
+      <div class="box-title">Travel Times (minutes)</div>
+      <div class="time-display">
+        <div class="time-row">
+          <span class="time-label">Route S→V→T</span>
+          <span class="time-val" id="topTime">—</span>
+        </div>
+        <div class="time-row">
+          <span class="time-label">Route S→W→T</span>
+          <span class="time-val" id="botTime">—</span>
+        </div>
+        <div class="time-row" id="vwRouteRow" style="display:none;">
+          <span class="time-label">Route S→V→W→T</span>
+          <span class="time-val nash" id="vwTime">—</span>
+        </div>
+        <hr style="border:none;border-top:1.5px solid #D4D4D4;margin:6px 0;">
+        <div class="time-row">
+          <span class="time-label" style="font-weight:900;color:#2A1A0E;">Avg Commute</span>
+          <span class="time-val" id="avgTime">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="gapBox" style="display:none;">
+      <div class="gap-annotation">
+        <div class="gap-label">Nash vs Social Optimum</div>
+        <div class="gap-val" id="gapVal">+0 min</div>
+        <div style="font-size:0.65rem;font-weight:600;color:#C8102E;">Adding the free road costs everyone extra time!</div>
+      </div>
+    </div>
+
+    <div class="box" style="font-size:0.68rem;line-height:1.6;color:#545454;font-weight:600;">
+      <div class="box-title">Parameters</div>
+      t₀ = 1 min/car (congestion cost)<br>
+      T = 45 min (constant road time)<br>
+      Without new road Nash: 50+45 = <strong>95 min</strong><br>
+      With new road Nash: 100+0+100 = <strong>200 min</strong><br>
+      Social optimum: 50+45 = <strong>95 min</strong>
+    </div>
+  </div>
+</div>
+
+<script>
+const BG = '#FFFFFF', INK = '#2A1A0E', RED = '#C8102E', SLATE = '#545454', HAIR = '#D4D4D4';
+const BLUE = '#2A6EBB';
+const T0 = 1; // min per car
+const T_CONST = 45; // constant road time
+const TOTAL_CARS = 100;
+
+let newRoadPresent = false;
+let split = 50; // cars on top route (S->V)
+let animTargetSplit = 50;
+
+// Network layout
+const W = 536, H = 380;
+const nodes = {
+  S: { x: 80, y: 190, label: 'S', sublabel: 'Start' },
+  V: { x: 268, y: 80, label: 'V', sublabel: 'Via V' },
+  W: { x: 268, y: 300, label: 'W', sublabel: 'Via W' },
+  T: { x: 456, y: 190, label: 'T', sublabel: 'End' }
+};
+
+function tSV(n) { return n * T0; }
+function tWT(n) { return n * T0; }
+function tVT() { return T_CONST; }
+function tSW() { return T_CONST; }
+function tVW() { return 0; }
+
+function computeTimes(nTop, hasNewRoad) {
+  const nBot = TOTAL_CARS - nTop;
+  if (!hasNewRoad) {
+    const topTime = tSV(nTop) + tVT();
+    const botTime = tSW() + tWT(nBot);
+    return {
+      top: topTime, bot: botTime, vw: null,
+      avg: (nTop * topTime + nBot * botTime) / TOTAL_CARS
+    };
+  } else {
+    // With new road: anyone can go S->V->W->T
+    // Nash: all 100 on S->V->W->T
+    // We show the VW route time separately
+    const topTime = tSV(nTop) + tVT();
+    const botTime = tSW() + tWT(nBot);
+    const vwTime = tSV(TOTAL_CARS) + tVW() + tWT(TOTAL_CARS);
+    // For display, avg based on current split (for slider exploration)
+    const avg = (nTop * topTime + nBot * botTime) / TOTAL_CARS;
+    return {
+      top: topTime, bot: botTime, vw: vwTime,
+      avg: avg
+    };
+  }
+}
+
+function getNashSplit(hasNewRoad) {
+  if (!hasNewRoad) return 50;
+  return 50; // still 50/50 for top/bottom display, but annotate VW route
+}
+
+function updateDisplay() {
+  const nTop = Math.round(split);
+  const times = computeTimes(nTop, newRoadPresent);
+
+  document.getElementById('topTime').textContent = times.top.toFixed(1) + ' min';
+  document.getElementById('botTime').textContent = times.bot.toFixed(1) + ' min';
+  if (newRoadPresent && times.vw !== null) {
+    document.getElementById('vwRouteRow').style.display = 'flex';
+    document.getElementById('vwTime').textContent = times.vw.toFixed(1) + ' min (Nash!)';
+  } else {
+    document.getElementById('vwRouteRow').style.display = 'none';
+  }
+  document.getElementById('avgTime').textContent = times.avg.toFixed(1) + ' min';
+
+  if (newRoadPresent) {
+    document.getElementById('gapBox').style.display = 'block';
+    const nashTime = tSV(TOTAL_CARS) + tVW() + tWT(TOTAL_CARS);
+    const optTime = 95;
+    const gap = nashTime - optTime;
+    document.getElementById('gapVal').textContent = `Nash: ${nashTime} min vs Optimum: ${optTime} min (+${gap} min)`;
+  } else {
+    document.getElementById('gapBox').style.display = 'none';
+  }
+
+  drawNetwork(nTop);
+}
+
+// D3 Network drawing
+function drawNetwork(nTop) {
+  const nBot = TOTAL_CARS - nTop;
+  const svg = d3.select('#networkSvg');
+  svg.selectAll('*').remove();
+
+  const defs = svg.append('defs');
+
+  function makeArrow(id, color) {
+    defs.append('marker').attr('id', id)
+      .attr('viewBox', '0 -5 10 10').attr('refX', 10).attr('refY', 0)
+      .attr('markerWidth', 5).attr('markerHeight', 5).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-5L10,0L0,5').attr('fill', color);
+  }
+  makeArrow('arrow-blue', BLUE);
+  makeArrow('arrow-slate', SLATE);
+  makeArrow('arrow-red', RED);
+
+  function strokeWidth(n) { return Math.max(1.5, Math.min(10, 1.5 + n * 0.08)); }
+
+  // Edges
+  const edges = [
+    { from: 'S', to: 'V', n: nTop, type: 'congestion', label: `S→V: ${nTop}×${T0}=${tSV(nTop)} min` },
+    { from: 'V', to: 'T', n: nTop, type: 'constant', label: `V→T: ${T_CONST} min (constant)` },
+    { from: 'S', to: 'W', n: nBot, type: 'constant', label: `S→W: ${T_CONST} min (constant)` },
+    { from: 'W', to: 'T', n: nBot, type: 'congestion', label: `W→T: ${nBot}×${T0}=${tWT(nBot)} min` },
+  ];
+
+  if (newRoadPresent) {
+    edges.push({ from: 'V', to: 'W', n: 0, type: 'free', label: 'V→W: 0 min (FREE)' });
+  }
+
+  edges.forEach(e => {
+    const src = nodes[e.from], dst = nodes[e.to];
+    const dx = dst.x - src.x, dy = dst.y - src.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const ux = dx / dist, uy = dy / dist;
+    const r = 28;
+    const x1 = src.x + ux * r, y1 = src.y + uy * r;
+    const x2 = dst.x - ux * (r + 8), y2 = dst.y - uy * (r + 8);
+
+    let color, arrowId;
+    if (e.type === 'congestion') { color = BLUE; arrowId = 'url(#arrow-blue)'; }
+    else if (e.type === 'constant') { color = SLATE; arrowId = 'url(#arrow-slate)'; }
+    else { color = RED; arrowId = 'url(#arrow-red)'; }
+
+    svg.append('line')
+      .attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
+      .attr('stroke', color).attr('stroke-width', e.type === 'free' ? 2.5 : strokeWidth(e.n))
+      .attr('stroke-dasharray', e.type === 'free' ? '6,4' : 'none')
+      .attr('marker-end', arrowId);
+
+    // Label midpoint
+    const mx = (src.x + dst.x) / 2, my = (src.y + dst.y) / 2;
+    const perp_x = -uy * 14, perp_y = ux * 14;
+    svg.append('rect')
+      .attr('x', mx + perp_x - 62).attr('y', my + perp_y - 9)
+      .attr('width', 124).attr('height', 18)
+      .attr('fill', 'rgba(255,255,255,0.88)').attr('rx', 2);
+    svg.append('text')
+      .attr('x', mx + perp_x).attr('y', my + perp_y + 4)
+      .attr('text-anchor', 'middle')
+      .attr('font-family', 'Montserrat').attr('font-size', '10px').attr('font-weight', '700')
+      .attr('fill', color).text(e.label);
+  });
+
+  // Nodes
+  Object.entries(nodes).forEach(([key, n]) => {
+    const isS = key === 'S', isT = key === 'T';
+    svg.append('circle').attr('cx', n.x).attr('cy', n.y).attr('r', 26)
+      .attr('fill', isS || isT ? INK : '#fff')
+      .attr('stroke', INK).attr('stroke-width', 2.5);
+    svg.append('text').attr('x', n.x).attr('y', n.y + 6)
+      .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+      .attr('font-size', '16px').attr('font-weight', '900')
+      .attr('fill', isS || isT ? '#fff' : INK).text(key);
+    svg.append('text').attr('x', n.x).attr('y', n.y + 44)
+      .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+      .attr('font-size', '9px').attr('font-weight', '600')
+      .attr('fill', SLATE).text(n.sublabel);
+  });
+
+  // Nash annotation
+  if (newRoadPresent) {
+    const nashY = 340;
+    svg.append('rect').attr('x', 80).attr('y', nashY).attr('width', 380).attr('height', 30)
+      .attr('fill', '#FFF0F0').attr('stroke', RED).attr('stroke-width', 1.5).attr('rx', 3);
+    svg.append('text').attr('x', 270).attr('y', nashY + 20)
+      .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+      .attr('font-size', '11px').attr('font-weight', '700').attr('fill', RED)
+      .text('Nash: All 100 cars → S→V→W→T = 200 min (vs 95 min without!)');
+  } else {
+    // Show equilibrium point
+    if (Math.abs(nTop - 50) < 3) {
+      const nashY = 340;
+      svg.append('rect').attr('x', 120).attr('y', nashY).attr('width', 300).attr('height', 26)
+        .attr('fill', '#F0F8F0').attr('stroke', '#1A8A1A').attr('stroke-width', 1.5).attr('rx', 3);
+      svg.append('text').attr('x', 270).attr('y', nashY + 17)
+        .attr('text-anchor', 'middle').attr('font-family', 'Montserrat')
+        .attr('font-size', '10px').attr('font-weight', '700').attr('fill', '#1A8A1A')
+        .text('Nash Equilibrium: 50/50 split → 95 min each');
+    }
+  }
+}
+
+// Controls
+document.getElementById('newRoadBtn').addEventListener('click', function () {
+  newRoadPresent = !newRoadPresent;
+  this.textContent = newRoadPresent ? 'Remove Free Road V→W' : 'Add Free Road V→W';
+  this.classList.toggle('active', newRoadPresent);
+  document.getElementById('newRoadStatus').textContent = 'Free road: ' + (newRoadPresent ? 'PRESENT (Nash gets worse!)' : 'ABSENT');
+  updateDisplay();
+});
+
+document.getElementById('splitSlider').addEventListener('input', function () {
+  split = parseInt(this.value);
+  document.getElementById('splitDisplay').textContent =
+    `${split} cars via S→V / ${TOTAL_CARS - split} cars via S→W`;
+  updateDisplay();
+});
+
+document.getElementById('nashBtn').addEventListener('click', function () {
+  // Animate to Nash
+  const target = 50;
+  let current = split;
+  const step = (target - current) / 20;
+  let count = 0;
+  const interval = setInterval(() => {
+    current += step;
+    count++;
+    if (count >= 20 || Math.abs(current - target) < 0.5) {
+      current = target;
+      clearInterval(interval);
+    }
+    split = Math.round(current);
+    document.getElementById('splitSlider').value = split;
+    document.getElementById('splitDisplay').textContent =
+      `${split} cars via S→V / ${TOTAL_CARS - split} cars via S→W`;
+    updateDisplay();
+  }, 30);
+});
+
+// Init
+updateDisplay();
+</script>
+</body>
+</html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<!-- Towers of Hanoi ↔ Binary Counting — D3 v7 interactive simulation
+     Binary bit flip → disc move. Smallest disc (k=0) moves EVERY step.
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hanoi ↔ Binary Counting</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 28px auto; padding: 0 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: var(--slate); margin: 0 0 20px; }
+
+  #controls {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  button.ctrl-btn {
+    padding: 6px 16px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px; font-family: inherit;
+  }
+  button.ctrl-btn:hover { background: #f5f5f5; }
+  button.ctrl-btn:disabled { opacity: 0.35; cursor: default; }
+  .ctrl-label { font-size: 13px; color: var(--slate); }
+  input[type=range] { accent-color: var(--red); cursor: pointer; }
+
+  /* Step counter */
+  #step-counter {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 20px; font-weight: 700; color: var(--ink);
+  }
+  #step-total { font-size: 13px; color: var(--slate); margin-left: 4px; }
+
+  #main { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+
+  /* Binary counter panel */
+  #binary-panel {
+    flex: 0 0 260px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px; padding: 14px;
+  }
+  .panel-title {
+    font-size: 11px; color: var(--slate); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 10px;
+  }
+  #bits-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .bit-box {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 16px; font-weight: 700;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    user-select: none;
+  }
+  .bit-box.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .bit-box.off { background: #fff; color: var(--border); border-color: var(--border); }
+  .bit-box.flash { background: var(--red); color: #fff; border-color: var(--red); }
+
+  #decimal-display {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 28px; font-weight: 700; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  #decimal-label { font-size: 11px; color: var(--slate); }
+  #disc-moved {
+    margin-top: 10px; font-size: 12px; color: var(--slate);
+    min-height: 18px;
+  }
+  #disc-moved strong { color: var(--red); }
+
+  /* Hanoi panel */
+  #hanoi-panel {
+    flex: 1 1 420px;
+    border: 1.5px solid var(--border);
+    border-radius: 3px; padding: 14px;
+  }
+  #hanoi-svg { display: block; }
+
+  /* Solve indicator */
+  #solved-msg {
+    display: none; margin-top: 10px;
+    font-size: 14px; font-weight: 700; color: GREEN;
+    color: #1A7A3A;
+  }
+
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 20px; padding-top: 12px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); }
+  .check { color: var(--red); font-weight: 700; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Towers of Hanoi ↔ Binary Counting</h1>
+  <p class="sub">
+    Count from 0 to 2^n−1 in binary. The bit that flips to 1 tells you which disc to move.
+    Disc k=0 (smallest) moves on <em>every</em> step — bit 0 always flips. Smallest disc is RED.
+  </p>
+
+  <div id="controls">
+    <div>
+      <div class="ctrl-label" style="margin-bottom:2px">n discs</div>
+      <input type="range" id="n-slider" min="1" max="6" value="3">
+      <span class="ctrl-label" id="n-label">3</span>
+    </div>
+    <button class="ctrl-btn" id="btn-step">Step</button>
+    <button class="ctrl-btn" id="btn-auto">Auto</button>
+    <button class="ctrl-btn" id="btn-reset">Reset</button>
+    <div>
+      <div class="ctrl-label" style="margin-bottom:2px">Speed</div>
+      <input type="range" id="speed-slider" min="1" max="10" value="3">
+      <span class="ctrl-label" id="speed-label">3 steps/sec</span>
+    </div>
+    <div>
+      <span id="step-counter">0</span>
+      <span id="step-total">/ 7 moves</span>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="binary-panel">
+      <div class="panel-title">Binary Counter</div>
+      <div id="bits-row"></div>
+      <div id="decimal-display">0</div>
+      <div id="decimal-label">decimal</div>
+      <div id="disc-moved"></div>
+    </div>
+
+    <div id="hanoi-panel">
+      <div class="panel-title">Towers of Hanoi — Pegs A, B, C</div>
+      <svg id="hanoi-svg" width="420" height="260"></svg>
+      <div id="solved-msg">✓ Solved! All discs on peg C.</div>
+    </div>
+  </div>
+
+  <div id="predictions">
+    <div class="pred"><strong>P1:</strong> n=3 requires exactly 7 moves to complete. <span class="check" id="p1-check"></span></div>
+    <div class="pred"><strong>P2:</strong> Smallest disc (k=0) moves on every single step. <span class="check" id="p2-check"></span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+const GREEN = '#1A7A3A';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let N = 3;
+let stepCount = 0;
+let totalSteps = 7;  // 2^N - 1
+let counter = 0;     // current binary counter value
+let pegs = [[], [], []]; // pegs[0]=A, [1]=B, [2]=C; disc sizes (larger # = bigger)
+let autoTimer = null;
+let solved = false;
+let disc0MoveCount = 0;  // count how many times disc 0 (smallest) moved
+let p2violated = false;
+
+// Disc colors: smallest (k=0) = RED, others = shades of INK
+function discColor(k, n) {
+  if (k === 0) return RED;
+  // Shade from dark (large disc) to medium gray
+  const t = k / (n - 1);  // 0=smallest non-red, 1=largest
+  // Interpolate from #545454 (slate) to #2A1A0E (ink)
+  const r = Math.round(84 + t * (42 - 84));
+  const gv = Math.round(84 + t * (26 - 84));
+  const b = Math.round(84 + t * (14 - 84));
+  return `rgb(${r},${gv},${b})`;
+}
+
+function initState() {
+  stepCount = 0;
+  counter = 0;
+  totalSteps = Math.pow(2, N) - 1;
+  pegs = [[], [], []];
+  // All discs on peg A, largest at bottom (disc N-1 at bottom)
+  for (let i = N - 1; i >= 0; i--) {
+    pegs[0].push(i);  // disc index (0=smallest)
+  }
+  solved = false;
+  disc0MoveCount = 0;
+  p2violated = false;
+  d3.select('#solved-msg').style('display', 'none');
+  d3.select('#p1-check').text('');
+  d3.select('#p2-check').text('');
+  d3.select('#step-total').text(`/ ${totalSteps} moves`);
+  d3.select('#step-counter').text('0');
+}
+
+// ─── Hanoi step via binary counting ──────────────────────────────────────────
+// Direction array for smallest disc: track which direction it cycles
+// Disc 0: cycles A→B→C→A... (or reverse depending on parity of N)
+// Classic rule: if N is odd, smallest moves A→C→B→A; if N even, A→B→C→A
+
+function getNextPegForDisc0(step) {
+  // Smallest disc direction depends on N
+  // For N odd: A→C→B→A (cycle mod 3 with direction -1)
+  // For N even: A→B→C→A (cycle mod 3 with direction +1)
+  // We'll use the peg the disc is on + direction
+  const dir = (N % 2 === 0) ? 1 : -1;
+  const curPeg = findDisc(0);
+  return ((curPeg + dir) + 3) % 3;
+}
+
+function findDisc(disc) {
+  for (let p = 0; p < 3; p++) {
+    if (pegs[p].includes(disc)) return p;
+  }
+  return -1;
+}
+
+function topDisc(peg) {
+  if (pegs[peg].length === 0) return Infinity;
+  return pegs[peg][pegs[peg].length - 1];
+}
+
+function moveDisc(disc, toPeg) {
+  const fromPeg = findDisc(disc);
+  if (fromPeg === -1) return;
+  pegs[fromPeg] = pegs[fromPeg].filter(d => d !== disc);
+  pegs[toPeg].push(disc);
+}
+
+function hanoisStep() {
+  if (solved || stepCount >= totalSteps) return;
+
+  const prevCounter = counter;
+  counter++;
+  stepCount++;
+
+  // Find which bit flipped to 1 (= LSB of counter)
+  const flippedBit = counter & (-counter);
+  const discIdx = Math.log2(flippedBit);
+
+  // Now move that disc to its unique legal peg
+  let targetPeg;
+  if (discIdx === 0) {
+    // Smallest disc: move cyclically
+    targetPeg = getNextPegForDisc0(stepCount);
+    disc0MoveCount++;
+  } else {
+    // Disc k: move to the peg that is neither its current peg
+    // nor the peg holding disc k-1 (the one it can't go on)
+    const fromPeg = findDisc(discIdx);
+    const smallerDiscPeg = findDisc(discIdx - 1);
+    // Find the third peg
+    for (let p = 0; p < 3; p++) {
+      if (p !== fromPeg && p !== smallerDiscPeg) {
+        targetPeg = p; break;
+      }
+    }
+  }
+
+  const fromPeg = findDisc(discIdx);
+  moveDisc(discIdx, targetPeg);
+
+  // Flash the bit
+  flashBit(discIdx);
+
+  // P2: verify smallest disc moved
+  if (discIdx !== 0) { p2violated = true; }
+
+  updateBinaryDisplay(counter, discIdx);
+  renderHanoi(fromPeg, targetPeg, discIdx);
+
+  d3.select('#step-counter').text(stepCount).style('color', RED);
+  setTimeout(() => d3.select('#step-counter').style('color', INK), 300);
+
+  d3.select('#disc-moved').html(
+    `Moved disc <strong>${discIdx + 1}</strong> (k=${discIdx}) from peg ${['A','B','C'][fromPeg]} → ${['A','B','C'][targetPeg]}`
+  );
+
+  // Check solved
+  if (stepCount === totalSteps) {
+    solved = true;
+    stopAuto();
+    d3.select('#solved-msg').style('display', 'block');
+    if (N === 3) d3.select('#p1-check').text('✓ Exactly 7 moves!');
+    if (!p2violated) d3.select('#p2-check').text('✓ Disc k=0 moved every step');
+  }
+}
+
+// ─── Binary display ───────────────────────────────────────────────────────────
+let flashTimer = null;
+
+function flashBit(bitIdx) {
+  const box = d3.select(`#bit-${bitIdx}`);
+  box.classed('flash', true).classed('on', false).classed('off', false);
+  setTimeout(() => {
+    box.classed('flash', false);
+    updateBitBox(bitIdx, (counter >> bitIdx) & 1);
+  }, 250);
+}
+
+function updateBitBox(bitIdx, val) {
+  const box = d3.select(`#bit-${bitIdx}`);
+  box.classed('on', val === 1).classed('off', val === 0).classed('flash', false);
+  box.text(val);
+}
+
+function updateBinaryDisplay(val, flippedBit) {
+  for (let b = 0; b < N; b++) {
+    if (b !== flippedBit) {
+      updateBitBox(b, (val >> b) & 1);
+    }
+  }
+  d3.select('#decimal-display').text(val);
+}
+
+function buildBitsRow() {
+  const row = d3.select('#bits-row');
+  row.selectAll('*').remove();
+  // Show MSB first (bit N-1 on left)
+  for (let b = N - 1; b >= 0; b--) {
+    row.append('div').attr('class', 'bit-box off').attr('id', `bit-${b}`).text('0');
+  }
+}
+
+function resetBitsDisplay() {
+  for (let b = 0; b < N; b++) {
+    updateBitBox(b, 0);
+  }
+  d3.select('#decimal-display').text('0');
+  d3.select('#disc-moved').html('');
+}
+
+// ─── Hanoi SVG ────────────────────────────────────────────────────────────────
+const HW = 420, HH = 260;
+const PEG_XS = [70, 210, 350];
+const PEG_H = 160;
+const PEG_W = 6;
+const BASE_Y = HH - 20;
+const DISC_H = 16;
+const MAX_DISC_W = 110;
+const MIN_DISC_W = 24;
+
+const hsvg = d3.select('#hanoi-svg');
+
+// Draw pegs (static)
+const PNAMES = ['A', 'B', 'C'];
+PEG_XS.forEach((px, i) => {
+  // Base
+  hsvg.append('rect')
+    .attr('x', px - MAX_DISC_W / 2 - 4).attr('y', BASE_Y - 4)
+    .attr('width', MAX_DISC_W + 8).attr('height', 8)
+    .attr('fill', SLATE).attr('rx', 2);
+  // Peg
+  hsvg.append('rect')
+    .attr('x', px - PEG_W / 2).attr('y', BASE_Y - PEG_H)
+    .attr('width', PEG_W).attr('height', PEG_H)
+    .attr('fill', SLATE).attr('rx', 1);
+  // Label
+  hsvg.append('text').attr('x', px).attr('y', BASE_Y + 18)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 13).attr('font-weight', 700).attr('fill', SLATE)
+    .attr('font-family', 'Inter,sans-serif')
+    .text(PNAMES[i]);
+});
+
+const discLayer = hsvg.append('g').attr('id', 'discs');
+
+function discWidth(k) {
+  // k=0 smallest, k=N-1 largest
+  const t = k / Math.max(N - 1, 1);
+  return MIN_DISC_W + t * (MAX_DISC_W - MIN_DISC_W);
+}
+
+function renderHanoi(fromPeg, toPeg, movedDisc) {
+  discLayer.selectAll('*').remove();
+
+  // Draw all discs on their pegs
+  pegs.forEach((peg, pi) => {
+    peg.forEach((disc, stackPos) => {
+      const w = discWidth(disc);
+      const x = PEG_XS[pi] - w / 2;
+      const y = BASE_Y - 4 - DISC_H * (stackPos + 1);
+      const isMoving = disc === movedDisc;
+
+      const g = discLayer.append('g').attr('class', 'disc-g');
+      g.append('rect')
+        .attr('x', x).attr('y', y)
+        .attr('width', w).attr('height', DISC_H - 2)
+        .attr('fill', discColor(disc, N))
+        .attr('rx', 3)
+        .attr('opacity', isMoving ? 1 : 0.9)
+        .attr('stroke', isMoving ? '#fff' : 'none')
+        .attr('stroke-width', isMoving ? 2 : 0);
+
+      // Disc label (size number, 1-indexed)
+      g.append('text')
+        .attr('x', PEG_XS[pi]).attr('y', y + DISC_H - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 10).attr('font-weight', 700)
+        .attr('fill', disc === 0 ? '#fff' : '#fff')
+        .attr('font-family', 'JetBrains Mono, monospace')
+        .attr('opacity', 0.85)
+        .text(disc + 1);
+    });
+  });
+
+  // Highlight moved disc with arrow
+  if (movedDisc !== undefined && toPeg !== undefined) {
+    // Small movement indicator
+    const topPos = pegs[toPeg].length - 1;
+    const w = discWidth(movedDisc);
+    const y = BASE_Y - 4 - DISC_H * (topPos + 1);
+    discLayer.append('rect')
+      .attr('x', PEG_XS[toPeg] - w / 2).attr('y', y)
+      .attr('width', w).attr('height', DISC_H - 2)
+      .attr('fill', 'none')
+      .attr('stroke', RED).attr('stroke-width', 2).attr('rx', 3)
+      .attr('opacity', 0.8);
+  }
+}
+
+function fullRenderHanoi() {
+  discLayer.selectAll('*').remove();
+  pegs.forEach((peg, pi) => {
+    peg.forEach((disc, stackPos) => {
+      const w = discWidth(disc);
+      const x = PEG_XS[pi] - w / 2;
+      const y = BASE_Y - 4 - DISC_H * (stackPos + 1);
+      const g = discLayer.append('g').attr('class', 'disc-g');
+      g.append('rect')
+        .attr('x', x).attr('y', y)
+        .attr('width', w).attr('height', DISC_H - 2)
+        .attr('fill', discColor(disc, N))
+        .attr('rx', 3).attr('opacity', 0.92);
+      g.append('text')
+        .attr('x', PEG_XS[pi]).attr('y', y + DISC_H - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', 10).attr('font-weight', 700)
+        .attr('fill', '#fff')
+        .attr('font-family', 'JetBrains Mono, monospace')
+        .attr('opacity', 0.85)
+        .text(disc + 1);
+    });
+  });
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+function stopAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  d3.select('#btn-auto').text('Auto').style('border-color', null).style('color', null);
+}
+
+d3.select('#btn-step').on('click', () => {
+  if (!solved) hanoisStep();
+});
+
+d3.select('#btn-auto').on('click', function() {
+  if (autoTimer) { stopAuto(); return; }
+  if (solved) return;
+  d3.select(this).text('Pause').style('border-color', RED).style('color', RED);
+  const speed = +d3.select('#speed-slider').property('value');
+  const interval = 1000 / speed;
+  autoTimer = setInterval(() => {
+    if (!solved) hanoisStep();
+    else stopAuto();
+  }, interval);
+});
+
+d3.select('#btn-reset').on('click', () => {
+  stopAuto();
+  initState();
+  buildBitsRow();
+  resetBitsDisplay();
+  fullRenderHanoi();
+});
+
+d3.select('#n-slider').on('input', function() {
+  N = +this.value;
+  d3.select('#n-label').text(N);
+  stopAuto();
+  initState();
+  buildBitsRow();
+  resetBitsDisplay();
+  fullRenderHanoi();
+});
+
+d3.select('#speed-slider').on('input', function() {
+  const v = +this.value;
+  d3.select('#speed-label').text(`${v} steps/sec`);
+  if (autoTimer) { stopAuto(); d3.select('#btn-auto').click(); }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+initState();
+buildBitsRow();
+resetBitsDisplay();
+fullRenderHanoi();
+</script>
+</body>
+</html>

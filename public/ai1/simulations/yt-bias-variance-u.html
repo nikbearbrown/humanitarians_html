@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bias-Variance Tradeoff: The U-Shaped Test Error</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    width: 900px;
+    height: 500px;
+    overflow: hidden;
+  }
+  #app {
+    width: 900px;
+    height: 500px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px 8px 18px;
+  }
+  h1 {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2A1A0E;
+    border-bottom: 2px solid #C8102E;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+  .body-row {
+    display: flex;
+    flex: 1;
+    gap: 14px;
+    min-height: 0;
+  }
+  .chart-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .right-panel {
+    width: 190px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 1px solid #D4D4D4;
+    padding-left: 14px;
+  }
+  .panel-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  input[type=range] {
+    accent-color: #C8102E;
+    cursor: pointer;
+    flex: 1;
+  }
+  .stat-block {
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    border-radius: 2px;
+    padding: 8px 10px;
+  }
+  .stat-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin-bottom: 3px;
+  }
+  .stat-val {
+    font-size: 16px;
+    font-weight: 900;
+  }
+  .stat-val.red { color: #C8102E; }
+  .stat-val.slate { color: #545454; }
+  .legend-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8.5px;
+    font-weight: 600;
+    color: #545454;
+  }
+  .legend-line {
+    width: 22px;
+    height: 3px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 10px;
+    border-radius: 1px;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  .annot {
+    font-size: 8.5px;
+    color: #545454;
+    line-height: 1.5;
+    margin-top: 2px;
+    border-top: 1px solid #D4D4D4;
+    padding-top: 6px;
+  }
+  .annot strong { color: #C8102E; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Bias-Variance Tradeoff: The U-Shaped Test Error</h1>
+  <div class="body-row">
+    <div class="chart-area">
+      <svg id="main-svg" width="680" height="400"></svg>
+      <div class="slider-row" style="margin-top:8px; justify-content:center;">
+        <span>Model Flexibility:</span>
+        <input type="range" id="flex-slider" min="1" max="10" step="1" value="5" style="width:200px;">
+        <span id="flex-val" style="font-size:13px; font-weight:900; color:#2A1A0E; min-width:20px;">5</span>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="stat-block">
+        <div class="stat-label">Test MSE at flex =</div>
+        <div class="stat-val red" id="test-mse-val">0.18</div>
+        <div style="font-size:8px; color:#545454; margin-top:2px;" id="test-mse-label">← Minimum (optimal)</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Training MSE at flex =</div>
+        <div class="stat-val slate" id="train-mse-val">0.25</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Decomposition</div>
+        <div style="font-size:9px; font-weight:600; line-height:1.8; color:#2A1A0E;">
+          <span style="color:#999999;">σ² (noise):</span> <span id="noise-val">0.06</span><br>
+          <span style="color:#E07020;">Bias²:</span> <span id="bias-val">—</span><br>
+          <span style="color:#4472C4;">Variance:</span> <span id="var-val">—</span>
+        </div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item"><div class="legend-line" style="background:#C8102E;"></div>Test MSE (U-curve)</div>
+        <div class="legend-item"><div class="legend-line" style="background:#545454; border-top: 2px dashed #545454; background:transparent; height:0;"></div>Train MSE</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#999999;"></div>Irreducible σ²</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#E07020;"></div>Bias²</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#4472C4;"></div>Variance</div>
+      </div>
+      <div class="annot">
+        <strong>At flex=10:</strong> Train MSE→0 but Test MSE is high — overfitting!<br>
+        <strong>Optimal:</strong> Bottom of the U (flex≈5)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Data curves defined at integers 1..10
+const flexValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// Training MSE: monotone decreasing
+const trainMSE = [0.62, 0.48, 0.35, 0.24, 0.14, 0.08, 0.04, 0.02, 0.01, 0.005];
+
+// Test MSE: U-shaped, min at 5
+const testMSE  = [0.62, 0.45, 0.30, 0.20, 0.18, 0.21, 0.29, 0.42, 0.58, 0.72];
+
+// Decomposition (must sum to testMSE each point)
+const sigma2   = 0.06; // constant irreducible noise
+const bias2    = [0.52, 0.35, 0.21, 0.12, 0.06, 0.03, 0.01, 0.005, 0.002, 0.001];
+const variance = testMSE.map((t, i) => Math.max(0, t - sigma2 - bias2[i]));
+
+// SVG setup
+const W = 680, H = 400;
+const mar = { top: 20, right: 20, bottom: 48, left: 52 };
+const inW = W - mar.left - mar.right;
+const inH = H - mar.top - mar.bottom;
+
+const svg = d3.select('#main-svg');
+const g = svg.append('g').attr('transform', `translate(${mar.left},${mar.top})`);
+
+const xScale = d3.scaleLinear().domain([1, 10]).range([0, inW]);
+const yScale = d3.scaleLinear().domain([0, 1.0]).range([inH, 0]);
+
+// Grid
+g.selectAll('.hgrid').data(yScale.ticks(5)).join('line')
+  .attr('class', 'hgrid')
+  .attr('x1', 0).attr('x2', inW)
+  .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
+  .attr('stroke', '#D4D4D4').attr('stroke-width', 0.5);
+
+// Stacked area chart (decomposition)
+const stackData = flexValues.map((f, i) => ({
+  f,
+  noiseBot: 0,
+  noiseTop: sigma2,
+  biasBot: sigma2,
+  biasTop: sigma2 + bias2[i],
+  varBot: sigma2 + bias2[i],
+  varTop: sigma2 + bias2[i] + variance[i]
+}));
+
+const areaFn = (bot, top) => d3.area()
+  .x(d => xScale(d.f))
+  .y0(d => yScale(bot(d)))
+  .y1(d => yScale(top(d)))
+  .curve(d3.curveMonotoneX);
+
+g.append('path').datum(stackData).attr('fill', '#999999').attr('opacity', 0.5)
+  .attr('d', areaFn(d => d.noiseBot, d => d.noiseTop));
+g.append('path').datum(stackData).attr('fill', '#E07020').attr('opacity', 0.5)
+  .attr('d', areaFn(d => d.biasBot, d => d.biasTop));
+g.append('path').datum(stackData).attr('fill', '#4472C4').attr('opacity', 0.5)
+  .attr('d', areaFn(d => d.varBot, d => d.varTop));
+
+// Training MSE line (dashed gray)
+const trainLine = d3.line()
+  .x((d, i) => xScale(flexValues[i]))
+  .y(d => yScale(d))
+  .curve(d3.curveMonotoneX);
+
+g.append('path').datum(trainMSE)
+  .attr('fill', 'none').attr('stroke', '#545454').attr('stroke-width', 2)
+  .attr('stroke-dasharray', '6,4').attr('d', trainLine);
+
+// Test MSE line (red solid)
+g.append('path').datum(testMSE)
+  .attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2.5)
+  .attr('d', trainLine); // same x mapping
+
+// Optimal flex line (fixed at 5)
+g.append('line')
+  .attr('x1', xScale(5)).attr('y1', 0)
+  .attr('x2', xScale(5)).attr('y2', inH)
+  .attr('stroke', '#C8102E').attr('stroke-width', 1).attr('stroke-dasharray', '4,3')
+  .attr('opacity', 0.5);
+g.append('text')
+  .attr('x', xScale(5) + 4).attr('y', 14)
+  .attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#C8102E').attr('font-weight', '700')
+  .text('Optimal (flex=5)');
+
+// Axes
+g.append('g').attr('transform', `translate(0,${inH})`)
+  .call(d3.axisBottom(xScale).ticks(10).tickFormat(d => d === 1 ? '1 (Underfit)' : d === 10 ? '10 (Overfit)' : d).tickSize(3))
+  .call(gg => gg.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+g.append('g')
+  .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('.1f')).tickSize(3))
+  .call(gg => gg.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+g.append('text').attr('x', inW/2).attr('y', inH + 40)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 9)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em')
+  .text('MODEL FLEXIBILITY  →  Underfitting ←————→ Overfitting');
+
+g.append('text').attr('transform', 'rotate(-90)').attr('x', -inH/2).attr('y', -40)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 9)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em').text('ERROR (MSE)');
+
+// Annotation for overfitting at flex=10
+g.append('text').attr('x', xScale(10) - 4).attr('y', yScale(testMSE[9]) - 8)
+  .attr('text-anchor', 'end').attr('font-family', 'Montserrat').attr('font-size', 7.5).attr('fill', '#C8102E').attr('font-weight', '700')
+  .text('Test MSE = 0.72');
+g.append('text').attr('x', xScale(10) - 4).attr('y', yScale(trainMSE[9]) + 14)
+  .attr('text-anchor', 'end').attr('font-family', 'Montserrat').attr('font-size', 7.5).attr('fill', '#545454').attr('font-weight', '700')
+  .text('Train MSE → 0');
+
+// Vertical marker (interactive)
+const markerLine = g.append('line')
+  .attr('y1', 0).attr('y2', inH)
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5).attr('stroke-dasharray', '5,3');
+
+const markerDot1 = g.append('circle').attr('r', 5.5).attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1.5);
+const markerDot2 = g.append('circle').attr('r', 4.5).attr('fill', '#545454').attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+function updateMarker(flex) {
+  const idx = flex - 1;
+  const x = xScale(flex);
+  markerLine.attr('x1', x).attr('x2', x);
+  markerDot1.attr('cx', x).attr('cy', yScale(testMSE[idx]));
+  markerDot2.attr('cx', x).attr('cy', yScale(trainMSE[idx]));
+
+  document.getElementById('test-mse-val').textContent = testMSE[idx].toFixed(3);
+  document.getElementById('train-mse-val').textContent = trainMSE[idx].toFixed(3);
+  document.getElementById('bias-val').textContent = bias2[idx].toFixed(3);
+  document.getElementById('var-val').textContent = variance[idx].toFixed(3);
+
+  const minTest = Math.min(...testMSE);
+  const label = document.getElementById('test-mse-label');
+  if (Math.abs(testMSE[idx] - minTest) < 0.001) {
+    label.textContent = '← Minimum (optimal)';
+    label.style.color = '#C8102E';
+  } else if (testMSE[idx] > minTest + 0.1) {
+    label.textContent = flex < 5 ? 'Underfitting zone' : 'Overfitting zone';
+    label.style.color = '#E07020';
+  } else {
+    label.textContent = '';
+  }
+}
+
+const flexSlider = document.getElementById('flex-slider');
+flexSlider.addEventListener('input', () => {
+  const v = +flexSlider.value;
+  document.getElementById('flex-val').textContent = v;
+  updateMarker(v);
+});
+
+updateMarker(5);
+</script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sinc² → Fermi's Golden Rule</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    padding: 18px 24px 6px;
+    border-bottom: 2px solid #2A1A0E;
+  }
+  h1 span { color: #C8102E; }
+  .subtitle {
+    padding: 4px 24px 14px;
+    font-size: 0.82rem;
+    color: #545454;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto 1fr;
+    gap: 0;
+    flex: 1;
+    padding: 0 24px 16px;
+  }
+  .main-panel {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    padding-right: 20px;
+  }
+  .side-top {
+    grid-column: 2;
+    grid-row: 1;
+    padding-bottom: 10px;
+  }
+  .side-bottom {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .panel-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin: 10px 0 4px;
+  }
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slider-group label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    min-width: 60px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 180px;
+    height: 4px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+  }
+  .val-display {
+    font-size: 0.82rem;
+    font-weight: 700;
+    min-width: 42px;
+    color: #C8102E;
+  }
+  .console-box {
+    background: #f7f5f2;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    font-family: "Courier New", monospace;
+    margin-top: 10px;
+  }
+  .console-box .pass { color: #1a7a1a; font-weight: 700; }
+  .console-box .label { color: #545454; }
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin: 8px 0 2px;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-swatch {
+    width: 26px;
+    height: 3px;
+    border-radius: 2px;
+  }
+  .eq-box {
+    background: #f7f5f2;
+    border-left: 3px solid #C8102E;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 0.82rem;
+    line-height: 1.8;
+  }
+  .eq-box .math { font-family: "Courier New", monospace; font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<h1>Fermi's Golden Rule: <span>sinc²(δT/2)</span> → δ(δ)</h1>
+<div class="subtitle">Transition probability P(δ,T) = (|V_fi|/ħ)² · sin²(δT/2)/(δ/2)² — as T→∞, width→0, area→2πT, density→2π·δ(δ)</div>
+
+<div class="layout">
+  <div class="main-panel">
+    <div class="eq-box">
+      <span class="math">f(δ,T) = T² · sinc²(δT/2)</span> &nbsp;|&nbsp; Peak = T² &nbsp;|&nbsp; First zero: δ = 2π/T &nbsp;|&nbsp; Area = 2πT &nbsp;|&nbsp; T→∞: f/T → 2π·δ(δ)
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#2A1A0E;"></div> T = 1</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#545454;"></div> T = 10</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#C8102E;"></div> T = 100</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#888; border: 1.5px dashed #888;"></div> T = slider</div>
+    </div>
+
+    <div class="panel-label">f(δ, T) = T² · sinc²(δT/2) — raw height (log₁₀ scale on y)</div>
+    <svg id="main-svg"></svg>
+
+    <div class="controls">
+      <div class="slider-group">
+        <label>T slider:</label>
+        <input type="range" id="T-slider" min="1" max="100" step="0.5" value="5">
+        <span class="val-display" id="T-val">5</span>
+      </div>
+      <div class="slider-group" style="margin-left: auto;">
+        <label style="min-width:auto; font-size:0.8rem; color:#545454;">y-axis:</label>
+        <select id="y-mode" style="font-size:0.8rem; padding:2px 6px; cursor:pointer;">
+          <option value="log">log₁₀</option>
+          <option value="linear">linear</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-top">
+    <div class="panel-label">Peak height vs T (slope 2) &amp; Area vs T (slope 1)</div>
+    <svg id="log-svg"></svg>
+    <div class="console-box" id="physics-console">
+      <div><span class="label">Physics checks:</span></div>
+      <div id="pc1"></div>
+      <div id="pc2"></div>
+      <div id="pc3"></div>
+    </div>
+  </div>
+
+  <div class="side-bottom">
+    <div class="panel-label">Area integral 2π·T vs T</div>
+    <svg id="area-svg"></svg>
+  </div>
+</div>
+
+<script>
+// ─── palette ───────────────────────────────────────────────────────────────
+const BG='#FFFFFF', INK='#2A1A0E', RED='#C8102E', SLATE='#545454';
+
+// ─── physics ───────────────────────────────────────────────────────────────
+// f(δ,T) = T² · sinc²(δT/2),  sinc(x)=sin(x)/x, sinc(0)=1
+function sinc(x) { return Math.abs(x)<1e-10 ? 1 : Math.sin(x)/x; }
+function fDeltaT(delta, T) {
+  const arg = delta * T / 2;
+  const s = sinc(arg);
+  return T * T * s * s;
+}
+
+// ─── main plot ──────────────────────────────────────────────────────────────
+const mainSvg = d3.select('#main-svg');
+const mMargin = {top:12, right:20, bottom:40, left:60};
+let mW, mH;
+
+function buildMain() {
+  mainSvg.selectAll('*').remove();
+  const node = document.getElementById('main-svg');
+  const rect = node.parentElement.getBoundingClientRect();
+  mW = Math.max(400, rect.width * 0.58) - mMargin.left - mMargin.right;
+  mH = 260;
+  mainSvg.attr('width', mW + mMargin.left + mMargin.right)
+         .attr('height', mH + mMargin.top + mMargin.bottom);
+  drawMain();
+}
+
+function getYMode() { return document.getElementById('y-mode').value; }
+
+function drawMain() {
+  mainSvg.selectAll('*').remove();
+  const yMode = getYMode();
+  const T_slider = +document.getElementById('T-slider').value;
+
+  const g = mainSvg.append('g').attr('transform', `translate(${mMargin.left},${mMargin.top})`);
+
+  // x domain: δ from -4π to +4π (using T_ref=1 for scale)
+  const dMax = 4 * Math.PI;
+  const xScale = d3.scaleLinear().domain([-dMax, dMax]).range([0, mW]);
+
+  // Generate data for T=1, 10, 100, slider
+  const Ts = [1, 10, 100];
+  const colors = [INK, SLATE, RED];
+  const N = 1200;
+  function genLine(T) {
+    return d3.range(N+1).map(i => {
+      const delta = -dMax + (2*dMax*i/N);
+      return { delta, val: fDeltaT(delta, T) };
+    });
+  }
+
+  const allData = Ts.map(T => genLine(T));
+  const sliderData = genLine(T_slider);
+
+  // y domain
+  let yMax, yMin;
+  if (yMode === 'log') {
+    yMax = Math.log10(100*100 * 1.5);
+    yMin = -1;
+  } else {
+    yMax = 100*100 * 1.05;
+    yMin = 0;
+  }
+
+  let yScale;
+  if (yMode === 'log') {
+    yScale = d3.scaleLinear().domain([yMin, yMax]).range([mH, 0]).clamp(true);
+  } else {
+    yScale = d3.scaleLinear().domain([yMin, yMax]).range([mH, 0]);
+  }
+
+  // grid
+  const xTicks = [-4,-3,-2,-1,0,1,2,3,4].map(v => v*Math.PI);
+  xTicks.forEach(x => {
+    g.append('line').attr('x1', xScale(x)).attr('x2', xScale(x))
+     .attr('y1', 0).attr('y2', mH).attr('stroke','#eee').attr('stroke-width',1);
+  });
+
+  // axes
+  const xAxis = d3.axisBottom(xScale)
+    .tickValues(xTicks)
+    .tickFormat(d => {
+      const v = Math.round(d/Math.PI);
+      if (v===0) return '0';
+      if (v===1) return 'π';
+      if (v===-1) return '−π';
+      return `${v}π`;
+    });
+
+  let yAxis;
+  if (yMode === 'log') {
+    const logTicks = [0,1,2,3,4].map(v => v);
+    yAxis = d3.axisLeft(yScale).tickValues(logTicks)
+      .tickFormat(d => `10^${d}`);
+  } else {
+    yAxis = d3.axisLeft(yScale).ticks(6)
+      .tickFormat(d3.format('.0f'));
+  }
+
+  g.append('g').attr('transform',`translate(0,${mH})`).call(xAxis)
+   .selectAll('text').style('font-size','11px');
+  g.append('g').call(yAxis).selectAll('text').style('font-size','11px');
+
+  // axis labels
+  g.append('text').attr('x', mW/2).attr('y', mH+34)
+   .attr('text-anchor','middle').attr('font-size',12)
+   .attr('fill', INK).text('δ (detuning)');
+  g.append('text').attr('transform','rotate(-90)')
+   .attr('x', -mH/2).attr('y', -48)
+   .attr('text-anchor','middle').attr('font-size',12)
+   .attr('fill', INK).text(yMode==='log' ? 'log₁₀ f(δ,T)' : 'f(δ,T)');
+
+  // line generator
+  function makeLine(colorStr, data, dasharray) {
+    const lineGen = d3.line()
+      .x(d => xScale(d.delta))
+      .y(d => {
+        if (yMode==='log') {
+          const v = d.val < 1e-14 ? 1e-14 : d.val;
+          return yScale(Math.log10(v));
+        }
+        return yScale(d.val);
+      })
+      .defined(d => d.val > 0 || yMode === 'linear')
+      .curve(d3.curveCatmullRom.alpha(0.5));
+    const path = g.append('path')
+      .datum(data)
+      .attr('fill','none')
+      .attr('stroke', colorStr)
+      .attr('stroke-width', colorStr===RED ? 2.2 : 1.6)
+      .attr('d', lineGen);
+    if (dasharray) path.attr('stroke-dasharray', dasharray);
+  }
+
+  makeLine(INK, allData[0]);
+  makeLine(SLATE, allData[1]);
+  makeLine(RED, allData[2]);
+  makeLine('#999', sliderData, '5,3');
+
+  // peak annotations
+  const peakData = [
+    {T:1, color: INK},
+    {T:10, color: SLATE},
+    {T:100, color: RED},
+  ];
+  peakData.forEach(({T, color}) => {
+    const py = yMode==='log' ? Math.log10(T*T) : T*T;
+    const screenY = yScale(py);
+    if (screenY > 0 && screenY < mH) {
+      g.append('line').attr('x1', xScale(0)-6).attr('x2', xScale(0)+6)
+       .attr('y1', screenY).attr('y2', screenY)
+       .attr('stroke', color).attr('stroke-width', 2);
+      g.append('text').attr('x', xScale(0)+8).attr('y', screenY+4)
+       .attr('font-size',10).attr('fill',color)
+       .text(`T=${T}, peak=${T*T}`);
+    }
+  });
+
+  // area annotation (text)
+  g.append('text').attr('x', mW-4).attr('y', 16)
+   .attr('text-anchor','end').attr('font-size',10).attr('fill', INK)
+   .text('Area ∝ 2πT');
+}
+
+// ─── log-log panel ──────────────────────────────────────────────────────────
+function buildLogPlot() {
+  const svg = d3.select('#log-svg');
+  svg.selectAll('*').remove();
+  const m = {top:10, right:16, bottom:36, left:50};
+  const W = 300 - m.left - m.right;
+  const H = 160 - m.top - m.bottom;
+  svg.attr('width', W+m.left+m.right).attr('height', H+m.top+m.bottom);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const Ts = d3.range(1,101,1);
+  const peaks = Ts.map(T => ({T, peak: T*T}));
+  const areas = Ts.map(T => ({T, area: 2*Math.PI*T}));
+
+  const xScale = d3.scaleLog().domain([1,100]).range([0,W]);
+  const yScale = d3.scaleLog().domain([1, 12000]).range([H,0]);
+
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(xScale).ticks(4,'~s')).selectAll('text').style('font-size','10px');
+  g.append('g').call(d3.axisLeft(yScale).ticks(4,'~s')).selectAll('text').style('font-size','10px');
+
+  g.append('text').attr('x',W/2).attr('y',H+28).attr('text-anchor','middle').attr('font-size',10).attr('fill',INK).text('T');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-36).attr('text-anchor','middle').attr('font-size',10).attr('fill',INK).text('value');
+
+  const peakLine = d3.line().x(d=>xScale(d.T)).y(d=>yScale(d.peak)).curve(d3.curveLinear);
+  const areaLine = d3.line().x(d=>xScale(d.T)).y(d=>yScale(d.area)).curve(d3.curveLinear);
+
+  g.append('path').datum(peaks).attr('fill','none').attr('stroke',INK).attr('stroke-width',2).attr('d',peakLine);
+  g.append('path').datum(areas).attr('fill','none').attr('stroke',RED).attr('stroke-width',2).attr('d',areaLine);
+
+  // slope annotations
+  g.append('text').attr('x',xScale(60)).attr('y',yScale(60*60)+(-16)).attr('font-size',9).attr('fill',INK).text('peak∝T² (slope 2)');
+  g.append('text').attr('x',xScale(30)).attr('y',yScale(2*Math.PI*30)+14).attr('font-size',9).attr('fill',RED).text('area∝T (slope 1)');
+}
+
+// ─── area panel ─────────────────────────────────────────────────────────────
+function buildAreaPlot() {
+  const svg = d3.select('#area-svg');
+  svg.selectAll('*').remove();
+  const m = {top:10, right:16, bottom:36, left:50};
+  const W = 300 - m.left - m.right;
+  const H = 140 - m.top - m.bottom;
+  svg.attr('width',W+m.left+m.right).attr('height',H+m.top+m.bottom);
+  const g = svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+
+  const Ts = d3.range(1,101,1);
+  const areas = Ts.map(T => ({T, area: 2*Math.PI*T}));
+
+  const xScale = d3.scaleLinear().domain([0,100]).range([0,W]);
+  const yScale = d3.scaleLinear().domain([0, 2*Math.PI*100*1.05]).range([H,0]);
+
+  g.append('g').attr('transform',`translate(0,${H})`).call(d3.axisBottom(xScale).ticks(5)).selectAll('text').style('font-size','10px');
+  g.append('g').call(d3.axisLeft(yScale).ticks(4).tickFormat(d=>`${(d/(2*Math.PI)).toFixed(0)}·2π`)).selectAll('text').style('font-size','10px');
+  g.append('text').attr('x',W/2).attr('y',H+28).attr('text-anchor','middle').attr('font-size',10).attr('fill',INK).text('T');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-H/2).attr('y',-38).attr('text-anchor','middle').attr('font-size',10).attr('fill',INK).text('∫ f dδ = 2πT');
+
+  const areaLine = d3.line().x(d=>xScale(d.T)).y(d=>yScale(d.area));
+  g.append('path').datum(areas).attr('fill','none').attr('stroke',RED).attr('stroke-width',2).attr('d',areaLine);
+
+  // T→∞ annotation
+  g.append('text').attr('x',xScale(70)).attr('y',yScale(2*Math.PI*70)-8)
+   .attr('font-size',9).attr('fill',RED).text('Linear → δ(δ)');
+}
+
+// ─── physics console ─────────────────────────────────────────────────────────
+function updateConsole() {
+  // P1: peak ratio T=10 / T=1
+  const p1 = (10*10) / (1*1);
+  const p1ok = Math.abs(p1 - 100) < 0.01;
+  document.getElementById('pc1').innerHTML =
+    `<span class="label">P1: peak(T=10)/peak(T=1) = ${p1.toFixed(0)}</span> ${p1ok?'<span class="pass">✓</span>':'✗'}`;
+
+  // P2: width ratio (first zero = 2π/T)
+  const w1 = 2*Math.PI/1, w10 = 2*Math.PI/10;
+  const p2 = w10/w1;
+  const p2ok = Math.abs(p2 - 0.1) < 0.001;
+  document.getElementById('pc2').innerHTML =
+    `<span class="label">P2: width(T=10)/width(T=1) = ${p2.toFixed(1)}</span> ${p2ok?'<span class="pass">✓</span>':'✗'}`;
+
+  // P3: area ratio
+  const a1 = 2*Math.PI*1, a10 = 2*Math.PI*10;
+  const p3 = a10/a1;
+  const p3ok = Math.abs(p3 - 10) < 0.001;
+  document.getElementById('pc3').innerHTML =
+    `<span class="label">P3: area(T=10)/area(T=1) = ${p3.toFixed(0)}</span> ${p3ok?'<span class="pass">✓</span>':'✗'}`;
+}
+
+// ─── init & events ───────────────────────────────────────────────────────────
+function init() {
+  buildMain();
+  buildLogPlot();
+  buildAreaPlot();
+  updateConsole();
+}
+
+document.getElementById('T-slider').addEventListener('input', function() {
+  document.getElementById('T-val').textContent = (+this.value).toFixed(1);
+  drawMain();
+});
+document.getElementById('y-mode').addEventListener('change', () => drawMain());
+
+window.addEventListener('resize', init);
+init();
+</script>
+</body>
+</html>

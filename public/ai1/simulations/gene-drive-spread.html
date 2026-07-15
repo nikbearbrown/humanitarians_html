@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gene Drive: One Edit Floods a Million Mosquitoes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  /* ── Palette ── */
+  :root {
+    --bg:   #FFFFFF;
+    --ink:  #2A1A0E;
+    --red:  #C8102E;
+    --slate:#545454;
+    --hair: #D4D4D4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 32px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 18px;
+    max-width: 860px;
+    line-height: 1.35;
+  }
+
+  .canvas-wrap {
+    width: 900px;
+    max-width: 100%;
+    background: var(--bg);
+  }
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 36px;
+    align-items: flex-end;
+    margin-top: 18px;
+    width: 900px;
+    max-width: 100%;
+  }
+
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="range"] {
+    width: 220px;
+    accent-color: var(--red);
+    cursor: pointer;
+  }
+
+  .val-display {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  button {
+    padding: 8px 22px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  /* Readouts */
+  .readouts {
+    display: flex;
+    gap: 40px;
+    margin-top: 14px;
+    width: 900px;
+    max-width: 100%;
+  }
+
+  .readout {
+    font-size: 13px;
+    color: var(--slate);
+  }
+  .readout strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* Toggle */
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .toggle-wrap label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  input[type="checkbox"] { accent-color: var(--red); cursor: pointer; }
+</style>
+</head>
+<body>
+
+<h1>Gene Drive: One Edit Floods a Million Mosquitoes</h1>
+
+<div class="canvas-wrap">
+  <svg id="chart" width="900" height="500"></svg>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Drive inheritance rate (d)</label>
+    <input type="range" id="d-slider" min="0.5" max="1.0" step="0.001" value="0.995" />
+    <span class="val-display" id="d-val">0.995</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Starting frequency (p₀)</label>
+    <input type="range" id="p0-slider" min="0.001" max="0.1" step="0.001" value="0.01" />
+    <span class="val-display" id="p0-val">0.010</span>
+  </div>
+  <div class="ctrl-group">
+    <button id="anim-btn">Animate</button>
+  </div>
+</div>
+
+<div class="toggle-wrap" style="width:900px;max-width:100%;margin-top:12px;">
+  <input type="checkbox" id="log-toggle" />
+  <label for="log-toggle">Log-scale y-axis (early dynamics)</label>
+</div>
+
+<div class="readouts">
+  <div class="readout">Generations to 50% fixation: <strong id="fix50">—</strong></div>
+  <div class="readout">Generations to 99% fixation: <strong id="fix99">—</strong></div>
+</div>
+
+<script>
+(function () {
+  /* ── Palette ── */
+  const BG    = "#FFFFFF";
+  const INK   = "#2A1A0E";
+  const RED   = "#C8102E";
+  const SLATE = "#545454";
+  const HAIR  = "#D4D4D4";
+
+  const MAX_GEN = 25;
+
+  /* ── SVG setup ── */
+  const W = 900, H = 500;
+  const margin = { top: 40, right: 30, bottom: 60, left: 64 };
+  const iW = W - margin.left - margin.right;
+  const iH = H - margin.top - margin.bottom;
+
+  const svg = d3.select("#chart");
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  /* ── Clip path ── */
+  svg.append("defs").append("clipPath").attr("id", "plot-clip")
+    .append("rect").attr("width", iW).attr("height", iH);
+
+  const plotArea = g.append("g").attr("clip-path", "url(#plot-clip)");
+
+  /* ── Scales ── */
+  const xScale = d3.scaleLinear().domain([0, MAX_GEN]).range([0, iW]);
+
+  let useLog = false;
+  const yLinear = d3.scaleLinear().domain([0, 1]).range([iH, 0]);
+  const yLog    = d3.scaleLog().domain([1e-4, 1]).range([iH, 0]).clamp(true);
+  const yScale = () => useLog ? yLog : yLinear;
+
+  /* ── Axes groups ── */
+  const xAxisG = g.append("g").attr("transform", `translate(0,${iH})`);
+  const yAxisG = g.append("g");
+
+  function renderAxes() {
+    const ys = yScale();
+
+    xAxisG.call(
+      d3.axisBottom(xScale).ticks(MAX_GEN).tickSizeOuter(0)
+    ).call(axStyle);
+
+    if (useLog) {
+      yAxisG.call(
+        d3.axisLeft(ys)
+          .tickValues([1e-4, 1e-3, 1e-2, 0.1, 0.5, 1])
+          .tickFormat(d3.format(".4~g"))
+          .tickSizeOuter(0)
+      ).call(axStyle);
+    } else {
+      yAxisG.call(
+        d3.axisLeft(ys).ticks(10).tickFormat(d3.format(".1f")).tickSizeOuter(0)
+      ).call(axStyle);
+    }
+  }
+
+  function axStyle(sel) {
+    sel.selectAll("path, line").attr("stroke", HAIR);
+    sel.selectAll("text").attr("fill", SLATE).style("font-family", "Montserrat").style("font-size", "11px");
+  }
+
+  /* ── Grid lines ── */
+  const gridG = plotArea.append("g").attr("class", "grid");
+
+  function renderGrid() {
+    gridG.selectAll("*").remove();
+    const ys = yScale();
+    const yTicks = useLog ? [1e-4, 1e-3, 1e-2, 0.1, 0.5, 1] : [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+    gridG.selectAll("line.ygrid")
+      .data(yTicks)
+      .enter().append("line")
+      .attr("class", "ygrid")
+      .attr("x1", 0).attr("x2", iW)
+      .attr("y1", d => ys(d)).attr("y2", d => ys(d))
+      .attr("stroke", HAIR).attr("stroke-width", 0.7);
+  }
+
+  /* ── Axis labels ── */
+  g.append("text")
+    .attr("x", iW / 2).attr("y", iH + 46)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "600")
+    .attr("fill", INK).text("Generation");
+
+  g.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -iH / 2).attr("y", -50)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "600")
+    .attr("fill", INK).text("Allele frequency (p)");
+
+  /* ── Chart title ── */
+  g.append("text")
+    .attr("x", iW / 2).attr("y", -18)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "500")
+    .attr("fill", SLATE).text("Allele frequency over generations");
+
+  /* ── Threshold lines ── */
+  const threshG = plotArea.append("g");
+
+  function renderThresholds() {
+    threshG.selectAll("*").remove();
+    const ys = yScale();
+    [[0.5, "p = 0.5"], [0.99, "p = 0.99"]].forEach(([yv, lbl]) => {
+      const yy = ys(Math.max(useLog ? 1e-4 : 0, yv));
+      threshG.append("line")
+        .attr("x1", 0).attr("x2", iW)
+        .attr("y1", yy).attr("y2", yy)
+        .attr("stroke", SLATE).attr("stroke-width", 1)
+        .attr("stroke-dasharray", "4 3");
+      threshG.append("text")
+        .attr("x", iW - 4).attr("y", yy - 4)
+        .attr("text-anchor", "end")
+        .style("font-family", "Montserrat").style("font-size", "10px")
+        .attr("fill", SLATE).text(lbl);
+    });
+  }
+
+  /* ── Recurrence ── */
+  function genDriveSeries(d, p0, nGen) {
+    const arr = [p0];
+    for (let t = 0; t < nGen; t++) {
+      const p = arr[arr.length - 1];
+      const pNext = (p * d) / (p * d + (1 - p) * (1 - d));
+      arr.push(pNext);
+    }
+    return arr.map((p, i) => ({ g: i, p }));
+  }
+
+  function mendelianSeries(p0, nGen) {
+    return d3.range(nGen + 1).map(i => ({ g: i, p: p0 }));
+  }
+
+  /* ── Line generators ── */
+  function makeLine() {
+    const ys = yScale();
+    return d3.line()
+      .x(d => xScale(d.g))
+      .y(d => ys(useLog ? Math.max(1e-4, d.p) : d.p))
+      .defined(d => isFinite(ys(useLog ? Math.max(1e-4, d.p) : d.p)));
+  }
+
+  /* ── Paths ── */
+  const drivePath  = plotArea.append("path").attr("fill", "none").attr("stroke-width", 2.5);
+  const mendelPath = plotArea.append("path").attr("fill", "none").attr("stroke-width", 2)
+    .attr("stroke-dasharray", "6 4");
+
+  /* ── Annotation text ── */
+  const annotG = plotArea.append("g");
+
+  /* ── Legend ── */
+  const legG = g.append("g").attr("transform", `translate(${iW - 240}, 6)`);
+
+  function buildLegend() {
+    legG.selectAll("*").remove();
+    const items = [
+      { label: "Gene drive (d=0.995)", color: RED, dash: null },
+      { label: "Mendelian (d=0.5)",   color: SLATE, dash: "6 4" },
+    ];
+    items.forEach((item, i) => {
+      const row = legG.append("g").attr("transform", `translate(0, ${i * 20})`);
+      row.append("line")
+        .attr("x1", 0).attr("x2", 24)
+        .attr("y1", 7).attr("y2", 7)
+        .attr("stroke", item.color).attr("stroke-width", 2.5)
+        .attr("stroke-dasharray", item.dash || "none");
+      row.append("text")
+        .attr("x", 30).attr("y", 11)
+        .style("font-family", "Montserrat").style("font-size", "11px")
+        .attr("fill", INK).text(item.label);
+    });
+  }
+
+  /* ── Fixation readout computation ── */
+  function computeFixation(series, thresh) {
+    for (let i = 0; i < series.length; i++) {
+      if (series[i].p >= thresh) return i;
+    }
+    return ">" + (series.length - 1);
+  }
+
+  /* ── State ── */
+  let currentD  = 0.995;
+  let currentP0 = 0.01;
+  let animTimer = null;
+  let animGen   = 0;
+
+  /* ── Full render (static) ── */
+  function render(nGenToShow) {
+    const nGen = nGenToShow !== undefined ? nGenToShow : MAX_GEN;
+    const ys = yScale();
+
+    const driveData  = genDriveSeries(currentD, currentP0, nGen);
+    const mendelData = mendelianSeries(currentP0, nGen);
+
+    const line = makeLine();
+    drivePath.datum(driveData).attr("d", line).attr("stroke", RED);
+    mendelPath.datum(mendelData).attr("d", line).attr("stroke", SLATE);
+
+    // Annotation
+    annotG.selectAll("*").remove();
+    const lastDrive = driveData[driveData.length - 1].p;
+    if (currentD <= 0.51) {
+      // Mendelian — no spread
+      annotG.append("text")
+        .attr("x", xScale(MAX_GEN / 2))
+        .attr("y", ys(useLog ? Math.max(1e-4, currentP0 * 1.5) : currentP0 + 0.05))
+        .attr("text-anchor", "middle")
+        .style("font-family", "Montserrat").style("font-size", "12px").style("font-weight", "600")
+        .attr("fill", SLATE).text("flat — no spread");
+    } else if (currentD >= 0.99) {
+      const fix99 = computeFixation(driveData, 0.99);
+      if (typeof fix99 === "number" && fix99 <= MAX_GEN) {
+        const xAnn = xScale(Math.min(fix99, MAX_GEN - 1));
+        const yAnn = ys(useLog ? Math.max(1e-4, 0.99) : 0.99);
+        annotG.append("text")
+          .attr("x", xAnn + 6).attr("y", yAnn - 8)
+          .style("font-family", "Montserrat").style("font-size", "11px").style("font-weight", "600")
+          .attr("fill", RED)
+          .text(`reaches 99% in ~${fix99} generations`);
+      }
+    }
+
+    // Fixation readouts
+    const fullDrive = genDriveSeries(currentD, currentP0, 200);
+    const f50 = computeFixation(fullDrive, 0.5);
+    const f99 = computeFixation(fullDrive, 0.99);
+    document.getElementById("fix50").textContent = f50;
+    document.getElementById("fix99").textContent = f99;
+  }
+
+  /* ── Full re-draw (axes + render) ── */
+  function fullDraw() {
+    renderGrid();
+    renderAxes();
+    renderThresholds();
+    buildLegend();
+    render();
+  }
+
+  /* ── Controls wiring ── */
+  d3.select("#d-slider").on("input", function () {
+    currentD = +this.value;
+    d3.select("#d-val").text(currentD.toFixed(3));
+    stopAnim();
+    fullDraw();
+  });
+
+  d3.select("#p0-slider").on("input", function () {
+    currentP0 = +this.value;
+    d3.select("#p0-val").text(currentP0.toFixed(3));
+    stopAnim();
+    fullDraw();
+  });
+
+  d3.select("#log-toggle").on("change", function () {
+    useLog = this.checked;
+    fullDraw();
+  });
+
+  /* ── Animation ── */
+  function stopAnim() {
+    if (animTimer) { clearInterval(animTimer); animTimer = null; }
+    document.getElementById("anim-btn").disabled = false;
+    document.getElementById("anim-btn").textContent = "Animate";
+    animGen = 0;
+  }
+
+  d3.select("#anim-btn").on("click", function () {
+    if (animTimer) { stopAnim(); return; }
+    animGen = 0;
+    document.getElementById("anim-btn").textContent = "Stop";
+    animTimer = setInterval(() => {
+      animGen++;
+      render(animGen);
+      if (animGen >= MAX_GEN) stopAnim();
+    }, 500);
+  });
+
+  /* ── Initial render ── */
+  fullDraw();
+})();
+</script>
+</body>
+</html>

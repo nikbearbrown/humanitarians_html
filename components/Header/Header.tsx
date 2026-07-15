@@ -36,7 +36,7 @@ export default function Header() {
     { name: "Courses", href: "/courses" },
     { name: "Fellows", href: "/fellows" },
     { name: "Projects", href: "/projects" },
-    { name: "Tools", href: "/tools" },
+    { name: "AI+1", href: "/ai1" },
     { name: "Videos", href: "/videos" },
   ]
 

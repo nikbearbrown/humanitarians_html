@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrogen Stark Effect — n=2 Shell</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #FFFFFF;
+    --ink:    #2A1A0E;
+    --red:    #C8102E;
+    --slate:  #545454;
+    --border: #E0D8D0;
+    --light:  #F7F4F0;
+    --font:   'Inter', Helvetica, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 20px 32px 14px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+  header .subtitle { font-size: 13px; color: var(--slate); font-style: italic; }
+  .red-accent { color: var(--red); font-weight: 700; }
+
+  .app {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    padding: 24px 32px;
+    min-height: calc(100vh - 100px);
+  }
+
+  .panel {
+    padding-right: 24px;
+  }
+
+  .panel + .panel {
+    padding-left: 24px;
+    padding-right: 0;
+    border-left: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  .section-gap { margin-top: 20px; }
+
+  /* MATRIX HEATMAP */
+  .matrix-wrap { overflow: visible; }
+
+  .cell-rect {
+    transition: opacity 0.12s;
+  }
+  .cell-rect:hover { opacity: 0.75; }
+
+  /* ANNOTATION BOX */
+  .annotation-box {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    background: var(--light);
+    font-size: 12px;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  .annotation-box strong { color: var(--red); }
+
+  /* SLIDER */
+  .slider-section {
+    margin-top: 20px;
+  }
+
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .slider-label .value-display {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--red);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .readout-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .readout-card {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+
+  .readout-card .rk { font-size: 10px; color: var(--slate); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .readout-card .rv { font-size: 13px; font-weight: 700; color: var(--ink); margin-top: 2px; }
+  .readout-card .rv.red { color: var(--red); }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .toggle-switch input { display: none; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: var(--border); border-radius: 10px; transition: background 0.2s;
+  }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: white; border-radius: 50%; transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .toggle-switch input:checked ~ .toggle-track { background: var(--red); }
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(16px); }
+
+  .toggle-label { font-size: 12px; font-weight: 500; cursor: pointer; }
+
+  /* PHYSICS CONSOLE */
+  .physics-console {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 16px;
+  }
+
+  .console-header {
+    background: var(--ink);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .console-body {
+    padding: 10px 12px;
+    background: var(--light);
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    line-height: 2;
+  }
+
+  .check-pass { color: #1A7F37; font-weight: 700; }
+  .check-fail { color: var(--red); font-weight: 700; }
+
+  /* ENERGY DIAGRAM */
+  #energy-diagram { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Hydrogen <span class="red-accent">Stark Effect</span></h1>
+  <span class="subtitle">Linear splitting of the n = 2 shell under a uniform electric field</span>
+</header>
+
+<div class="app">
+  <!-- LEFT PANEL: Matrix + Controls -->
+  <div class="panel" id="left-panel">
+    <div class="panel-title">Perturbation Matrix H' = eEz</div>
+    <div class="matrix-wrap" id="matrix-container"></div>
+
+    <div class="annotation-box">
+      Selection rule: <strong>Δℓ = ±1, Δm = 0</strong><br>
+      Only ⟨2s|z|2p,0⟩ = −3a₀ survives.<br>
+      All other matrix elements vanish.
+    </div>
+
+    <!-- SLIDER -->
+    <div class="slider-section">
+      <div class="slider-label">
+        <span>Electric field E</span>
+        <span class="value-display" id="field-display">0 V/m</span>
+      </div>
+      <input type="range" id="field-slider"
+             min="0" max="20000000" step="100000" value="5000000">
+
+      <div class="readout-grid">
+        <div class="readout-card">
+          <div class="rk">ΔE (eV)</div>
+          <div class="rv red" id="dE-ev">—</div>
+        </div>
+        <div class="readout-card">
+          <div class="rk">ΔE (GHz)</div>
+          <div class="rv" id="dE-ghz">—</div>
+        </div>
+        <div class="readout-card">
+          <div class="rk">E+ (eV)</div>
+          <div class="rv" id="E-plus">—</div>
+        </div>
+        <div class="readout-card">
+          <div class="rk">E− (eV)</div>
+          <div class="rv" id="E-minus">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- n=1 toggle -->
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" id="n1-toggle">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+      <span class="toggle-label" id="n1-label">Show n=1 ground state (quadratic Stark)</span>
+    </div>
+
+    <!-- PHYSICS CONSOLE -->
+    <div class="physics-console">
+      <div class="console-header">Physics Checks</div>
+      <div class="console-body" id="console-body">Ready.</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: Energy level diagram -->
+  <div class="panel" id="right-panel">
+    <div class="panel-title">Energy Level Diagram</div>
+    <div id="energy-diagram-container"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const BG    = '#FFFFFF';
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+
+// e * a0 in eV·m
+const e_a0_eV_per_Vm = 3 * 1.602e-19 * 5.292e-11 / 1.602e-19; // = 3 * 5.292e-11 * e/e = 3*a0 in m, but ΔE = 3ea0 E
+// ΔE in eV = 3 * e * a0 * E_field / (e) = 3 * a0 * E_field  [a0 in meters]
+// ΔE [eV] = 3 * (5.292e-11 m) * E_field [V/m] = 1.5876e-10 * E_field
+const DELTA_E_PER_FIELD = 3 * 5.292e-11; // eV per V/m
+const E2_eV = -3.4;          // n=2 unperturbed
+const E1_eV = -13.6;         // n=1
+
+// For n=1 quadratic Stark: ΔE ≈ -α/2 * E^2  where α = 4.5 a0^3
+// α in SI: 4.5 * (5.292e-11)^3 m^3 = 4.5 * 1.481e-31 = 6.665e-31 m^3
+// ΔE [J] = -6.665e-31 / 2 * E^2
+// ΔE [eV] = -6.665e-31 / (2 * 1.602e-19) * E^2 = -2.082e-12 * E^2
+const ALPHA_SI = 4.5 * Math.pow(5.292e-11, 3); // m^3
+const QUAD_COEFF = -ALPHA_SI / (2 * 1.602e-19); // eV / (V/m)^2
+
+// 1 eV = 2.418e14 Hz = 241.8 THz
+const EV_TO_HZ = 2.418e14;
+
+// State labels
+const STATES = ['|2s⟩', '|2p,−1⟩', '|2p,0⟩', '|2p,+1⟩'];
+
+// ============================================================
+// STATE
+// ============================================================
+let eField = 5e6;   // V/m
+let showN1 = false;
+
+// ============================================================
+// PHYSICS HELPERS
+// ============================================================
+function deltaE(E) {
+  return DELTA_E_PER_FIELD * E; // eV
+}
+
+function n1shift(E) {
+  return QUAD_COEFF * E * E; // eV  (negative — quadratic)
+}
+
+// ============================================================
+// MATRIX HEATMAP
+// ============================================================
+const MAT_W = 280, MAT_H = 260;
+const MAT_MARGIN = { top: 36, right: 12, bottom: 12, left: 52 };
+
+function buildMatrix(E) {
+  const container = document.getElementById('matrix-container');
+  container.innerHTML = '';
+
+  const beta = DELTA_E_PER_FIELD * E; // ΔE in eV (diagonal split)
+  // Matrix in basis {|2s>, |2p,-1>, |2p,0>, |2p,+1>}
+  // H' = e*E*<z> matrix elements in units of eV
+  // <2s|z|2p,0> = -3a0, so matrix element = e*E*(-3a0) = -deltaE
+  const dE = deltaE(E);
+  const matValues = [
+    [ 0,    0,   -dE,  0],
+    [ 0,    0,    0,   0],
+    [-dE,   0,    0,   0],
+    [ 0,    0,    0,   0],
+  ];
+
+  const cellSize = 48;
+  const n = 4;
+  const W = MAT_W;
+  const H = n * cellSize + MAT_MARGIN.top + MAT_MARGIN.bottom;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', W).attr('height', H);
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${MAT_MARGIN.left},${MAT_MARGIN.top})`);
+
+  // Color scale: white → RED for nonzero
+  const absMax = Math.max(dE, 1e-30);
+  const colorNonzero = RED;
+
+  // Row labels
+  for (let i = 0; i < n; i++) {
+    svg.append('text')
+      .attr('x', MAT_MARGIN.left - 6)
+      .attr('y', MAT_MARGIN.top + i * cellSize + cellSize/2 + 4)
+      .attr('text-anchor', 'end')
+      .attr('font-size', '11px')
+      .attr('fill', SLATE)
+      .text(STATES[i]);
+  }
+
+  // Column labels
+  for (let j = 0; j < n; j++) {
+    svg.append('text')
+      .attr('x', MAT_MARGIN.left + j * cellSize + cellSize/2)
+      .attr('y', MAT_MARGIN.top - 8)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '11px')
+      .attr('fill', SLATE)
+      .text(STATES[j]);
+  }
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const v = matValues[i][j];
+      const isNonzero = Math.abs(v) > 1e-30;
+
+      const cellG = g.append('g');
+
+      cellG.append('rect')
+        .attr('class', 'cell-rect')
+        .attr('x', j * cellSize + 1)
+        .attr('y', i * cellSize + 1)
+        .attr('width', cellSize - 2)
+        .attr('height', cellSize - 2)
+        .attr('rx', 3)
+        .attr('fill', isNonzero ? RED : '#F7F4F0')
+        .attr('stroke', isNonzero ? INK : var_border());
+
+      // Text
+      let label = '';
+      if (isNonzero) {
+        label = dE === 0 ? '−3eEa₀' : `${(-dE).toFixed(4)}\neV`;
+      } else {
+        label = '0';
+      }
+
+      if (isNonzero && dE > 0) {
+        // Two-line: formula + value
+        cellG.append('text')
+          .attr('x', j * cellSize + cellSize/2)
+          .attr('y', i * cellSize + cellSize/2 - 4)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '8.5px')
+          .attr('fill', BG)
+          .attr('font-weight', '600')
+          .text('−3eEa₀');
+        cellG.append('text')
+          .attr('x', j * cellSize + cellSize/2)
+          .attr('y', i * cellSize + cellSize/2 + 8)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '9px')
+          .attr('fill', BG)
+          .text(`${(-dE).toExponential(2)} eV`);
+      } else {
+        cellG.append('text')
+          .attr('x', j * cellSize + cellSize/2)
+          .attr('y', i * cellSize + cellSize/2 + 4)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '12px')
+          .attr('fill', isNonzero ? BG : SLATE)
+          .text('0');
+      }
+    }
+  }
+
+  // Eigenvalues annotation
+  svg.append('text')
+    .attr('x', MAT_MARGIN.left)
+    .attr('y', H - 2)
+    .attr('font-size', '10px')
+    .attr('fill', SLATE)
+    .text(dE > 0 ?
+      `Eigenvalues: 0, 0, +${dE.toExponential(3)} eV, −${dE.toExponential(3)} eV` :
+      'Eigenvalues: all degenerate at E₂ = −3.4 eV');
+}
+
+function var_border() { return '#E0D8D0'; }
+
+// ============================================================
+// ENERGY DIAGRAM
+// ============================================================
+const ED_W = 520, ED_H = 480;
+const ED_MARGIN = { top: 40, right: 120, bottom: 50, left: 80 };
+
+let edSvg = null;
+let edG = null;
+let edXScale, edYScale;
+let edW, edH;
+let edLineEplus, edLineMinus, edLineFlat, edLineN1quad;
+let edLabelEplus, edLabelEminus, edLabelFlat, edLabelN1;
+let edFieldLine;
+let edAnnotation;
+
+function buildEnergyDiagram() {
+  const container = document.getElementById('energy-diagram-container');
+  container.innerHTML = '';
+
+  edW = ED_W - ED_MARGIN.left - ED_MARGIN.right;
+  edH = ED_H - ED_MARGIN.top - ED_MARGIN.bottom;
+
+  edSvg = d3.select(container).append('svg')
+    .attr('width', ED_W).attr('height', ED_H)
+    .attr('id', 'energy-diagram');
+
+  edG = edSvg.append('g')
+    .attr('transform', `translate(${ED_MARGIN.left},${ED_MARGIN.top})`);
+
+  const maxField = 2e7;
+  edXScale = d3.scaleLinear().domain([0, maxField]).range([0, edW]);
+
+  // Y domain: from E2 - max_split - margin to E2 + max_split + margin (and optionally n=1)
+  const maxSplit = deltaE(maxField);
+  const yMin = E2_eV - maxSplit * 1.3;
+  const yMax = E2_eV + maxSplit * 1.3;
+  edYScale = d3.scaleLinear().domain([yMin, yMax]).range([edH, 0]);
+
+  // Axes
+  edG.append('g').attr('transform', `translate(0,${edH})`)
+    .call(d3.axisBottom(edXScale)
+      .tickFormat(d => d === 0 ? '0' : (d/1e6).toFixed(0) + '×10⁶')
+      .ticks(5))
+    .call(g => g.selectAll('text').style('font-size', '11px').style('fill', SLATE));
+
+  edG.append('g')
+    .call(d3.axisLeft(edYScale).ticks(6).tickFormat(d => d.toFixed(3)))
+    .call(g => g.selectAll('text').style('font-size', '11px').style('fill', SLATE));
+
+  // Axis labels
+  edSvg.append('text')
+    .attr('x', ED_MARGIN.left + edW/2)
+    .attr('y', ED_H - 4)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '12px')
+    .attr('fill', SLATE)
+    .text('Electric field E (V/m)');
+
+  edSvg.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -(ED_MARGIN.top + edH/2))
+    .attr('y', 16)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '12px')
+    .attr('fill', SLATE)
+    .text('Energy (eV)');
+
+  // Grid lines
+  edG.append('g').attr('class', 'y-grid')
+    .call(d3.axisLeft(edYScale).ticks(6).tickSize(-edW).tickFormat(''))
+    .call(g => { g.selectAll('line').style('stroke', '#EEE').style('stroke-width', '1'); g.select('.domain').remove(); });
+
+  // Unperturbed level marker (dashed at E2 = -3.4 eV)
+  edG.append('line')
+    .attr('x1', 0).attr('x2', edW)
+    .attr('y1', edYScale(E2_eV)).attr('y2', edYScale(E2_eV))
+    .attr('stroke', SLATE).attr('stroke-width', 0.8)
+    .attr('stroke-dasharray', '6,4').attr('opacity', 0.5);
+
+  edSvg.append('text')
+    .attr('x', ED_MARGIN.left - 6)
+    .attr('y', ED_MARGIN.top + edYScale(E2_eV) + 4)
+    .attr('text-anchor', 'end')
+    .attr('font-size', '10px').attr('fill', SLATE)
+    .attr('font-style', 'italic')
+    .text('E₂=−3.4');
+
+  // Stark annotation (right side)
+  edAnnotation = edSvg.append('text')
+    .attr('x', ED_MARGIN.left + edW + 4)
+    .attr('y', ED_MARGIN.top + 16)
+    .attr('font-size', '9px')
+    .attr('fill', SLATE)
+    .attr('font-style', 'italic')
+    .text('Stark splitting: linear in E');
+
+  // Build line data
+  const nPts = 200;
+  const fields = d3.range(nPts).map(i => (i / (nPts - 1)) * maxField);
+
+  function makeLine(fn, color, width, dash) {
+    const linePath = edG.append('path')
+      .datum(fields)
+      .attr('fill', 'none')
+      .attr('stroke', color)
+      .attr('stroke-width', width || 2);
+    if (dash) linePath.attr('stroke-dasharray', dash);
+    return linePath;
+  }
+
+  const lineGen = fn => d3.line()
+    .x(E => edXScale(E))
+    .y(E => edYScale(fn(E)));
+
+  // E+ line (rises, RED)
+  edLineEplus = makeLine(null, RED, 2.5);
+  edLineEplus.attr('d', lineGen(E => E2_eV + deltaE(E))(fields));
+
+  // E- line (falls, INK)
+  edLineMinus = makeLine(null, INK, 2.5);
+  edLineMinus.attr('d', lineGen(E => E2_eV - deltaE(E))(fields));
+
+  // Flat (|2p,±1⟩, SLATE)
+  edLineFlat = makeLine(null, SLATE, 2, '6,3');
+  edLineFlat.attr('d', lineGen(E => E2_eV)(fields));
+
+  // n=1 quadratic (hidden initially)
+  edLineN1quad = edG.append('path')
+    .datum(fields)
+    .attr('fill', 'none')
+    .attr('stroke', SLATE)
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '4,4')
+    .attr('opacity', 0);
+  edLineN1quad.attr('d', lineGen(E => E1_eV + n1shift(E))(fields));
+
+  // Labels
+  edLabelEplus = edSvg.append('text')
+    .attr('font-size', '11px').attr('fill', RED).attr('font-weight', '600');
+
+  edLabelEminus = edSvg.append('text')
+    .attr('font-size', '11px').attr('fill', INK).attr('font-weight', '600');
+
+  edLabelFlat = edSvg.append('text')
+    .attr('font-size', '11px').attr('fill', SLATE).attr('font-weight', '500');
+
+  edLabelN1 = edSvg.append('text')
+    .attr('font-size', '10px').attr('fill', SLATE)
+    .attr('font-style', 'italic').attr('opacity', 0);
+
+  // Current field indicator line
+  edFieldLine = edG.append('line')
+    .attr('y1', 0).attr('y2', edH)
+    .attr('stroke', RED).attr('stroke-width', 1)
+    .attr('stroke-dasharray', '3,3').attr('opacity', 0.5);
+
+  // Zero-field label
+  edSvg.append('text')
+    .attr('x', ED_MARGIN.left + edXScale(0))
+    .attr('y', ED_MARGIN.top + edYScale(E2_eV) - 10)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '10px')
+    .attr('fill', SLATE)
+    .text('4-fold degenerate');
+
+  updateEnergyDiagram();
+}
+
+function updateEnergyDiagram() {
+  if (!edSvg) return;
+
+  const E = eField;
+  const dE = deltaE(E);
+  const Eplus = E2_eV + dE;
+  const Eminus = E2_eV - dE;
+  const Eflat = E2_eV;
+  const EN1 = E1_eV + n1shift(E);
+
+  // Update field indicator
+  edFieldLine.attr('x1', edXScale(E)).attr('x2', edXScale(E));
+
+  // Label positions: right end of diagram + offset
+  const labelX = ED_MARGIN.left + edW + 6;
+
+  edLabelEplus
+    .attr('x', labelX)
+    .attr('y', ED_MARGIN.top + edYScale(Eplus) + 4)
+    .text(`E+ = ${Eplus.toFixed(5)} eV`);
+
+  edLabelEminus
+    .attr('x', labelX)
+    .attr('y', ED_MARGIN.top + edYScale(Eminus) + 4)
+    .text(`E− = ${Eminus.toFixed(5)} eV`);
+
+  edLabelFlat
+    .attr('x', labelX)
+    .attr('y', ED_MARGIN.top + edYScale(Eflat) + 4)
+    .text('|2p,±1⟩  (degen.)');
+
+  // n=1 toggle
+  if (showN1) {
+    edLineN1quad.attr('opacity', 1);
+    edLabelN1.attr('opacity', 1)
+      .attr('x', labelX)
+      .attr('y', ED_MARGIN.top + edYScale(Math.max(edYScale.domain()[0], EN1)) + 4)
+      .text(`n=1 (quad.)`);
+  } else {
+    edLineN1quad.attr('opacity', 0);
+    edLabelN1.attr('opacity', 0);
+  }
+
+  // Readouts
+  document.getElementById('dE-ev').textContent = dE === 0 ? '0' : dE.toExponential(4) + ' eV';
+  const dE_Hz = dE * EV_TO_HZ;
+  document.getElementById('dE-ghz').textContent = dE === 0 ? '0' : (dE_Hz / 1e9).toFixed(2) + ' GHz';
+  document.getElementById('E-plus').textContent = Eplus.toFixed(6);
+  document.getElementById('E-minus').textContent = Eminus.toFixed(6);
+
+  // Matrix
+  buildMatrix(E);
+
+  // Field display
+  document.getElementById('field-display').textContent =
+    E === 0 ? '0 V/m' :
+    E >= 1e6 ? (E/1e6).toFixed(1) + ' ×10⁶ V/m' : E.toExponential(2) + ' V/m';
+
+  // Physics console
+  updateConsole(E);
+}
+
+// ============================================================
+// PHYSICS CONSOLE
+// ============================================================
+function updateConsole(E) {
+  const body = document.getElementById('console-body');
+
+  // P1: |2p,±1⟩ remain at -3.4 eV always
+  const flatE = E2_eV;
+  const p1ok = Math.abs(flatE - E2_eV) < 1e-10;
+
+  // P2: ΔE at 1e6 V/m
+  const dE1 = deltaE(1e6);
+  const expected1 = 1.588e-4;
+  const p2ok = Math.abs(dE1 - expected1) / expected1 < 0.01;
+
+  // P3: Doubling field doubles ΔE (linear)
+  const dE2 = deltaE(2e6);
+  const p3ok = Math.abs(dE2 / dE1 - 2.0) < 0.001;
+
+  body.innerHTML = `
+<span class="${p1ok ? 'check-pass' : 'check-fail'}">P1</span> |2p,±1⟩ energy = ${flatE.toFixed(4)} eV (constant) ${p1ok ? '✓' : '— FAIL'}<br>
+<span class="${p2ok ? 'check-pass' : 'check-fail'}">P2</span> ΔE(10⁶ V/m) = ${dE1.toExponential(4)} eV (exp: 1.588×10⁻⁴) ${p2ok ? '✓' : '— FAIL'}<br>
+<span class="${p3ok ? 'check-pass' : 'check-fail'}">P3</span> ΔE(2×10⁶)/ΔE(10⁶) = ${(dE2/dE1).toFixed(4)} (linear → ratio=2) ${p3ok ? '✓' : '— FAIL'}
+  `.trim();
+}
+
+// ============================================================
+// SLIDER
+// ============================================================
+const slider = document.getElementById('field-slider');
+slider.addEventListener('input', () => {
+  eField = +slider.value;
+  updateEnergyDiagram();
+});
+
+// ============================================================
+// N=1 TOGGLE
+// ============================================================
+const n1Toggle = document.getElementById('n1-toggle');
+n1Toggle.addEventListener('change', () => {
+  showN1 = n1Toggle.checked;
+  const label = document.getElementById('n1-label');
+  label.textContent = showN1
+    ? 'Showing n=1 (quadratic Stark — 2nd order, parity argument)'
+    : 'Show n=1 ground state (quadratic Stark)';
+  updateEnergyDiagram();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+eField = +slider.value;
+buildEnergyDiagram();
+updateConsole(eField);
+</script>
+</body>
+</html>

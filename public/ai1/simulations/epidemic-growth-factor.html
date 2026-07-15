@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Epidemic Growth Factor: One Month's Warning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 14px;
+    color: #2A1A0E;
+    max-width: 900px;
+  }
+  #outer {
+    width: 900px;
+    border: 1px solid #D4D4D4;
+  }
+  #ctrl-bar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #D4D4D4;
+    background: #fafafa;
+    flex-wrap: wrap;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  .ctrl-label { font-size: 11px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ctrl-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] { width: 220px; accent-color: #C8102E; cursor: pointer; }
+  .g-val {
+    font-size: 28px;
+    font-weight: 700;
+    color: #C8102E;
+    font-variant-numeric: tabular-nums;
+    min-width: 52px;
+  }
+  #stats-row {
+    display: flex;
+    border-top: 1px solid #D4D4D4;
+  }
+  .stat-cell {
+    flex: 1;
+    padding: 10px 16px;
+    border-right: 1px solid #D4D4D4;
+    font-size: 12px;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label { font-size: 10px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-val { font-size: 20px; font-weight: 700; color: #2A1A0E; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .stat-val.red { color: #C8102E; }
+  #chart-area {
+    padding: 14px 16px 0 16px;
+  }
+  #note-box {
+    padding: 10px 20px;
+    background: #2A1A0E;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  #note-box strong { color: #C8102E; }
+  .flat-note {
+    font-size: 12px;
+    color: #C8102E;
+    font-weight: 700;
+    padding: 8px 20px;
+    background: #fff6f6;
+    display: none;
+    border-top: 1px solid #C8102E;
+  }
+</style>
+</head>
+<body>
+<h1>Epidemic Growth Factor: One Month's Warning</h1>
+
+<div id="outer">
+  <div id="ctrl-bar">
+    <div class="ctrl-group">
+      <div class="ctrl-label">Daily growth factor g</div>
+      <div class="ctrl-row">
+        <input type="range" id="g-slider" min="90" max="135" step="1" value="125">
+        <span class="g-val" id="g-val">1.25</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:24px; flex-wrap:wrap;">
+      <div>
+        <div class="ctrl-label">Country A</div>
+        <div style="font-size:13px; font-weight:700; color:#545454;">N₀ = 60</div>
+      </div>
+      <div>
+        <div class="ctrl-label">Country B</div>
+        <div style="font-size:13px; font-weight:700; color:#C8102E;">N₀ = 6,000</div>
+      </div>
+    </div>
+    <div style="font-size:11px; color:#545454; line-height:1.5;">
+      N(t) = N₀ × g^t<br>
+      Both curves same slope on log scale
+    </div>
+  </div>
+
+  <div id="chart-area">
+    <svg id="main-svg" width="868" height="360"></svg>
+  </div>
+
+  <div id="flat-note" class="flat-note">g = 1.00 → epidemic neither grows nor shrinks (flat lines)</div>
+
+  <div id="stats-row">
+    <div class="stat-cell">
+      <div class="stat-label">Days until A reaches B's start</div>
+      <div class="stat-val red" id="stat-catchup">20.6 d</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">Doubling time</div>
+      <div class="stat-val" id="stat-double">3.1 d</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">A at day 90</div>
+      <div class="stat-val" id="stat-a90">—</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-label">B at day 90</div>
+      <div class="stat-val" id="stat-b90">—</div>
+    </div>
+  </div>
+
+  <div id="note-box">
+    <strong>Same g → same trajectory, just offset in time.</strong>
+    Country A (60 cases) is not "safe" — it is Country B <em>one month ago</em>.<br>
+    At g = 1.25: doubling every ~3 days. One month = ≈ 10 doublings = 1000× more cases.
+  </div>
+</div>
+
+<script>
+const SVG_W = 868, SVG_H = 360;
+const margin = { top: 20, right: 120, bottom: 50, left: 72 };
+const chartW = SVG_W - margin.left - margin.right;
+const chartH = SVG_H - margin.top - margin.bottom;
+
+const N0_A = 60, N0_B = 6000;
+const DAY_MAX = 90;
+const Y_MIN = 10, Y_MAX = 1e8;
+
+// Milestones
+const MILESTONES = [600, 6000, 60000, 600000, 6e6, 1e8];
+const MLABELS = ["600", "6K", "60K", "600K", "6M", "100M"];
+
+const svg = d3.select("#main-svg");
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().domain([0, DAY_MAX]).range([0, chartW]);
+const yScale = d3.scaleLog().domain([Y_MIN, Y_MAX]).range([chartH, 0]).clamp(true);
+
+// Axes
+const xAxis = g.append("g")
+  .attr("transform", `translate(0,${chartH})`)
+  .call(d3.axisBottom(xScale).ticks(9).tickFormat(d => d + "d"));
+xAxis.selectAll("text").attr("font-size", 11).attr("font-family", "Montserrat, sans-serif");
+
+const yAxis = g.append("g")
+  .call(d3.axisLeft(yScale).ticks(7, ".0s").tickValues([10, 100, 1000, 10000, 1e5, 1e6, 1e7, 1e8]));
+yAxis.selectAll("text").attr("font-size", 11).attr("font-family", "Montserrat, sans-serif");
+
+// Axis labels
+svg.append("text")
+  .attr("x", margin.left + chartW / 2).attr("y", SVG_H - 6)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 11).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+  .text("Days since outbreak start");
+
+svg.append("text")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -(margin.top + chartH / 2)).attr("y", 16)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 11).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+  .text("Cases N(t)");
+
+// Milestone lines
+MILESTONES.forEach((m, i) => {
+  const y = yScale(m);
+  if (y < 0 || y > chartH) return;
+  g.append("line")
+    .attr("x1", 0).attr("x2", chartW)
+    .attr("y1", y).attr("y2", y)
+    .attr("stroke", "#D4D4D4").attr("stroke-dasharray", "4,3").attr("stroke-width", 1);
+  g.append("text")
+    .attr("x", chartW + 4).attr("y", y + 4)
+    .attr("font-size", 9).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+    .text(MLABELS[i]);
+});
+
+// Clip
+svg.append("defs").append("clipPath").attr("id", "chart-clip")
+  .append("rect").attr("width", chartW).attr("height", chartH);
+
+const clipG = g.append("g").attr("clip-path", "url(#chart-clip)");
+
+// Curve A (Slate)
+const lineA = clipG.append("path")
+  .attr("fill", "none").attr("stroke", "#545454").attr("stroke-width", 2.5);
+
+// Curve B (Red)
+const lineB = clipG.append("path")
+  .attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2.5);
+
+// Catchup annotation line
+const catchupLine = g.append("line")
+  .attr("stroke", "#C8102E").attr("stroke-dasharray", "6,3").attr("stroke-width", 1.5)
+  .attr("y1", 0).attr("y2", 0);
+
+const catchupLabel = g.append("text")
+  .attr("font-size", 10).attr("font-family", "Montserrat, sans-serif")
+  .attr("fill", "#C8102E").attr("font-weight", "700")
+  .attr("text-anchor", "middle");
+
+// Legend
+const legG = g.append("g").attr("transform", `translate(${chartW - 130}, 10)`);
+legG.append("line").attr("x1", 0).attr("x2", 24).attr("y1", 8).attr("y2", 8)
+  .attr("stroke", "#545454").attr("stroke-width", 2.5);
+legG.append("text").attr("x", 30).attr("y", 12)
+  .attr("font-size", 11).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+  .text("Country A (60)");
+legG.append("line").attr("x1", 0).attr("x2", 24).attr("y1", 28).attr("y2", 28)
+  .attr("stroke", "#C8102E").attr("stroke-width", 2.5);
+legG.append("text").attr("x", 30).attr("y", 32)
+  .attr("font-size", 11).attr("font-family", "Montserrat, sans-serif").attr("fill", "#C8102E")
+  .text("Country B (6000)");
+
+const lineGen = d3.line().x(d => xScale(d.t)).y(d => yScale(Math.min(d.v, Y_MAX * 2)));
+
+function fmt(v) {
+  if (!isFinite(v) || v > 1e11) return "overflow";
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + "B";
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + "M";
+  if (v >= 1e3) return (v / 1e3).toFixed(0) + "K";
+  return Math.round(v).toLocaleString();
+}
+
+function update() {
+  const g_val = +document.getElementById("g-slider").value / 100;
+  document.getElementById("g-val").textContent = g_val.toFixed(2);
+
+  const flatNote = document.getElementById("flat-note");
+  if (g_val === 1.0) {
+    flatNote.style.display = "block";
+  } else {
+    flatNote.style.display = "none";
+  }
+
+  // Data
+  const days = d3.range(0, DAY_MAX + 0.5, 0.5);
+  const dataA = days.map(t => ({ t, v: N0_A * Math.pow(g_val, t) }));
+  const dataB = days.map(t => ({ t, v: N0_B * Math.pow(g_val, t) }));
+
+  lineA.attr("d", lineGen(dataA));
+  lineB.attr("d", lineGen(dataB));
+
+  // Stats
+  let catchup, doubTime, a90, b90;
+  if (g_val <= 1.0) {
+    catchup = "∞";
+    doubTime = g_val === 1.0 ? "∞" : "—";
+  } else {
+    const cu = Math.log(N0_B / N0_A) / Math.log(g_val);
+    catchup = cu.toFixed(1) + " d";
+    doubTime = (Math.log(2) / Math.log(g_val)).toFixed(1) + " d";
+
+    // Catchup annotation
+    const catchDay = cu;
+    if (catchDay <= DAY_MAX && catchDay >= 0) {
+      const cx = xScale(catchDay);
+      const cy1 = yScale(Math.min(N0_A * Math.pow(g_val, catchDay), Y_MAX));
+      catchupLine
+        .attr("x1", cx).attr("x2", cx)
+        .attr("y1", 0).attr("y2", chartH)
+        .attr("opacity", 0.7);
+      catchupLabel
+        .attr("x", cx).attr("y", Math.max(12, cy1 - 8))
+        .text(`A=B at day ${cu.toFixed(0)}`);
+    } else {
+      catchupLine.attr("opacity", 0);
+      catchupLabel.text("");
+    }
+  }
+
+  a90 = N0_A * Math.pow(g_val, 90);
+  b90 = N0_B * Math.pow(g_val, 90);
+
+  document.getElementById("stat-catchup").textContent = catchup;
+  document.getElementById("stat-double").textContent = doubTime;
+  document.getElementById("stat-a90").textContent = fmt(a90);
+  document.getElementById("stat-b90").textContent = fmt(b90);
+
+  // Note
+  const noteBox = document.getElementById("note-box");
+  if (g_val < 1.0) {
+    noteBox.innerHTML = `<strong>g &lt; 1.00 → epidemic is shrinking.</strong> Both curves decline. Effective reproduction number R &lt; 1.`;
+  } else if (g_val === 1.0) {
+    noteBox.innerHTML = `<strong>g = 1.00 → epidemic is flat.</strong> Neither growing nor shrinking. R = 1.`;
+  } else {
+    const cuN = (Math.log(N0_B / N0_A) / Math.log(g_val)).toFixed(1);
+    noteBox.innerHTML = `<strong>Same g → same trajectory, just offset in time.</strong> Country A (60 cases) is Country B <em>${cuN} days ago</em>.<br>At g = ${g_val.toFixed(2)}: doubling every ${(Math.log(2)/Math.log(g_val)).toFixed(1)} days. One month = ${(30 * Math.log(2)/Math.log(g_val)).toFixed(0)} doublings.`;
+  }
+}
+
+document.getElementById("g-slider").addEventListener("input", update);
+update();
+</script>
+</body>
+</html>

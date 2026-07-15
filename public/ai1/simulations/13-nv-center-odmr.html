@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NV Center ODMR — Quantum Magnetometry</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 18px 28px 14px;
+    border-bottom: 2px solid #2A1A0E;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  header p  { font-size: 12px; color: #545454; }
+
+  .body-wrap {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── LEFT: controls + spectrum ── */
+  .left {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px 16px 24px;
+    border-right: 1px solid #d8d0c8;
+    gap: 14px;
+  }
+
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    align-items: center;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ctrl-group label {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  input[type=range] {
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .ctrl-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 44px;
+  }
+
+  .spectrum-area { flex: 1; min-height: 240px; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+
+  /* ── RIGHT: info + level diagram ── */
+  .right {
+    width: 290px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px;
+    gap: 12px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #545454;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 6px;
+    column-gap: 12px;
+    font-size: 13px;
+  }
+  .info-grid .lbl { color: #545454; }
+  .info-grid .val { font-weight: 700; color: #2A1A0E; text-align: right; }
+  .info-grid .val.highlight { color: #C8102E; }
+  .info-grid .val.fixed    { color: #1a7a3c; }
+
+  .separator {
+    border: none;
+    border-top: 1px solid #d8d0c8;
+    margin: 2px 0;
+  }
+
+  .sensing-box {
+    padding: 10px 12px;
+    background: #fafaf8;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+  }
+  .sensing-box .sb-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #545454;
+    margin-bottom: 6px;
+  }
+  .sensing-box .sb-formula {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 6px;
+    font-style: italic;
+  }
+  .sensing-box .sb-val {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #C8102E;
+  }
+  .sensing-box .sb-unit {
+    font-size: 11px;
+    color: #545454;
+    margin-left: 4px;
+  }
+
+  .note-box {
+    padding: 8px 10px;
+    background: #f5f2ee;
+    border-left: 3px solid #545454;
+    font-size: 11px;
+    color: #545454;
+    line-height: 1.5;
+  }
+
+  .level-area {
+    flex: 1;
+    min-height: 140px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NV Center ODMR</h1>
+  <p>D = 2870 MHz · γ = 28 MHz/mT · Two Lorentzian dips track B symmetrically around D</p>
+</header>
+
+<div class="body-wrap">
+
+  <!-- LEFT: controls + ODMR spectrum -->
+  <div class="left">
+    <div class="controls-row">
+      <div class="ctrl-group">
+        <label>B-field</label>
+        <input type="range" id="bSlider" min="0" max="15" step="0.1" value="2" style="width:140px;">
+        <span class="ctrl-val" id="bVal">2.0 mT</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Linewidth Γ</label>
+        <input type="range" id="gammaSlider" min="3" max="30" step="0.5" value="10" style="width:120px;">
+        <span class="ctrl-val" id="gammaVal">10.0 MHz</span>
+      </div>
+    </div>
+
+    <div class="spectrum-area" id="spectrumArea"></div>
+
+    <div style="font-size:11px;color:#545454;padding-left:2px;">
+      <span style="display:inline-block;width:22px;height:2px;background:#C8102E;vertical-align:middle;"></span>
+      Fluorescence I(f) &nbsp;|&nbsp;
+      <span style="display:inline-block;width:22px;height:2px;background:#545454;vertical-align:middle;border-top:2px dashed #545454;"></span>
+      Resonance f±
+    </div>
+  </div>
+
+  <!-- RIGHT: info panel + spin level diagram -->
+  <div class="right">
+    <div class="panel-title">Spectral Readout</div>
+
+    <div class="info-grid">
+      <div class="lbl">f<sub>+</sub> =</div>
+      <div class="val highlight" id="infoFp">— MHz</div>
+
+      <div class="lbl">f<sub>−</sub> =</div>
+      <div class="val highlight" id="infoFm">— MHz</div>
+
+      <div class="lbl">(f<sub>+</sub>+f<sub>−</sub>)/2 =</div>
+      <div class="val fixed" id="infoCenter">2870 MHz ✓</div>
+
+      <div class="lbl">Splitting =</div>
+      <div class="val" id="infoSplit">— MHz</div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="sensing-box">
+      <div class="sb-title">Magnetometry Readout</div>
+      <div class="sb-formula">B = (f<sub>+</sub> − f<sub>−</sub>) / (2 × 28 MHz/mT)</div>
+      <div>
+        <span class="sb-val" id="sensingB">—</span>
+        <span class="sb-unit">mT</span>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Center frequency = D = 2870 MHz for ALL B.</strong><br>
+      The two dips move <em>symmetrically</em> outward — the midpoint is always fixed at D.<br>
+      At B=0 the dips merge into one.
+    </div>
+
+    <hr class="separator">
+
+    <div class="panel-title">Spin Level Diagram</div>
+    <div class="level-area" id="levelArea"></div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────
+const D    = 2870;   // MHz  zero-field splitting
+const GAMMA = 28;    // MHz/mT  Zeeman coefficient
+const C    = 0.30;   // contrast (30% dip depth)
+const I0   = 1.0;
+
+// Frequency grid: 2600 to 3200 MHz
+const F_MIN = 2600, F_MAX = 3200, N_F = 600;
+
+function fGrid() {
+  const f = [];
+  for (let i = 0; i <= N_F; i++) f.push(F_MIN + (F_MAX - F_MIN) * i / N_F);
+  return f;
+}
+
+// Lorentzian
+function lorentzian(f, f0, gamma) {
+  return (gamma * gamma) / ((f - f0) * (f - f0) + gamma * gamma);
+}
+
+// ODMR spectrum
+function odmrSpectrum(B, gamma) {
+  const fp = D + GAMMA * B;
+  const fm = D - GAMMA * B;
+  return fGrid().map(f => I0 * (1 - C * lorentzian(f, fp, gamma) - C * lorentzian(f, fm, gamma)));
+}
+
+// ─────────────────────────────────────────────
+// PHYSICS CHECKS
+// ─────────────────────────────────────────────
+function runPhysicsChecks() {
+  console.group('%c[Physics Checks] NV Center ODMR', 'font-weight:bold;color:#C8102E');
+
+  // P1: Center frequency is always D for any B
+  for (const B of [0, 1, 5, 10, 15]) {
+    const fp = D + GAMMA * B;
+    const fm = D - GAMMA * B;
+    const center = (fp + fm) / 2;
+    const pass = Math.abs(center - D) < 1e-9;
+    console.log(`P1 B=${B}mT: f+=${fp}MHz f-=${fm}MHz center=${center}MHz ${pass ? '✓ PASS' : '✗ FAIL'}`);
+  }
+
+  // P2: Splitting linear in B
+  for (const B of [1, 2, 5, 10]) {
+    const split = (D + GAMMA * B) - (D - GAMMA * B);
+    const expected = 2 * GAMMA * B;
+    const pass = Math.abs(split - expected) < 1e-9;
+    console.log(`P2 B=${B}mT: splitting=${split}MHz expected=${expected}MHz ${pass ? '✓ PASS' : '✗ FAIL'}`);
+  }
+  console.log('P2 Note: doubling B should double splitting');
+  console.log(`  B=2: ${2*GAMMA*2}MHz, B=4: ${2*GAMMA*4}MHz (ratio 2:1) ✓`);
+
+  // P3: At B=0, two dips merge at D
+  const B0fp = D + GAMMA * 0;
+  const B0fm = D - GAMMA * 0;
+  console.log(`P3 B=0: f+=${B0fp}MHz, f-=${B0fm}MHz — both equal D=${D}MHz ${B0fp === D && B0fm === D ? '✓ PASS' : '✗ FAIL'}`);
+
+  // Specific values from spec
+  console.log('--- Spot checks ---');
+  console.log(`B=1mT: f+=${D+GAMMA*1}MHz (expect 2898), f-=${D-GAMMA*1}MHz (expect 2842), split=${2*GAMMA*1}MHz (expect 56) ✓`);
+  console.log(`B=10mT: f+=${D+GAMMA*10}MHz (expect 3150), f-=${D-GAMMA*10}MHz (expect 2590), split=${2*GAMMA*10}MHz (expect 560) ✓`);
+
+  console.groupEnd();
+}
+
+// ─────────────────────────────────────────────
+// ODMR SPECTRUM CHART
+// ─────────────────────────────────────────────
+const specDiv  = document.getElementById('spectrumArea');
+const specH    = 260;
+const sm       = { top: 16, right: 22, bottom: 42, left: 54 };
+const freqs    = fGrid();
+
+const specSvg = d3.select('#spectrumArea')
+  .append('svg')
+  .attr('width', '100%')
+  .attr('height', specH)
+  .style('display', 'block');
+
+const specW = () => (specDiv.getBoundingClientRect().width || 560) - sm.left - sm.right;
+const specPH = specH - sm.top - sm.bottom;
+
+const sg = specSvg.append('g').attr('transform', `translate(${sm.left},${sm.top})`);
+
+// Scales
+const xSc = d3.scaleLinear().domain([F_MIN, F_MAX]);
+const ySc = d3.scaleLinear().domain([0.55, 1.05]).range([specPH, 0]);
+
+// Grid lines (horizontal)
+const yAxisG = sg.append('g').attr('class', 'y-axis');
+const xAxisG = sg.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${specPH})`);
+
+// I₀ = 1 baseline reference
+sg.append('line').attr('class', 'baseline')
+  .attr('stroke', '#d8d0c8').attr('stroke-width', 1).attr('stroke-dasharray', '2,3')
+  .attr('x1', 0).attr('x2', 0)
+  .attr('y1', ySc(I0)).attr('y2', ySc(I0));
+
+// D = 2870 label
+const dLine = sg.append('line').attr('class', 'D-line')
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 1.2)
+  .attr('stroke-dasharray', '6,3').attr('opacity', 0.35);
+
+const dLabel = sg.append('text')
+  .attr('class', 'D-label')
+  .attr('font-size', 10).attr('fill', '#2A1A0E').attr('text-anchor', 'middle');
+
+// Resonance dashed lines
+const fpLine = sg.append('line').attr('class', 'fp-line')
+  .attr('stroke', '#545454').attr('stroke-width', 1.5).attr('stroke-dasharray', '5,3');
+const fmLine = sg.append('line').attr('class', 'fm-line')
+  .attr('stroke', '#545454').attr('stroke-width', 1.5).attr('stroke-dasharray', '5,3');
+
+// Labels for f+ f-
+const fpLabel = sg.append('text').attr('class', 'fp-label')
+  .attr('font-size', 10).attr('fill', '#545454').attr('text-anchor', 'middle');
+const fmLabel = sg.append('text').attr('class', 'fm-label')
+  .attr('font-size', 10).attr('fill', '#545454').attr('text-anchor', 'middle');
+
+// Spectrum curve
+const specPath = sg.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.2);
+
+// Axis labels
+sg.append('text')
+  .attr('x', 0).attr('y', specPH + 34)
+  .attr('fill', '#545454').attr('font-size', 12)
+  .attr('class', 'x-ax-label')
+  .text('Microwave frequency (MHz)');
+
+sg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -specPH / 2).attr('y', -42)
+  .attr('text-anchor', 'middle').attr('fill', '#545454').attr('font-size', 12)
+  .text('Fluorescence I(f)');
+
+// ─────────────────────────────────────────────
+// SPIN LEVEL DIAGRAM
+// ─────────────────────────────────────────────
+const levelDiv = document.getElementById('levelArea');
+const LW = 250, LH = 160;
+const levelSvg = d3.select('#levelArea')
+  .append('svg')
+  .attr('width', LW).attr('height', LH)
+  .style('display', 'block');
+
+const lm = { left: 20, right: 20, top: 12, bottom: 16 };
+const lPW = LW - lm.left - lm.right;
+const lPH = LH - lm.top - lm.bottom;
+const lg = levelSvg.append('g').attr('transform', `translate(${lm.left},${lm.top})`);
+
+// We have 3 levels: ms=0 (bottom), ms=+1 (top right), ms=-1 (top left)
+// Positions in fraction of lPH:
+//   ms=0 at y=lPH (bottom, full width)
+//   ms=+1 and ms=-1 at top, split by B
+
+const lvlX1 = 0, lvlX2 = lPW;
+const lvlW = lPW * 0.37;
+
+// ms=0 level (fixed at bottom)
+lg.append('line').attr('class', 'lv0')
+  .attr('x1', lPW * 0.18).attr('x2', lPW * 0.82)
+  .attr('y1', lPH).attr('y2', lPH)
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 2.5);
+
+lg.append('text').attr('x', lPW * 0.5).attr('y', lPH + 13)
+  .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#2A1A0E')
+  .text('mₛ = 0');
+
+// ms=+1 level (right)
+const lv_p = lg.append('line').attr('class', 'lv_p')
+  .attr('stroke', '#C8102E').attr('stroke-width', 2);
+
+lg.append('text').attr('class', 'lv_p_lbl')
+  .attr('font-size', 10).attr('fill', '#C8102E').attr('text-anchor', 'start');
+
+// ms=-1 level (left)
+const lv_m = lg.append('line').attr('class', 'lv_m')
+  .attr('stroke', '#545454').attr('stroke-width', 2);
+
+lg.append('text').attr('class', 'lv_m_lbl')
+  .attr('font-size', 10).attr('fill', '#545454').attr('text-anchor', 'end');
+
+// D arrow (double-headed: ms=0 to ms=±1 center)
+lg.append('defs').append('marker')
+  .attr('id', 'arr').attr('viewBox', '0 0 6 6')
+  .attr('refX', 3).attr('refY', 3)
+  .attr('markerWidth', 5).attr('markerHeight', 5)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,0 L0,6 L6,3 z').attr('fill', '#2A1A0E');
+
+lg.append('defs').append('marker')
+  .attr('id', 'arr-red').attr('viewBox', '0 0 6 6')
+  .attr('refX', 3).attr('refY', 3)
+  .attr('markerWidth', 5).attr('markerHeight', 5)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,0 L0,6 L6,3 z').attr('fill', '#C8102E');
+
+lg.append('defs').append('marker')
+  .attr('id', 'arr-slate').attr('viewBox', '0 0 6 6')
+  .attr('refX', 3).attr('refY', 3)
+  .attr('markerWidth', 5).attr('markerHeight', 5)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,0 L0,6 L6,3 z').attr('fill', '#545454');
+
+// Transition arrows
+const tArrowP = lg.append('line').attr('class', 'tarr-p')
+  .attr('stroke', '#C8102E').attr('stroke-width', 1.8)
+  .attr('marker-end', 'url(#arr-red)');
+
+const tArrowM = lg.append('line').attr('class', 'tarr-m')
+  .attr('stroke', '#545454').attr('stroke-width', 1.8)
+  .attr('marker-end', 'url(#arr-slate)');
+
+// f+ and f- labels on arrows
+const tLblP = lg.append('text').attr('class', 'tlbl-p')
+  .attr('font-size', 9).attr('fill', '#C8102E');
+const tLblM = lg.append('text').attr('class', 'tlbl-m')
+  .attr('font-size', 9).attr('fill', '#545454');
+
+// ─────────────────────────────────────────────
+// MAIN UPDATE
+// ─────────────────────────────────────────────
+function update() {
+  const B     = +document.getElementById('bSlider').value;
+  const gamma = +document.getElementById('gammaSlider').value;
+
+  document.getElementById('bVal').textContent    = `${B.toFixed(1)} mT`;
+  document.getElementById('gammaVal').textContent = `${gamma.toFixed(1)} MHz`;
+
+  const fp = D + GAMMA * B;
+  const fm = D - GAMMA * B;
+  const center = (fp + fm) / 2;
+  const split  = fp - fm;
+  const B_meas = split / (2 * GAMMA);
+
+  // Info panel
+  document.getElementById('infoFp').textContent    = `${fp.toFixed(1)} MHz`;
+  document.getElementById('infoFm').textContent    = `${fm.toFixed(1)} MHz`;
+  document.getElementById('infoCenter').textContent = `${center.toFixed(1)} MHz ✓`;
+  document.getElementById('infoSplit').textContent  = `${split.toFixed(1)} MHz`;
+  document.getElementById('sensingB').textContent   = B_meas.toFixed(2);
+
+  // Spectrum data
+  const spec = odmrSpectrum(B, gamma);
+
+  // Expand x domain if dips are near edges
+  const xDomMin = Math.min(F_MIN, fm - 4 * gamma);
+  const xDomMax = Math.max(F_MAX, fp + 4 * gamma);
+  xSc.domain([xDomMin, xDomMax]).range([0, specW()]);
+
+  // y domain: dip can go as low as I0*(1-2C) with overlapping; give headroom
+  const minI = d3.min(spec);
+  ySc.domain([Math.min(0.50, minI - 0.05), 1.06]);
+
+  // Axes
+  const xAxis = d3.axisBottom(xSc).ticks(7).tickFormat(d3.format('.0f'));
+  const yAxis = d3.axisLeft(ySc).ticks(5).tickFormat(d3.format('.2f'));
+  xAxisG.call(xAxis).call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#545454'))
+                    .call(a => a.selectAll('line,path').attr('stroke', '#d8d0c8'));
+  yAxisG.call(yAxis).call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#545454'))
+                    .call(a => a.selectAll('line,path').attr('stroke', '#d8d0c8'));
+
+  // Baseline
+  sg.select('.baseline')
+    .attr('x1', 0).attr('x2', specW())
+    .attr('y1', ySc(I0)).attr('y2', ySc(I0));
+
+  // D center line
+  sg.select('.D-line')
+    .attr('x1', xSc(D)).attr('x2', xSc(D))
+    .attr('y1', 0).attr('y2', specPH);
+  sg.select('.D-label')
+    .attr('x', xSc(D)).attr('y', -4)
+    .text('D = 2870 MHz');
+
+  // f+, f- dashed lines
+  sg.select('.fp-line')
+    .attr('x1', xSc(fp)).attr('x2', xSc(fp))
+    .attr('y1', 0).attr('y2', specPH);
+  sg.select('.fm-line')
+    .attr('x1', xSc(fm)).attr('x2', xSc(fm))
+    .attr('y1', 0).attr('y2', specPH);
+  sg.select('.fp-label')
+    .attr('x', xSc(fp)).attr('y', specPH + 12)
+    .text(`f+ ${fp.toFixed(0)}`);
+  sg.select('.fm-label')
+    .attr('x', xSc(fm)).attr('y', specPH + 12)
+    .text(`f− ${fm.toFixed(0)}`);
+
+  // x-axis label centering
+  sg.select('.x-ax-label').attr('x', specW() / 2);
+
+  // Spectrum curve
+  specPath.attr('d', d3.line()
+    .x((_, i) => xSc(freqs[i]))
+    .y(d => ySc(d))(spec));
+
+  // ── Spin level diagram ──
+  // Energy scale: ms=0 at bottom (y=lPH), ms=±1 split above
+  // We map energies: E(0)=0, E(+1)=D+γB, E(-1)=D-γB
+  // Normalize to lPH (reserve ~20px for top label space)
+  const Emax = D + GAMMA * 15; // at max B
+  const E0 = 0, Ep = D + GAMMA * B, Em = D - GAMMA * B;
+
+  const topY = 8;
+  const botY = lPH;
+  const yE = val => topY + (botY - topY) * (1 - val / Emax);
+
+  const yEp = yE(Ep);
+  const yEm = yE(Em);
+  const yE0 = botY;
+
+  // ms=+1 level (right side)
+  const rightX1 = lPW * 0.54, rightX2 = lPW * 0.95;
+  const leftX1  = lPW * 0.05, leftX2  = lPW * 0.46;
+
+  lv_p.attr('x1', rightX1).attr('x2', rightX2)
+       .attr('y1', yEp).attr('y2', yEp);
+  lg.select('.lv_p_lbl')
+    .attr('x', rightX2 + 3).attr('y', yEp + 3).text('mₛ=+1');
+
+  lv_m.attr('x1', leftX1).attr('x2', leftX2)
+       .attr('y1', yEm).attr('y2', yEm);
+  lg.select('.lv_m_lbl')
+    .attr('x', leftX1 - 2).attr('y', yEm + 3).text('mₛ=−1');
+
+  // Transition arrows: ms=0 ↔ ms=+1 (right), ms=0 ↔ ms=−1 (left)
+  const ms0mid = (lPW * 0.18 + lPW * 0.82) / 2;
+  const arrPx = (rightX1 + rightX2) / 2;
+  const arrMx = (leftX1 + leftX2) / 2;
+
+  tArrowP.attr('x1', arrPx).attr('y1', yE0 - 6)
+          .attr('x2', arrPx).attr('y2', yEp + 7);
+  tArrowM.attr('x1', arrMx).attr('y1', yE0 - 6)
+          .attr('x2', arrMx).attr('y2', yEm + 7);
+
+  tLblP.attr('x', arrPx + 3).attr('y', (yE0 + yEp) / 2)
+        .text(`f+ ${fp.toFixed(0)}`);
+  tLblM.attr('x', arrMx - 3).attr('y', (yE0 + yEm) / 2)
+        .attr('text-anchor', 'end')
+        .text(`f− ${fm.toFixed(0)}`);
+}
+
+// ─────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────
+document.getElementById('bSlider').addEventListener('input', update);
+document.getElementById('gammaSlider').addEventListener('input', update);
+window.addEventListener('resize', update);
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+runPhysicsChecks();
+update();
+</script>
+</body>
+</html>

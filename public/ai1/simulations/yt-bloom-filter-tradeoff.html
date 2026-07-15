@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloom Filter: Exponential Precision for Linear Space</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .main-layout {
+    width: 100%;
+    max-width: 920px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .section-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 6px;
+  }
+  /* Bit array */
+  .bit-section {
+    border: 2px solid #D4D4D4;
+    padding: 12px;
+  }
+  #bitArray {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 10px;
+  }
+  .bit {
+    width: 18px;
+    height: 18px;
+    background: #F0F0F0;
+    border: 1px solid #D4D4D4;
+    transition: background 0.3s;
+    cursor: default;
+    position: relative;
+  }
+  .bit.set { background: #C8102E; border-color: #C8102E; }
+  .bit.queried { background: #F0A020; border-color: #F0A020; }
+  .bit-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 7px 14px;
+    border: 2px solid #2A1A0E;
+    background: #2A1A0E;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: #C8102E; border-color: #C8102E; }
+  button.secondary {
+    background: #fff;
+    color: #2A1A0E;
+  }
+  button.secondary:hover { background: #2A1A0E; color: #fff; }
+  button.reset-btn { background: #545454; border-color: #545454; }
+  button.reset-btn:hover { background: #C8102E; border-color: #C8102E; }
+  .object-input {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    border: 2px solid #2A1A0E;
+    outline: none;
+    width: 140px;
+  }
+  .result-msg {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-top: 8px;
+    min-height: 22px;
+  }
+  .result-msg.fp { color: #E07000; }
+  .result-msg.no { color: #1A8A1A; }
+  .inserted-list {
+    font-size: 0.7rem;
+    color: #545454;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  /* Bottom two panels */
+  .bottom-row {
+    display: flex;
+    gap: 14px;
+  }
+  .panel {
+    flex: 1;
+    border: 2px solid #D4D4D4;
+    padding: 12px;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  input[type=range] {
+    flex: 1;
+    accent-color: #C8102E;
+    height: 4px;
+  }
+  .slider-val {
+    font-weight: 900;
+    font-size: 1rem;
+    color: #C8102E;
+    min-width: 28px;
+    text-align: right;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #545454;
+    min-width: 80px;
+  }
+  .stat-val {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    min-width: 56px;
+  }
+  .stat-bar-bg {
+    flex: 1;
+    height: 10px;
+    background: #F0F0F0;
+    border: 1px solid #D4D4D4;
+    overflow: hidden;
+  }
+  .stat-bar {
+    height: 100%;
+    background: #C8102E;
+    transition: width 0.3s;
+  }
+  svg { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Bloom Filter: Exponential Precision for Linear Space</h1>
+<div class="subtitle">ε ≈ (1/2)^(b·ln 2) &nbsp;|&nbsp; b = bits per inserted object &nbsp;|&nbsp; False positives shrink exponentially as b grows linearly</div>
+
+<div class="main-layout">
+
+  <!-- Bit Array Section -->
+  <div class="bit-section">
+    <div class="section-title">Bit Array (100 bits)</div>
+    <div id="bitArray"></div>
+    <div class="bit-controls">
+      <input type="text" class="object-input" id="objectInput" placeholder="Object name..." value="apple">
+      <button id="insertBtn">Insert</button>
+      <button class="secondary" id="queryBtn">Query (New Object)</button>
+      <button class="reset-btn" id="resetBtn">Reset</button>
+    </div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="inserted-list" id="insertedList">Inserted: (none)</div>
+  </div>
+
+  <!-- Bottom panels -->
+  <div class="bottom-row">
+    <!-- Left: Parameters panel -->
+    <div class="panel">
+      <div class="section-title">Filter Parameters</div>
+      <div class="slider-row">
+        <span style="font-size:0.7rem;font-weight:700;color:#545454;">b (bits/obj)</span>
+        <input type="range" id="bSlider" min="4" max="32" value="8">
+        <span class="slider-val" id="bVal">8</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Hash fns k</span>
+        <span class="stat-val" id="kVal">—</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="kBar" style="width:50%"></div></div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">False pos ε</span>
+        <span class="stat-val" id="epsilonVal">—</span>
+        <div class="stat-bar-bg"><div class="stat-bar" id="epsilonBar" style="width:50%"></div></div>
+      </div>
+      <div style="margin-top:10px;padding:8px;background:#FAFAFA;border:1.5px solid #D4D4D4;">
+        <div style="font-size:0.68rem;font-weight:700;color:#545454;margin-bottom:4px;">FORMULA</div>
+        <div style="font-size:0.82rem;font-weight:700;">k = round(b · ln 2)</div>
+        <div style="font-size:0.82rem;font-weight:700;color:#C8102E;">ε = (0.5)^(b · 0.693)</div>
+        <div style="font-size:0.68rem;color:#545454;margin-top:4px;">
+          b=8 → ε ≈ 2% &nbsp;|&nbsp; b=16 → ε ≈ 0.02%
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: ε vs b curve -->
+    <div class="panel">
+      <div class="section-title">False Positive Rate vs Bits/Object</div>
+      <svg id="curveSvg" width="380" height="200"></svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BG = '#FFFFFF', INK = '#2A1A0E', RED = '#C8102E', SLATE = '#545454', HAIR = '#D4D4D4';
+
+// --- Bit array state ---
+const N_BITS = 100;
+let bits = new Array(N_BITS).fill(0);
+let inserted = [];
+let queryHighlight = [];
+let objectCounter = 0;
+const sampleObjects = ['apple','mango','grape','peach','plum','berry','melon','papaya','cherry','kiwi','lemon','lime'];
+
+// Build bit array UI
+const bitArrayEl = document.getElementById('bitArray');
+function buildBitUI() {
+  bitArrayEl.innerHTML = '';
+  for (let i = 0; i < N_BITS; i++) {
+    const el = document.createElement('div');
+    el.className = 'bit' + (bits[i] ? ' set' : '') + (queryHighlight.includes(i) ? ' queried' : '');
+    el.title = `Bit ${i}`;
+    bitArrayEl.appendChild(el);
+  }
+}
+buildBitUI();
+
+// Hash functions (seeded, deterministic)
+function hashStr(str, seed) {
+  let h = seed ^ 0xdeadbeef;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 0x9e3779b1);
+    h = ((h << 13) | (h >>> 19));
+  }
+  return (h >>> 0) % N_BITS;
+}
+
+function getKFromB(b) { return Math.max(1, Math.round(b * Math.LN2)); }
+function getEpsilon(b) { return Math.pow(0.5, b * Math.LN2); }
+
+function getBitIndices(str, k) {
+  const indices = new Set();
+  for (let s = 0; s < k * 3 && indices.size < k; s++) {
+    indices.add(hashStr(str, s * 1013 + 7));
+  }
+  return [...indices].slice(0, k);
+}
+
+let currentB = 8;
+
+function updateParams() {
+  currentB = parseInt(document.getElementById('bSlider').value);
+  document.getElementById('bVal').textContent = currentB;
+  const k = getKFromB(currentB);
+  const eps = getEpsilon(currentB);
+  document.getElementById('kVal').textContent = k;
+  document.getElementById('epsilonVal').textContent = (eps * 100).toFixed(4) + '%';
+  // Bars (log scale for epsilon)
+  const kBarPct = Math.min(100, (k / 22) * 100);
+  document.getElementById('kBar').style.width = kBarPct + '%';
+  const epsLogPct = Math.max(0, Math.min(100, (1 - (Math.log10(eps) / Math.log10(0.0001))) * 100));
+  document.getElementById('epsilonBar').style.width = epsLogPct + '%';
+  drawCurve();
+}
+
+function insertObject(name) {
+  const k = getKFromB(currentB);
+  const indices = getBitIndices(name, k);
+  indices.forEach(i => { bits[i] = 1; });
+  inserted.push(name);
+  queryHighlight = [];
+  buildBitUI();
+  document.getElementById('insertedList').textContent = 'Inserted: ' + inserted.join(', ');
+  document.getElementById('resultMsg').textContent = `"${name}" inserted — ${k} bits set`;
+  document.getElementById('resultMsg').className = 'result-msg';
+}
+
+function queryObject(name) {
+  const k = getKFromB(currentB);
+  const indices = getBitIndices(name, k);
+  queryHighlight = indices;
+  const allSet = indices.every(i => bits[i] === 1);
+  const wasInserted = inserted.includes(name);
+  buildBitUI();
+  const msg = document.getElementById('resultMsg');
+  if (allSet && !wasInserted) {
+    msg.textContent = `"${name}" → All ${k} bits set: POSSIBLE MEMBER (false positive!)`;
+    msg.className = 'result-msg fp';
+  } else if (allSet && wasInserted) {
+    msg.textContent = `"${name}" → All ${k} bits set: Probably a member (was inserted)`;
+    msg.className = 'result-msg';
+  } else {
+    msg.textContent = `"${name}" → At least one bit is 0: DEFINITELY NOT a member`;
+    msg.className = 'result-msg no';
+  }
+}
+
+document.getElementById('insertBtn').addEventListener('click', () => {
+  const val = document.getElementById('objectInput').value.trim();
+  if (!val) return;
+  insertObject(val);
+  objectCounter++;
+  document.getElementById('objectInput').value = sampleObjects[objectCounter % sampleObjects.length] || '';
+});
+
+document.getElementById('queryBtn').addEventListener('click', () => {
+  // Query an object NOT inserted
+  const notInserted = ['banana','dragon','fig','pear','guava','starfruit','durian','jackfruit','lychee','mango2']
+    .filter(s => !inserted.includes(s));
+  const name = notInserted[Math.floor(Math.random() * notInserted.length)] || 'xyz' + Math.floor(Math.random()*1000);
+  document.getElementById('objectInput').value = name;
+  queryObject(name);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  bits = new Array(N_BITS).fill(0);
+  inserted = [];
+  queryHighlight = [];
+  objectCounter = 0;
+  buildBitUI();
+  document.getElementById('insertedList').textContent = 'Inserted: (none)';
+  document.getElementById('resultMsg').textContent = '';
+  document.getElementById('objectInput').value = sampleObjects[0];
+});
+
+document.getElementById('bSlider').addEventListener('input', updateParams);
+
+// --- ε vs b curve (D3) ---
+function drawCurve() {
+  const svg = d3.select('#curveSvg');
+  svg.selectAll('*').remove();
+  const W = 380, H = 200;
+  const margin = { top: 16, right: 20, bottom: 36, left: 56 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const bData = d3.range(4, 33);
+  const x = d3.scaleLinear().domain([4, 32]).range([0, pw]);
+  const y = d3.scaleLog().domain([1e-5, 1]).range([ph, 0]).clamp(true);
+
+  // Grid
+  g.append('g').attr('class', 'grid')
+    .attr('transform', `translate(0,${ph})`)
+    .call(d3.axisBottom(x).ticks(7).tickSize(-ph).tickFormat(''))
+    .selectAll('line').attr('stroke', HAIR).attr('stroke-width', 0.7);
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5, '.0e').tickSize(-pw).tickFormat(''))
+    .selectAll('line').attr('stroke', HAIR).attr('stroke-width', 0.7);
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${ph})`).call(
+    d3.axisBottom(x).ticks(7).tickFormat(d => d)
+  ).selectAll('text').attr('font-family', 'Montserrat').attr('font-size', '9px').attr('fill', SLATE);
+  g.append('g').call(
+    d3.axisLeft(y).ticks(5, '.0e')
+  ).selectAll('text').attr('font-family', 'Montserrat').attr('font-size', '9px').attr('fill', SLATE);
+
+  // Axis labels
+  g.append('text').attr('x', pw / 2).attr('y', ph + 30).attr('text-anchor', 'middle')
+    .attr('font-family', 'Montserrat').attr('font-size', '10px').attr('font-weight', '700').attr('fill', INK)
+    .text('Bits per Object (b)');
+  g.append('text').attr('transform', 'rotate(-90)').attr('x', -ph / 2).attr('y', -44)
+    .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', '10px')
+    .attr('font-weight', '700').attr('fill', INK).text('False Positive Rate ε');
+
+  // Curve
+  const line = d3.line()
+    .x(d => x(d))
+    .y(d => y(Math.max(1e-5, getEpsilon(d))))
+    .curve(d3.curveCatmullRom);
+  g.append('path').datum(bData)
+    .attr('d', line)
+    .attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 2);
+
+  // Highlighted points
+  [[8, '~2%'], [16, '~0.02%']].forEach(([bv, lbl]) => {
+    const ex = x(bv), ey = y(Math.max(1e-5, getEpsilon(bv)));
+    g.append('circle').attr('cx', ex).attr('cy', ey).attr('r', 4).attr('fill', RED);
+    g.append('text').attr('x', ex + 6).attr('y', ey + 4)
+      .attr('font-family', 'Montserrat').attr('font-size', '9px').attr('font-weight', '700').attr('fill', RED)
+      .text(`b=${bv}: ε${lbl}`);
+  });
+
+  // Current b marker
+  const cb = currentB;
+  const cbX = x(cb);
+  g.append('line').attr('x1', cbX).attr('x2', cbX).attr('y1', 0).attr('y2', ph)
+    .attr('stroke', RED).attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+  g.append('text').attr('x', cbX + 3).attr('y', 14)
+    .attr('font-family', 'Montserrat').attr('font-size', '9px').attr('font-weight', '700').attr('fill', RED)
+    .text('b=' + cb);
+}
+
+updateParams();
+</script>
+</body>
+</html>

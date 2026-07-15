@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kolmogorov Turbulence: The −5/3 Power Law Hidden in Chaos</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    max-width: 900px;
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+  .layout {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    width: 900px;
+  }
+  svg { display: block; }
+  .right-panel {
+    width: 230px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 0 0 16px;
+  }
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .slider-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2A1A0E;
+  }
+  .slider-sub {
+    font-size: 10px;
+    color: #545454;
+    line-height: 1.4;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .fact-box {
+    background: #FFFFFF;
+    border: 1.5px solid #D4D4D4;
+    border-left: 4px solid #C8102E;
+    padding: 11px;
+    border-radius: 3px;
+  }
+  .fact-box h3 {
+    font-size: 10px;
+    font-weight: 700;
+    color: #C8102E;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 7px;
+  }
+  .fact-box p {
+    font-size: 10.5px;
+    color: #2A1A0E;
+    line-height: 1.55;
+  }
+  .fact-box .eq {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    display: block;
+    text-align: center;
+    margin: 6px 0;
+  }
+  .ref-box {
+    background: #FFFFFF;
+    border: 1.5px solid #D4D4D4;
+    padding: 10px;
+    border-radius: 3px;
+  }
+  .ref-box h3 {
+    font-size: 10px;
+    font-weight: 700;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .ref-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+    font-size: 10.5px;
+    color: #2A1A0E;
+  }
+  .ref-line {
+    display: inline-block;
+    width: 22px;
+    height: 2px;
+    flex-shrink: 0;
+  }
+  .axis text { font-family: 'Montserrat',sans-serif; font-size: 11px; fill: #545454; }
+  .axis path, .axis line { stroke: #D4D4D4; }
+  .annotation { font-family: 'Montserrat',sans-serif; }
+</style>
+</head>
+<body>
+<h1>Kolmogorov Turbulence: The −5/3 Power Law Hidden in Chaos</h1>
+<div class="layout">
+  <svg id="chart"></svg>
+  <div class="right-panel">
+    <div class="controls">
+      <div class="slider-row">
+        <span class="slider-label">ε (dissipation rate): <span id="eps-val">1.0</span></span>
+        <span class="slider-sub">Shifts the −5/3 line up/down</span>
+        <input type="range" id="eps-slider" min="0.01" max="10" step="0.01" value="1.0">
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">η (Kolmogorov scale): <span id="eta-val">0.01</span></span>
+        <span class="slider-sub">Moves the dissipation cutoff</span>
+        <input type="range" id="eta-slider" min="0.001" max="0.1" step="0.001" value="0.01">
+      </div>
+    </div>
+    <div class="fact-box">
+      <h3>Key fact</h3>
+      <p>At k = 2k₀:</p>
+      <span class="eq">E drops by 2<sup>5/3</sup> ≈ 3.17×</span>
+      <p>Not 2×, not 4× — exactly 2<sup>5/3</sup>. The exponent is precisely −5/3 across 4 orders of magnitude.</p>
+    </div>
+    <div class="ref-box">
+      <h3>Reference lines</h3>
+      <div class="ref-row">
+        <span class="ref-line" style="background:#D4D4D4; border-top:2px dashed #545454; background:none; border-bottom:none; border-left:none; border-right:none; height:0; border-top-style:dashed;"></span>
+        White noise (slope 0)
+      </div>
+      <div class="ref-row">
+        <span class="ref-line" style="border-top:2px dashed #545454; background:none;"></span>
+        Brownian (slope −2)
+      </div>
+      <div class="ref-row">
+        <span class="ref-line" style="background:#C8102E; height:3px;"></span>
+        Kolmogorov −5/3
+      </div>
+    </div>
+    <div class="fact-box" style="border-left-color:#545454">
+      <h3>Slope ruler</h3>
+      <p style="font-size:10px">Drag the ruler on the chart to measure rise/run in the inertial subrange. Lock onto the red curve to verify slope = <strong>−5/3 ≈ −1.667</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── layout ───────────────────────────────────────────────────────────────────
+const W = 670, H = 500;
+const margin = { top: 36, right: 20, bottom: 56, left: 68 };
+const pw = W - margin.left - margin.right;
+const ph = H - margin.top - margin.bottom;
+
+const svg = d3.select('#chart').attr('width', W).attr('height', H);
+const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+// ── scales ───────────────────────────────────────────────────────────────────
+const kMin = 1e-2, kMax = 1e4;
+const eMin = 1e-8, eMax = 1e5;
+
+const xScale = d3.scaleLog().domain([kMin, kMax]).range([0, pw]);
+const yScale = d3.scaleLog().domain([eMin, eMax]).range([ph, 0]);
+
+// ── axes ─────────────────────────────────────────────────────────────────────
+const xAxis = d3.axisBottom(xScale)
+  .ticks(6, '~e')
+  .tickSize(-ph);
+
+const yAxis = d3.axisLeft(yScale)
+  .ticks(6, '~e')
+  .tickSize(-pw);
+
+g.append('g').attr('class', 'axis x-axis')
+  .attr('transform', `translate(0,${ph})`).call(xAxis);
+g.append('g').attr('class', 'axis y-axis').call(yAxis);
+
+g.selectAll('.x-axis .tick line, .y-axis .tick line')
+  .attr('stroke', '#D4D4D4').attr('stroke-dasharray', '3,3');
+g.selectAll('.x-axis path, .y-axis path').attr('stroke', '#D4D4D4');
+
+// Axis labels
+svg.append('text')
+  .attr('x', margin.left + pw / 2).attr('y', H - 8)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('Wavenumber  k  (log scale)');
+
+svg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(margin.top + ph / 2)).attr('y', 14)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('E(k)  energy density  (log scale)');
+
+// Chart title
+svg.append('text')
+  .attr('x', margin.left + pw / 2).attr('y', 18)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('Turbulent Energy Spectrum E(k)');
+
+// ── state ─────────────────────────────────────────────────────────────────────
+let eps = 1.0, eta = 0.01;
+
+// ── data generation ───────────────────────────────────────────────────────────
+const C_k = 1.5; // Kolmogorov constant
+
+function kolmogorovE(k, eps_val, eta_val) {
+  const inertial = C_k * Math.pow(eps_val, 2 / 3) * Math.pow(k, -5 / 3);
+  const kEta = k * eta_val;
+  // Dissipation cutoff: exponential roll-off beyond k*eta ~ 1
+  const dissipation = Math.exp(-5.2 * Math.max(0, kEta - 0.5));
+  return inertial * dissipation;
+}
+
+// White noise: flat, anchored at k=0.1, E=10^3
+function whiteNoiseE(k) { return 5e2; }
+// Brownian: slope -2, anchored same
+function brownianE(k) { return 5e4 * Math.pow(k / kMin, -2); }
+
+function makeKpoints(n) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const k = Math.pow(10, Math.log10(kMin) + (i / n) * (Math.log10(kMax) - Math.log10(kMin)));
+    pts.push(k);
+  }
+  return pts;
+}
+
+const kPoints = makeKpoints(400);
+
+// ── line generator ────────────────────────────────────────────────────────────
+const lineGen = d3.line()
+  .x(d => xScale(d[0]))
+  .y(d => yScale(Math.max(eMin * 1.1, d[1])))
+  .defined(d => d[1] > eMin && isFinite(d[1]));
+
+// ── static reference lines ─────────────────────────────────────────────────
+// White noise
+const wnData = kPoints.map(k => [k, whiteNoiseE(k)]);
+g.append('path')
+  .datum(wnData).attr('fill', 'none')
+  .attr('stroke', '#545454').attr('stroke-width', 1.2)
+  .attr('stroke-dasharray', '5,4')
+  .attr('d', lineGen);
+
+// Brownian
+const brData = kPoints.map(k => [k, brownianE(k)]).filter(d => d[1] >= eMin && d[1] <= eMax);
+g.append('path')
+  .datum(brData).attr('fill', 'none')
+  .attr('stroke', '#545454').attr('stroke-width', 1.2)
+  .attr('stroke-dasharray', '5,4')
+  .attr('d', lineGen);
+
+// Brownian label
+g.append('text').attr('class', 'annotation')
+  .attr('x', xScale(3e-2)).attr('y', yScale(brownianE(3e-2)) + 14)
+  .attr('font-size', '10px').attr('fill', '#545454').attr('font-weight', '600')
+  .text('Brownian: slope −2');
+
+g.append('text').attr('class', 'annotation')
+  .attr('x', xScale(3e-2)).attr('y', yScale(whiteNoiseE(3e-2)) - 6)
+  .attr('font-size', '10px').attr('fill', '#545454').attr('font-weight', '600')
+  .text('White noise: slope 0');
+
+// ── dynamic Kolmogorov curve ───────────────────────────────────────────────
+const kolmPath = g.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E').attr('stroke-width', 3);
+
+// Inertial subrange annotation (background band)
+const bandGroup = g.append('g');
+
+// ── annotations ───────────────────────────────────────────────────────────────
+// Regions: low k = energy injection, mid = inertial, high k = dissipation
+const annotGroup = g.append('g').attr('class', 'annots');
+
+function drawAnnotations(eps_val, eta_val) {
+  annotGroup.selectAll('*').remove();
+
+  // Inertial subrange band: k from ~0.1 to 1/eta
+  const kLow = 0.1, kHigh = 0.5 / eta_val;
+  if (xScale(kLow) < xScale(kHigh)) {
+    annotGroup.append('rect')
+      .attr('x', xScale(kLow)).attr('y', 0)
+      .attr('width', Math.max(0, xScale(Math.min(kHigh, kMax * 0.5)) - xScale(kLow)))
+      .attr('height', ph)
+      .attr('fill', 'rgba(200,16,46,0.04)');
+  }
+
+  // Inertial label
+  const kMid = Math.sqrt(kLow * Math.min(kHigh, kMax * 0.3));
+  annotGroup.append('text')
+    .attr('x', xScale(kMid)).attr('y', yScale(kolmogorovE(kMid, eps_val, eta_val)) - 10)
+    .attr('text-anchor', 'middle').attr('font-family', 'Montserrat,sans-serif')
+    .attr('font-size', '10.5px').attr('fill', '#C8102E').attr('font-weight', '700')
+    .text('Inertial subrange: k⁻⁵/³');
+
+  // Energy injection label (low k)
+  annotGroup.append('text')
+    .attr('x', xScale(kMin * 2)).attr('y', 20)
+    .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10px')
+    .attr('fill', '#2A1A0E').attr('font-weight', '600')
+    .text('Energy injection');
+  annotGroup.append('text')
+    .attr('x', xScale(kMin * 2)).attr('y', 33)
+    .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10px')
+    .attr('fill', '#545454')
+    .text('(large eddies)');
+
+  // Dissipation label (high k)
+  const kDiss = 1 / eta_val;
+  if (xScale(kDiss) < pw - 10) {
+    annotGroup.append('line')
+      .attr('x1', xScale(kDiss)).attr('x2', xScale(kDiss))
+      .attr('y1', 0).attr('y2', ph)
+      .attr('stroke', '#545454').attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4,3');
+    annotGroup.append('text')
+      .attr('x', xScale(kDiss) + 4).attr('y', 22)
+      .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10px')
+      .attr('fill', '#545454').attr('font-weight', '600')
+      .text('Dissipation');
+    annotGroup.append('text')
+      .attr('x', xScale(kDiss) + 4).attr('y', 34)
+      .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10px')
+      .attr('fill', '#545454')
+      .text('(viscosity)');
+  }
+}
+
+function updateKolmogorov() {
+  const data = kPoints.map(k => [k, kolmogorovE(k, eps, eta)]);
+  kolmPath.datum(data).attr('d', lineGen);
+  drawAnnotations(eps, eta);
+  drawSlopeRuler();
+}
+
+// ── slope ruler ───────────────────────────────────────────────────────────────
+const rulerGroup = g.append('g').attr('class', 'ruler').attr('cursor', 'grab');
+let rulerK = 1.0; // current anchor k for ruler
+
+function drawSlopeRuler() {
+  rulerGroup.selectAll('*').remove();
+
+  // Draw a ruler line spanning 1 decade in k centered at rulerK
+  const k1 = rulerK / 3, k2 = rulerK * 3;
+  const e1 = kolmogorovE(Math.max(kMin, k1), eps, eta);
+  const e2 = kolmogorovE(Math.min(kMax, k2), eps, eta);
+
+  const x1 = xScale(Math.max(kMin, k1)), y1 = yScale(Math.max(eMin * 2, e1));
+  const x2 = xScale(Math.min(kMax, k2)), y2 = yScale(Math.max(eMin * 2, e2));
+
+  // Ruler line
+  rulerGroup.append('line')
+    .attr('x1', x1).attr('y1', y1).attr('x2', x2).attr('y2', y2)
+    .attr('stroke', '#2A1A0E').attr('stroke-width', 2.5)
+    .attr('stroke-dasharray', '6,3');
+
+  // Endpoints
+  rulerGroup.append('circle').attr('cx', x1).attr('cy', y1).attr('r', 4)
+    .attr('fill', '#2A1A0E');
+  rulerGroup.append('circle').attr('cx', x2).attr('cy', y2).attr('r', 4)
+    .attr('fill', '#2A1A0E');
+
+  // Slope label
+  const slope = (Math.log10(e2) - Math.log10(e1)) / (Math.log10(k2) - Math.log10(k1));
+  const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+  rulerGroup.append('rect')
+    .attr('x', midX - 50).attr('y', midY - 22)
+    .attr('width', 100).attr('height', 20)
+    .attr('rx', 3).attr('fill', '#FFFFFF').attr('stroke', '#D4D4D4');
+  rulerGroup.append('text')
+    .attr('x', midX).attr('y', midY - 7)
+    .attr('text-anchor', 'middle')
+    .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '11px')
+    .attr('font-weight', '700').attr('fill', '#2A1A0E')
+    .text(`slope ≈ ${slope.toFixed(3)}`);
+
+  // Drag handle
+  rulerGroup.append('rect')
+    .attr('x', midX - 12).attr('y', midY - 12)
+    .attr('width', 24).attr('height', 24).attr('rx', 4)
+    .attr('fill', 'rgba(200,16,46,0.15)').attr('stroke', '#C8102E')
+    .attr('stroke-width', 1.5).attr('cursor', 'grab');
+}
+
+// Drag behavior for ruler
+const drag = d3.drag()
+  .on('start', function() { d3.select(this).attr('cursor', 'grabbing'); })
+  .on('drag', function(event) {
+    const newK = xScale.invert(Math.max(0, Math.min(pw, event.x)));
+    if (newK >= kMin * 3 && newK <= kMax / 3) {
+      rulerK = newK;
+      drawSlopeRuler();
+    }
+  })
+  .on('end', function() { d3.select(this).attr('cursor', 'grab'); });
+
+rulerGroup.call(drag);
+
+// ── sliders ───────────────────────────────────────────────────────────────────
+document.getElementById('eps-slider').addEventListener('input', function() {
+  eps = +this.value;
+  document.getElementById('eps-val').textContent = eps.toFixed(2);
+  updateKolmogorov();
+});
+document.getElementById('eta-slider').addEventListener('input', function() {
+  eta = +this.value;
+  document.getElementById('eta-val').textContent = eta.toFixed(3);
+  updateKolmogorov();
+});
+
+updateKolmogorov();
+</script>
+</body>
+</html>

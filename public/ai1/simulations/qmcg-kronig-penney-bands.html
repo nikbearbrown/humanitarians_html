@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kronig-Penney Band Gap Explorer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:    #FFFFFF;
+    --ink:   #2A1A0E;
+    --red:   #C8102E;
+    --slate: #545454;
+    --gap-fill: rgba(200, 16, 46, 0.08);
+    --gap-stroke: rgba(200, 16, 46, 0.25);
+    --band-fill: rgba(42, 26, 14, 0.06);
+  }
+
+  body {
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 32px 32px;
+  }
+
+  header {
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  header p {
+    font-size: 0.78rem;
+    color: var(--slate);
+    margin-top: 4px;
+    max-width: 780px;
+    line-height: 1.5;
+  }
+
+  .main-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex: 1;
+  }
+
+  .panel {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .panel-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+  }
+
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .control-group {
+    border: 1px solid rgba(42,26,14,0.12);
+    border-radius: 6px;
+    padding: 14px 14px 12px;
+  }
+  .control-group h3 {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  .slider-row {
+    margin-bottom: 10px;
+  }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+  }
+  .slider-name {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .slider-val {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--red);
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    text-align: right;
+  }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(42,26,14,0.15);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--red);
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--red);
+    border: none;
+    cursor: pointer;
+  }
+
+  .info-box {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .info-box .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    border-bottom: 1px solid rgba(42,26,14,0.06);
+  }
+  .info-box .row:last-child { border-bottom: none; }
+  .info-box .lbl { color: var(--slate); }
+  .info-box .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .checks {
+    font-size: 0.70rem;
+    line-height: 1.7;
+    color: var(--slate);
+  }
+  .checks .check-row {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    padding: 2px 0;
+  }
+  .check-icon {
+    font-size: 0.68rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .pass  { color: #1B6E2E; }
+  .fail  { color: var(--red); }
+
+  /* D3 axis styling */
+  .axis-label {
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 11px;
+    fill: var(--slate);
+  }
+  .tick text {
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 10px;
+    fill: var(--slate);
+  }
+  .domain { stroke: var(--ink); stroke-width: 1; }
+  .tick line { stroke: rgba(42,26,14,0.2); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kronig-Penney Band Gap Explorer</h1>
+  <p>Dirac delta barrier model: cos(Ka) = f(qa) = cos(qa) + P·sin(qa)/(qa).
+     Allowed bands exist where |f(qa)| ≤ 1; forbidden gaps where |f(qa)| > 1.
+     Left: f(qa) vs qa. Right: reduced-zone band structure E vs K.</p>
+</header>
+
+<div class="main-row">
+  <div class="panel">
+    <div class="panel-label">KP Function — f(qa) vs qa</div>
+    <svg id="svg-left"></svg>
+  </div>
+  <div class="panel">
+    <div class="panel-label">Band Structure — E vs K (reduced zone)</div>
+    <svg id="svg-right"></svg>
+  </div>
+  <div class="sidebar">
+    <div class="control-group">
+      <h3>Parameters</h3>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-name">P (barrier strength)</span>
+          <span class="slider-val" id="val-P">3.0</span>
+        </div>
+        <input type="range" id="slider-P" min="0" max="20" step="0.1" value="3">
+      </div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-name">a (lattice constant)</span>
+          <span class="slider-val" id="val-a">0.30 nm</span>
+        </div>
+        <input type="range" id="slider-a" min="0.2" max="0.6" step="0.01" value="0.30">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Band Info</h3>
+      <div class="info-box" id="info-box">
+        <div class="row"><span class="lbl">P</span><span class="val" id="ib-P">3.00</span></div>
+        <div class="row"><span class="lbl">a</span><span class="val" id="ib-a">0.30 nm</span></div>
+        <div class="row"><span class="lbl">E(π/a)</span><span class="val" id="ib-E1">— eV</span></div>
+        <div class="row"><span class="lbl">Gap 1 center</span><span class="val" id="ib-gc">— eV</span></div>
+        <div class="row"><span class="lbl">Gap 1 width</span><span class="val" id="ib-gw">— eV</span></div>
+        <div class="row"><span class="lbl">Bands shown</span><span class="val" id="ib-nb">—</span></div>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3>Physics Checks</h3>
+      <div class="checks" id="checks">
+        <div class="check-row" id="chk1">
+          <span class="check-icon">○</span>
+          <span>P=0 → no gaps (free electron)</span>
+        </div>
+        <div class="check-row" id="chk2">
+          <span class="check-icon">○</span>
+          <span>Gap 1 at qa=π, E≈4.2 eV (a=0.3nm)</span>
+        </div>
+        <div class="check-row" id="chk3">
+          <span class="check-icon">○</span>
+          <span>a=0.6nm → E(π/a)≈1.05 eV (×¼)</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:0.65rem; color:var(--slate); line-height:1.5; padding: 0 2px;">
+      <strong style="color:var(--ink)">Legend:</strong><br>
+      <span style="color:var(--red)">——</span> f(qa) curve (left) / allowed bands (right)<br>
+      <span style="color:rgba(200,16,46,0.5)">▬▬</span> forbidden gap shading<br>
+      <span style="border-bottom:1px dashed var(--ink); display:inline-block; width:18px; vertical-align:middle;"></span> ±1 window / BZ boundary
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ─── Physical constants ───────────────────────────────────────────────────────
+const HBAR  = 1.054571817e-34; // J·s
+const ME    = 9.1093837015e-31; // kg
+const EV    = 1.602176634e-19;  // J per eV
+// E(qa, a) = ħ²(qa)²/(2m·a²)
+// Factor: ħ²/(2m) in eV·m² = HBAR²/(2*ME*EV) m²
+const EFACT_m2 = HBAR * HBAR / (2 * ME * EV); // eV·m²
+
+function E_from_qa(qa, a_nm) {
+  const a = a_nm * 1e-9;
+  return EFACT_m2 * (qa * qa) / (a * a);
+}
+
+function qa_from_E(E_eV, a_nm) {
+  const a = a_nm * 1e-9;
+  return Math.sqrt(E_eV / EFACT_m2) * a;
+}
+
+// KP function f(qa)
+function fkp(qa, P) {
+  if (qa < 1e-10) return 1 + P; // limit: cos(0)+P*1 = 1+P
+  return Math.cos(qa) + P * Math.sin(qa) / qa;
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let P = 3.0;
+let a_nm = 0.30;
+
+// ─── SVG dimensions ──────────────────────────────────────────────────────────
+const MARGIN = { top: 18, right: 22, bottom: 52, left: 58 };
+
+function getSVGDims(svgEl) {
+  const rect = svgEl.getBoundingClientRect();
+  return {
+    W: rect.width || 420,
+    H: rect.height || 380
+  };
+}
+
+// ─── LEFT PANEL: f(qa) vs qa ──────────────────────────────────────────────────
+function drawLeft() {
+  const svgEl = document.getElementById('svg-left');
+  const { W, H } = getSVGDims(svgEl);
+  const w = W - MARGIN.left - MARGIN.right;
+  const h = H - MARGIN.top - MARGIN.bottom;
+
+  const svg = d3.select('#svg-left');
+  svg.selectAll('*').remove();
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+
+  const g = svg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
+
+  // Scales
+  const qaMax = 4 * Math.PI;
+  const xScale = d3.scaleLinear().domain([0, qaMax]).range([0, w]);
+  const yScale = d3.scaleLinear().domain([-1.5, 1.5]).range([h, 0]);
+
+  // Data for f(qa) curve — 1200 points for smooth rendering
+  const N = 1200;
+  const pts = d3.range(N + 1).map(i => {
+    const qa = (i / N) * qaMax;
+    return { qa, f: fkp(qa, P) };
+  });
+
+  // ── Gap shading: where |f| > 1 ──────────────────────────────────────────
+  // We need continuous bands — find contiguous segments where |f|>1
+  // Build area patches clamped to [-1.5, 1.5]
+  const gapSegments = [];
+  let inGap = false;
+  let segStart = 0;
+  for (let i = 0; i <= N; i++) {
+    const { qa, f } = pts[i];
+    const isGap = Math.abs(f) > 1;
+    if (isGap && !inGap) { segStart = qa; inGap = true; }
+    if (!isGap && inGap) { gapSegments.push([segStart, qa]); inGap = false; }
+  }
+  if (inGap) gapSegments.push([segStart, qaMax]);
+
+  gapSegments.forEach(([q0, q1]) => {
+    g.append('rect')
+      .attr('x', xScale(q0))
+      .attr('y', yScale(1.5))
+      .attr('width', xScale(q1) - xScale(q0))
+      .attr('height', yScale(-1.5) - yScale(1.5))
+      .attr('fill', 'var(--gap-fill)')
+      .attr('stroke', 'none');
+  });
+
+  // ── Grid lines ────────────────────────────────────────────────────────────
+  g.append('line').attr('x1',0).attr('x2',w).attr('y1',yScale(0)).attr('y2',yScale(0))
+   .attr('stroke','rgba(42,26,14,0.08)').attr('stroke-width',1);
+
+  // ── ±1 dashed lines ───────────────────────────────────────────────────────
+  [1, -1].forEach(yv => {
+    g.append('line')
+      .attr('x1', 0).attr('x2', w)
+      .attr('y1', yScale(yv)).attr('y2', yScale(yv))
+      .attr('stroke', 'var(--ink)')
+      .attr('stroke-width', 1.2)
+      .attr('stroke-dasharray', '5,4');
+    g.append('text')
+      .attr('x', w + 4)
+      .attr('y', yScale(yv) + 4)
+      .attr('font-size', 9)
+      .attr('fill', 'var(--slate)')
+      .text(yv > 0 ? '+1' : '−1');
+  });
+
+  // ── Vertical dashed lines at qa = nπ ─────────────────────────────────────
+  for (let n = 1; n <= 4; n++) {
+    const qan = n * Math.PI;
+    g.append('line')
+      .attr('x1', xScale(qan)).attr('x2', xScale(qan))
+      .attr('y1', 0).attr('y2', h)
+      .attr('stroke', 'rgba(42,26,14,0.18)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '4,3');
+    // Energy annotation below x-axis
+    const E_n = E_from_qa(qan, a_nm);
+    g.append('text')
+      .attr('x', xScale(qan))
+      .attr('y', h + 30)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 9)
+      .attr('fill', 'var(--slate)')
+      .text(`${E_n.toFixed(1)}eV`);
+  }
+
+  // ── f(qa) curve ───────────────────────────────────────────────────────────
+  // Clip to y range for visual clarity
+  const line = d3.line()
+    .x(d => xScale(d.qa))
+    .y(d => yScale(Math.max(-1.5, Math.min(1.5, d.f))))
+    .defined(d => isFinite(d.f));
+
+  // Split into segments to handle discontinuities near qa=0
+  g.append('path')
+    .datum(pts.filter(d => d.qa > 0.02))
+    .attr('d', line)
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--red)')
+    .attr('stroke-width', 2)
+    .attr('stroke-linejoin', 'round');
+
+  // ── Axes ──────────────────────────────────────────────────────────────────
+  const xAxis = d3.axisBottom(xScale)
+    .tickValues([0, Math.PI, 2*Math.PI, 3*Math.PI, 4*Math.PI])
+    .tickFormat(d => {
+      const n = Math.round(d / Math.PI);
+      if (n === 0) return '0';
+      if (n === 1) return 'π';
+      return `${n}π`;
+    });
+
+  const yAxis = d3.axisLeft(yScale)
+    .tickValues([-1.5, -1, -0.5, 0, 0.5, 1, 1.5]);
+
+  g.append('g').attr('transform', `translate(0,${h})`).call(xAxis)
+    .call(ax => ax.select('.domain').attr('stroke','var(--ink)'))
+    .call(ax => ax.selectAll('.tick line').attr('stroke','rgba(42,26,14,0.2)'))
+    .call(ax => ax.selectAll('text').attr('fill','var(--slate)').attr('font-size',10));
+
+  g.append('g').call(yAxis)
+    .call(ax => ax.select('.domain').attr('stroke','var(--ink)'))
+    .call(ax => ax.selectAll('.tick line').attr('stroke','rgba(42,26,14,0.2)'))
+    .call(ax => ax.selectAll('text').attr('fill','var(--slate)').attr('font-size',10));
+
+  // Axis labels
+  g.append('text')
+    .attr('x', w / 2).attr('y', h + 44)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11).attr('fill', 'var(--ink)').attr('font-weight', 500)
+    .text('qa  (dimensionless)');
+
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -h / 2).attr('y', -44)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11).attr('fill', 'var(--ink)').attr('font-weight', 500)
+    .text('f(qa) = cos(qa) + P·sin(qa)/(qa)');
+
+  // Panel title annotation
+  g.append('text')
+    .attr('x', 6).attr('y', -4)
+    .attr('font-size', 9).attr('fill', 'var(--slate)')
+    .text(`Shaded = |f|>1 (forbidden gap)   P = ${P.toFixed(1)}`);
+}
+
+// ─── RIGHT PANEL: Band structure E vs K ───────────────────────────────────────
+function drawRight() {
+  const svgEl = document.getElementById('svg-right');
+  const { W, H } = getSVGDims(svgEl);
+  const w = W - MARGIN.left - MARGIN.right;
+  const h = H - MARGIN.top - MARGIN.bottom;
+
+  const svg = d3.select('#svg-right');
+  svg.selectAll('*').remove();
+
+  const qaMax = 4 * Math.PI;
+  const E_max = E_from_qa(qaMax, a_nm);
+
+  svg.attr('viewBox', `0 0 ${W} ${H}`).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${MARGIN.left},${MARGIN.top})`);
+
+  // Scales: K normalized to K/(π/a), range -1..1
+  const xScale = d3.scaleLinear().domain([-1, 1]).range([0, w]);
+  const yScale = d3.scaleLinear().domain([0, E_max]).range([h, 0]);
+
+  // ── Horizontal gap bands ──────────────────────────────────────────────────
+  // Scan E to find forbidden gap intervals
+  const NE = 2000;
+  const gapBandsE = [];
+  let gapStart = null;
+  for (let i = 0; i <= NE; i++) {
+    const E = (i / NE) * E_max;
+    const qa = qa_from_E(E, a_nm);
+    const f = fkp(qa, P);
+    const isGap = Math.abs(f) > 1 && E > 0.001;
+    if (isGap && gapStart === null) gapStart = E;
+    if (!isGap && gapStart !== null) {
+      gapBandsE.push([gapStart, E]);
+      gapStart = null;
+    }
+  }
+  if (gapStart !== null) gapBandsE.push([gapStart, E_max]);
+
+  gapBandsE.forEach(([E0, E1]) => {
+    g.append('rect')
+      .attr('x', 0)
+      .attr('y', yScale(E1))
+      .attr('width', w)
+      .attr('height', yScale(E0) - yScale(E1))
+      .attr('fill', 'var(--gap-fill)')
+      .attr('stroke', 'none');
+    // subtle border lines
+    [E0, E1].forEach(E => {
+      g.append('line')
+        .attr('x1', 0).attr('x2', w)
+        .attr('y1', yScale(E)).attr('y2', yScale(E))
+        .attr('stroke', 'var(--gap-stroke)')
+        .attr('stroke-width', 0.8);
+    });
+  });
+
+  // ── BZ boundary dashed lines ──────────────────────────────────────────────
+  [-1, 0, 1].forEach(kn => {
+    g.append('line')
+      .attr('x1', xScale(kn)).attr('x2', xScale(kn))
+      .attr('y1', 0).attr('y2', h)
+      .attr('stroke', 'rgba(42,26,14,0.18)')
+      .attr('stroke-width', kn === 0 ? 1 : 1.2)
+      .attr('stroke-dasharray', kn === 0 ? '3,3' : '5,4');
+  });
+
+  // ── Band curves ───────────────────────────────────────────────────────────
+  // Strategy: scan E continuously; for each E where |f|≤1, K = arccos(f)/a
+  // Reduced zone: K in [-π/a, π/a], normalized K_norm = K/(π/a) = Ka/π = arccos(f)/π
+  // We build continuous band paths by following E upward, emitting points
+  // and breaking paths at gap boundaries.
+
+  const bandPts_pos = []; // K_norm ≥ 0 side
+  const bandPts_neg = []; // K_norm ≤ 0 side (mirror)
+
+  let currentBand_pos = [];
+  let currentBand_neg = [];
+
+  for (let i = 0; i <= NE; i++) {
+    const E = (i / NE) * E_max;
+    if (E < 1e-6) continue;
+    const qa = qa_from_E(E, a_nm);
+    const f = fkp(qa, P);
+
+    if (Math.abs(f) <= 1) {
+      // Ka = arccos(f), K_norm = Ka/π  ∈ [0,1]
+      const Ka = Math.acos(Math.max(-1, Math.min(1, f)));
+      const K_norm = Ka / Math.PI;
+      currentBand_pos.push({ E, K: K_norm });
+      currentBand_neg.push({ E, K: -K_norm });
+    } else {
+      // gap — break the current band segment
+      if (currentBand_pos.length > 1) {
+        bandPts_pos.push([...currentBand_pos]);
+        bandPts_neg.push([...currentBand_neg]);
+      }
+      currentBand_pos = [];
+      currentBand_neg = [];
+    }
+  }
+  if (currentBand_pos.length > 1) {
+    bandPts_pos.push([...currentBand_pos]);
+    bandPts_neg.push([...currentBand_neg]);
+  }
+
+  const lineGen = d3.line()
+    .x(d => xScale(d.K))
+    .y(d => yScale(d.E))
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  // Draw each band segment (positive K side + mirrored negative K side)
+  const allBands = [...bandPts_pos, ...bandPts_neg];
+  allBands.forEach(seg => {
+    g.append('path')
+      .datum(seg)
+      .attr('d', lineGen)
+      .attr('fill', 'none')
+      .attr('stroke', 'var(--red)')
+      .attr('stroke-width', 2)
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke-linecap', 'round');
+  });
+
+  // ── Free-electron reference (P=0, very faint) ────────────────────────────
+  if (P > 0.2) {
+    // Draw the bare parabola E = ħ²K²/(2m) for comparison; K_norm ∈ [-1,1]
+    const freeE = d3.range(101).map(i => {
+      const Kn = (i / 100) * 2 - 1; // -1 to 1
+      const K_actual = Kn * Math.PI / (a_nm * 1e-9); // K in m⁻¹
+      const E_free = HBAR * HBAR * K_actual * K_actual / (2 * ME * EV);
+      return { K: Kn, E: E_free };
+    }).filter(d => d.E <= E_max);
+    g.append('path')
+      .datum(freeE)
+      .attr('d', d3.line().x(d => xScale(d.K)).y(d => yScale(d.E)))
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(84,84,84,0.22)')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '3,3');
+  }
+
+  // ── Axes ──────────────────────────────────────────────────────────────────
+  const xAxis = d3.axisBottom(xScale)
+    .tickValues([-1, -0.5, 0, 0.5, 1])
+    .tickFormat(d => {
+      if (d === -1) return '−π/a';
+      if (d === 1) return 'π/a';
+      if (d === 0) return '0';
+      return `${d > 0 ? '+' : ''}${d}π/a`;
+    });
+
+  // E axis: dynamic ticks
+  const nTicks = Math.min(8, Math.ceil(E_max / 2));
+  const eStep = E_max / nTicks;
+  const eTicks = d3.range(0, E_max + 0.01, eStep).map(e => +e.toFixed(2));
+
+  const yAxis = d3.axisLeft(yScale)
+    .tickValues(eTicks)
+    .tickFormat(d => d.toFixed(1));
+
+  g.append('g').attr('transform', `translate(0,${h})`).call(xAxis)
+    .call(ax => ax.select('.domain').attr('stroke','var(--ink)'))
+    .call(ax => ax.selectAll('.tick line').attr('stroke','rgba(42,26,14,0.2)'))
+    .call(ax => ax.selectAll('text').attr('fill','var(--slate)').attr('font-size',9));
+
+  g.append('g').call(yAxis)
+    .call(ax => ax.select('.domain').attr('stroke','var(--ink)'))
+    .call(ax => ax.selectAll('.tick line').attr('stroke','rgba(42,26,14,0.2)'))
+    .call(ax => ax.selectAll('text').attr('fill','var(--slate)').attr('font-size',10));
+
+  // Axis labels
+  g.append('text')
+    .attr('x', w / 2).attr('y', h + 44)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11).attr('fill', 'var(--ink)').attr('font-weight', 500)
+    .text('Bloch wavevector K');
+
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -h / 2).attr('y', -44)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11).attr('fill', 'var(--ink)').attr('font-weight', 500)
+    .text('Energy E (eV)');
+
+  // gap labels
+  gapBandsE.forEach(([E0, E1], idx) => {
+    const Emid = (E0 + E1) / 2;
+    const gw = E1 - E0;
+    if (yScale(E1) < h - 2 && gw > 0.05 * E_max / gapBandsE.length) {
+      g.append('text')
+        .attr('x', w - 4)
+        .attr('y', yScale(Emid) + 3)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 8)
+        .attr('fill', 'var(--red)')
+        .attr('opacity', 0.7)
+        .text(`gap ${idx + 1}`);
+    }
+  });
+
+  // Panel annotation
+  g.append('text')
+    .attr('x', 6).attr('y', -4)
+    .attr('font-size', 9).attr('fill', 'var(--slate)')
+    .text(`Gray dashes = free-electron parabola (P=0 reference)`);
+}
+
+// ─── Info panel update ────────────────────────────────────────────────────────
+function updateInfo() {
+  const E_pi = E_from_qa(Math.PI, a_nm);
+  document.getElementById('ib-P').textContent = P.toFixed(2);
+  document.getElementById('ib-a').textContent = `${a_nm.toFixed(2)} nm`;
+  document.getElementById('ib-E1').textContent = `${E_pi.toFixed(3)} eV`;
+
+  // Find first gap: scan E near qa=π (E_pi)
+  const NE = 4000;
+  const E_max = E_from_qa(4 * Math.PI, a_nm);
+  let firstGapStart = null, firstGapEnd = null;
+  let inGap = false;
+  let gapCount = 0;
+  for (let i = 1; i <= NE; i++) {
+    const E = (i / NE) * E_max;
+    const qa = qa_from_E(E, a_nm);
+    const f = fkp(qa, P);
+    const isGap = Math.abs(f) > 1 && E > 0.001;
+    if (isGap && !inGap) {
+      if (gapCount === 0) firstGapStart = E;
+      inGap = true;
+    }
+    if (!isGap && inGap) {
+      if (gapCount === 0) firstGapEnd = E;
+      gapCount++;
+      inGap = false;
+    }
+  }
+
+  if (firstGapStart !== null && firstGapEnd !== null) {
+    const gw = firstGapEnd - firstGapStart;
+    const gc = (firstGapStart + firstGapEnd) / 2;
+    document.getElementById('ib-gc').textContent = `${gc.toFixed(3)} eV`;
+    document.getElementById('ib-gw').textContent = `${gw.toFixed(3)} eV`;
+  } else {
+    document.getElementById('ib-gc').textContent = 'none';
+    document.getElementById('ib-gw').textContent = '—';
+  }
+  document.getElementById('ib-nb').textContent = gapCount > 0 ? `${gapCount} gap(s)` : 'none';
+}
+
+// ─── Physics checks ───────────────────────────────────────────────────────────
+function updateChecks() {
+  // Check 1: P=0 → no gaps
+  const chk1El = document.getElementById('chk1');
+  if (P < 0.05) {
+    // Verify: scan f(qa) at P≈0, all |f|≤1?
+    let allAllowed = true;
+    for (let i = 1; i <= 200; i++) {
+      const qa = (i / 200) * 4 * Math.PI;
+      if (Math.abs(fkp(qa, 0.0)) > 1.001) { allAllowed = false; break; }
+    }
+    chk1El.children[0].textContent = allAllowed ? '✓' : '✗';
+    chk1El.children[0].className = `check-icon ${allAllowed ? 'pass' : 'fail'}`;
+  } else {
+    chk1El.children[0].textContent = P < 0.5 ? '◉' : '○';
+    chk1El.children[0].className = 'check-icon';
+  }
+
+  // Check 2: Gap 1 centers near qa=π, E≈4.2 eV for a=0.3nm
+  const E_pi_ref = E_from_qa(Math.PI, 0.30);
+  const chk2El = document.getElementById('chk2');
+  if (Math.abs(a_nm - 0.30) < 0.005 && P > 0.5) {
+    // find first gap center
+    const NE = 2000;
+    const E_max = E_from_qa(4 * Math.PI, a_nm);
+    let gapStart = null, gapEnd = null;
+    let inGap = false;
+    for (let i = 1; i <= NE; i++) {
+      const E = (i / NE) * E_max;
+      const qa = qa_from_E(E, a_nm);
+      const isGap = Math.abs(fkp(qa, P)) > 1 && E > 0.001;
+      if (isGap && !inGap) { gapStart = E; inGap = true; }
+      if (!isGap && inGap) { gapEnd = E; break; }
+    }
+    if (gapStart && gapEnd) {
+      const gc = (gapStart + gapEnd) / 2;
+      const pass = Math.abs(gc - E_pi_ref) < 0.5; // within 0.5 eV of expected
+      chk2El.children[0].textContent = pass ? '✓' : '✗';
+      chk2El.children[0].className = `check-icon ${pass ? 'pass' : 'fail'}`;
+    }
+  } else {
+    chk2El.children[0].textContent = '○';
+    chk2El.children[0].className = 'check-icon';
+  }
+
+  // Check 3: a=0.6nm → E(π/a) ≈ 1.05 eV ≈ 4.18/4
+  const E_pi_06 = E_from_qa(Math.PI, 0.60);
+  const chk3El = document.getElementById('chk3');
+  if (Math.abs(a_nm - 0.60) < 0.01) {
+    const pass = Math.abs(E_pi_06 - E_pi_ref / 4) < 0.05;
+    chk3El.children[0].textContent = pass ? '✓' : '✗';
+    chk3El.children[0].className = `check-icon ${pass ? 'pass' : 'fail'}`;
+  } else {
+    chk3El.children[0].textContent = '○';
+    chk3El.children[0].className = 'check-icon';
+  }
+}
+
+// ─── Render all ───────────────────────────────────────────────────────────────
+function renderAll() {
+  drawLeft();
+  drawRight();
+  updateInfo();
+  updateChecks();
+}
+
+// ─── Slider wiring ────────────────────────────────────────────────────────────
+document.getElementById('slider-P').addEventListener('input', function () {
+  P = +this.value;
+  document.getElementById('val-P').textContent = P.toFixed(1);
+  renderAll();
+});
+document.getElementById('slider-a').addEventListener('input', function () {
+  a_nm = +this.value;
+  document.getElementById('val-a').textContent = `${a_nm.toFixed(2)} nm`;
+  renderAll();
+});
+
+// ─── Initial size and draw ────────────────────────────────────────────────────
+function setSVGHeights() {
+  // Make SVGs square-ish: use container width
+  const leftPanel  = document.querySelector('.panel:nth-child(1)');
+  const rightPanel = document.querySelector('.panel:nth-child(2)');
+  const leftW  = leftPanel.getBoundingClientRect().width;
+  const rightW = rightPanel.getBoundingClientRect().width;
+  const H = Math.max(320, Math.min(480, leftW * 0.82));
+  document.getElementById('svg-left').style.height  = `${H}px`;
+  document.getElementById('svg-right').style.height = `${H}px`;
+}
+
+// Run on load
+window.addEventListener('load', () => {
+  setSVGHeights();
+  renderAll();
+});
+window.addEventListener('resize', () => {
+  setSVGHeights();
+  renderAll();
+});
+
+// ─── Self-test on load (console) ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Physics check P1
+  let noGaps = true;
+  for (let i = 1; i <= 300; i++) {
+    const qa = (i / 300) * 4 * Math.PI;
+    if (Math.abs(fkp(qa, 0)) > 1 + 1e-9) { noGaps = false; break; }
+  }
+  console.log('[P1] P=0 → no gaps:', noGaps ? 'PASS ✓' : 'FAIL ✗');
+
+  // Physics check P2
+  const E_pi_03 = E_from_qa(Math.PI, 0.30);
+  console.log(`[P2] E(qa=π, a=0.3nm) = ${E_pi_03.toFixed(3)} eV (expect ~4.18 eV):`, Math.abs(E_pi_03 - 4.18) < 0.1 ? 'PASS ✓' : 'FAIL ✗');
+
+  // Physics check P3
+  const E_pi_06 = E_from_qa(Math.PI, 0.60);
+  const ratio = E_pi_03 / E_pi_06;
+  console.log(`[P3] E(π/a,0.3nm)/E(π/a,0.6nm) = ${ratio.toFixed(3)} (expect 4.0):`, Math.abs(ratio - 4.0) < 0.01 ? 'PASS ✓' : 'FAIL ✗');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Counting Solves Towers of Hanoi</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    width: 900px;
+    min-height: 550px;
+  }
+  #app {
+    width: 900px;
+    min-height: 550px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px 10px 18px;
+  }
+  h1 {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2A1A0E;
+    border-bottom: 2px solid #C8102E;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  .main-row {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+  }
+  /* LEFT: Binary counter */
+  .left-panel {
+    width: 400px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .panel-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .step-counter {
+    font-size: 14px;
+    font-weight: 900;
+    color: #2A1A0E;
+    margin-bottom: 10px;
+  }
+  .bit-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .bit-cell {
+    width: 68px;
+    height: 68px;
+    border: 2.5px solid #2A1A0E;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    transition: background 0.25s, border-color 0.25s;
+    position: relative;
+  }
+  .bit-cell.one {
+    background: #C8102E;
+    border-color: #C8102E;
+  }
+  .bit-cell.zero {
+    background: #FFFFFF;
+    border-color: #2A1A0E;
+  }
+  .bit-cell.flipped {
+    box-shadow: 0 0 0 3px #E07020;
+  }
+  .bit-val {
+    font-size: 30px;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .bit-cell.one .bit-val { color: #FFFFFF; }
+  .bit-cell.zero .bit-val { color: #2A1A0E; }
+  .bit-label {
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .bit-cell.one .bit-label { color: rgba(255,255,255,0.8); }
+  .bit-cell.zero .bit-label { color: #545454; }
+  .binary-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: #2A1A0E;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .binary-number span.highlighted { color: #C8102E; }
+  .corr-table {
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    border-radius: 2px;
+    padding: 10px 14px;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .corr-table-title {
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #545454;
+    margin-bottom: 6px;
+  }
+  .corr-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2A1A0E;
+    line-height: 1.8;
+  }
+  .corr-row span.hl { color: #C8102E; font-weight: 900; }
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  button {
+    background: #2A1A0E;
+    color: #FFFFFF;
+    border: none;
+    padding: 6px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: #C8102E; }
+  button:disabled { background: #D4D4D4; cursor: not-allowed; }
+  button.red-btn { background: #C8102E; }
+  button.red-btn:hover { background: #a00020; }
+  .speed-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #545454;
+  }
+  input[type=range] {
+    accent-color: #C8102E;
+    cursor: pointer;
+    width: 80px;
+  }
+  /* RIGHT: Hanoi pegs */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #hanoi-svg { display: block; }
+  .peg-labels {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    padding: 0 10px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #545454;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Binary Counting Solves Towers of Hanoi</h1>
+  <div class="main-row">
+    <!-- LEFT: Binary counter -->
+    <div class="left-panel">
+      <div class="panel-label">4-bit Binary Counter (n=4 disks)</div>
+      <div class="step-counter" id="step-counter">Step 0 of 15</div>
+      <div class="bit-row" id="bit-row">
+        <!-- filled by JS -->
+      </div>
+      <div class="binary-number" id="binary-number">0000</div>
+
+      <div class="corr-table">
+        <div class="corr-table-title">This Step's Correspondence</div>
+        <div class="corr-row">
+          <span>Step:</span> <span id="corr-step">0</span>
+        </div>
+        <div class="corr-row">
+          <span>Binary:</span> <span id="corr-binary">0000</span>
+        </div>
+        <div class="corr-row">
+          <span>Bit flipped:</span> <span id="corr-bit" class="hl">—</span>
+        </div>
+        <div class="corr-row">
+          <span>Disk moved:</span> <span id="corr-disk" class="hl">—</span>
+        </div>
+        <div class="corr-row">
+          <span>From peg:</span> <span id="corr-from" class="hl">—</span>
+        </div>
+        <div class="corr-row">
+          <span>To peg:</span> <span id="corr-to" class="hl">—</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="prev-btn" disabled>← Prev</button>
+        <button id="next-btn">Next →</button>
+        <button id="reset-btn" class="red-btn">Reset</button>
+      </div>
+      <div class="controls">
+        <button id="play-btn">Auto-play</button>
+        <div class="speed-row">
+          <span>Speed:</span>
+          <input type="range" id="speed-slider" min="0.5" max="4" step="0.5" value="1">
+          <span id="speed-val">1×</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Hanoi -->
+    <div class="right-panel">
+      <div class="panel-label">Towers of Hanoi (4 Disks)</div>
+      <svg id="hanoi-svg" width="440" height="400"></svg>
+      <div class="peg-labels">
+        <span>A (Source)</span>
+        <span>B (Auxiliary)</span>
+        <span>C (Destination)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const N = 4;
+const TOTAL_STEPS = Math.pow(2, N) - 1; // 15
+
+// Disk colors by size (0=smallest, 3=largest)
+const DISK_COLORS = ['#C8102E', '#E07020', '#4472C4', '#2A1A0E'];
+const PEG_NAMES = ['A', 'B', 'C'];
+
+// ─── Hanoi algorithm: generate all moves ──────────────────
+// Returns array of {disk, from, to} for each step
+function generateHanoiMoves(n) {
+  const moves = [];
+  function hanoi(disk, from, to, aux) {
+    if (disk < 0) return;
+    hanoi(disk - 1, from, aux, to);
+    moves.push({ disk, from, to });
+    hanoi(disk - 1, aux, to, from);
+  }
+  hanoi(n - 1, 0, 2, 1);
+  return moves;
+}
+
+const moves = generateHanoiMoves(N);
+
+// ─── Peg state tracking ───────────────────────────────────
+// pegs[i] = array of disk sizes (bottom→top), initially all on peg 0
+function initPegs() {
+  return [
+    [3, 2, 1, 0], // peg A: disks 3,2,1,0 (3 at bottom)
+    [],
+    []
+  ];
+}
+
+let currentStep = 0;
+let pegs = initPegs();
+let autoTimer = null;
+
+// ─── SVG setup for Hanoi ──────────────────────────────────
+const hSvg = d3.select('#hanoi-svg');
+const HW = 440, HH = 400;
+const BASE_Y = HH - 30;
+const PEG_H = 280;
+const PEG_W = 6;
+const DISK_H = 22;
+const DISK_MAX_W = 120;
+const DISK_MIN_W = 36;
+const PEG_X = [HW/6, HW/2, 5*HW/6];
+
+// Base platform
+hSvg.append('rect')
+  .attr('x', 10).attr('y', BASE_Y + 2).attr('width', HW - 20).attr('height', 10)
+  .attr('fill', '#2A1A0E').attr('rx', 2);
+
+// Pegs
+PEG_X.forEach(px => {
+  hSvg.append('rect')
+    .attr('x', px - PEG_W/2).attr('y', BASE_Y - PEG_H).attr('width', PEG_W).attr('height', PEG_H)
+    .attr('fill', '#545454').attr('rx', 2);
+});
+
+// Disk group
+const diskGroup = hSvg.append('g');
+
+function diskWidth(size) {
+  return DISK_MIN_W + (DISK_MAX_W - DISK_MIN_W) * (size / (N - 1));
+}
+
+function drawHanoi() {
+  const allDisks = [];
+  pegs.forEach((peg, pegIdx) => {
+    peg.forEach((diskSize, stackPos) => {
+      const w = diskWidth(diskSize);
+      const x = PEG_X[pegIdx] - w / 2;
+      const y = BASE_Y - DISK_H * (stackPos + 1) - 2;
+      allDisks.push({ diskSize, pegIdx, stackPos, x, y, w });
+    });
+  });
+
+  const rects = diskGroup.selectAll('rect').data(allDisks, d => d.diskSize);
+  const texts = diskGroup.selectAll('text').data(allDisks, d => d.diskSize);
+
+  rects.join(
+    enter => enter.append('rect')
+      .attr('rx', 4).attr('height', DISK_H - 3)
+      .attr('fill', d => DISK_COLORS[d.diskSize])
+      .attr('x', d => d.x).attr('y', d => d.y).attr('width', d => d.w),
+    update => update.transition().duration(350)
+      .attr('x', d => d.x).attr('y', d => d.y).attr('width', d => d.w)
+      .attr('fill', d => DISK_COLORS[d.diskSize])
+  );
+
+  texts.join(
+    enter => enter.append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-family', 'Montserrat').attr('font-size', 9).attr('font-weight', '700')
+      .attr('fill', d => d.diskSize === 3 ? '#FFFFFF' : '#FFFFFF')
+      .attr('pointer-events', 'none')
+      .attr('x', d => d.x + d.w/2).attr('y', d => d.y + (DISK_H - 3)/2)
+      .text(d => 'Disk ' + d.diskSize),
+    update => update.transition().duration(350)
+      .attr('x', d => d.x + d.w/2).attr('y', d => d.y + (DISK_H - 3)/2)
+  );
+}
+
+// ─── Binary counter display ───────────────────────────────
+function buildBitRow() {
+  const row = document.getElementById('bit-row');
+  row.innerHTML = '';
+  for (let b = N - 1; b >= 0; b--) {
+    const cell = document.createElement('div');
+    cell.className = 'bit-cell zero';
+    cell.id = 'bit-' + b;
+    cell.innerHTML = `<span class="bit-val" id="bitval-${b}">0</span><span class="bit-label">Bit ${b} / Disk ${b}</span>`;
+    row.appendChild(cell);
+  }
+}
+
+function updateBitDisplay(step, flippedBit) {
+  const binary = step.toString(2).padStart(N, '0');
+  document.getElementById('binary-number').textContent = binary;
+
+  for (let b = 0; b < N; b++) {
+    const bitVal = (step >> b) & 1;
+    const cell = document.getElementById('bit-' + b);
+    const valEl = document.getElementById('bitval-' + b);
+    valEl.textContent = bitVal;
+    cell.className = 'bit-cell ' + (bitVal ? 'one' : 'zero') + (b === flippedBit ? ' flipped' : '');
+  }
+}
+
+function getFlippedBit(prev, curr) {
+  if (prev === curr) return -1;
+  const xor = prev ^ curr;
+  // find lowest set bit
+  for (let b = 0; b < N; b++) {
+    if ((xor >> b) & 1) return b;
+  }
+  return -1;
+}
+
+// ─── State update ─────────────────────────────────────────
+function updateDisplay() {
+  const step = currentStep;
+  const prevStep = step - 1;
+  const flippedBit = step > 0 ? getFlippedBit(step - 1, step) : -1;
+
+  document.getElementById('step-counter').textContent = `Step ${step} of ${TOTAL_STEPS}`;
+  updateBitDisplay(step, flippedBit);
+
+  document.getElementById('corr-step').textContent = step;
+  document.getElementById('corr-binary').textContent = step.toString(2).padStart(N, '0');
+
+  if (flippedBit >= 0 && step > 0) {
+    const mv = moves[step - 1];
+    document.getElementById('corr-bit').textContent = `Bit ${flippedBit}`;
+    document.getElementById('corr-disk').textContent = `Disk ${mv.disk}`;
+    document.getElementById('corr-from').textContent = PEG_NAMES[mv.from];
+    document.getElementById('corr-to').textContent = PEG_NAMES[mv.to];
+  } else {
+    document.getElementById('corr-bit').textContent = '—';
+    document.getElementById('corr-disk').textContent = '—';
+    document.getElementById('corr-from').textContent = '—';
+    document.getElementById('corr-to').textContent = '—';
+  }
+
+  document.getElementById('prev-btn').disabled = step === 0;
+  document.getElementById('next-btn').disabled = step === TOTAL_STEPS;
+
+  drawHanoi();
+}
+
+function applyMove(mv) {
+  const top = pegs[mv.from].pop();
+  pegs[mv.to].push(top);
+}
+
+function undoMove(mv) {
+  const top = pegs[mv.to].pop();
+  pegs[mv.from].push(top);
+}
+
+function stepForward() {
+  if (currentStep >= TOTAL_STEPS) return;
+  applyMove(moves[currentStep]);
+  currentStep++;
+  updateDisplay();
+}
+
+function stepBack() {
+  if (currentStep <= 0) return;
+  currentStep--;
+  undoMove(moves[currentStep]);
+  updateDisplay();
+}
+
+function reset() {
+  stopAuto();
+  currentStep = 0;
+  pegs = initPegs();
+  updateDisplay();
+}
+
+// ─── Auto-play ────────────────────────────────────────────
+let isPlaying = false;
+
+function getInterval() {
+  const speed = +document.getElementById('speed-slider').value;
+  return Math.round(700 / speed);
+}
+
+function startAuto() {
+  if (isPlaying) return;
+  isPlaying = true;
+  document.getElementById('play-btn').textContent = 'Pause';
+  document.getElementById('play-btn').classList.add('red-btn');
+  function tick() {
+    if (currentStep >= TOTAL_STEPS) {
+      stopAuto();
+      return;
+    }
+    stepForward();
+    autoTimer = setTimeout(tick, getInterval());
+  }
+  autoTimer = setTimeout(tick, getInterval());
+}
+
+function stopAuto() {
+  isPlaying = false;
+  clearTimeout(autoTimer);
+  document.getElementById('play-btn').textContent = 'Auto-play';
+  document.getElementById('play-btn').classList.remove('red-btn');
+}
+
+document.getElementById('next-btn').addEventListener('click', () => { stopAuto(); stepForward(); });
+document.getElementById('prev-btn').addEventListener('click', () => { stopAuto(); stepBack(); });
+document.getElementById('reset-btn').addEventListener('click', reset);
+document.getElementById('play-btn').addEventListener('click', () => {
+  if (isPlaying) stopAuto(); else startAuto();
+});
+document.getElementById('speed-slider').addEventListener('input', () => {
+  document.getElementById('speed-val').textContent = document.getElementById('speed-slider').value + '×';
+});
+
+// ─── Init ─────────────────────────────────────────────────
+buildBitRow();
+updateDisplay();
+</script>
+</body>
+</html>

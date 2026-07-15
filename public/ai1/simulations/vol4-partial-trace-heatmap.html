@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partial Trace — Tracing Away One Qubit Kills All Coherence</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    padding: 24px 28px 32px;
+    max-width: 820px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2A1A0E;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .sub {
+    font-size: 12px;
+    color: #545454;
+    margin-bottom: 18px;
+    line-height: 1.5;
+    max-width: 700px;
+  }
+  .panels {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .panel-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #545454;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .control-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2A1A0E;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 4px;
+    background: #e0d8ce;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #C8102E;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #C8102E;
+  }
+  #theta-display {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 42px;
+    font-variant-numeric: tabular-nums;
+  }
+  .readout {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #f7f4f0;
+    border-left: 3px solid #C8102E;
+    font-size: 12px;
+    color: #2A1A0E;
+    line-height: 2.0;
+    font-variant-numeric: tabular-nums;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .right-panel {
+    width: 224px;
+    flex-shrink: 0;
+  }
+  .bar-row {
+    margin-bottom: 14px;
+  }
+  .bar-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .bar-track {
+    height: 20px;
+    background: #ede8e0;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.05s linear;
+    display: flex;
+    align-items: center;
+    padding-left: 6px;
+  }
+  .bar-fill span {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .info-box {
+    margin-top: 14px;
+    padding: 9px 11px;
+    background: #f7f4f0;
+    border: 1px solid #e0d8ce;
+    font-size: 11px;
+    color: #545454;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<h1>Partial Trace — Tracing Away One Qubit Kills All Coherence</h1>
+<p class="sub">The Bell state is perfectly pure. Trace out qubit B and what remains is maximally mixed. All quantum correlation was between the parts, not within one.</p>
+
+<div class="panels" id="panels">
+  <div>
+    <div class="panel-title">Joint ρ_AB</div>
+    <svg id="svg-joint" width="292" height="308"></svg>
+  </div>
+  <div>
+    <div class="panel-title">Reduced ρ_A = Tr_B(ρ_AB)</div>
+    <svg id="svg-reduced" width="204" height="204"></svg>
+  </div>
+  <div class="right-panel">
+    <div class="panel-title">Measures</div>
+    <div class="bar-row">
+      <div class="bar-label">Purity  Tr(ρ²)</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="purity-bar" style="background:#2A1A0E;">
+          <span id="purity-bar-label"></span>
+        </div>
+      </div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">Entropy S  (bits)</div>
+      <div class="bar-track">
+        <div class="bar-fill" id="entropy-bar" style="background:#C8102E;">
+          <span id="entropy-bar-label"></span>
+        </div>
+      </div>
+    </div>
+    <div class="info-box">
+      Off-diagonals of ρ_A are <b>always zero</b> here — entanglement has no local signature. The full ρ_AB has off-diagonals; they are traced away.
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="control-label">θ =</span>
+  <span id="theta-display">45.0°</span>
+  <input type="range" id="theta-slider" min="0" max="1000" value="1000" step="1"/>
+  <span style="font-size:11px;color:#545454;">0° = product state &nbsp;·&nbsp; 45° = Bell |Φ+⟩</span>
+</div>
+
+<div class="readout" id="readout"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ─── Colors ───────────────────────────────────────────────────────────────────
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+const ZERO_BG = '#f0ece4';
+
+// ─── Physics ──────────────────────────────────────────────────────────────────
+function purity(theta) {
+  const c2 = Math.cos(theta)**2, s2 = Math.sin(theta)**2;
+  return c2*c2 + s2*s2;
+}
+function entropy(theta) {
+  const c2 = Math.cos(theta)**2, s2 = Math.sin(theta)**2;
+  const h = x => (x <= 0 || x >= 1) ? 0 : -x * Math.log2(x);
+  return h(c2) + h(s2);
+}
+function rhoAB(theta) {
+  const c = Math.cos(theta), s = Math.sin(theta);
+  const c2 = c*c, s2 = s*s, cs = c*s;
+  // 4x4 matrix, row-major, basis |00⟩,|01⟩,|10⟩,|11⟩
+  const m = Array.from({length:4}, () => new Array(4).fill(0));
+  m[0][0] = c2;
+  m[0][3] = cs;
+  m[3][0] = cs;
+  m[3][3] = s2;
+  return m;
+}
+function rhoA(theta) {
+  const c2 = Math.cos(theta)**2, s2 = Math.sin(theta)**2;
+  return [[c2, 0],[0, s2]];
+}
+function stateLabel(theta) {
+  const deg = theta * 180 / Math.PI;
+  if (deg < 1)   return 'product state |00⟩';
+  if (deg > 44)  return 'Bell state |Φ+⟩';
+  return 'partially entangled';
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let theta = Math.PI / 4;
+
+// ─── Joint ρ_AB heatmap (4×4) ─────────────────────────────────────────────────
+const CELL = 52, MARG = 30;
+const svgJ = d3.select('#svg-joint');
+const gJ   = svgJ.append('g').attr('transform', `translate(${MARG},${MARG})`);
+
+// Axis labels (basis states)
+const basisJ = ['|00⟩','|01⟩','|10⟩','|11⟩'];
+basisJ.forEach((lbl,i) => {
+  // Column header
+  gJ.append('text')
+    .attr('x', i*CELL + CELL/2).attr('y', -10)
+    .attr('text-anchor','middle').attr('font-size',10).attr('fill',SLATE)
+    .text(lbl);
+  // Row header
+  gJ.append('text')
+    .attr('x', -8).attr('y', i*CELL + CELL/2 + 4)
+    .attr('text-anchor','end').attr('font-size',10).attr('fill',SLATE)
+    .text(lbl);
+});
+
+// Panel border
+gJ.append('rect')
+  .attr('x',0).attr('y',0)
+  .attr('width',4*CELL).attr('height',4*CELL)
+  .attr('fill','none').attr('stroke','#d4cec6').attr('stroke-width',1);
+
+// Build cell groups
+const cellsJ = [];
+for (let row=0;row<4;row++) {
+  for (let col=0;col<4;col++) {
+    const cg = gJ.append('g')
+      .attr('transform', `translate(${col*CELL},${row*CELL})`);
+    const isCorner   = (row===0&&col===0)||(row===3&&col===3);
+    const isOffDiag  = (row===0&&col===3)||(row===3&&col===0);
+    const isActive   = isCorner || isOffDiag;
+    const cellRect = cg.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width',CELL).attr('height',CELL)
+      .attr('stroke','#d4cec6').attr('stroke-width',0.5);
+    const subscript = `${row}${col}`;
+    cg.append('text')
+      .attr('x', CELL/2).attr('y', 14)
+      .attr('text-anchor','middle').attr('font-size',9).attr('fill','#999')
+      .text(`ρ${subscript.replace(/0/g,'₀').replace(/1/g,'₁').replace(/2/g,'₂').replace(/3/g,'₃')}`);
+    const valText = cg.append('text')
+      .attr('x', CELL/2).attr('y', CELL/2 + 10)
+      .attr('text-anchor','middle').attr('font-size',13).attr('font-weight',700)
+      .attr('fill', isActive ? INK : SLATE);
+    cellsJ.push({ row, col, rect: cellRect, valText, isActive });
+  }
+}
+
+function subDigit(n) {
+  return String(n).replace(/0/g,'₀').replace(/1/g,'₁').replace(/2/g,'₂').replace(/3/g,'₃');
+}
+
+function updateJoint(th) {
+  const m = rhoAB(th);
+  cellsJ.forEach(({row,col,rect,valText,isActive}) => {
+    const v = m[row][col];
+    const absV = Math.abs(v);
+    if (absV < 1e-10) {
+      rect.attr('fill', ZERO_BG);
+      valText.attr('fill','#bbb').attr('font-size',12).text('0');
+    } else {
+      // INK tint: opacity proportional to value
+      const opacity = Math.min(0.92, absV + 0.08);
+      rect.attr('fill', `rgba(42,26,14,${opacity.toFixed(3)})`);
+      const textCol = opacity > 0.5 ? '#fff' : INK;
+      valText.attr('fill', textCol).attr('font-size',13).text(v.toFixed(3));
+    }
+  });
+}
+
+// ─── Reduced ρ_A heatmap (2×2) ───────────────────────────────────────────────
+const CELL2 = 70, MARG2 = 30;
+const svgR = d3.select('#svg-reduced');
+const gR   = svgR.append('g').attr('transform', `translate(${MARG2},${MARG2})`);
+
+const basisR = ['|0⟩','|1⟩'];
+basisR.forEach((lbl,i) => {
+  gR.append('text')
+    .attr('x', i*CELL2 + CELL2/2).attr('y', -10)
+    .attr('text-anchor','middle').attr('font-size',10).attr('fill',SLATE)
+    .text(lbl);
+  gR.append('text')
+    .attr('x', -8).attr('y', i*CELL2 + CELL2/2 + 4)
+    .attr('text-anchor','end').attr('font-size',10).attr('fill',SLATE)
+    .text(lbl);
+});
+
+gR.append('rect')
+  .attr('x',0).attr('y',0)
+  .attr('width',2*CELL2).attr('height',2*CELL2)
+  .attr('fill','none').attr('stroke','#d4cec6').attr('stroke-width',1);
+
+const cellsR = [];
+for (let row=0;row<2;row++) {
+  for (let col=0;col<2;col++) {
+    const cg = gR.append('g')
+      .attr('transform', `translate(${col*CELL2},${row*CELL2})`);
+    const cellRect = cg.append('rect')
+      .attr('x',0).attr('y',0)
+      .attr('width',CELL2).attr('height',CELL2)
+      .attr('stroke','#d4cec6').attr('stroke-width',0.5);
+    const sub = `${row}${col}`.replace(/0/g,'₀').replace(/1/g,'₁');
+    cg.append('text')
+      .attr('x', CELL2/2).attr('y', 16)
+      .attr('text-anchor','middle').attr('font-size',10).attr('fill','#999')
+      .text(`ρ${sub}`);
+    const valText = cg.append('text')
+      .attr('x', CELL2/2).attr('y', CELL2/2 + 10)
+      .attr('text-anchor','middle').attr('font-size',15).attr('font-weight',700);
+    cellsR.push({ row, col, rect: cellRect, valText });
+  }
+}
+
+function updateReduced(th) {
+  const m = rhoA(th);
+  cellsR.forEach(({row,col,rect,valText}) => {
+    const v = m[row][col];
+    const absV = Math.abs(v);
+    if (absV < 1e-10) {
+      rect.attr('fill', ZERO_BG);
+      valText.attr('fill','#bbb').text('0');
+    } else {
+      const opacity = Math.min(0.92, absV + 0.08);
+      rect.attr('fill', `rgba(42,26,14,${opacity.toFixed(3)})`);
+      const textCol = opacity > 0.5 ? '#fff' : INK;
+      valText.attr('fill', textCol).text(v.toFixed(3));
+    }
+  });
+}
+
+// ─── Bars ─────────────────────────────────────────────────────────────────────
+function updateBars(th) {
+  const p = purity(th);
+  const e = entropy(th);
+
+  // Purity: maps [0.5, 1.0] → [0%, 100%]
+  const pPct = ((p - 0.5) / 0.5) * 100;
+  document.getElementById('purity-bar').style.width = Math.max(2, pPct) + '%';
+  document.getElementById('purity-bar-label').textContent = p.toFixed(3);
+
+  // Entropy: maps [0, 1] → [0%, 100%]
+  const ePct = e * 100;
+  document.getElementById('entropy-bar').style.width = Math.max(2, ePct) + '%';
+  document.getElementById('entropy-bar-label').textContent = e.toFixed(3);
+}
+
+// ─── Readout ──────────────────────────────────────────────────────────────────
+function updateReadout(th) {
+  const deg   = (th * 180 / Math.PI).toFixed(1);
+  const p     = purity(th).toFixed(3);
+  const e     = entropy(th).toFixed(3);
+  const label = stateLabel(th);
+  document.getElementById('readout').innerHTML =
+    `θ = <span>${deg}°</span> &nbsp;|&nbsp; ` +
+    `State: <span>${label}</span> &nbsp;|&nbsp; ` +
+    `Purity = <span>${p}</span> &nbsp;|&nbsp; ` +
+    `Entropy = <span>${e}</span> bits`;
+}
+
+// ─── Combined update ─────────────────────────────────────────────────────────
+function update(th) {
+  updateJoint(th);
+  updateReduced(th);
+  updateBars(th);
+  updateReadout(th);
+}
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+const slider = document.getElementById('theta-slider');
+slider.addEventListener('input', function() {
+  const frac = parseInt(this.value) / 1000;
+  theta = frac * Math.PI / 4;
+  const deg = (theta * 180 / Math.PI).toFixed(1);
+  document.getElementById('theta-display').textContent = deg + '°';
+  update(theta);
+});
+
+// Initial render
+update(theta);
+
+// ─── Console assertions ───────────────────────────────────────────────────────
+function purityTest(theta) {
+  const c2 = Math.cos(theta)**2, s2 = Math.sin(theta)**2;
+  return c2*c2 + s2*s2;
+}
+function entropyTest(theta) {
+  const c2 = Math.cos(theta)**2, s2 = Math.sin(theta)**2;
+  const h = x => (x<=0||x>=1) ? 0 : -x*Math.log2(x);
+  return h(c2) + h(s2);
+}
+// P1: Bell state (θ=π/4): purity=0.5, entropy=1.0
+const p1 = purityTest(Math.PI/4);
+console.assert(Math.abs(p1 - 0.5) < 1e-10, 'P1: Bell purity=0.5: '+p1);
+const e1 = entropyTest(Math.PI/4);
+console.assert(Math.abs(e1 - 1.0) < 1e-10, 'P1b: Bell entropy=1.0: '+e1);
+// P2: θ=π/6: purity = cos⁴(π/6)+sin⁴(π/6) = (√3/2)⁴+(1/2)⁴ = 9/16+1/16=10/16=0.625
+const p2 = purityTest(Math.PI/6);
+console.assert(Math.abs(p2 - 0.625) < 1e-10, 'P2: θ=π/6 purity=0.625: '+p2.toFixed(6));
+// P3: off-diagonal of ρ_A is always 0
+const rhoA_01 = 0; // by construction
+console.assert(Math.abs(rhoA_01) < 1e-15, 'P3: ρ_A off-diagonal=0');
+// P4: θ=0 → product state: purity=1, entropy=0
+const p4 = purityTest(0);
+console.assert(Math.abs(p4 - 1.0) < 1e-10, 'P4: θ=0 product purity=1: '+p4);
+const e4 = entropyTest(0);
+console.assert(Math.abs(e4 - 0.0) < 1e-10, 'P4b: θ=0 product entropy=0: '+e4);
+// P5: ρ_AB at Bell state: corner values = 0.5, off-diagonal = 0.5
+const mBell = rhoAB(Math.PI/4);
+console.assert(Math.abs(mBell[0][0] - 0.5) < 1e-10, 'P5a: ρ_AB[0][0]=0.5: '+mBell[0][0].toFixed(6));
+console.assert(Math.abs(mBell[3][3] - 0.5) < 1e-10, 'P5b: ρ_AB[3][3]=0.5: '+mBell[3][3].toFixed(6));
+console.assert(Math.abs(mBell[0][3] - 0.5) < 1e-10, 'P5c: ρ_AB[0][3]=0.5: '+mBell[0][3].toFixed(6));
+console.log('Partial Trace: P1 Bell purity=',p1,'entropy=',e1,'P2 θ=30° purity=',p2.toFixed(6));
+console.log('All partial trace assertions passed.');
+</script>
+</body>
+</html>

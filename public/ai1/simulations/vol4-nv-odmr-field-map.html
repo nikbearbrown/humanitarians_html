@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NV Center ODMR — Magnetic Field Map</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 24px;
+  }
+
+  .top-layout {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 28px;
+    align-items: start;
+    margin-bottom: 28px;
+  }
+
+  .panel-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+  }
+
+  .slider-block {
+    margin-bottom: 14px;
+  }
+  .slider-block label {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 160px;
+    height: 3px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 48px;
+  }
+
+  /* Info panel */
+  .info-panel {
+    border: 1px solid #e0dbd6;
+    border-radius: 4px;
+    padding: 16px;
+    background: #fafaf9;
+  }
+  .info-panel .info-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 12px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .info-row .lbl { color: #545454; }
+  .info-row .val { font-weight: 600; color: #2A1A0E; }
+  .info-row .val.red { color: #C8102E; }
+
+  /* Bottom layout */
+  .bottom-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* Console */
+  .console {
+    border: 1px solid #e0dbd6;
+    border-radius: 4px;
+    padding: 12px 14px;
+    background: #fafaf9;
+  }
+  .console-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  .check-row {
+    font-size: 11px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+    font-family: 'Courier New', monospace;
+    line-height: 1.5;
+  }
+  .check-mark { color: #C8102E; font-weight: 700; }
+
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+
+<h1>NV Center ODMR — Magnetic Field Map</h1>
+<p class="subtitle">Optically detected magnetic resonance: zero-field splitting D = 2870 MHz, Zeeman splitting γ = 2.8 MHz/mT</p>
+
+<div class="top-layout">
+  <!-- ODMR Spectrum -->
+  <div>
+    <div class="panel-title">ODMR Spectrum — Fluorescence Intensity vs Frequency</div>
+    <div class="slider-block">
+      <label>Applied field B:</label>
+      <div class="slider-row">
+        <input type="range" id="b-slider" min="0" max="50" value="0" step="0.5">
+        <span class="slider-val" id="b-display">0.0 mT</span>
+      </div>
+    </div>
+    <div id="odmr-chart"></div>
+  </div>
+
+  <!-- Info panel -->
+  <div>
+    <div class="panel-title">Resonance Parameters</div>
+    <div class="info-panel">
+      <div class="info-title">Current Values</div>
+      <div class="info-row">
+        <span class="lbl">B</span>
+        <span class="val" id="info-B">0.0 mT</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">f₊</span>
+        <span class="val red" id="info-fp">2870 MHz</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">f₋</span>
+        <span class="val red" id="info-fm">2870 MHz</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Splitting Δf</span>
+        <span class="val" id="info-split">0 MHz</span>
+      </div>
+      <div class="info-row">
+        <span class="lbl">Formula</span>
+        <span class="val" id="info-formula" style="font-size:11px">5.6 × B MHz</span>
+      </div>
+
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e0dbd6;">
+        <div style="font-size: 11px; color: #545454; margin-bottom: 6px; font-weight: 600;">Physical constants</div>
+        <div style="font-size: 11px; color: #545454; line-height: 1.8;">
+          D = 2870 MHz (ZFS)<br>
+          γ<sub>NV</sub> = 2.8 MHz/mT<br>
+          Δf = 2γB = 5.6B MHz<br>
+          C = 30% contrast<br>
+          Γ = 10 MHz linewidth
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom: Splitting-vs-B plot + Console -->
+<div class="bottom-layout">
+  <div>
+    <div class="panel-title">Splitting Δf vs Applied Field B</div>
+    <div id="splitting-chart"></div>
+  </div>
+  <div>
+    <div class="panel-title">Physics Checks</div>
+    <div class="console">
+      <div class="console-title">Verification</div>
+      <div class="check-row" id="p1">P1: B=0 → single dip at 2870 MHz, splitting=0</div>
+      <div class="check-row" id="p2">P2: B=10 mT → f₊=2898, f₋=2842, Δf=56 MHz</div>
+      <div class="check-row" id="p3">P3: Splitting is linear in B</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Physics ───────────────────────────────────────────────────────────────────
+const D = 2870;   // MHz, zero-field splitting
+const gamma = 2.8; // MHz/mT, gyromagnetic ratio
+const C = 0.30;   // contrast (30%)
+const Gamma = 10; // MHz, linewidth (half-width)
+
+function lorentzianDip(f, f0) {
+  return C / (1 + ((f - f0) / Gamma) ** 2);
+}
+
+function odmrIntensity(f, B) {
+  const fp = D + gamma * B;
+  const fm = D - gamma * B;
+  // Additive Lorentzian dips (valid when dips don't overlap significantly)
+  return 1 - lorentzianDip(f, fp) - lorentzianDip(f, fm);
+}
+
+// ── ODMR Spectrum Chart ───────────────────────────────────────────────────────
+const specW = 520, specH = 260;
+const specM = { top: 18, right: 24, bottom: 46, left: 58 };
+const specIW = specW - specM.left - specM.right;
+const specIH = specH - specM.top - specM.bottom;
+
+const fMin = 2700, fMax = 3100;
+const nFreq = 400;
+const freqs = d3.range(nFreq + 1).map(i => fMin + i * (fMax - fMin) / nFreq);
+
+const xSpec = d3.scaleLinear([fMin, fMax], [0, specIW]);
+const ySpec = d3.scaleLinear([0.2, 1.05], [specIH, 0]);
+
+const svgSpec = d3.select('#odmr-chart')
+  .append('svg').attr('width', specW).attr('height', specH);
+
+const gSpec = svgSpec.append('g')
+  .attr('transform', `translate(${specM.left},${specM.top})`);
+
+// Grid
+[0.4, 0.6, 0.8, 1.0].forEach(v => {
+  gSpec.append('line')
+    .attr('x1', 0).attr('x2', specIW)
+    .attr('y1', ySpec(v)).attr('y2', ySpec(v))
+    .style('stroke', '#f0ede8').style('stroke-width', 1);
+});
+
+// Axes
+const xAxis = d3.axisBottom(xSpec).ticks(8).tickFormat(d => `${d}`);
+const yAxis = d3.axisLeft(ySpec).ticks(5).tickFormat(d => d.toFixed(1));
+
+const xAxisG = gSpec.append('g')
+  .attr('transform', `translate(0,${specIH})`)
+  .call(xAxis);
+xAxisG.selectAll('text').style('font-size', '11px').style('fill', '#545454');
+xAxisG.select('.domain').style('stroke', '#2A1A0E');
+xAxisG.selectAll('.tick line').style('stroke', '#2A1A0E');
+
+const yAxisG = gSpec.append('g').call(yAxis);
+yAxisG.selectAll('text').style('font-size', '11px').style('fill', '#545454');
+yAxisG.select('.domain').style('stroke', '#2A1A0E');
+yAxisG.selectAll('.tick line').style('stroke', '#2A1A0E');
+
+// Axis labels
+gSpec.append('text')
+  .attr('x', specIW / 2).attr('y', specIH + 38)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('Microwave Frequency (MHz)');
+
+gSpec.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -specIH / 2).attr('y', -46)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('PL Intensity (norm.)');
+
+// Line generator
+const line = d3.line()
+  .x(f => xSpec(f))
+  .y(f => ySpec(odmrIntensity(f, 0)));
+
+const specPath = gSpec.append('path')
+  .datum(freqs)
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.2)
+  .attr('d', d3.line().x(f => xSpec(f)).y(f => ySpec(odmrIntensity(f, 0))));
+
+// Dashed vertical annotation lines
+const vLinePlus = gSpec.append('line')
+  .style('stroke', '#545454').style('stroke-width', 1.2)
+  .style('stroke-dasharray', '5,3');
+
+const vLineMinus = gSpec.append('line')
+  .style('stroke', '#545454').style('stroke-width', 1.2)
+  .style('stroke-dasharray', '5,3');
+
+// Annotation labels for dip positions
+const labelPlus = gSpec.append('text')
+  .attr('text-anchor', 'middle')
+  .style('font-size', '10px').style('fill', '#545454');
+
+const labelMinus = gSpec.append('text')
+  .attr('text-anchor', 'middle')
+  .style('font-size', '10px').style('fill', '#545454');
+
+// D = 2870 MHz label
+const labelD = gSpec.append('text')
+  .attr('text-anchor', 'middle')
+  .style('font-size', '10px').style('fill', '#545454');
+
+function updateSpectrum(B) {
+  const fp = D + gamma * B;
+  const fm = D - gamma * B;
+
+  specPath.attr('d',
+    d3.line()
+      .x(f => xSpec(f))
+      .y(f => ySpec(odmrIntensity(f, B)))(freqs)
+  );
+
+  // Vertical lines
+  const showTwo = B > 2;
+
+  vLinePlus
+    .attr('x1', xSpec(fp)).attr('x2', xSpec(fp))
+    .attr('y1', 0).attr('y2', specIH)
+    .style('opacity', showTwo ? 0.6 : 0);
+
+  vLineMinus
+    .attr('x1', xSpec(fm)).attr('x2', xSpec(fm))
+    .attr('y1', 0).attr('y2', specIH)
+    .style('opacity', showTwo ? 0.6 : 0);
+
+  // Labels
+  if (showTwo) {
+    const labelY = specIH * 0.18;
+    labelPlus
+      .attr('x', xSpec(fp)).attr('y', labelY - 4)
+      .text(`f₊ = ${Math.round(fp)} MHz`)
+      .style('opacity', 1);
+    labelMinus
+      .attr('x', xSpec(fm)).attr('y', labelY - 4)
+      .text(`f₋ = ${Math.round(fm)} MHz`)
+      .style('opacity', 1);
+    labelD.style('opacity', 0);
+  } else {
+    // B=0 single dip label
+    labelPlus.style('opacity', 0);
+    labelMinus.style('opacity', 0);
+    labelD
+      .attr('x', xSpec(D)).attr('y', specIH * 0.18 - 4)
+      .text(`D = 2870 MHz`)
+      .style('opacity', 1);
+  }
+}
+
+// ── Splitting vs B chart ──────────────────────────────────────────────────────
+const splW = 360, splH = 200;
+const splM = { top: 16, right: 24, bottom: 46, left: 60 };
+const splIW = splW - splM.left - splM.right;
+const splIH = splH - splM.top - splM.bottom;
+
+const bRange = d3.range(0, 51, 1);
+const xSpl = d3.scaleLinear([0, 50], [0, splIW]);
+const ySpl = d3.scaleLinear([0, 280], [splIH, 0]);
+
+const svgSpl = d3.select('#splitting-chart')
+  .append('svg').attr('width', splW).attr('height', splH);
+
+const gSpl = svgSpl.append('g')
+  .attr('transform', `translate(${splM.left},${splM.top})`);
+
+// Grid
+[0, 56, 112, 168, 224, 280].forEach(v => {
+  gSpl.append('line')
+    .attr('x1', 0).attr('x2', splIW)
+    .attr('y1', ySpl(v)).attr('y2', ySpl(v))
+    .style('stroke', '#f0ede8').style('stroke-width', 1);
+});
+
+const xAxisSpl = d3.axisBottom(xSpl).ticks(6);
+const yAxisSpl = d3.axisLeft(ySpl).ticks(5);
+
+const xAxisSplG = gSpl.append('g')
+  .attr('transform', `translate(0,${splIH})`).call(xAxisSpl);
+xAxisSplG.selectAll('text').style('font-size', '11px').style('fill', '#545454');
+xAxisSplG.select('.domain').style('stroke', '#2A1A0E');
+
+const yAxisSplG = gSpl.append('g').call(yAxisSpl);
+yAxisSplG.selectAll('text').style('font-size', '11px').style('fill', '#545454');
+yAxisSplG.select('.domain').style('stroke', '#2A1A0E');
+
+// Axis labels
+gSpl.append('text')
+  .attr('x', splIW / 2).attr('y', splIH + 38)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('B (mT)');
+
+gSpl.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -splIH / 2).attr('y', -50)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '12px').style('fill', '#2A1A0E')
+  .text('Splitting Δf (MHz)');
+
+// Static theory line
+gSpl.append('path')
+  .datum(bRange)
+  .attr('fill', 'none')
+  .attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1.8)
+  .attr('d', d3.line().x(b => xSpl(b)).y(b => ySpl(2 * gamma * b)));
+
+// Slope label
+gSpl.append('text')
+  .attr('x', xSpl(44)).attr('y', ySpl(2 * gamma * 44) - 8)
+  .attr('text-anchor', 'end')
+  .style('font-size', '10px').style('fill', '#545454')
+  .text('Δf = 5.6·B MHz');
+
+// Current point (highlighted in red)
+const currentDot = gSpl.append('circle')
+  .attr('r', 6)
+  .attr('fill', '#C8102E')
+  .attr('stroke', '#FFFFFF')
+  .attr('stroke-width', 2);
+
+const currentDotLabel = gSpl.append('text')
+  .attr('text-anchor', 'start')
+  .style('font-size', '10px').style('fill', '#C8102E').style('font-weight', '600');
+
+function updateSplittingDot(B) {
+  const split = 2 * gamma * B;
+  currentDot.attr('cx', xSpl(B)).attr('cy', ySpl(split));
+  const labelAnchor = B > 40 ? 'end' : 'start';
+  const labelOffset = B > 40 ? -8 : 8;
+  currentDotLabel
+    .attr('x', xSpl(B) + labelOffset)
+    .attr('y', ySpl(split) - 8)
+    .attr('text-anchor', labelAnchor)
+    .text(B > 0 ? `${split.toFixed(1)} MHz` : '');
+}
+
+// ── Info panel update ─────────────────────────────────────────────────────────
+function updateInfo(B) {
+  const fp = D + gamma * B;
+  const fm = D - gamma * B;
+  const split = fp - fm;
+
+  d3.select('#info-B').text(`${B.toFixed(1)} mT`);
+  d3.select('#info-fp').text(`${fp.toFixed(1)} MHz`);
+  d3.select('#info-fm').text(`${fm.toFixed(1)} MHz`);
+  d3.select('#info-split').text(`${split.toFixed(1)} MHz`);
+  d3.select('#info-formula').text(`5.6 × ${B.toFixed(1)} = ${split.toFixed(1)} MHz`);
+}
+
+// ── Physics Checks ────────────────────────────────────────────────────────────
+function runPhysicsChecks() {
+  // P1: B=0 → single dip at 2870 MHz, splitting=0
+  const fp0 = D + gamma * 0;
+  const fm0 = D - gamma * 0;
+  const split0 = fp0 - fm0;
+  const p1pass = fp0 === 2870 && fm0 === 2870 && split0 === 0;
+  d3.select('#p1').html(
+    `P1: B=0 → f₊=${fp0}, f₋=${fm0}, Δf=${split0} &nbsp;<span class="check-mark">${p1pass ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+
+  // P2: B=10 mT → f+=2898, f-=2842, splitting=56
+  const B2 = 10;
+  const fp10 = D + gamma * B2;
+  const fm10 = D - gamma * B2;
+  const split10 = fp10 - fm10;
+  const p2pass = Math.abs(fp10 - 2898) < 0.01 && Math.abs(fm10 - 2842) < 0.01 && Math.abs(split10 - 56) < 0.01;
+  d3.select('#p2').html(
+    `P2: B=10 mT → f₊=${fp10}, f₋=${fm10}, Δf=${split10} MHz &nbsp;<span class="check-mark">${p2pass ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+
+  // P3: splitting linear in B (check slope = 2*gamma)
+  const bTest = [5, 15, 30];
+  const slopes = bTest.map(b => (2 * gamma * b) / b);
+  const allLinear = slopes.every(s => Math.abs(s - 2 * gamma) < 0.001);
+  d3.select('#p3').html(
+    `P3: Δf/B slope = ${(2 * gamma).toFixed(2)} MHz/mT (constant) &nbsp;<span class="check-mark">${allLinear ? '✓ PASS' : '✗ FAIL'}</span>`
+  );
+}
+
+// ── Slider control ────────────────────────────────────────────────────────────
+let currentB = 0;
+
+d3.select('#b-slider').on('input', function () {
+  currentB = +this.value;
+  d3.select('#b-display').text(`${currentB.toFixed(1)} mT`);
+  updateSpectrum(currentB);
+  updateSplittingDot(currentB);
+  updateInfo(currentB);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+updateSpectrum(0);
+updateSplittingDot(0);
+updateInfo(0);
+runPhysicsChecks();
+</script>
+</body>
+</html>

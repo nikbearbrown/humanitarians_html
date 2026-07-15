@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knapsack's Hidden Exponential: One Zero, Ten Times Slower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    color: #2A1A0E;
+    max-width: 900px;
+  }
+  #outer {
+    width: 900px;
+    border: 1px solid #D4D4D4;
+    padding: 0;
+  }
+  #ctrl-bar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #D4D4D4;
+    background: #fafafa;
+  }
+  .ctrl-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  input[type=range] { width: 180px; accent-color: #C8102E; cursor: pointer; }
+  .ctrl-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2A1A0E;
+    min-width: 44px;
+  }
+  .digit-display {
+    font-size: 28px;
+    font-weight: 700;
+    color: #C8102E;
+    font-variant-numeric: tabular-nums;
+  }
+  #charts-row {
+    display: flex;
+    border-bottom: 1px solid #D4D4D4;
+  }
+  #left-chart, #right-chart {
+    flex: 1;
+    padding: 14px 16px;
+  }
+  #right-chart {
+    border-left: 1px solid #D4D4D4;
+  }
+  .chart-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 8px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .chart-sub {
+    font-size: 10px;
+    color: #545454;
+    text-align: center;
+    margin-top: 2px;
+    margin-bottom: 6px;
+  }
+  #info-row {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #D4D4D4;
+  }
+  .info-cell {
+    flex: 1;
+    padding: 10px 16px;
+    border-right: 1px solid #D4D4D4;
+    font-size: 12px;
+  }
+  .info-cell:last-child { border-right: none; }
+  .info-label { color: #545454; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .info-val { font-size: 18px; font-weight: 700; color: #2A1A0E; margin-top: 2px; }
+  .info-val.red { color: #C8102E; }
+  #annotation {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    padding: 8px 16px;
+    min-height: 28px;
+    transition: opacity 0.3s;
+  }
+  #summary {
+    background: #2A1A0E;
+    color: #fff;
+    padding: 14px 20px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  #summary strong { color: #C8102E; }
+</style>
+</head>
+<body>
+<h1>Knapsack's Hidden Exponential: One Zero, Ten Times Slower</h1>
+<div id="outer">
+  <div id="ctrl-bar">
+    <div>
+      <div class="ctrl-label">Digits in capacity W</div>
+      <div class="ctrl-row">
+        <input type="range" id="d-slider" min="1" max="8" value="4" step="1">
+        <span class="ctrl-val"><span id="d-val">4</span> digits</span>
+      </div>
+    </div>
+    <div>
+      <div class="ctrl-label">W = 10^d</div>
+      <div class="digit-display" id="w-display">10,000</div>
+    </div>
+    <div style="font-size:12px; color:#545454; max-width:200px; line-height:1.5;">
+      n = <strong>10 items</strong> (fixed)<br>
+      Grid cells = n × W = n × 10^d
+    </div>
+  </div>
+
+  <div id="charts-row">
+    <div id="left-chart">
+      <div class="chart-title">Linear Scale</div>
+      <div class="chart-sub">n × W vs W — looks polynomial</div>
+      <svg id="svg-linear"></svg>
+    </div>
+    <div id="right-chart">
+      <div class="chart-title">Log Scale (digits d)</div>
+      <div class="chart-sub">n × 10^d vs d — each step = ×10</div>
+      <svg id="svg-log"></svg>
+    </div>
+  </div>
+
+  <div id="info-row">
+    <div class="info-cell">
+      <div class="info-label">Digits (d)</div>
+      <div class="info-val" id="info-d">4</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-label">Grid cells (n × W)</div>
+      <div class="info-val" id="info-cells">100,000</div>
+    </div>
+    <div class="info-cell">
+      <div class="info-label">Time @ 10^9 ops/s</div>
+      <div class="info-val" id="info-time" style="color:#2A1A0E">0.0001 s</div>
+    </div>
+  </div>
+
+  <div id="annotation"></div>
+
+  <div id="summary">
+    Runtime = O(n × W) = <strong>O(n × 10^d)</strong> — exponential in input length <em>d</em>, not d × 10.<br>
+    Adding one digit to W multiplies the grid by 10. The algorithm is <strong>pseudo-polynomial</strong>: polynomial in the <em>value</em> of W, but exponential in its <em>bit-length</em>.
+  </div>
+</div>
+
+<script>
+const N_ITEMS = 10;
+const D_MAX = 8;
+
+// --- Linear chart ---
+const LW = 420, LH = 240;
+const lm = { top: 20, right: 20, bottom: 50, left: 70 };
+
+const linSvg = d3.select("#svg-linear")
+  .attr("width", LW).attr("height", LH);
+
+const linX = d3.scaleLinear()
+  .domain([1, Math.pow(10, D_MAX)])
+  .range([lm.left, LW - lm.right]);
+
+const linY = d3.scaleLinear()
+  .domain([0, N_ITEMS * Math.pow(10, D_MAX) * 1.05])
+  .range([LH - lm.bottom, lm.top]);
+
+linSvg.append("g")
+  .attr("transform", `translate(0,${LH - lm.bottom})`)
+  .call(d3.axisBottom(linX).ticks(4).tickFormat(d => {
+    if (d >= 1e8) return "10^8";
+    if (d >= 1e7) return "10^7";
+    if (d >= 1e6) return "10^6";
+    if (d >= 1e5) return "10^5";
+    if (d >= 1e4) return "10^4";
+    if (d >= 1e3) return "10^3";
+    return d;
+  }))
+  .selectAll("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif");
+
+linSvg.append("g")
+  .attr("transform", `translate(${lm.left},0)`)
+  .call(d3.axisLeft(linY).ticks(5).tickFormat(d => {
+    if (d >= 1e9) return (d / 1e9).toFixed(0) + "B";
+    if (d >= 1e6) return (d / 1e6).toFixed(0) + "M";
+    if (d >= 1e3) return (d / 1e3).toFixed(0) + "K";
+    return d;
+  }))
+  .selectAll("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif");
+
+// Full curve
+const linData = d3.range(1, D_MAX + 0.1, 0.05).map(d => ({
+  w: Math.pow(10, d), cells: N_ITEMS * Math.pow(10, d)
+}));
+
+const linLine = d3.line().x(d => linX(d.w)).y(d => linY(d.cells)).curve(d3.curveBasis);
+linSvg.append("path")
+  .datum(linData)
+  .attr("fill", "none")
+  .attr("stroke", "#545454")
+  .attr("stroke-width", 2)
+  .attr("d", linLine);
+
+const linDot = linSvg.append("circle").attr("r", 6).attr("fill", "#C8102E").attr("stroke", "#fff").attr("stroke-width", 2);
+const linLabel = linSvg.append("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif").attr("fill", "#C8102E").attr("font-weight", "700");
+
+linSvg.append("text")
+  .attr("x", lm.left + (LW - lm.left - lm.right) / 2)
+  .attr("y", LH - 4)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 10).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+  .text("W (capacity)");
+
+// --- Log chart ---
+const logSvg = d3.select("#svg-log")
+  .attr("width", LW).attr("height", LH);
+
+const logX = d3.scaleLinear().domain([1, D_MAX]).range([lm.left, LW - lm.right]);
+const logY = d3.scaleLog().domain([N_ITEMS * 10, N_ITEMS * Math.pow(10, D_MAX) * 1.5]).range([LH - lm.bottom, lm.top]);
+
+logSvg.append("g")
+  .attr("transform", `translate(0,${LH - lm.bottom})`)
+  .call(d3.axisBottom(logX).ticks(D_MAX).tickFormat(d => "d=" + d))
+  .selectAll("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif");
+
+logSvg.append("g")
+  .attr("transform", `translate(${lm.left},0)`)
+  .call(d3.axisLeft(logY).ticks(5, ".0e"))
+  .selectAll("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif");
+
+const logData = d3.range(1, D_MAX + 0.01, 0.05).map(d => ({ d, cells: N_ITEMS * Math.pow(10, d) }));
+const logLine = d3.line().x(d => logX(d.d)).y(d => logY(d.cells));
+
+logSvg.append("path")
+  .datum(logData)
+  .attr("fill", "none")
+  .attr("stroke", "#2A1A0E")
+  .attr("stroke-width", 2)
+  .attr("d", logLine);
+
+// Tick-factor labels
+for (let i = 2; i <= D_MAX; i++) {
+  logSvg.append("text")
+    .attr("x", logX(i - 0.5))
+    .attr("y", logY(N_ITEMS * Math.pow(10, i - 0.5)) - 10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", 9).attr("font-family", "Montserrat, sans-serif")
+    .attr("fill", "#545454")
+    .text("×10");
+}
+
+const logDot = logSvg.append("circle").attr("r", 6).attr("fill", "#C8102E").attr("stroke", "#fff").attr("stroke-width", 2);
+const logLabel = logSvg.append("text").attr("font-size", 10).attr("font-family", "Montserrat, sans-serif").attr("fill", "#C8102E").attr("font-weight", "700");
+
+logSvg.append("text")
+  .attr("x", lm.left + (LW - lm.left - lm.right) / 2)
+  .attr("y", LH - 4)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 10).attr("font-family", "Montserrat, sans-serif").attr("fill", "#545454")
+  .text("d (digits in W)");
+
+function formatTime(cells) {
+  const secs = cells / 1e9;
+  if (secs < 0.001) return (secs * 1000).toFixed(4) + " ms";
+  if (secs < 1) return secs.toFixed(4) + " s";
+  return secs.toFixed(1) + " s";
+}
+
+function formatCells(c) {
+  if (c >= 1e9) return (c / 1e9).toFixed(1) + "B";
+  if (c >= 1e6) return (c / 1e6).toFixed(1) + "M";
+  if (c >= 1e3) return (c / 1e3).toFixed(0) + "K";
+  return c.toFixed(0);
+}
+
+let prevD = 4;
+
+function update() {
+  const d = +document.getElementById("d-slider").value;
+  const W = Math.pow(10, d);
+  const cells = N_ITEMS * W;
+  const secs = cells / 1e9;
+
+  document.getElementById("d-val").textContent = d;
+  document.getElementById("w-display").textContent = W.toLocaleString();
+  document.getElementById("info-d").textContent = d;
+  document.getElementById("info-cells").textContent = formatCells(cells);
+
+  const timeEl = document.getElementById("info-time");
+  timeEl.textContent = formatTime(cells);
+  timeEl.className = "info-val" + (d >= 7 ? " red" : "");
+
+  // Update dots
+  linDot.attr("cx", linX(W)).attr("cy", linY(cells));
+  linLabel.attr("x", linX(W) + 8).attr("y", linY(cells) - 8).text(`d=${d}`);
+
+  logDot.attr("cx", logX(d)).attr("cy", logY(cells));
+  logLabel.attr("x", logX(d) + 8).attr("y", logY(cells) - 8).text(`d=${d}`);
+
+  // Annotation
+  const ann = document.getElementById("annotation");
+  if (d > prevD) {
+    ann.textContent = `+1 digit → ×10 grid cells (${formatCells(N_ITEMS * Math.pow(10, d - 1))} → ${formatCells(cells)})`;
+    ann.style.color = "#C8102E";
+  } else if (d === 8) {
+    ann.textContent = "10^9 grid cells ≈ 10 seconds! The algorithm breaks down.";
+    ann.style.color = "#C8102E";
+  } else {
+    ann.textContent = "";
+  }
+  prevD = d;
+}
+
+document.getElementById("d-slider").addEventListener("input", update);
+update();
+</script>
+</body>
+</html>

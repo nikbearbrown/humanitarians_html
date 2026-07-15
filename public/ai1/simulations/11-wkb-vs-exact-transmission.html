@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WKB vs Exact Transmission — Rectangular Barrier</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; font-weight: 700; color: #2A1A0E; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #545454; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  .panel-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #545454; margin-bottom: 8px; }
+  .controls { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  .slider-row label { font-size: 13px; font-weight: 600; min-width: 80px; }
+  .slider-row input[type=range] { flex: 1; accent-color: #C8102E; }
+  .slider-row .val { font-size: 13px; font-weight: 700; color: #C8102E; min-width: 52px; text-align: right; }
+  .info-box { border: 1.5px solid #2A1A0E; padding: 16px; background: #FFFFFF; }
+  .info-box h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; color: #2A1A0E; }
+  .info-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .info-key { font-size: 12px; color: #545454; }
+  .info-val { font-size: 13px; font-weight: 700; color: #2A1A0E; }
+  .info-val.red { color: #C8102E; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-line { width: 28px; height: 2px; display: inline-block; }
+  .legend-line.red-solid { background: #C8102E; }
+  .legend-line.slate-dashed { background: transparent; border-top: 2px dashed #545454; }
+  .legend-label { font-size: 12px; color: #2A1A0E; }
+  .axis text { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 11px; }
+  .axis path, .axis line { stroke: #2A1A0E; }
+  .axis-label { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 12px; font-weight: 600; }
+  .resonance-note { font-size: 11px; color: #545454; line-height: 1.5; margin-top: 8px; }
+  .e-slider-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<h1>WKB vs Exact Transmission — Rectangular Barrier</h1>
+<p class="subtitle">
+  Exact quantum-mechanical transmission (RED) versus WKB approximation (SLATE dashed) for a rectangular potential barrier.
+  Below the barrier: both shown. Above: resonances where T→1 (only exact shown).
+</p>
+
+<div class="layout">
+  <div>
+    <div class="panel-label">log₁₀(T) vs Energy E (eV)</div>
+    <svg id="main-svg"></svg>
+
+    <div class="controls">
+      <div class="slider-row">
+        <label>V₀ (eV)</label>
+        <input type="range" id="v0-slider" min="0.5" max="3" step="0.05" value="1">
+        <span class="val" id="v0-val">1.00 eV</span>
+      </div>
+      <div class="slider-row">
+        <label>L (nm)</label>
+        <input type="range" id="L-slider" min="0.5" max="2" step="0.05" value="1">
+        <span class="val" id="L-val">1.00 nm</span>
+      </div>
+    </div>
+    <div style="margin-top: 10px;">
+      <div class="legend-row">
+        <span class="legend-line red-solid"></span>
+        <span class="legend-label">T_exact (both tunneling and above-barrier)</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-line slate-dashed"></span>
+        <span class="legend-label">T_WKB = exp(−2κL)  (tunneling only, E &lt; V₀)</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <div class="panel-label">T_exact / T_WKB ratio (tunneling regime only)</div>
+      <svg id="ratio-svg"></svg>
+      <div class="legend-row" style="margin-top: 6px;">
+        <span class="legend-line red-solid"></span>
+        <span class="legend-label">T_exact / T_WKB</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-line" style="background: #e0d8d0;"></span>
+        <span class="legend-label">Ratio = 1 reference (WKB exact match)</span>
+      </div>
+    </div>
+
+    <div class="e-slider-row">
+      <label style="font-size:13px; font-weight:600; min-width:60px;">E probe =</label>
+      <input type="range" id="e-slider" min="0.01" max="2" step="0.01" value="0.5" style="flex:1; accent-color:#C8102E;">
+      <span style="font-size:13px; font-weight:700; color:#C8102E; min-width:60px;" id="e-val">0.50 eV</span>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="info-box">
+      <h3>At Probe Energy E</h3>
+      <div class="info-row">
+        <span class="info-key">E (probe)</span>
+        <span class="info-val red" id="info-E">0.50 eV</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">E / V₀</span>
+        <span class="info-val" id="info-EV0">0.500</span>
+      </div>
+      <div style="margin: 8px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">T_exact</span>
+        <span class="info-val" id="info-Texact">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">T_WKB</span>
+        <span class="info-val" id="info-TWKB">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">T_exact / T_WKB</span>
+        <span class="info-val" id="info-ratio">—</span>
+      </div>
+      <div style="margin: 8px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">κ or k₂ (barrier)</span>
+        <span class="info-val" id="info-kappa">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">κL (or k₂L)</span>
+        <span class="info-val" id="info-kappaL">—</span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>Resonance Energies (E &gt; V₀)</h3>
+      <div style="font-size:12px; color:#545454; line-height:1.6; margin-bottom:8px;">
+        T→1 when k₂L = nπ, i.e.:<br>
+        E_n = V₀ + n²π²ħ²/(2mL²)
+      </div>
+      <div id="resonance-list" style="font-size:13px; font-weight:700; color:#2A1A0E; line-height:1.8;"></div>
+    </div>
+
+    <div class="info-box">
+      <h3>Formulas</h3>
+      <div style="font-size:12px; color:#2A1A0E; line-height:1.8; font-family: monospace;">
+        <div>ħ²/2m = 0.03813 eV·nm²</div>
+        <div>k₁ = √(E/0.03813) nm⁻¹</div>
+        <div style="margin-top:4px;"><strong>Tunneling (E &lt; V₀):</strong></div>
+        <div>κ = √((V₀−E)/0.03813)</div>
+        <div>T_exact = 1/(1 + γ²sinh²(κL))</div>
+        <div>γ = (k₁²+κ²)/(2k₁κ)</div>
+        <div>T_WKB = e^(−2κL)</div>
+        <div style="margin-top:4px;"><strong>Above barrier (E &gt; V₀):</strong></div>
+        <div>k₂ = √((E−V₀)/0.03813)</div>
+        <div>T_exact = 1/(1 + γ²sin²(k₂L))</div>
+        <div>γ = (k₁²−k₂²)/(2k₁k₂)</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>Physics Notes</h3>
+      <div style="font-size:12px; color:#545454; line-height:1.6;">
+        <p style="margin-bottom:8px;"><strong>WKB accuracy:</strong> WKB works best when κL ≫ 1 (deep tunneling). As E→V₀ from below, κ→0, κL→0, and WKB underestimates T by a factor of ~4 for a symmetric barrier.</p>
+        <p style="margin-bottom:8px;"><strong>Resonances:</strong> Above the barrier, T oscillates between 0 and 1. WKB cannot predict these — it gives T≈1 for all E&gt;V₀ (no reflection from a classically allowed region).</p>
+        <p><strong>Energy conservation:</strong> T + R = 1 at all energies (checked numerically).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── physics constants ────────────────────────────────────────────
+const HBAR2_OVER_2M = 0.03813; // eV·nm²
+
+function k1(E) { return Math.sqrt(Math.max(E, 1e-30) / HBAR2_OVER_2M); }
+function kappa(E, V0) { return Math.sqrt(Math.max(V0 - E, 1e-30) / HBAR2_OVER_2M); }
+function k2above(E, V0) { return Math.sqrt(Math.max(E - V0, 1e-30) / HBAR2_OVER_2M); }
+
+function T_exact(E, V0, L) {
+  if (E <= 0) return 0;
+  const K1 = k1(E);
+  if (E < V0) {
+    // tunneling
+    const kap = kappa(E, V0);
+    const gamma = (K1 * K1 + kap * kap) / (2 * K1 * kap);
+    const sh = Math.sinh(kap * L);
+    return 1 / (1 + gamma * gamma * sh * sh);
+  } else if (Math.abs(E - V0) < 1e-6 * V0) {
+    // near top: use limiting form T = 1/(1 + K1^2 L^2 / 4)... actually exact:
+    // at E=V0 exactly: κ→0, sinh(κL)→κL, γ→K1/(κ) → ∞ in a way that combines
+    // Use numeric slightly off
+    const eps = 1e-6 * V0;
+    return T_exact(E - eps, V0, L);
+  } else {
+    // above barrier
+    const K2 = k2above(E, V0);
+    const gamma = Math.abs(K1 * K1 - K2 * K2) / (2 * K1 * K2);
+    const sn = Math.sin(K2 * L);
+    return 1 / (1 + gamma * gamma * sn * sn);
+  }
+}
+
+function T_WKB(E, V0, L) {
+  if (E >= V0) return null; // WKB only defined for tunneling here
+  const kap = kappa(E, V0);
+  return Math.exp(-2 * kap * L);
+}
+
+// ─── dimensions ───────────────────────────────────────────────────
+const W = 620, H = 300;
+const margin = { top: 24, right: 24, bottom: 50, left: 62 };
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top - margin.bottom;
+
+const W2 = 620, H2 = 160;
+const m2 = { top: 16, right: 24, bottom: 40, left: 62 };
+const iW2 = W2 - m2.left - m2.right;
+const iH2 = H2 - m2.top - m2.bottom;
+
+// ─── main SVG ────────────────────────────────────────────────────
+const mainSvg = d3.select("#main-svg").attr("width", W).attr("height", H);
+const g = mainSvg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().range([0, innerW]);
+const yScale = d3.scaleLinear().range([innerH, 0]);
+
+const xAxisG = g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`);
+const yAxisG = g.append("g").attr("class", "axis");
+
+g.append("text").attr("class", "axis-label")
+  .attr("x", innerW / 2).attr("y", innerH + 40).attr("text-anchor", "middle")
+  .text("Energy E (eV)");
+g.append("text").attr("class", "axis-label")
+  .attr("transform", "rotate(-90)").attr("x", -innerH / 2).attr("y", -50)
+  .attr("text-anchor", "middle").text("log₁₀(T)");
+
+// barrier top line
+const barrierLine = g.append("line")
+  .attr("y1", 0).attr("y2", innerH)
+  .attr("stroke", "#2A1A0E").attr("stroke-width", 1.5).attr("stroke-dasharray", "5,4");
+const barrierLabel = g.append("text")
+  .attr("font-size", 10).attr("fill", "#2A1A0E");
+
+// probe line
+const probeLine = g.append("line")
+  .attr("y1", 0).attr("y2", innerH)
+  .attr("stroke", "#C8102E").attr("stroke-width", 1).attr("stroke-dasharray", "3,3").attr("opacity", 0.8);
+
+const pathExact = g.append("path").attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2.5);
+const pathWKB = g.append("path").attr("fill", "none").attr("stroke", "#545454").attr("stroke-width", 2).attr("stroke-dasharray", "6,4");
+
+// ─── ratio SVG ───────────────────────────────────────────────────
+const ratioSvg = d3.select("#ratio-svg").attr("width", W2).attr("height", H2);
+const g2 = ratioSvg.append("g").attr("transform", `translate(${m2.left},${m2.top})`);
+
+const xScale2 = d3.scaleLinear().range([0, iW2]);
+const yScale2 = d3.scaleLinear().range([iH2, 0]);
+
+const xAxisG2 = g2.append("g").attr("class", "axis").attr("transform", `translate(0,${iH2})`);
+const yAxisG2 = g2.append("g").attr("class", "axis");
+
+g2.append("text").attr("class", "axis-label")
+  .attr("x", iW2 / 2).attr("y", iH2 + 32).attr("text-anchor", "middle").text("Energy E (eV)");
+g2.append("text").attr("class", "axis-label")
+  .attr("transform", "rotate(-90)").attr("x", -iH2 / 2).attr("y", -50)
+  .attr("text-anchor", "middle").text("T_exact/T_WKB");
+
+// ratio=1 line
+const ratio1Line = g2.append("line").attr("x1", 0).attr("stroke", "#e0d8d0").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+
+const barrierLine2 = g2.append("line").attr("y1", 0).attr("stroke", "#2A1A0E").attr("stroke-width", 1).attr("stroke-dasharray", "5,4");
+const pathRatio = g2.append("path").attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2);
+const probeLine2 = g2.append("line").attr("y1", 0).attr("stroke", "#C8102E").attr("stroke-width", 1).attr("stroke-dasharray", "3,3").attr("opacity", 0.8);
+
+// ─── main update ─────────────────────────────────────────────────
+let V0cur = 1.0, Lcur = 1.0;
+
+function formatSci(v) {
+  if (v === null || isNaN(v)) return "—";
+  if (v === 0) return "0";
+  if (v >= 0.001 && v <= 9999) return v.toPrecision(4);
+  const e = Math.floor(Math.log10(Math.abs(v)));
+  const m = v / Math.pow(10, e);
+  return m.toFixed(2) + "×10^" + e;
+}
+
+function updateAll() {
+  const V0 = V0cur;
+  const L = Lcur;
+  const Emax = 2 * V0;
+  const Eslider = document.getElementById("e-slider");
+  // Reclamp E slider
+  const Emaxslider = Emax;
+  Eslider.max = Emaxslider.toFixed(2);
+
+  const N = 600;
+  const Es = d3.range(0.01, Emax + Emax / N, Emax / N);
+
+  const exactData = Es.map(E => ({ E, T: T_exact(E, V0, L) }));
+  const wkbData = Es.filter(E => E < V0).map(E => ({ E, T: T_WKB(E, V0, L) }));
+  const ratioData = Es.filter(E => E < V0 - 0.01).map(E => {
+    const te = T_exact(E, V0, L);
+    const tw = T_WKB(E, V0, L);
+    if (tw < 1e-40) return null;
+    return { E, ratio: te / tw };
+  }).filter(d => d && isFinite(d.ratio));
+
+  // log10 data — floor at -14
+  const logExact = exactData.map(d => ({ E: d.E, y: Math.max(Math.log10(Math.max(d.T, 1e-14)), -14) }));
+  const logWKB = wkbData.map(d => ({ E: d.E, y: Math.max(Math.log10(Math.max(d.T, 1e-14)), -14) }));
+
+  const yMin = d3.min(logExact, d => d.y) - 0.5;
+  const yMax = 0.3;
+
+  xScale.domain([0, Emax]);
+  yScale.domain([yMin, yMax]);
+  xScale2.domain([0, V0]);
+  const ratioMax = d3.max(ratioData, d => d.ratio) || 10;
+  yScale2.domain([0, Math.min(ratioMax * 1.1, 20)]);
+
+  xAxisG.call(d3.axisBottom(xScale).ticks(8));
+  yAxisG.call(d3.axisLeft(yScale).ticks(6));
+  xAxisG2.call(d3.axisBottom(xScale2).ticks(6));
+  yAxisG2.call(d3.axisLeft(yScale2).ticks(5).tickFormat(d3.format(".1f")));
+
+  // barrier line
+  barrierLine.attr("x1", xScale(V0)).attr("x2", xScale(V0));
+  barrierLabel.attr("x", xScale(V0) + 4).attr("y", 12).text("E=V₀=" + V0.toFixed(2) + "eV");
+
+  // paths
+  const lineExact = d3.line().x(d => xScale(d.E)).y(d => yScale(d.y)).defined(d => isFinite(d.y)).curve(d3.curveMonotoneX);
+  const lineWKB = d3.line().x(d => xScale(d.E)).y(d => yScale(d.y)).defined(d => isFinite(d.y)).curve(d3.curveMonotoneX);
+  const lineRatio = d3.line().x(d => xScale2(d.E)).y(d => yScale2(Math.min(d.ratio, 20))).defined(d => isFinite(d.ratio)).curve(d3.curveMonotoneX);
+
+  pathExact.datum(logExact).attr("d", lineExact);
+  pathWKB.datum(logWKB).attr("d", lineWKB);
+  pathRatio.datum(ratioData).attr("d", lineRatio);
+
+  // ratio=1 line
+  ratio1Line.attr("y1", yScale2(1)).attr("y2", yScale2(1)).attr("x2", iW2);
+  // barrier in ratio panel
+  barrierLine2.attr("x1", xScale2(V0 - 0.001)).attr("x2", xScale2(V0 - 0.001)).attr("y2", iH2);
+
+  // resonance energies
+  const resHbar2 = HBAR2_OVER_2M;
+  const resList = [];
+  for (let n = 1; n <= 5; n++) {
+    const En = V0 + n * n * Math.PI * Math.PI * resHbar2 / (L * L);
+    if (En < Emax * 1.5) resList.push({ n, En });
+  }
+  const resHtml = resList.map(d =>
+    `E<sub>${d.n}</sub> = ${d.En.toFixed(3)} eV` + (d.En < Emax ? ` ✓` : ` (off chart)`)
+  ).join("<br>");
+  document.getElementById("resonance-list").innerHTML = resHtml;
+
+  // probe update
+  updateProbe(+document.getElementById("e-slider").value);
+}
+
+function updateProbe(E) {
+  const V0 = V0cur, L = Lcur;
+  const Emax = 2 * V0;
+
+  document.getElementById("e-val").textContent = E.toFixed(2) + " eV";
+  document.getElementById("info-E").textContent = E.toFixed(3) + " eV";
+  document.getElementById("info-EV0").textContent = (E / V0).toFixed(3);
+
+  const te = T_exact(E, V0, L);
+  const tw = T_WKB(E, V0, L);
+  document.getElementById("info-Texact").textContent = formatSci(te);
+  document.getElementById("info-TWKB").textContent = E < V0 ? formatSci(tw) : "N/A (above barrier)";
+  document.getElementById("info-ratio").textContent = (E < V0 && tw > 1e-40) ? (te / tw).toFixed(4) : "N/A";
+
+  if (E < V0) {
+    const kap = kappa(E, V0);
+    document.getElementById("info-kappa").textContent = kap.toFixed(4) + " nm⁻¹ (κ)";
+    document.getElementById("info-kappaL").textContent = (kap * L).toFixed(4);
+  } else {
+    const k2 = k2above(E, V0);
+    document.getElementById("info-kappa").textContent = k2.toFixed(4) + " nm⁻¹ (k₂)";
+    document.getElementById("info-kappaL").textContent = (k2 * L).toFixed(4);
+  }
+
+  const ExC = Math.min(E, xScale.domain()[1]);
+  probeLine.attr("x1", xScale(ExC)).attr("x2", xScale(ExC));
+  if (E < V0cur) {
+    probeLine2.attr("x1", xScale2(E)).attr("x2", xScale2(E)).attr("y2", iH2);
+  }
+}
+
+// ─── events ──────────────────────────────────────────────────────
+document.getElementById("v0-slider").addEventListener("input", function () {
+  V0cur = +this.value;
+  document.getElementById("v0-val").textContent = V0cur.toFixed(2) + " eV";
+  updateAll();
+});
+
+document.getElementById("L-slider").addEventListener("input", function () {
+  Lcur = +this.value;
+  document.getElementById("L-val").textContent = Lcur.toFixed(2) + " nm";
+  updateAll();
+});
+
+document.getElementById("e-slider").addEventListener("input", function () {
+  updateProbe(+this.value);
+});
+
+updateAll();
+</script>
+</body>
+</html>

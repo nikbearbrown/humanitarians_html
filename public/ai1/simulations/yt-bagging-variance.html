@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bagging: 300 Trees Kill the Variance</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    width: 900px;
+    height: 550px;
+    overflow: hidden;
+  }
+  #app {
+    width: 900px;
+    height: 550px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px 10px 18px;
+  }
+  h1 {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2A1A0E;
+    border-bottom: 2px solid #C8102E;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+  }
+  .panels {
+    display: flex;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+  .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .panel-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .divider {
+    width: 1px;
+    background: #D4D4D4;
+    margin: 0 16px;
+    flex-shrink: 0;
+  }
+  svg { display: block; }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    background: #2A1A0E;
+    color: #FFFFFF;
+    border: none;
+    padding: 5px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: #C8102E; }
+  button.secondary {
+    background: #545454;
+  }
+  button.secondary:hover { background: #C8102E; }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #545454;
+  }
+  input[type=range] {
+    accent-color: #C8102E;
+    cursor: pointer;
+    width: 100px;
+  }
+  .inset-box {
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    border-radius: 2px;
+    padding: 6px 10px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #545454;
+    line-height: 1.7;
+    margin-top: 8px;
+  }
+  .inset-box strong { color: #2A1A0E; }
+  .inset-box .formula {
+    font-size: 12px;
+    font-weight: 900;
+    color: #C8102E;
+    display: block;
+    margin: 3px 0;
+    font-style: italic;
+  }
+  #error-display {
+    font-size: 18px;
+    font-weight: 900;
+    color: #C8102E;
+    text-align: center;
+    margin-top: 4px;
+  }
+  #error-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #545454;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Bagging: 300 Trees Kill the Variance</h1>
+  <div class="panels">
+    <!-- LEFT: Single tree wobble -->
+    <div class="panel">
+      <div class="panel-title">Single Decision Tree — Instability</div>
+      <svg id="tree-svg" width="400" height="340"></svg>
+      <div class="controls">
+        <button id="resample-btn">Resample Bootstrap</button>
+      </div>
+      <div class="inset-box">
+        Each resample draws 30 points <strong>with replacement</strong>.<br>
+        The decision boundary lurches — high variance!
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RIGHT: Error vs B curve -->
+    <div class="panel">
+      <div class="panel-title">Ensemble Error vs Number of Trees B</div>
+      <svg id="error-svg" width="395" height="290"></svg>
+      <div class="slider-row" style="justify-content:center; margin-top:6px;">
+        <span>B =</span>
+        <input type="range" id="b-slider" min="1" max="300" step="1" value="1">
+        <span id="b-val" style="font-size:13px; font-weight:900; color:#2A1A0E; min-width:28px;">1</span>
+      </div>
+      <div id="error-label">Test Error at B trees:</div>
+      <div id="error-display">0.200</div>
+      <div class="inset-box">
+        <span class="formula">Var(ensemble) = σ²/B</span>
+        σ² = 0.04 (single tree variance)<br>
+        At B=1: error = 0.200 &nbsp;|&nbsp; At B=100: error ≈ 0.020<br>
+        <strong>Variance shrinks 100× with 100 trees.</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SEEDED RNG ───────────────────────────────────────────
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ─── LEFT PANEL: scatter + decision boundary ──────────────
+const tW = 400, tH = 340;
+const tMar = { top: 10, right: 10, bottom: 30, left: 35 };
+const tInW = tW - tMar.left - tMar.right;
+const tInH = tH - tMar.top - tMar.bottom;
+
+const treeSvg = d3.select('#tree-svg');
+const tG = treeSvg.append('g').attr('transform', `translate(${tMar.left},${tMar.top})`);
+
+const xScaleT = d3.scaleLinear().domain([0, 1]).range([0, tInW]);
+const yScaleT = d3.scaleLinear().domain([0, 1]).range([tInH, 0]);
+
+tG.append('g').attr('transform', `translate(0,${tInH})`)
+  .call(d3.axisBottom(xScaleT).ticks(5).tickSize(3))
+  .call(g => g.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+tG.append('g')
+  .call(d3.axisLeft(yScaleT).ticks(5).tickSize(3))
+  .call(g => g.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+tG.append('text').attr('x', tInW/2).attr('y', tInH + 26)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 8)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em').text('FEATURE X₁');
+tG.append('text').attr('transform', 'rotate(-90)').attr('x', -tInH/2).attr('y', -26)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 8)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em').text('FEATURE X₂');
+
+const dotsGroup = tG.append('g');
+const boundaryGroup = tG.append('g');
+
+let baseSeed = 42;
+
+function generatePoints(seed) {
+  const rng = mulberry32(seed);
+  const pts = [];
+  for (let i = 0; i < 30; i++) {
+    const x = rng();
+    const y = rng();
+    // Class 1 if x+y > 1 + some noise
+    const cls = (x + y + (rng() - 0.5) * 0.4) > 1.0 ? 1 : 0;
+    pts.push({ x, y, cls });
+  }
+  return pts;
+}
+
+function bootstrapSample(pts, rng) {
+  const n = pts.length;
+  const sample = [];
+  for (let i = 0; i < n; i++) {
+    sample.push(pts[Math.floor(rng() * n)]);
+  }
+  return sample;
+}
+
+function findBestSplit(pts) {
+  // Simple: find one threshold on x1 or x2
+  let bestGini = Infinity, bestAxis = 0, bestThresh = 0.5;
+  for (let axis of [0, 1]) {
+    const vals = pts.map(p => axis === 0 ? p.x : p.y).sort((a, b) => a - b);
+    for (let i = 0; i < vals.length - 1; i++) {
+      const t = (vals[i] + vals[i+1]) / 2;
+      const left = pts.filter(p => (axis === 0 ? p.x : p.y) < t);
+      const right = pts.filter(p => (axis === 0 ? p.x : p.y) >= t);
+      if (left.length === 0 || right.length === 0) continue;
+      const gini = (giniImpurity(left) * left.length + giniImpurity(right) * right.length) / pts.length;
+      if (gini < bestGini) { bestGini = gini; bestAxis = axis; bestThresh = t; }
+    }
+  }
+  return { axis: bestAxis, thresh: bestThresh };
+}
+
+function giniImpurity(pts) {
+  if (pts.length === 0) return 0;
+  const p1 = pts.filter(p => p.cls === 1).length / pts.length;
+  return 1 - p1*p1 - (1-p1)*(1-p1);
+}
+
+function drawTree(seed) {
+  const baseRng = mulberry32(seed + 1000);
+  const pts = generatePoints(seed);
+  const sample = bootstrapSample(pts, baseRng);
+
+  dotsGroup.selectAll('circle').data(pts).join('circle')
+    .attr('cx', d => xScaleT(d.x))
+    .attr('cy', d => yScaleT(d.y))
+    .attr('r', 5)
+    .attr('fill', d => d.cls === 1 ? '#C8102E' : '#545454')
+    .attr('opacity', 0.8)
+    .attr('stroke', '#fff').attr('stroke-width', 1);
+
+  const split = findBestSplit(sample);
+  // Draw step-function boundary (2 levels deep for visual interest)
+  const split2left = findBestSplit(sample.filter(p => (split.axis === 0 ? p.x : p.y) < split.thresh));
+  const split2right = findBestSplit(sample.filter(p => (split.axis === 0 ? p.x : p.y) >= split.thresh));
+
+  boundaryGroup.selectAll('*').remove();
+
+  // Draw main split
+  if (split.axis === 0) {
+    // vertical line at x=thresh
+    boundaryGroup.append('line')
+      .attr('x1', xScaleT(split.thresh)).attr('y1', 0)
+      .attr('x2', xScaleT(split.thresh)).attr('y2', tInH)
+      .attr('stroke', '#2A1A0E').attr('stroke-width', 2).attr('stroke-dasharray', '4,3');
+    // horizontal splits
+    if (split2left.pts && split2left.axis !== undefined) {
+      const subThresh = split2left.thresh;
+      if (split2left.axis === 1) {
+        boundaryGroup.append('line')
+          .attr('x1', 0).attr('y1', yScaleT(subThresh))
+          .attr('x2', xScaleT(split.thresh)).attr('y2', yScaleT(subThresh))
+          .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5).attr('stroke-dasharray', '3,2');
+      }
+    }
+    if (split2right.axis !== undefined) {
+      const subThresh2 = split2right.thresh;
+      if (split2right.axis === 1) {
+        boundaryGroup.append('line')
+          .attr('x1', xScaleT(split.thresh)).attr('y1', yScaleT(subThresh2))
+          .attr('x2', tInW).attr('y2', yScaleT(subThresh2))
+          .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5).attr('stroke-dasharray', '3,2');
+      }
+    }
+  } else {
+    // horizontal line at y=thresh
+    boundaryGroup.append('line')
+      .attr('x1', 0).attr('y1', yScaleT(split.thresh))
+      .attr('x2', tInW).attr('y2', yScaleT(split.thresh))
+      .attr('stroke', '#2A1A0E').attr('stroke-width', 2).attr('stroke-dasharray', '4,3');
+  }
+
+  // Label bootstrap indicator
+  boundaryGroup.append('text')
+    .attr('x', tInW - 4).attr('y', 12)
+    .attr('text-anchor', 'end')
+    .attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#C8102E').attr('font-weight', '700')
+    .text('Bootstrap sample #' + Math.abs(seed - 42 + 1));
+}
+
+drawTree(baseSeed);
+
+document.getElementById('resample-btn').addEventListener('click', () => {
+  baseSeed = Math.floor(Math.random() * 10000);
+  drawTree(baseSeed);
+});
+
+// ─── RIGHT PANEL: Error vs B curve ────────────────────────
+const eW = 395, eH = 290;
+const eMar = { top: 12, right: 16, bottom: 38, left: 50 };
+const eInW = eW - eMar.left - eMar.right;
+const eInH = eH - eMar.top - eMar.bottom;
+
+const sigma2 = 0.04;
+const irred = 0.06; // irreducible error floor
+function ensembleError(B) { return irred + sigma2 / B; }
+
+const xScaleE = d3.scaleLinear().domain([1, 300]).range([0, eInW]);
+const yScaleE = d3.scaleLinear().domain([0, 0.25]).range([eInH, 0]);
+
+const errSvg = d3.select('#error-svg');
+const eG = errSvg.append('g').attr('transform', `translate(${eMar.left},${eMar.top})`);
+
+// Grid lines
+eG.selectAll('.hgrid').data(yScaleE.ticks(5)).join('line')
+  .attr('class', 'hgrid')
+  .attr('x1', 0).attr('x2', eInW)
+  .attr('y1', d => yScaleE(d)).attr('y2', d => yScaleE(d))
+  .attr('stroke', '#D4D4D4').attr('stroke-width', 0.5);
+
+// Single tree error line (flat dashed)
+eG.append('line')
+  .attr('x1', 0).attr('y1', yScaleE(irred + sigma2))
+  .attr('x2', eInW).attr('y2', yScaleE(irred + sigma2))
+  .attr('stroke', '#545454').attr('stroke-width', 1.5).attr('stroke-dasharray', '5,3');
+eG.append('text')
+  .attr('x', 4).attr('y', yScaleE(irred + sigma2) - 4)
+  .attr('font-family', 'Montserrat').attr('font-size', 7.5).attr('fill', '#545454').attr('font-weight', '700')
+  .text('Single Tree Error = ' + (irred + sigma2).toFixed(3));
+
+// Ensemble error curve (all 300 points)
+const allBValues = d3.range(1, 301);
+const linePath = d3.line()
+  .x(B => xScaleE(B))
+  .y(B => yScaleE(ensembleError(B)));
+
+eG.append('path')
+  .datum(allBValues)
+  .attr('fill', 'none')
+  .attr('stroke', '#D4D4D4')
+  .attr('stroke-width', 1)
+  .attr('d', linePath);
+
+// Active path (draws up to B)
+const activePath = eG.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.5);
+
+// Marker dot
+const markerDot = eG.append('circle')
+  .attr('r', 5)
+  .attr('fill', '#C8102E')
+  .attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+// Axes
+eG.append('g').attr('transform', `translate(0,${eInH})`)
+  .call(d3.axisBottom(xScaleE).ticks(6).tickSize(3))
+  .call(g => g.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+eG.append('g')
+  .call(d3.axisLeft(yScaleE).ticks(5).tickFormat(d3.format('.2f')).tickSize(3))
+  .call(g => g.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(g => g.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+eG.append('text').attr('x', eInW/2).attr('y', eInH + 30)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 8)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em').text('NUMBER OF TREES B');
+eG.append('text').attr('transform', 'rotate(-90)').attr('x', -eInH/2).attr('y', -38)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 8)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em').text('TEST ERROR');
+
+function updateErrorChart(B) {
+  const bVals = d3.range(1, B + 1);
+  activePath.datum(bVals).attr('d', linePath);
+  const err = ensembleError(B);
+  markerDot.attr('cx', xScaleE(B)).attr('cy', yScaleE(err));
+  document.getElementById('b-val').textContent = B;
+  document.getElementById('error-display').textContent = err.toFixed(4);
+}
+
+const bSlider = document.getElementById('b-slider');
+bSlider.addEventListener('input', () => updateErrorChart(+bSlider.value));
+
+// Animate from 1 to 300 on load
+let animB = 1;
+function animate() {
+  if (animB <= 300) {
+    updateErrorChart(animB);
+    bSlider.value = animB;
+    animB += 3;
+    requestAnimationFrame(animate);
+  }
+}
+animate();
+</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Inner Sphere Paradox: It Pokes Outside the Box in 10D</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF; color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 5px; letter-spacing: -0.3px; }
+  .subtitle { font-size: 12px; color: #545454; text-align: center; margin-bottom: 16px; }
+
+  .main-layout { display: flex; width: 900px; gap: 0; border: 1px solid #D4D4D4; border-radius: 6px; overflow: hidden; }
+
+  /* Left chart */
+  .chart-area { flex: 1; padding: 14px 10px 10px 10px; background: #FFFFFF; }
+
+  /* Right cross-section */
+  .cross-area {
+    width: 320px; border-left: 1px solid #D4D4D4; background: #FAFAFA;
+    padding: 14px 12px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .cross-title { font-size: 10px; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  /* Controls */
+  .controls-area {
+    width: 900px; background: #FAFAFA; border: 1px solid #D4D4D4;
+    border-top: none; border-radius: 0 0 6px 6px;
+    padding: 12px 20px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 10px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; }
+  input[type=range] { width: 200px; accent-color: #C8102E; cursor: pointer; }
+  .n-display { font-size: 24px; font-weight: 700; color: #C8102E; min-width: 50px; text-align: center; }
+  .r-display { font-size: 15px; font-weight: 700; color: #2A1A0E; min-width: 120px; }
+
+  /* Status badge */
+  .status-badge {
+    font-size: 12px; font-weight: 700; padding: 5px 12px;
+    border-radius: 4px; letter-spacing: 0.3px;
+  }
+  .status-inside  { background: #E8F5E9; color: #2A7A2A; border: 1.5px solid #2A7A2A; }
+  .status-equal   { background: #FFF8E1; color: #B07A00; border: 1.5px solid #B07A00; }
+  .status-boxwall { background: #FFF0F0; color: #C8102E; border: 1.5px solid #C8102E; }
+
+  /* Value table */
+  .val-table { font-size: 11px; color: #545454; }
+  .val-table td { padding: 2px 6px; }
+  .val-table td:first-child { font-weight: 600; }
+
+  svg text { font-family: 'Montserrat', sans-serif; }
+</style>
+</head>
+<body>
+<h1>The Inner Sphere Paradox: It Pokes Outside the Box in 10D</h1>
+<p class="subtitle">Pack unit spheres in the corners of an n-dimensional box. Drop one sphere in the middle — by dimension 10, it pokes through the walls.</p>
+
+<div class="main-layout">
+  <!-- Left: line chart -->
+  <div class="chart-area">
+    <div style="font-size:10px;font-weight:700;color:#545454;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;">Radii vs Dimension n</div>
+    <svg id="chartSvg" width="555" height="400"></svg>
+    <!-- Legend -->
+    <div style="display:flex;gap:20px;margin-top:6px;padding-left:50px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#C8102E" stroke-width="2.5"/></svg>
+        r_inner = √n − 1 (growing)
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#545454" stroke-width="2.5"/></svg>
+        Corner sphere radius = 1
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <svg width="24" height="4"><line x1="0" y1="2" x2="24" y2="2" stroke="#2A1A0E" stroke-width="2" stroke-dasharray="5,3"/></svg>
+        Box half-width = 2
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: cross-section -->
+  <div class="cross-area">
+    <div class="cross-title">2D Cross-Section (n = <span id="nCross">2</span>)</div>
+    <canvas id="crossCanvas" width="280" height="280"></canvas>
+    <div style="font-size:10px;color:#545454;text-align:center;line-height:1.5;">
+      Gray: corner spheres (radius=1)<br>
+      <span style="color:#C8102E;font-weight:700;">Red</span>: inner sphere (radius = r_inner)<br>
+      Black square: the box (side 4)
+    </div>
+    <table class="val-table">
+      <tr><td>n =</td><td id="nVal">2</td></tr>
+      <tr><td>r_inner =</td><td id="rVal">0.414</td></tr>
+      <tr><td>Corner r =</td><td>1.000</td></tr>
+      <tr><td>Box half-width =</td><td>2.000</td></tr>
+    </table>
+    <div class="status-badge status-inside" id="statusBadge">Inner sphere inside box</div>
+  </div>
+</div>
+
+<div class="controls-area">
+  <div class="ctrl-group">
+    <label>Dimension n</label>
+    <input type="range" id="nSlider" min="2" max="20" step="1" value="2">
+  </div>
+  <div class="ctrl-group">
+    <label>n =</label>
+    <div class="n-display" id="nDisplay">2</div>
+  </div>
+  <div class="ctrl-group">
+    <label>r_inner = √n − 1</label>
+    <div class="r-display" id="rDisplay">√2 − 1 ≈ 0.414</div>
+  </div>
+</div>
+
+<script>
+const chartSvg = d3.select("#chartSvg");
+const chartW = 555, chartH = 400;
+const margin = {top:20, right:20, bottom:45, left:55};
+const cw = chartW - margin.left - margin.right;
+const ch = chartH - margin.top - margin.bottom;
+
+const nRange = d3.range(2, 21);
+const rInner = n => Math.sqrt(n) - 1;
+const cornerR = 1;
+const boxHW = 2;
+
+const xS = d3.scaleLinear().domain([2, 20]).range([0, cw]);
+const yS = d3.scaleLinear().domain([0, 4.5]).range([ch, 0]);
+
+const g = chartSvg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+// Red zone (n >= 9 where r_inner >= box half-width)
+g.append("rect")
+  .attr("x", xS(9)).attr("y", 0).attr("width", xS(20)-xS(9)).attr("height", ch)
+  .attr("fill","#FFF0F0").attr("opacity",0.6);
+
+g.append("text").attr("x",xS(14.5)).attr("y",yS(4.0))
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+  .attr("font-size","10").attr("fill","#C8102E").attr("font-weight","600")
+  .text("Inner sphere pokes outside box");
+
+// Axes
+g.append("g").attr("transform",`translate(0,${ch})`).call(d3.axisBottom(xS).ticks(10).tickFormat(d => "n="+d))
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+g.append("g").call(d3.axisLeft(yS).ticks(6))
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+
+g.append("text").attr("x",cw/2).attr("y",ch+38).attr("text-anchor","middle")
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","11").attr("fill","#545454").text("Dimension n");
+g.append("text").attr("transform","rotate(-90)").attr("x",-ch/2).attr("y",-42)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif").attr("font-size","11").attr("fill","#545454").text("Radius");
+
+// Corner sphere line (flat at 1)
+g.append("line").attr("x1",xS(2)).attr("y1",yS(1)).attr("x2",xS(20)).attr("y2",yS(1))
+  .attr("stroke","#545454").attr("stroke-width",2.5);
+
+// Box half-width line (flat at 2)
+g.append("line").attr("x1",xS(2)).attr("y1",yS(2)).attr("x2",xS(20)).attr("y2",yS(2))
+  .attr("stroke","#2A1A0E").attr("stroke-width",2).attr("stroke-dasharray","6,3");
+
+// r_inner line
+const lineGen = d3.line().x(n => xS(n)).y(n => yS(rInner(n)));
+g.append("path").datum(nRange).attr("d",lineGen).attr("fill","none").attr("stroke","#C8102E").attr("stroke-width",2.5);
+
+// Key annotations
+// n=4: r_inner=1 (equals corner spheres)
+const ann4 = { n:4, r:1, label:"n=4: r_inner=1\n(= corner spheres)", color:"#B07A00" };
+// n=9: r_inner=2 (= box half-width)
+const ann9 = { n:9, r:2, label:"n=9: r_inner=2\n(= box size!)", color:"#C8102E" };
+
+[ann4, ann9].forEach(a => {
+  g.append("circle").attr("cx",xS(a.n)).attr("cy",yS(a.r)).attr("r",7)
+    .attr("fill",a.color).attr("stroke","#FFFFFF").attr("stroke-width",2);
+  const lines = a.label.split("\n");
+  const tx = a.n <= 9 ? xS(a.n)+10 : xS(a.n)-10;
+  const anchor = a.n <= 9 ? "start" : "end";
+  lines.forEach((line, i) => {
+    g.append("text").attr("x",tx).attr("y",yS(a.r)-6+i*13)
+      .attr("text-anchor",anchor).attr("font-family","Montserrat,sans-serif")
+      .attr("font-size","10").attr("fill",a.color).attr("font-weight","600").text(line);
+  });
+});
+
+// Cursor elements
+const cursorLine = g.append("line").attr("y1",0).attr("y2",ch)
+  .attr("stroke","#2A1A0E").attr("stroke-width",1).attr("stroke-dasharray","3,3").attr("opacity",0.6);
+const cursorDot = g.append("circle").attr("r",6).attr("fill","#C8102E").attr("stroke","#FFFFFF").attr("stroke-width",2);
+
+// Cross-section canvas
+const canvas = document.getElementById("crossCanvas");
+const ctx = canvas.getContext("2d");
+const CW = 280, CH = 280;
+
+function drawCross(n) {
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillRect(0, 0, CW, CH);
+
+  const ri = rInner(n);
+  const BOX_HW = 2; // half-width of box
+  const scale = (CW * 0.40) / BOX_HW; // pixels per unit
+  const cx_ = CW/2, cy_ = CH/2;
+
+  // Draw box
+  const bpx = BOX_HW * scale;
+  ctx.strokeStyle = "#2A1A0E";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([5,3]);
+  ctx.strokeRect(cx_ - bpx, cy_ - bpx, bpx*2, bpx*2);
+  ctx.setLineDash([]);
+
+  // Corner circles (radius 1, centers at distance √n from center — but we project to 2D corners)
+  // In 2D cross-section: corners at (±1, ±1) from box center? No.
+  // Corner sphere centers are at distance √n (in n-D each corner is at (±1,±1,...,±1), distance √n)
+  // For 2D display: we show the 2D slice — corners at (±(BOX_HW-1), ±(BOX_HW-1)) = (±1, ±1)
+  const cornerPos = [[1,1],[1,-1],[-1,1],[-1,-1]];
+  cornerPos.forEach(([cx2, cy2]) => {
+    const px = cx_ + cx2 * scale;
+    const py = cy_ - cy2 * scale; // flip y
+    ctx.beginPath();
+    ctx.arc(px, py, 1*scale, 0, 2*Math.PI);
+    ctx.fillStyle = "rgba(84,84,84,0.18)";
+    ctx.fill();
+    ctx.strokeStyle = "#545454";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // Inner sphere (radius = ri, clamped for display so it's visible)
+  // Scale: if ri > 2*BOX_HW it would be off-screen — just draw clipped
+  const riPx = ri * scale;
+  ctx.beginPath();
+  ctx.arc(cx_, cy_, Math.min(riPx, CW * 0.9), 0, 2*Math.PI);
+  ctx.fillStyle = ri >= BOX_HW ? "rgba(200,16,46,0.18)" : "rgba(200,16,46,0.10)";
+  ctx.fill();
+  ctx.strokeStyle = "#C8102E";
+  ctx.lineWidth = ri >= BOX_HW ? 3 : 2;
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(cx_, cy_, 3, 0, 2*Math.PI);
+  ctx.fillStyle = "#C8102E";
+  ctx.fill();
+}
+
+function getStatus(n) {
+  const ri = rInner(n);
+  if (ri < 1) return { text: "Inner sphere < corner spheres", cls: "status-inside" };
+  if (Math.abs(ri - 1) < 0.001) return { text: "n=4: Inner sphere = corner spheres", cls: "status-equal" };
+  if (ri < 2) return { text: "Inner sphere > corner spheres (still inside box)", cls: "status-inside" };
+  if (Math.abs(ri - 2) < 0.001) return { text: "n=9: Inner sphere = box half-width!", cls: "status-equal" };
+  return { text: "Inner sphere POKES OUTSIDE the box!", cls: "status-boxwall" };
+}
+
+function update(n) {
+  const ri = rInner(n);
+
+  // Chart cursor
+  cursorLine.attr("x1",xS(n)).attr("x2",xS(n));
+  cursorDot.attr("cx",xS(n)).attr("cy",yS(ri));
+
+  // Cross-section
+  document.getElementById("nCross").textContent = n;
+  drawCross(n);
+
+  // Info
+  document.getElementById("nVal").textContent = n;
+  document.getElementById("rVal").textContent = ri.toFixed(4);
+  document.getElementById("nDisplay").textContent = n;
+  document.getElementById("rDisplay").textContent = `√${n} − 1 ≈ ${ri.toFixed(4)}`;
+
+  const s = getStatus(n);
+  const badge = document.getElementById("statusBadge");
+  badge.textContent = s.text;
+  badge.className = "status-badge " + s.cls;
+}
+
+document.getElementById("nSlider").addEventListener("input", function() {
+  update(+this.value);
+});
+
+update(2);
+</script>
+</body>
+</html>

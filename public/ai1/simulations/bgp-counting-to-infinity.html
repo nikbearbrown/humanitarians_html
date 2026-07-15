@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BGP vs Bellman-Ford: Counting to Infinity</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  .subtitle {
+    font-size: 0.78rem;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 18px;
+    max-width: 740px;
+  }
+  .panels-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .panel {
+    border: 1px solid #D4D4D4;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 400px;
+  }
+  .panel-title {
+    background: #2A1A0E;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+  .panel-title.bgp { background: #1a3a6e; }
+  canvas { display: block; }
+  .panel-footer {
+    padding: 8px 12px;
+    background: #f9f9f9;
+    border-top: 1px solid #D4D4D4;
+    font-size: 0.72rem;
+    min-height: 52px;
+  }
+  .converged { color: #1a6b3c; font-weight: 700; }
+  .counting { color: #C8102E; font-weight: 700; }
+  .controls-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 9px 20px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary { background: #2A1A0E; color: #fff; }
+  .btn-primary:hover { background: #4a3a2e; }
+  .btn-red { background: #C8102E; color: #fff; }
+  .btn-red:hover { background: #a00d24; }
+  .btn-outline { background: #fff; color: #2A1A0E; border: 1.5px solid #D4D4D4; }
+  .btn-outline:hover { background: #f0f0f0; }
+  .step-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    min-width: 80px;
+    text-align: center;
+  }
+  .legend-row {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 0.7rem;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<h1>BGP vs Bellman-Ford: Counting to Infinity</h1>
+<p class="subtitle">After a link fails, Bellman-Ford loops forever counting up. Path-vector (BGP) detects the loop in 1 step by checking if its own ID appears in the advertised path.</p>
+
+<div class="panels-row">
+  <div class="panel">
+    <div class="panel-title">Bellman-Ford: Counting to Infinity</div>
+    <canvas id="bfCanvas" width="400" height="340"></canvas>
+    <div class="panel-footer" id="bfFooter">
+      <span>Initial state: V→T=1, S→T=2 (via V).</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title bgp">BGP Path-Vector: Instant Detection</div>
+    <canvas id="bgpCanvas" width="400" height="340"></canvas>
+    <div class="panel-footer" id="bgpFooter">
+      <span>Initial state: V→T=1, S→T=2 (path [S,V,T]).</span>
+    </div>
+  </div>
+</div>
+
+<div class="controls-row">
+  <button class="btn-outline" id="btnReset">Reset</button>
+  <button class="btn-primary" id="btnStep">Step Forward</button>
+  <span class="step-label" id="stepLabel">Step 0</span>
+  <button class="btn-red" id="btnAuto">Auto-Play</button>
+</div>
+
+<div class="legend-row">
+  <div class="legend-item"><div class="legend-dot" style="background:#1a3a8f;"></div> Router S</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1a6b3c;"></div> Router V</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#545454;"></div> Destination T</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C8102E;"></div> Failed link / loop arrow</div>
+</div>
+
+<script>
+// ---- State machine ----
+// Steps:
+// 0: Initial — all links up, V→T=1, S→T=2
+// 1: V→T link fails (red X appears)
+// 2: BF: V hears S says d(S,T)=2. V updates d(V,T)=3. BGP: V withdraws. S tries S's path — contains V → reject. Both set ∞.
+// 3+: BF: continues counting. BGP: converged.
+
+const MAX_BF = 30;
+let step = 0;
+let autoTimer = null;
+
+// BF distances
+function bfDist(step) {
+  if (step <= 0) return { S: 2, V: 1 };
+  if (step === 1) return { S: 2, V: 1 }; // failure just happened
+  // step 2: V updates to 3, step 3: S updates to 4, etc.
+  const round = step - 1;
+  const V = 1 + 2 * Math.ceil(round / 2);
+  const S = V + 1;
+  return { S: Math.min(S, 99), V: Math.min(V, 99) };
+}
+
+function bgpDist(step) {
+  if (step <= 0) return { S: 2, V: 1, converged: false };
+  if (step === 1) return { S: 2, V: 1, converged: false }; // failure
+  return { S: Infinity, V: Infinity, converged: true };
+}
+
+// Canvas layout
+// Nodes: S=(80,170), V=(200,70), T=(320,170) — in 400x340
+const NODES = {
+  S: { x: 80, y: 180, label: 'S', color: '#1a3a8f' },
+  V: { x: 200, y: 90, label: 'V', color: '#1a6b3c' },
+  T: { x: 320, y: 180, label: 'T', color: '#545454' },
+};
+const EDGES = [
+  { from: 'S', to: 'V', cost: 1, label: 'cost=1' },
+  { from: 'V', to: 'T', cost: 1, label: 'cost=1', failable: true },
+  { from: 'S', to: 'T', cost: 2, label: 'cost=2', indirect: true },
+];
+const R = 28;
+
+function drawNetwork(ctx, state, isBGP) {
+  ctx.clearRect(0, 0, 400, 340);
+
+  // Draw edges
+  EDGES.forEach(e => {
+    const from = NODES[e.from], to = NODES[e.to];
+    const failed = e.failable && state.step >= 1;
+    const indirect = e.indirect;
+
+    ctx.save();
+    if (failed) {
+      ctx.strokeStyle = '#C8102E';
+      ctx.setLineDash([6, 4]);
+      ctx.lineWidth = 2;
+    } else if (indirect) {
+      ctx.strokeStyle = '#D4D4D4';
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1.5;
+    } else {
+      ctx.strokeStyle = '#545454';
+      ctx.setLineDash([]);
+      ctx.lineWidth = 2.5;
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+    ctx.restore();
+
+    // Edge cost label
+    const mx = (from.x + to.x) / 2;
+    const my = (from.y + to.y) / 2;
+    ctx.save();
+    ctx.font = '600 11px Montserrat, sans-serif';
+    ctx.fillStyle = failed ? '#C8102E' : '#545454';
+    ctx.textAlign = 'center';
+    ctx.fillText(e.label, mx + (e.indirect ? 10 : 0), my - 8);
+    ctx.restore();
+
+    // Red X on failed link
+    if (failed) {
+      ctx.save();
+      ctx.strokeStyle = '#C8102E';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(mx - 9, my - 9); ctx.lineTo(mx + 9, my + 9);
+      ctx.moveTo(mx + 9, my - 9); ctx.lineTo(mx - 9, my + 9);
+      ctx.stroke();
+      ctx.restore();
+    }
+  });
+
+  // Draw loop arrow for BF (when step >= 2 and not BGP)
+  if (!isBGP && state.step >= 2) {
+    ctx.save();
+    ctx.strokeStyle = '#C8102E';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([5, 3]);
+    // Arrow from V to S then curved back
+    const sx = NODES.S.x, sy = NODES.S.y;
+    const vx = NODES.V.x, vy = NODES.V.y;
+    // Curved arc below
+    ctx.beginPath();
+    ctx.moveTo(vx, vy + R);
+    ctx.bezierCurveTo(vx - 30, vy + 130, sx + 30, sy + 110, sx, sy + R);
+    ctx.stroke();
+    // Arrowhead at S
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#C8102E';
+    ctx.beginPath();
+    ctx.moveTo(sx, sy + R);
+    ctx.lineTo(sx - 7, sy + R + 12);
+    ctx.lineTo(sx + 7, sy + R + 12);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.font = '700 10px Montserrat, sans-serif';
+    ctx.fillStyle = '#C8102E';
+    ctx.textAlign = 'center';
+    ctx.fillText('LOOP', (sx + vx)/2 - 30, sy + 80);
+    ctx.restore();
+  }
+
+  // Draw nodes
+  Object.entries(NODES).forEach(([key, node]) => {
+    const isT = key === 'T';
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, R, 0, Math.PI * 2);
+    ctx.fillStyle = node.color;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+    ctx.restore();
+
+    // Node label
+    ctx.save();
+    ctx.font = '700 16px Montserrat, sans-serif';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.label, node.x, node.y);
+    ctx.restore();
+
+    // Distance bubble (not for T)
+    if (!isT) {
+      const dist = state.dist[key];
+      const distStr = dist === Infinity ? '∞' : dist.toString();
+      const bx = node.x + 30, by = node.y - 28;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(bx - 22, by - 13, 44, 24, 5);
+      ctx.fillStyle = state.step >= 2 && !isBGP && dist > 2 ? '#C8102E' : '#fff';
+      ctx.fill();
+      ctx.strokeStyle = state.step >= 2 && !isBGP && dist > 2 ? '#C8102E' : '#D4D4D4';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.font = '700 12px Montserrat, sans-serif';
+      ctx.fillStyle = state.step >= 2 && !isBGP && dist > 2 ? '#fff' : '#2A1A0E';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('d=' + distStr, bx, by);
+      ctx.restore();
+    }
+  });
+
+  // Path info for BGP
+  if (isBGP && state.step >= 1) {
+    const bgpState = bgpDist(state.step);
+    if (!bgpState.converged) {
+      // Draw path labels
+      ctx.save();
+      ctx.font = '600 9.5px Montserrat, sans-serif';
+      ctx.fillStyle = '#1a3a8f';
+      ctx.textAlign = 'center';
+      ctx.fillText('path: [S,V,T]', NODES.S.x, NODES.S.y + R + 18);
+      ctx.fillStyle = '#1a6b3c';
+      ctx.fillText('path: [V,T]', NODES.V.x, NODES.V.y + R + 18);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.font = '700 10px Montserrat, sans-serif';
+      ctx.fillStyle = '#1a6b3c';
+      ctx.textAlign = 'center';
+      ctx.fillText('V in S path → REJECT', (NODES.S.x + NODES.V.x)/2, NODES.V.y + 60);
+      ctx.restore();
+    }
+  }
+
+  // Messages count for BF
+  if (!isBGP && state.step >= 1) {
+    const msgs = Math.max(0, state.step - 1) * 2;
+    ctx.save();
+    ctx.font = '600 11px Montserrat, sans-serif';
+    ctx.fillStyle = '#545454';
+    ctx.textAlign = 'left';
+    ctx.fillText('Messages sent: ' + msgs, 14, 320);
+    ctx.restore();
+  }
+
+  // BGP converged banner
+  if (isBGP && bgpDist(state.step).converged) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(26,107,60,0.12)';
+    ctx.roundRect(12, 290, 376, 34, 5);
+    ctx.fill();
+    ctx.font = '700 13px Montserrat, sans-serif';
+    ctx.fillStyle = '#1a6b3c';
+    ctx.textAlign = 'center';
+    ctx.fillText('Converged in 1 step. d(V,T) = d(S,T) = ∞', 200, 312);
+    ctx.restore();
+  }
+}
+
+function getState(s) {
+  const bf = bfDist(s);
+  const bgp = bgpDist(s);
+  return {
+    bf: { step: s, dist: bf },
+    bgp: { step: s, dist: bgp },
+  };
+}
+
+function updateFooters(s) {
+  const bf = bfDist(s);
+  const bgp = bgpDist(s);
+  const bfEl = document.getElementById('bfFooter');
+  const bgpEl = document.getElementById('bgpFooter');
+
+  if (s === 0) {
+    bfEl.innerHTML = 'Initial state: d(V,T)=1, d(S,T)=2.';
+    bgpEl.innerHTML = 'Initial state: d(V,T)=1 (path [V,T]); d(S,T)=2 (path [S,V,T]).';
+  } else if (s === 1) {
+    bfEl.innerHTML = '<span class="counting">V→T link FAILS.</span> V still hears S advertise d(S,T)=2.';
+    bgpEl.innerHTML = '<span class="counting">V→T link FAILS.</span> V withdraws route to T.';
+  } else {
+    const round = s - 1;
+    bfEl.innerHTML = `<span class="counting">Round ${round}:</span> d(V,T)=${bf.V}, d(S,T)=${bf.S}. Counting forever…`;
+    if (bgp.converged) {
+      bgpEl.innerHTML = `<span class="converged">S checks V's advertised path — [V,T] path failed. S path [S,V,T] contains V → V rejects it. Both set d=∞. Done.</span>`;
+    }
+  }
+}
+
+function render() {
+  const state = getState(step);
+  const bfCtx = document.getElementById('bfCanvas').getContext('2d');
+  const bgpCtx = document.getElementById('bgpCanvas').getContext('2d');
+  drawNetwork(bfCtx, state.bf, false);
+  drawNetwork(bgpCtx, state.bgp, true);
+  document.getElementById('stepLabel').textContent = 'Step ' + step;
+  updateFooters(step);
+}
+
+function advance() {
+  if (step < MAX_BF) step++;
+  render();
+  if (step >= MAX_BF && autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    document.getElementById('btnAuto').textContent = 'Auto-Play';
+  }
+}
+
+document.getElementById('btnStep').addEventListener('click', () => {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; document.getElementById('btnAuto').textContent = 'Auto-Play'; }
+  advance();
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; document.getElementById('btnAuto').textContent = 'Auto-Play'; }
+  step = 0;
+  render();
+});
+
+document.getElementById('btnAuto').addEventListener('click', function() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    this.textContent = 'Auto-Play';
+  } else {
+    this.textContent = 'Pause';
+    autoTimer = setInterval(advance, 900);
+  }
+});
+
+// Polyfill for roundRect if needed
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    this.beginPath();
+    this.moveTo(x+r, y);
+    this.lineTo(x+w-r, y);
+    this.quadraticCurveTo(x+w, y, x+w, y+r);
+    this.lineTo(x+w, y+h-r);
+    this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    this.lineTo(x+r, y+h);
+    this.quadraticCurveTo(x, y+h, x, y+h-r);
+    this.lineTo(x, y+r);
+    this.quadraticCurveTo(x, y, x+r, y);
+    this.closePath();
+  };
+}
+
+render();
+</script>
+</body>
+</html>

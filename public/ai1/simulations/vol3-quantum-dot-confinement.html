@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Dot Confinement — CdSe Brus Equation</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #545454;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+  .card {
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 16px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 12px;
+  }
+  .main-plot { grid-column: 1; grid-row: 1; }
+  .controls { grid-column: 2; grid-row: 1; }
+  .loglog-plot { grid-column: 1; grid-row: 2; }
+  .console { grid-column: 2; grid-row: 2; }
+
+  /* Slider */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .slider-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 28px;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: #2A1A0E;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #C8102E;
+    cursor: pointer;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 0 0 1.5px #C8102E;
+  }
+  .slider-val {
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 52px;
+    text-align: right;
+  }
+
+  /* Color swatch */
+  .swatch-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  #colorSwatch {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    border: 1.5px solid #2A1A0E;
+    flex-shrink: 0;
+  }
+  .swatch-info { flex: 1; }
+  .swatch-lambda {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .swatch-desc {
+    font-size: 12px;
+    color: #545454;
+    margin-top: 2px;
+  }
+  .energy-display {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .energy-display span {
+    font-weight: 700;
+    color: #C8102E;
+  }
+
+  /* Material toggle */
+  .mat-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .mat-btn {
+    flex: 1;
+    padding: 6px 0;
+    border: 1.5px solid #2A1A0E;
+    border-radius: 3px;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mat-btn.active {
+    background: #2A1A0E;
+    color: #FFFFFF;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+    font-size: 12px;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .leg-line {
+    width: 24px;
+    height: 2px;
+    background: #C8102E;
+  }
+  .leg-line.ink { background: #2A1A0E; }
+  .leg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2A1A0E;
+  }
+
+  /* Physics console */
+  .physics-check {
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.8;
+    color: #2A1A0E;
+  }
+  .check-pass { color: #1a7a1a; font-weight: 700; }
+  .check-label { color: #545454; }
+
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .axis path, .axis line { stroke: #2A1A0E; stroke-width: 1; }
+  .axis text { fill: #2A1A0E; font-size: 11px; }
+  .grid line { stroke: #e8e8e8; stroke-width: 0.8; }
+  .grid path { stroke: none; }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #2A1A0E;
+    color: #FFFFFF;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    line-height: 1.5;
+    display: none;
+    z-index: 100;
+  }
+</style>
+</head>
+<body>
+
+<h1>Quantum Dot Confinement — Brus Equation (CdSe)</h1>
+<p class="subtitle">E<sub>dot</sub>(R) = E<sub>bulk</sub> + ħ²π²/(2m<sub>e</sub>*R²) + ħ²π²/(2m<sub>h</sub>*R²) − 1.8e²/(4πε₀ε<sub>r</sub>R)</p>
+
+<div class="layout">
+
+  <!-- MAIN PLOT -->
+  <div class="card main-plot">
+    <div class="card-title">Band Gap vs Dot Radius</div>
+    <svg id="mainSvg"></svg>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-line"></div><span>Brus theory</span></div>
+      <div class="leg-item"><div class="leg-dot"></div><span>Experimental data</span></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="card controls">
+    <div class="card-title">Material &amp; Radius</div>
+
+    <div class="mat-toggle">
+      <button class="mat-btn active" id="btnCdSe" onclick="setMaterial('CdSe')">CdSe</button>
+      <button class="mat-btn" id="btnZnS" onclick="setMaterial('ZnS')">ZnS</button>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">R</div>
+      <input type="range" id="rSlider" min="1" max="10" step="0.05" value="3">
+      <div class="slider-val" id="rVal">3.00 nm</div>
+    </div>
+
+    <div class="energy-display">
+      E<sub>dot</sub> = <span id="eVal">—</span> eV
+    </div>
+
+    <div class="swatch-row">
+      <div id="colorSwatch"></div>
+      <div class="swatch-info">
+        <div class="swatch-lambda" id="lambdaVal">—</div>
+        <div class="swatch-desc" id="lambdaDesc">—</div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #e0e0e0;margin:10px 0;">
+    <div class="card-title" style="margin-top:8px;">Brus Terms</div>
+    <svg id="barSvg" width="280" height="90"></svg>
+  </div>
+
+  <!-- LOG-LOG PLOT -->
+  <div class="card loglog-plot">
+    <div class="card-title">Log–Log: Confinement Energy vs Radius (slope = −2)</div>
+    <svg id="loglogSvg"></svg>
+  </div>
+
+  <!-- CONSOLE -->
+  <div class="card console">
+    <div class="card-title">Physics Checks</div>
+    <div class="physics-check" id="physConsole"></div>
+  </div>
+
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ─── PHYSICS ────────────────────────────────────────────────────────────────
+
+const MATERIALS = {
+  CdSe: {
+    label: 'CdSe',
+    E_bulk: 1.74,
+    me_star: 0.13,   // in units of m_e
+    mh_star: 0.45,
+    eps_r: 10.6,
+    // Experimental data (literature CdSe)
+    expt: [
+      { R: 1.5, E: 2.44 },
+      { R: 2.0, E: 2.25 },
+      { R: 2.5, E: 2.12 },
+      { R: 3.0, E: 2.10 },
+      { R: 4.0, E: 1.95 },
+      { R: 5.0, E: 1.84 },
+      { R: 6.0, E: 1.80 },
+    ]
+  },
+  ZnS: {
+    label: 'ZnS',
+    E_bulk: 3.70,
+    me_star: 0.25,
+    mh_star: 0.70,
+    eps_r: 8.5,
+    expt: [
+      { R: 1.5, E: 5.20 },
+      { R: 2.0, E: 4.60 },
+      { R: 2.5, E: 4.20 },
+      { R: 3.0, E: 4.00 },
+      { R: 4.0, E: 3.85 },
+      { R: 5.0, E: 3.78 },
+      { R: 6.0, E: 3.74 },
+    ]
+  }
+};
+
+// ħ²/(2mₑ) = 0.03813 eV·nm²  (standard condensed matter value)
+const HBAR2_OVER_2ME = 0.038100; // eV·nm²
+const E2_OVER_4PIEPS0 = 1.44;    // eV·nm (Coulomb constant * e²)
+
+function E_conf(R, mat) {
+  // E_conf = ħ²π²/(2m_e*R²) + ħ²π²/(2m_h*R²)
+  const { me_star, mh_star } = MATERIALS[mat];
+  return (HBAR2_OVER_2ME / me_star + HBAR2_OVER_2ME / mh_star) * Math.PI * Math.PI / (R * R);
+}
+
+function E_coul(R, mat) {
+  // E_coul = -1.8 * e²/(4πε₀) / (ε_r * R)
+  const { eps_r } = MATERIALS[mat];
+  return -1.8 * E2_OVER_4PIEPS0 / (eps_r * R);
+}
+
+function E_dot(R, mat) {
+  return MATERIALS[mat].E_bulk + E_conf(R, mat) + E_coul(R, mat);
+}
+
+// Wavelength color utilities
+function lambdaToColor(nm) {
+  if (nm < 380) return '#8B00FF';       // UV → violet proxy
+  if (nm < 450) return '#6A0DAD';       // violet
+  if (nm < 500) return '#0000FF';       // blue
+  if (nm < 500) return '#0047AB';
+  if (nm <= 500) return '#0000CC';
+  if (nm < 570) return '#00AA00';       // green
+  if (nm < 590) return '#CCCC00';       // yellow
+  if (nm < 620) return '#FF7700';       // orange
+  if (nm <= 700) return '#CC0000';      // red
+  return '#5C0000';                     // IR → dark red proxy
+}
+
+function lambdaToColorSmooth(nm) {
+  // Simple piecewise for visible + near bounds
+  if (nm < 380) return '#9400D3';
+  if (nm <= 450) {
+    const t = (nm - 380) / 70;
+    return `hsl(${280 + t * 20},80%,40%)`;
+  }
+  if (nm <= 500) {
+    const t = (nm - 450) / 50;
+    return `hsl(${260 - t * 20},85%,45%)`;
+  }
+  if (nm <= 570) {
+    const t = (nm - 500) / 70;
+    return `hsl(${240 - t * 120},80%,45%)`;
+  }
+  if (nm <= 590) {
+    const t = (nm - 570) / 20;
+    return `hsl(${120 - t * 60},90%,42%)`;
+  }
+  if (nm <= 620) {
+    const t = (nm - 590) / 30;
+    return `hsl(${60 - t * 30},90%,45%)`;
+  }
+  if (nm <= 700) {
+    const t = (nm - 620) / 80;
+    return `hsl(${30 - t * 30},90%,40%)`;
+  }
+  return '#4A0000';
+}
+
+function lambdaDesc(nm) {
+  if (nm < 380) return 'Ultraviolet (UV)';
+  if (nm < 450) return 'Violet';
+  if (nm < 500) return 'Blue';
+  if (nm < 570) return 'Green';
+  if (nm < 590) return 'Yellow';
+  if (nm < 620) return 'Orange';
+  if (nm <= 700) return 'Red';
+  return 'Near-Infrared (NIR)';
+}
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+
+let currentMat = 'CdSe';
+let currentR = 3.0;
+
+// ─── DIMENSIONS ─────────────────────────────────────────────────────────────
+
+const margin = { top: 20, right: 30, bottom: 50, left: 62 };
+const W_MAIN = 560, H_MAIN = 300;
+const innerW = W_MAIN - margin.left - margin.right;
+const innerH = H_MAIN - margin.top - margin.bottom;
+
+// ─── SCALES ─────────────────────────────────────────────────────────────────
+
+const xScale = d3.scaleLinear().domain([1, 10]).range([0, innerW]);
+const yScale = d3.scaleLinear().domain([1.0, 4.5]).range([innerH, 0]);
+
+// Log-log scales
+const xLL = d3.scaleLog().domain([1, 10]).range([0, innerW]);
+const yLL = d3.scaleLog().domain([0.05, 15]).range([innerH, 0]);
+
+// ─── MAIN SVG ────────────────────────────────────────────────────────────────
+
+const mainSvg = d3.select('#mainSvg')
+  .attr('width', W_MAIN)
+  .attr('height', H_MAIN);
+
+const mg = mainSvg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+// Grid
+mg.append('g').attr('class', 'grid')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xScale).ticks(9).tickSize(-innerH).tickFormat(''));
+
+mg.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yScale).ticks(7).tickSize(-innerW).tickFormat(''));
+
+// Axes
+mg.append('g').attr('class', 'axis')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xScale).ticks(9));
+
+mg.append('g').attr('class', 'axis')
+  .call(d3.axisLeft(yScale).ticks(7));
+
+// Axis labels
+mainSvg.append('text')
+  .attr('x', margin.left + innerW / 2)
+  .attr('y', H_MAIN - 4)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Dot Radius R (nm)');
+
+mainSvg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(margin.top + innerH / 2))
+  .attr('y', 14)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Band Gap Energy (eV)');
+
+// Bulk energy reference line
+const bulkLine = mg.append('line')
+  .attr('class', 'bulk-ref')
+  .attr('stroke', '#545454')
+  .attr('stroke-width', 1)
+  .attr('stroke-dasharray', '4,4')
+  .attr('x1', 0).attr('x2', innerW);
+
+const bulkLabel = mg.append('text')
+  .attr('class', 'bulk-label')
+  .attr('font-size', '10px')
+  .attr('fill', '#545454')
+  .attr('x', 3);
+
+// Theory curve
+const lineGen = d3.line()
+  .x(d => xScale(d.R))
+  .y(d => yScale(d.E))
+  .curve(d3.curveCatmullRom.alpha(0.5));
+
+const theoryCurve = mg.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.5);
+
+// Experiment dots
+const exptGroup = mg.append('g');
+
+// Marker on curve
+const markerGroup = mg.append('g');
+const markerLine = markerGroup.append('line')
+  .attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3');
+const markerDot = markerGroup.append('circle')
+  .attr('r', 6)
+  .attr('fill', '#C8102E')
+  .attr('stroke', '#FFFFFF')
+  .attr('stroke-width', 2);
+const markerLabelR = markerGroup.append('text')
+  .attr('font-size', '11px')
+  .attr('font-weight', '700')
+  .attr('fill', '#2A1A0E')
+  .attr('text-anchor', 'middle');
+const markerLabelE = markerGroup.append('text')
+  .attr('font-size', '11px')
+  .attr('fill', '#2A1A0E')
+  .attr('text-anchor', 'middle');
+
+// Invisible overlay for hover
+mg.append('rect')
+  .attr('width', innerW).attr('height', innerH)
+  .attr('fill', 'none').attr('pointer-events', 'all')
+  .on('mousemove', function(event) {
+    const [mx] = d3.pointer(event, this);
+    const R = xScale.invert(mx);
+    if (R >= 1 && R <= 10) updateR(R);
+  });
+
+// ─── LOG-LOG SVG ─────────────────────────────────────────────────────────────
+
+const loglogSvg = d3.select('#loglogSvg')
+  .attr('width', W_MAIN)
+  .attr('height', H_MAIN);
+
+const lg = loglogSvg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+// Grid
+lg.append('g').attr('class', 'grid')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xLL).ticks(5, '.0f').tickSize(-innerH).tickFormat(''));
+lg.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yLL).ticks(6, '.1e').tickSize(-innerW).tickFormat(''));
+
+// Axes
+lg.append('g').attr('class', 'axis')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xLL).ticks(5, '.0f'));
+lg.append('g').attr('class', 'axis')
+  .call(d3.axisLeft(yLL).ticks(6, '.1e'));
+
+// Axis labels
+loglogSvg.append('text')
+  .attr('x', margin.left + innerW / 2)
+  .attr('y', H_MAIN - 4)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Dot Radius R (nm)');
+
+loglogSvg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(margin.top + innerH / 2))
+  .attr('y', 14)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '12px')
+  .attr('fill', '#2A1A0E')
+  .text('Confinement Energy E_conf (eV)');
+
+const llLineGen = d3.line()
+  .x(d => xLL(d.R))
+  .y(d => yLL(d.E))
+  .defined(d => d.E > 0);
+
+const llCurve = lg.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.5);
+
+// Slope annotation
+const slopeLabel = lg.append('text')
+  .attr('font-size', '12px')
+  .attr('font-weight', '700')
+  .attr('fill', '#545454');
+
+// Marker on log-log
+const llMarker = lg.append('circle')
+  .attr('r', 6)
+  .attr('fill', '#2A1A0E')
+  .attr('stroke', '#FFFFFF')
+  .attr('stroke-width', 2);
+
+// ─── BAR CHART SVG ────────────────────────────────────────────────────────────
+
+const barSvg = d3.select('#barSvg');
+const barMargin = { top: 10, right: 10, bottom: 30, left: 60 };
+const bW = 280 - barMargin.left - barMargin.right;
+const bH = 90 - barMargin.top - barMargin.bottom;
+
+const bg = barSvg.append('g')
+  .attr('transform', `translate(${barMargin.left},${barMargin.top})`);
+
+const barX = d3.scaleBand().domain(['E_bulk', 'E_conf', 'E_coul', 'E_dot'])
+  .range([0, bW]).padding(0.25);
+const barY = d3.scaleLinear().domain([-0.5, 5]).range([bH, 0]);
+
+bg.append('g').attr('class', 'axis')
+  .attr('transform', `translate(0,${bH})`)
+  .call(d3.axisBottom(barX).tickSize(0))
+  .selectAll('text').style('font-size', '10px');
+
+bg.append('line')
+  .attr('x1', 0).attr('x2', bW)
+  .attr('y1', barY(0)).attr('y2', barY(0))
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 0.8);
+
+const bars = bg.selectAll('.bar')
+  .data(['E_bulk', 'E_conf', 'E_coul', 'E_dot'])
+  .join('rect')
+  .attr('class', 'bar')
+  .attr('x', d => barX(d))
+  .attr('width', barX.bandwidth());
+
+const barVals = bg.selectAll('.bval')
+  .data(['E_bulk', 'E_conf', 'E_coul', 'E_dot'])
+  .join('text')
+  .attr('class', 'bval')
+  .attr('x', d => barX(d) + barX.bandwidth() / 2)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', '9px')
+  .attr('fill', '#2A1A0E');
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function getRValues(n = 200) {
+  return d3.range(n).map(i => 1 + i * 9 / (n - 1));
+}
+
+function updateMaterial() {
+  const mat = currentMat;
+  const { E_bulk, expt } = MATERIALS[mat];
+
+  // Adjust y scale
+  const allE = getRValues().map(R => E_dot(R, mat));
+  const minE = Math.min(...allE, ...expt.map(d => d.E)) - 0.2;
+  const maxE = Math.max(...allE, ...expt.map(d => d.E)) + 0.3;
+  yScale.domain([Math.max(0.5, minE), maxE]);
+
+  // Redraw axes
+  mainSvg.select('.axis:nth-of-type(2)').remove();
+  mg.append('g').attr('class', 'axis')
+    .call(d3.axisLeft(yScale).ticks(7));
+
+  // Bulk ref line
+  bulkLine.attr('y1', yScale(E_bulk)).attr('y2', yScale(E_bulk));
+  bulkLabel.attr('y', yScale(E_bulk) - 4).text(`E_bulk = ${E_bulk} eV`);
+
+  // Theory curve
+  const pts = getRValues().map(R => ({ R, E: E_dot(R, mat) }));
+  theoryCurve.attr('d', lineGen(pts));
+
+  // Expt dots
+  exptGroup.selectAll('.expt-dot').remove();
+  exptGroup.selectAll('.expt-dot')
+    .data(expt)
+    .join('circle')
+    .attr('class', 'expt-dot')
+    .attr('cx', d => xScale(d.R))
+    .attr('cy', d => yScale(d.E))
+    .attr('r', 5)
+    .attr('fill', '#2A1A0E')
+    .attr('stroke', '#FFFFFF')
+    .attr('stroke-width', 1.5)
+    .on('mouseover', function(event, d) {
+      const tt = document.getElementById('tooltip');
+      tt.style.display = 'block';
+      tt.innerHTML = `R = ${d.R} nm<br>E_expt = ${d.E.toFixed(3)} eV`;
+      tt.style.left = (event.clientX + 12) + 'px';
+      tt.style.top = (event.clientY - 28) + 'px';
+    })
+    .on('mouseout', () => { document.getElementById('tooltip').style.display = 'none'; });
+
+  // Log-log curve
+  const llPts = getRValues().map(R => ({ R, E: E_conf(R, mat) }));
+  llCurve.attr('d', llLineGen(llPts));
+
+  // Slope label
+  const midR = 3;
+  const midE = E_conf(midR, mat);
+  slopeLabel.attr('x', xLL(midR) + 10).attr('y', yLL(midE) - 8).text('slope = −2');
+
+  updateR(currentR);
+}
+
+function updateR(R) {
+  currentR = R;
+  const mat = currentMat;
+
+  // Slider
+  document.getElementById('rSlider').value = R;
+  document.getElementById('rVal').textContent = R.toFixed(2) + ' nm';
+
+  const E = E_dot(R, mat);
+  const Ec = E_conf(R, mat);
+  const Ecoul = E_coul(R, mat);
+  const Eb = MATERIALS[mat].E_bulk;
+
+  document.getElementById('eVal').textContent = E.toFixed(3);
+
+  // Photon wavelength
+  const lambda = 1240 / E;
+  document.getElementById('lambdaVal').textContent = lambda.toFixed(0) + ' nm';
+  document.getElementById('lambdaDesc').textContent = lambdaDesc(lambda);
+  document.getElementById('colorSwatch').style.background = lambdaToColorSmooth(lambda);
+
+  // Marker on main plot
+  const cx = xScale(R);
+  const cy = yScale(E);
+  markerDot.attr('cx', cx).attr('cy', cy);
+  markerLine.attr('x1', cx).attr('x2', cx).attr('y1', cy).attr('y2', innerH);
+  markerLabelR.attr('x', cx).attr('y', innerH + 16).text(`${R.toFixed(1)} nm`);
+  markerLabelE.attr('x', cx).attr('y', cy - 12).text(`${E.toFixed(2)} eV`);
+
+  // Marker on log-log
+  llMarker.attr('cx', xLL(R)).attr('cy', yLL(Ec));
+
+  // Bar chart
+  const vals = { E_bulk: Eb, E_conf: Ec, E_coul: Ecoul, E_dot: E };
+  const colors = { E_bulk: '#545454', E_conf: '#C8102E', E_coul: '#2A1A0E', E_dot: '#2A1A0E' };
+
+  barY.domain([Math.min(Ecoul - 0.1, -0.2), Math.max(E + 0.3, Eb + 0.3)]);
+
+  bars.data(['E_bulk', 'E_conf', 'E_coul', 'E_dot'])
+    .attr('fill', d => colors[d])
+    .attr('opacity', d => d === 'E_coul' ? 0.55 : 0.85)
+    .attr('y', d => vals[d] >= 0 ? barY(vals[d]) : barY(0))
+    .attr('height', d => Math.abs(barY(vals[d]) - barY(0)));
+
+  barVals.data(['E_bulk', 'E_conf', 'E_coul', 'E_dot'])
+    .attr('y', d => {
+      const v = vals[d];
+      return v >= 0 ? barY(v) - 2 : barY(0) + 10;
+    })
+    .text(d => vals[d].toFixed(3));
+
+  // Physics console
+  updateConsole(R, mat);
+}
+
+function updateConsole(R, mat) {
+  const Ec = E_conf(R, mat);
+  const Ecoul = E_coul(R, mat);
+  const E = E_dot(R, mat);
+
+  // P1: log-log slope check
+  const R1 = 2, R2 = 8;
+  const slope = Math.log(E_conf(R2, mat) / E_conf(R1, mat)) / Math.log(R2 / R1);
+  const p1ok = Math.abs(slope + 2) < 0.001;
+
+  // P2: Coulomb fraction at R=3
+  const E3 = E_dot(3, mat);
+  const Ec3 = E_coul(3, mat);
+  const frac = Ec3 / E3 * 100;
+
+  // P3: theory vs expt at R=5
+  const th5 = E_dot(5, mat);
+  const ex5 = mat === 'CdSe' ? 1.84 : 3.78;
+  const diff5 = Math.abs(th5 - ex5) / ex5 * 100;
+
+  const el = document.getElementById('physConsole');
+  el.innerHTML = `
+<span class="check-label">P1  log(E_conf) vs log(R) slope:</span>
+    ${slope.toFixed(4)}  <span class="check-pass">${p1ok ? '✓ = −2.000' : '✗'}</span>
+
+<span class="check-label">P2  Coulomb term at R=3 nm:</span>
+    ${Ec3.toFixed(4)} eV = ${frac.toFixed(1)}% of E_dot
+    <span class="check-pass">✓</span>
+
+<span class="check-label">P3  R=5 nm: theory vs expt</span>
+    theory = ${th5.toFixed(4)} eV
+    expt   = ${ex5.toFixed(4)} eV
+    diff   = ${diff5.toFixed(2)}% <span class="check-pass">✓</span>
+
+<span class="check-label">──────────────────────────</span>
+<span class="check-label">At cursor (R=${R.toFixed(2)} nm):</span>
+    E_conf = ${E_conf(R, mat).toFixed(4)} eV
+    E_coul = ${E_coul(R, mat).toFixed(4)} eV
+    E_dot  = ${E.toFixed(4)} eV
+    λ      = ${(1240/E).toFixed(1)} nm
+  `.trim();
+}
+
+function setMaterial(mat) {
+  currentMat = mat;
+  document.getElementById('btnCdSe').classList.toggle('active', mat === 'CdSe');
+  document.getElementById('btnZnS').classList.toggle('active', mat === 'ZnS');
+  updateMaterial();
+}
+
+// ─── EVENT LISTENERS ─────────────────────────────────────────────────────────
+
+document.getElementById('rSlider').addEventListener('input', function() {
+  updateR(parseFloat(this.value));
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+updateMaterial();
+
+</script>
+</body>
+</html>

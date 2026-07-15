@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Platform N_gates Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --ink: #2A1A0E;
+    --red: #C8102E;
+    --slate: #545454;
+    --border: #D0C8C0;
+    --panel: #F7F5F2;
+    --ink-light: #7A6A5A;
+    --green: #1A7A3A;
+    --green-bg: #F0F8F2;
+    --red-bg: #FFF0F2;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 32px 40px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 24px;
+  }
+
+  /* Top controls strip */
+  .controls-strip {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* Toggle button */
+  .toggle-group {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .toggle-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    background: var(--bg);
+    color: var(--slate);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .toggle-btn.active {
+    background: var(--ink);
+    color: white;
+  }
+
+  /* Slider */
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--panel);
+    padding: 8px 14px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+  }
+
+  .slider-group label {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 140px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+  }
+
+  .slider-val {
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 44px;
+    color: var(--ink);
+  }
+
+  /* Platform checkboxes */
+  .platform-toggles {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .platform-toggles span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-right: 4px;
+  }
+
+  .plat-cb-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    transition: background 0.12s;
+    user-select: none;
+  }
+
+  .plat-cb-label:hover { background: var(--panel); }
+  .plat-cb-label.checked { border-color: var(--ink); background: #F0EDE8; }
+
+  .plat-cb-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Two-column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+  }
+
+  .panel h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    margin-bottom: 14px;
+  }
+
+  /* Chart panel */
+  #chart-area {
+    width: 100%;
+    min-height: 280px;
+  }
+
+  /* Constraint table */
+  .constraint-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+
+  .constraint-table th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--slate);
+    padding: 4px 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .constraint-table td {
+    padding: 7px 6px;
+    border-bottom: 1px solid #EAE6E0;
+    vertical-align: middle;
+  }
+
+  .constraint-table tr:last-child td { border-bottom: none; }
+
+  .ratio-badge {
+    display: inline-block;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .ratio-ok { background: var(--green-bg); color: var(--green); }
+  .ratio-bad { background: var(--red-bg); color: var(--red); }
+
+  .platform-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* View title */
+  .view-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+
+  .threshold-note {
+    font-size: 11px;
+    color: var(--slate);
+    margin-bottom: 14px;
+  }
+
+  /* Physics console */
+  .console {
+    background: #1A1A1A;
+    color: #D4D0C8;
+    border-radius: 6px;
+    padding: 16px 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .console-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--slate);
+    margin-bottom: 10px;
+  }
+
+  .check-pass { color: #6BCB77; }
+  .check-fail { color: #FF6B6B; }
+  .check-label { color: #A0A0A0; }
+
+  /* SVG chart styles */
+  .bar-rect { transition: width 0.35s ease; }
+  .threshold-line { stroke-dasharray: 6,4; }
+  .axis-label { font-family: Inter, Helvetica, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Quantum Platform N_gates Comparison</h1>
+<p class="subtitle">N_gates = T₂ / t_gate — figure of merit for fault-tolerant quantum computing. Fault-tolerance threshold: N_gates > 10⁴.</p>
+
+<!-- Top controls -->
+<div class="controls-strip">
+  <div class="toggle-group">
+    <button class="toggle-btn active" id="btnT2" onclick="setView('t2')">Raw T₂</button>
+    <button class="toggle-btn" id="btnNg" onclick="setView('ngates')">N_gates</button>
+  </div>
+  <div class="slider-group">
+    <label>t_gate scale:</label>
+    <input type="range" id="tgateSlider" min="-1" max="1" step="0.01" value="0">
+    <span class="slider-val" id="tgateVal">×1.0</span>
+  </div>
+  <div style="font-size:12px; color:var(--slate);">Slide left → faster gates → higher N_gates &nbsp;(Transmon crosses 10⁴ at ×0.4)</div>
+</div>
+
+<!-- Platform checkboxes -->
+<div class="platform-toggles" id="platformToggles">
+  <span>Platforms:</span>
+</div>
+
+<!-- Two-column layout -->
+<div class="two-col">
+  <!-- Main chart -->
+  <div class="panel">
+    <div class="view-title" id="viewTitle">Raw T₂</div>
+    <div class="threshold-note" id="thresholdNote">Dashed line = 10⁴ gates (fault-tolerance threshold)</div>
+    <div id="chart-area"></div>
+  </div>
+
+  <!-- T2 ≤ 2T1 constraint -->
+  <div class="panel">
+    <h3>T₂ ≤ 2T₁ Physical Limit</h3>
+    <p style="font-size:11px; color:var(--slate); margin-bottom:12px;">From the quantum master equation: decoherence time cannot exceed twice the relaxation time.</p>
+    <table class="constraint-table" id="constraintTable">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>T₁</th>
+          <th>T₂</th>
+          <th>T₂/T₁</th>
+          <th>OK?</th>
+        </tr>
+      </thead>
+      <tbody id="constraintBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Physics console -->
+<div class="console-title">Physics checks</div>
+<div class="console" id="physicsConsole"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ─── PALETTE ────────────────────────────────────────────────────────────────
+const RED   = '#C8102E';
+const INK   = '#2A1A0E';
+const SLATE = '#545454';
+const INK_LIGHT = '#7A6A5A';
+const GREEN = '#1A7A3A';
+
+// ─── PLATFORM DATA ──────────────────────────────────────────────────────────
+const platformsBase = [
+  { name: "Transmon",     T1_us: 500,   T2_us: 400,   tgate_ns: 100,    color: RED      },
+  { name: "Trapped Ion",  T1_us: 1e7,   T2_us: 1e7,   tgate_ns: 500000, color: INK      },
+  { name: "Neutral Atom", T1_us: 1e7,   T2_us: 1e6,   tgate_ns: 1000,   color: SLATE    },
+  { name: "NV Center",    T1_us: 6000,  T2_us: 100,   tgate_ns: 200,    color: INK_LIGHT},
+  { name: "Spin Qubit",   T1_us: 10000, T2_us: 1000,  tgate_ns: 100,    color: '#8B6914'}
+];
+
+// Compute base N_gates
+platformsBase.forEach(p => {
+  p.N_gates_base = (p.T2_us * 1000) / p.tgate_ns;
+});
+
+// State
+let viewMode = 't2';          // 't2' or 'ngates'
+let tgateScale = 1.0;         // multiplicative factor
+const visible = {};
+platformsBase.forEach(p => { visible[p.name] = true; });
+
+// ─── SLIDER ─────────────────────────────────────────────────────────────────
+const tgateSlider = document.getElementById('tgateSlider');
+tgateSlider.addEventListener('input', () => {
+  const raw = parseFloat(tgateSlider.value); // -1..+1
+  tgateScale = Math.pow(10, raw);
+  document.getElementById('tgateVal').textContent = '×' + tgateScale.toFixed(tgateScale < 0.5 ? 2 : 1);
+  renderChart();
+  renderConsole();
+});
+
+// ─── VIEW TOGGLE ────────────────────────────────────────────────────────────
+function setView(v) {
+  viewMode = v;
+  document.getElementById('btnT2').classList.toggle('active', v === 't2');
+  document.getElementById('btnNg').classList.toggle('active', v === 'ngates');
+  document.getElementById('viewTitle').textContent = v === 't2' ? 'Raw T₂ (μs)' : 'N_gates = T₂ / t_gate';
+  document.getElementById('thresholdNote').textContent = v === 't2'
+    ? 'Log scale: 10⁻⁴ μs to 10⁷ μs'
+    : 'Dashed line = 10⁴ gates (fault-tolerance threshold)';
+  renderChart();
+}
+
+// ─── PLATFORM CHECKBOXES ────────────────────────────────────────────────────
+const togglesDiv = document.getElementById('platformToggles');
+platformsBase.forEach(p => {
+  const lbl = document.createElement('label');
+  lbl.className = 'plat-cb-label checked';
+  lbl.id = 'lbl_' + p.name.replace(/\s/g,'_');
+  lbl.innerHTML = `
+    <span class="plat-cb-swatch" style="background:${p.color}"></span>
+    ${p.name}
+    <input type="checkbox" checked style="display:none" data-name="${p.name}">
+  `;
+  lbl.addEventListener('click', () => {
+    visible[p.name] = !visible[p.name];
+    lbl.classList.toggle('checked', visible[p.name]);
+    const inp = lbl.querySelector('input');
+    inp.checked = visible[p.name];
+    renderChart();
+    renderConsole();
+  });
+  togglesDiv.appendChild(lbl);
+});
+
+// ─── CHART ──────────────────────────────────────────────────────────────────
+function formatTime(us) {
+  if (us >= 1e6) return d3.format('.1e')(us).replace('+', '') + ' μs';
+  if (us >= 1000) return (us/1000).toFixed(0) + ' ms → ' + d3.format('.2s')(us) + 'μs';
+  if (us >= 1) return us.toFixed(0) + ' μs';
+  return (us * 1000).toFixed(0) + ' ns';
+}
+
+function formatTimeShort(us) {
+  if (us >= 1e9) return d3.format('.0e')(us).replace('+','') + ' μs';
+  if (us >= 1e6) return (us/1e6).toFixed(0) + ' s';
+  if (us >= 1000) return (us/1000).toFixed(0) + ' ms';
+  if (us >= 1) return us.toFixed(0) + ' μs';
+  return (us * 1000).toFixed(0) + ' ns';
+}
+
+function renderChart() {
+  const container = document.getElementById('chart-area');
+  container.innerHTML = '';
+
+  const platforms = platformsBase.filter(p => visible[p.name]);
+  if (platforms.length === 0) return;
+
+  const W = container.clientWidth || 520;
+  const barH = 36;
+  const gap = 10;
+  const marginL = 120;
+  const marginR = 80;
+  const marginT = 10;
+  const marginB = 40;
+  const chartW = W - marginL - marginR;
+  const chartH = platforms.length * (barH + gap) + marginB;
+  const totalH = chartH + marginT + marginB;
+
+  const svg = d3.select(container)
+    .append('svg')
+    .attr('width', W)
+    .attr('height', totalH);
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${marginL},${marginT})`);
+
+  // ── Scales ──
+  let xScale, xAxisFn, thresholdX, barValue, barLabel;
+
+  if (viewMode === 't2') {
+    const t2Min = 1e-4, t2Max = 1.5e7;
+    xScale = d3.scaleLog().domain([t2Min, t2Max]).range([0, chartW]).clamp(true);
+    xAxisFn = d3.axisBottom(xScale)
+      .ticks(6, '~s')
+      .tickFormat(d => {
+        const e = Math.log10(d);
+        if (Number.isInteger(e)) return `10${superscript(e)} μs`;
+        return '';
+      });
+    barValue = p => p.T2_us;
+    barLabel = p => formatTimeShort(p.T2_us);
+    thresholdX = null;
+  } else {
+    // N_gates with tgate scaling
+    const ngMin = 50, ngMax = 5e7;
+    xScale = d3.scaleLog().domain([ngMin, ngMax]).range([0, chartW]).clamp(true);
+    xAxisFn = d3.axisBottom(xScale)
+      .ticks(6, '~s')
+      .tickFormat(d => {
+        const e = Math.log10(d);
+        if (Number.isInteger(e)) return `10${superscript(e)}`;
+        return '';
+      });
+    barValue = p => p.N_gates_base / tgateScale;
+    barLabel = p => {
+      const n = p.N_gates_base / tgateScale;
+      if (n >= 1e6) return d3.format('.1e')(n);
+      if (n >= 1e4) return d3.format('.2s')(n);
+      return d3.format('.0f')(n);
+    };
+    thresholdX = xScale(1e4);
+  }
+
+  // ── Bars ──
+  platforms.forEach((p, i) => {
+    const y = i * (barH + gap);
+    const val = barValue(p);
+    const xEnd = xScale(Math.max(val, xScale.domain()[0]));
+
+    // Bar background
+    g.append('rect')
+      .attr('x', 0).attr('y', y)
+      .attr('width', chartW).attr('height', barH)
+      .attr('fill', '#EDEAE6').attr('rx', 3);
+
+    // Bar fill
+    g.append('rect')
+      .attr('class', 'bar-rect')
+      .attr('x', 0).attr('y', y)
+      .attr('width', Math.max(xEnd, 2)).attr('height', barH)
+      .attr('fill', p.color).attr('rx', 3)
+      .attr('opacity', 0.85);
+
+    // Bar label (value)
+    const labelX = Math.min(xEnd + 6, chartW - 2);
+    g.append('text')
+      .attr('x', labelX).attr('y', y + barH/2)
+      .attr('dy', '0.35em')
+      .attr('font-size', 11)
+      .attr('font-family', 'Inter, Helvetica, sans-serif')
+      .attr('font-weight', 600)
+      .attr('fill', var_ink())
+      .text(barLabel(p));
+
+    // Platform name (left axis)
+    g.append('text')
+      .attr('x', -6).attr('y', y + barH/2)
+      .attr('dy', '0.35em')
+      .attr('text-anchor', 'end')
+      .attr('font-size', 12)
+      .attr('font-family', 'Inter, Helvetica, sans-serif')
+      .attr('font-weight', 500)
+      .attr('fill', INK)
+      .text(p.name);
+
+    // Threshold indicator in N_gates mode
+    if (viewMode === 'ngates' && thresholdX !== null) {
+      const n = barValue(p);
+      const aboveThreshold = n >= 1e4;
+      if (!aboveThreshold) {
+        g.append('text')
+          .attr('x', Math.max(xEnd + 6, 4))
+          .attr('y', y + barH/2 - 9)
+          .attr('font-size', 9)
+          .attr('font-family', 'Inter, Helvetica, sans-serif')
+          .attr('fill', RED)
+          .text('below threshold');
+      }
+    }
+  });
+
+  // ── Threshold line (N_gates view) ──
+  if (viewMode === 'ngates' && thresholdX !== null) {
+    const lineH = platforms.length * (barH + gap) - gap;
+    g.append('line')
+      .attr('class', 'threshold-line')
+      .attr('x1', thresholdX).attr('y1', -4)
+      .attr('x2', thresholdX).attr('y2', lineH + 4)
+      .attr('stroke', RED)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '6,4');
+
+    g.append('text')
+      .attr('x', thresholdX)
+      .attr('y', -8)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 10)
+      .attr('font-family', 'Inter, Helvetica, sans-serif')
+      .attr('fill', RED)
+      .attr('font-weight', 600)
+      .text('10⁴ threshold');
+  }
+
+  // ── X-axis ──
+  const axisY = platforms.length * (barH + gap) + 6;
+  const axisG = g.append('g')
+    .attr('transform', `translate(0,${axisY})`)
+    .call(xAxisFn);
+
+  axisG.select('.domain').attr('stroke', SLATE).attr('stroke-width', 0.75);
+  axisG.selectAll('.tick line').attr('stroke', SLATE).attr('stroke-width', 0.75);
+  axisG.selectAll('.tick text')
+    .attr('font-family', 'Inter, Helvetica, sans-serif')
+    .attr('font-size', 10)
+    .attr('fill', SLATE);
+
+  // X label
+  g.append('text')
+    .attr('x', chartW / 2)
+    .attr('y', axisY + 30)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11)
+    .attr('font-family', 'Inter, Helvetica, sans-serif')
+    .attr('fill', SLATE)
+    .text(viewMode === 't2' ? 'T₂ (μs, log scale)' : 'N_gates (log scale)');
+}
+
+function var_ink() { return INK; }
+
+function superscript(n) {
+  const map = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  return String(n).split('').map(c => map[c] || c).join('');
+}
+
+// ─── CONSTRAINT TABLE ───────────────────────────────────────────────────────
+function renderConstraintTable() {
+  const tbody = document.getElementById('constraintBody');
+  tbody.innerHTML = '';
+
+  platformsBase.forEach(p => {
+    const ratio = p.T2_us / p.T1_us;
+    const ok = ratio <= 2.0;
+    const tr = document.createElement('tr');
+    tr.style.opacity = visible[p.name] ? '1' : '0.4';
+    tr.innerHTML = `
+      <td>
+        <span class="platform-dot" style="background:${p.color}"></span>
+        ${p.name}
+      </td>
+      <td>${formatUS(p.T1_us)}</td>
+      <td>${formatUS(p.T2_us)}</td>
+      <td><span class="ratio-badge ${ok ? 'ratio-ok' : 'ratio-bad'}">${ratio.toFixed(3)}</span></td>
+      <td>${ok ? '✓' : '✗'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function formatUS(us) {
+  if (us >= 1e6) return d3.format('.0e')(us).replace('+','') + ' μs';
+  if (us >= 1000) return (us/1000).toFixed(0) + 'k μs';
+  return us.toFixed(0) + ' μs';
+}
+
+// ─── PHYSICS CONSOLE ────────────────────────────────────────────────────────
+function renderConsole() {
+  const consoleEl = document.getElementById('physicsConsole');
+
+  // Compute current N_gates
+  const getNg = (p) => p.N_gates_base / tgateScale;
+
+  const ti  = platformsBase.find(p => p.name === 'Trapped Ion');
+  const tr  = platformsBase.find(p => p.name === 'Transmon');
+  const na  = platformsBase.find(p => p.name === 'Neutral Atom');
+  const nv  = platformsBase.find(p => p.name === 'NV Center');
+  const sq  = platformsBase.find(p => p.name === 'Spin Qubit');
+
+  const ngTi = ti.N_gates_base;  // base (scale=1)
+  const ngTr = tr.N_gates_base;
+
+  // P1: Trapped Ion vs Transmon ratio in N_gates vs T2
+  const ngRatio = ngTi / ngTr;
+  const t2Ratio = ti.T2_us / tr.T2_us;
+  const p1note = `N_gates ratio: ${ngRatio.toFixed(0)}× | T₂ ratio: ${t2Ratio.toFixed(0)}×`;
+  const p1pass = Math.abs(ngRatio - 5) < 1;  // should be ~5
+
+  // P2: All T2 ≤ 2*T1
+  const p2data = platformsBase.map(p => ({
+    name: p.name,
+    ok: p.T2_us <= 2 * p.T1_us,
+    ratio: (p.T2_us / p.T1_us).toFixed(3)
+  }));
+  const p2pass = p2data.every(d => d.ok);
+
+  // P3: Transmon crosses 10^4 with t_gate reduced to ×0.4 (60% speedup)
+  // N_gates_base(Transmon) = 4000; 4000/0.4 = 10000, just at threshold; use 0.39 to be safely above
+  const ngTr_cross = tr.N_gates_base / 0.4;
+  const p3pass = ngTr_cross >= 1e4;
+
+  // Current values
+  const curVals = platformsBase.map(p => `  ${p.name.padEnd(13)}: N_gates = ${formatSci(getNg(p))} ${getNg(p) >= 1e4 ? '' : '← below threshold'}`).join('\n');
+
+  consoleEl.innerHTML = `<span class="check-label">— Base N_gates (t_gate × 1.0) —</span>
+${platformsBase.map(p => `  ${p.name.padEnd(13)}: T₂=${formatUS(p.T2_us).padEnd(9)} t_gate=${p.tgate_ns}ns → N_gates = ${formatSci(p.N_gates_base)}`).join('\n')}
+
+<span class="check-label">— P1: N_gates ratio Trapped Ion / Transmon vs T₂ ratio —</span>
+<span class="${p1pass ? 'check-pass' : 'check-fail'}">${p1pass ? '✓' : '✗'}</span> N_gates ratio = ${ngRatio.toFixed(0)}×, T₂ ratio = ${t2Ratio.toFixed(0)}×
+   Despite 25,000× T₂ advantage, gate time 5000× slower → only 5× N_gates advantage ${p1pass ? '✓' : ''}
+
+<span class="check-label">— P2: T₂ ≤ 2T₁ (physical limit from master equation) —</span>
+<span class="${p2pass ? 'check-pass' : 'check-fail'}">${p2pass ? '✓' : '✗'}</span> ${p2data.map(d => `${d.name}: T₂/T₁=${d.ratio} ${d.ok ? '✓' : '✗'}`).join(' | ')}
+
+<span class="check-label">— P3: Transmon crosses 10⁴ at t_gate × 0.4 (N_gates = ${formatSci(ngTr_cross)}) —</span>
+<span class="${p3pass ? 'check-pass' : 'check-fail'}">${p3pass ? '✓' : '✗'}</span> At ×0.4: Transmon N_gates = ${formatSci(ngTr_cross)} ${p3pass ? '≥ 10⁴ threshold ✓' : '< 10⁴ threshold ✗'}
+   Note: ×0.5 gives only 8000 gates; need ×0.4 or less to clear threshold. Set slider to ×0.4.
+
+<span class="check-label">— Current (t_gate scale = ×${tgateScale.toFixed(2)}) —</span>
+${curVals}`;
+}
+
+function formatSci(n) {
+  if (n >= 1e6) return d3.format('.2e')(n);
+  if (n >= 1000) return d3.format('.0f')(n);
+  return d3.format('.1f')(n);
+}
+
+// ─── INIT ───────────────────────────────────────────────────────────────────
+renderChart();
+renderConstraintTable();
+renderConsole();
+
+// Re-render chart on resize
+window.addEventListener('resize', () => { renderChart(); });
+</script>
+</body>
+</html>

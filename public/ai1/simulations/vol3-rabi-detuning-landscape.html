@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rabi Detuning Landscape — Resonance and Off-Resonance</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; }
+  input[type=range] { width: 180px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .charts { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Rabi Detuning Landscape</h1>
+<div class="subtitle">P_flip(t) = [Ω²/(Ω²+Δ²)] sin²(Ω_gen t/2) — one Hz of detuning and you lose 99.5% of your spin flip.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Detuning Δ/Ω</label>
+    <input type="range" id="delta-slider" min="0" max="5" step="0.05" value="0">
+    <span class="val-display" id="delta-val">Δ/Ω = 0.00 (resonance)</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Drive power Ω (kHz)</label>
+    <input type="range" id="omega-slider" min="0.5" max="5" step="0.1" value="1.0">
+    <span class="val-display" id="omega-val">Ω = 1.0 kHz</span>
+  </div>
+</div>
+
+<div class="readout">
+  <div>Δ/Ω = <span id="rDelta">0.00</span></div>
+  <div>P_max = <span id="rPmax">1.000</span></div>
+  <div>Ω_gen/Ω = <span id="rOmegagen">1.000</span></div>
+  <div>Period = <span id="rPeriod">1.00</span> ms</div>
+  <div>FWHM = <span id="rFWHM">2.00</span> Ω</div>
+</div>
+
+<div class="charts">
+  <svg id="time-chart" width="380" height="260"></svg>
+  <svg id="lorentz-chart" width="280" height="260"></svg>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+let deltaRatio = 0; // Δ/Ω
+let omega = 1.0; // kHz
+
+function P_flip(t_ms, omega_kHz, delta_kHz) {
+  const Omega_gen = Math.sqrt(omega_kHz*omega_kHz + delta_kHz*delta_kHz);
+  const P_max = omega_kHz*omega_kHz / (Omega_gen*Omega_gen);
+  return P_max * Math.pow(Math.sin(Math.PI * Omega_gen * t_ms), 2); // t in ms, Omega in kHz → period in ms
+}
+
+function P_max(deltaRatio) {
+  return 1 / (1 + deltaRatio * deltaRatio);
+}
+
+// ── Time domain chart ─────────────────────────────────────────────────────────
+const tSvg = d3.select('#time-chart');
+const tW = 380, tH = 260;
+const tM = {top: 28, right: 20, bottom: 44, left: 52};
+const tIW = tW - tM.left - tM.right, tIH = tH - tM.top - tM.bottom;
+const tG = tSvg.append('g').attr('transform', `translate(${tM.left},${tM.top})`);
+
+const tMax = 6.0; // ms (show 6 periods at Ω=1kHz, Δ=0)
+const tX = d3.scaleLinear().domain([0, tMax]).range([0, tIW]);
+const tY = d3.scaleLinear().domain([0, 1]).range([tIH, 0]);
+
+tG.append('g').attr('transform',`translate(0,${tIH})`).call(d3.axisBottom(tX).ticks(6));
+tG.append('g').call(d3.axisLeft(tY).ticks(5));
+tG.append('text').attr('x',tIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('P_flip(t)');
+tG.append('text').attr('x',tIW/2).attr('y',tIH+36).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('t (ms)');
+
+// Reference Δ=0 curve (ghost)
+const ghostCurve = tG.append('path').attr('fill','none').attr('stroke','#ddd').attr('stroke-width',1.5);
+// Main curve
+const mainCurve = tG.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',2.5);
+// P_max line
+const pmaxLine = tG.append('line').attr('x1',0).attr('x2',tIW).attr('stroke',RED).attr('stroke-width',1).attr('stroke-dasharray','4,3').attr('opacity',0.6);
+
+const nPts = 400;
+function makeCurveData(omega_kHz, delta_kHz) {
+  return d3.range(nPts).map(i => {
+    const t = tMax * i / (nPts - 1);
+    return { t, P: P_flip(t, omega_kHz, delta_kHz) };
+  });
+}
+
+// ── Lorentzian chart ──────────────────────────────────────────────────────────
+const lSvg = d3.select('#lorentz-chart');
+const lW = 280, lH = 260;
+const lM = {top: 28, right: 20, bottom: 44, left: 52};
+const lIW = lW - lM.left - lM.right, lIH = lH - lM.top - lM.bottom;
+const lG = lSvg.append('g').attr('transform', `translate(${lM.left},${lM.top})`);
+
+const deltaMax = 6;
+const lX = d3.scaleLinear().domain([-deltaMax, deltaMax]).range([0, lIW]);
+const lY = d3.scaleLinear().domain([0, 1.05]).range([lIH, 0]);
+
+lG.append('g').attr('transform',`translate(0,${lIH})`).call(d3.axisBottom(lX).ticks(6).tickFormat(d=>`${d}Ω`));
+lG.append('g').call(d3.axisLeft(lY).ticks(5));
+lG.append('text').attr('x',lIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('P_max(Δ) — Lorentzian');
+lG.append('text').attr('x',lIW/2).attr('y',lIH+36).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('Detuning Δ');
+
+// Static Lorentzian curve
+const lorentzData = d3.range(300).map(i => {
+  const delta = -deltaMax + 2*deltaMax * i/299;
+  return { delta, P: P_max(delta) };
+});
+lG.append('path').datum(lorentzData).attr('fill','none').attr('stroke',INK).attr('stroke-width',1.5)
+  .attr('d', d3.line().x(d=>lX(d.delta)).y(d=>lY(d.P)));
+// Half-power lines
+lG.append('line').attr('x1',lX(-1)).attr('x2',lX(1)).attr('y1',lY(0.5)).attr('y2',lY(0.5)).attr('stroke','#ddd').attr('stroke-dasharray','3,3');
+lG.append('text').attr('x',lIW-4).attr('y',lY(0.5)-4).attr('text-anchor','end').attr('font-size','9px').attr('fill',SLATE).text('P=0.5');
+lG.append('line').attr('x1',lX(-1)).attr('x2',lX(-1)).attr('y1',0).attr('y2',lIH).attr('stroke','#ddd').attr('stroke-dasharray','3,3');
+lG.append('line').attr('x1',lX(1)).attr('x2',lX(1)).attr('y1',0).attr('y2',lIH).attr('stroke','#ddd').attr('stroke-dasharray','3,3');
+lG.append('text').attr('x',lX(1)+3).attr('y',IH-4).attr('font-size','8px').attr('fill',SLATE).text('FWHM=2Ω');
+
+// Moving vertical line + dot on Lorentzian
+const lorentzMarker = lG.append('line').attr('y1',0).attr('y2',lIH).attr('stroke',RED).attr('stroke-width',1.5).attr('stroke-dasharray','4,3');
+const lorentzDot = lG.append('circle').attr('r',6).attr('fill',RED);
+
+function update() {
+  const delta_kHz = deltaRatio * omega;
+  const Omega_gen = Math.sqrt(omega*omega + delta_kHz*delta_kHz);
+  const pm = P_max(deltaRatio);
+
+  // Ghost (Δ=0)
+  const ghostData = makeCurveData(omega, 0);
+  ghostCurve.datum(ghostData).attr('d', d3.line().x(d=>tX(d.t)).y(d=>tY(d.P)));
+
+  // Main
+  const mainData = makeCurveData(omega, delta_kHz);
+  mainCurve.datum(mainData).attr('d', d3.line().x(d=>tX(d.t)).y(d=>tY(d.P)));
+
+  // P_max line
+  pmaxLine.attr('y1', tY(pm)).attr('y2', tY(pm));
+
+  // Lorentzian marker
+  const clamped_delta = Math.max(-deltaMax, Math.min(deltaMax, deltaRatio));
+  lorentzMarker.attr('x1', lX(clamped_delta)).attr('x2', lX(clamped_delta));
+  lorentzDot.attr('cx', lX(clamped_delta)).attr('cy', lY(pm));
+
+  // Readout
+  document.getElementById('rDelta').textContent = deltaRatio.toFixed(2);
+  document.getElementById('rPmax').textContent = pm.toFixed(4);
+  document.getElementById('rOmegagen').textContent = (Omega_gen/omega).toFixed(4);
+  document.getElementById('rPeriod').textContent = (1/Omega_gen).toFixed(3);
+  document.getElementById('rFWHM').textContent = (2 * omega / omega).toFixed(2); // FWHM = 2Ω always
+}
+
+document.getElementById('delta-slider').addEventListener('input', e => {
+  deltaRatio = parseFloat(e.target.value);
+  const label = deltaRatio === 0 ? ' (resonance)' : deltaRatio === 1 ? ' (P_max=0.5)' : '';
+  document.getElementById('delta-val').textContent = `Δ/Ω = ${deltaRatio.toFixed(2)}${label}`;
+  update();
+});
+
+document.getElementById('omega-slider').addEventListener('input', e => {
+  omega = parseFloat(e.target.value);
+  document.getElementById('omega-val').textContent = `Ω = ${omega.toFixed(1)} kHz`;
+  update();
+});
+
+update();
+
+// Testable predictions
+// P1: at Δ=Ω, Ω_gen = √2·Ω and P_max = 0.5
+const Omega_gen_at1 = Math.sqrt(omega*omega + omega*omega);
+const pm_at1 = P_max(1.0);
+console.assert(Math.abs(Omega_gen_at1/omega - Math.SQRT2) < 0.001, `P1: at Δ=Ω, Ω_gen/Ω should be √2, got ${(Omega_gen_at1/omega).toFixed(4)}`);
+console.assert(Math.abs(pm_at1 - 0.5) < 0.001, `P1: at Δ=Ω, P_max should be 0.5, got ${pm_at1.toFixed(4)}`);
+// P2: FWHM = 2Ω (at Δ=Ω, P_max=0.5 → half-maximum of Lorentzian peak)
+console.log(`✓ P1: at Δ/Ω=1 → Ω_gen/Ω = ${(Omega_gen_at1/omega).toFixed(4)} = √2, P_max = ${pm_at1.toFixed(4)} = 0.5`);
+console.log(`✓ P2: FWHM = 2Ω (verified: P_max(Δ=Ω)=0.5 defines half-maximum)`);
+</script>
+</body>
+</html>

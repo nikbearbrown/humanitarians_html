@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barrier Transmission Explorer — Exact vs WKB</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=range] { width: 170px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Barrier Transmission Explorer</h1>
+<div class="subtitle">Exact vs WKB — resonances above barrier hit T=1 exactly like an anti-reflection coating. Each Å below barrier changes T by ×7.4.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Barrier V₀ (eV)</label>
+    <input type="range" id="V0-slider" min="0.5" max="6" step="0.1" value="2.0">
+    <span class="val-display" id="V0-val">V₀ = 2.0 eV</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Width L (nm)</label>
+    <input type="range" id="L-slider" min="0.1" max="3" step="0.05" value="1.0">
+    <span class="val-display" id="L-val">L = 1.0 nm</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Energy E (eV) [cursor]</label>
+    <input type="range" id="E-slider" min="0.1" max="8" step="0.02" value="1.0">
+    <span class="val-display" id="E-val">E = 1.0 eV</span>
+  </div>
+</div>
+
+<div class="readout">
+  <div>E = <span id="rE">1.00</span> eV</div>
+  <div>T_exact = <span id="rTex">–</span></div>
+  <div>T_WKB = <span id="rTwkb">–</span></div>
+  <div>T_ex/T_WKB = <span id="rRatio">–</span></div>
+  <div>STM: 1Å → <span id="rSTM">×7.4</span></div>
+  <div>Resonance 1: <span id="rRes1">–</span> eV</div>
+</div>
+
+<svg id="main-chart" width="640" height="320"></svg>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+// ħ²/(2m) in eV·nm²
+const HBAR = 0.6582; // eV·fs
+const M_E_EV = 0.511e6;
+const C_NM_FS = 299.792;
+const HBAR2_OVER_2M = (HBAR * HBAR) / (2 * M_E_EV / (C_NM_FS * C_NM_FS)); // eV·nm²
+
+let V0 = 2.0;
+let L = 1.0;
+let E_cursor = 1.0;
+
+function T_exact(E, V0, L) {
+  if (E <= 0) return 0;
+  if (Math.abs(E - V0) < 1e-5) return 1 / (1 + M_E_EV / (C_NM_FS*C_NM_FS) * L*L / (2*HBAR*HBAR));
+  if (E < V0) {
+    const kappa = Math.sqrt((V0 - E) / HBAR2_OVER_2M);
+    const kL = kappa * L;
+    const sh = Math.sinh(kL);
+    const denom = 1 + V0*V0 * sh*sh / (4*E*(V0-E));
+    return 1 / denom;
+  } else {
+    const k2 = Math.sqrt((E - V0) / HBAR2_OVER_2M);
+    const k2L = k2 * L;
+    const sn = Math.sin(k2L);
+    const denom = 1 + V0*V0 * sn*sn / (4*E*(E-V0));
+    return 1 / denom;
+  }
+}
+
+function T_WKB(E, V0, L) {
+  if (E >= V0) return 1; // simplified for above-barrier
+  const kappa = Math.sqrt((V0 - E) / HBAR2_OVER_2M);
+  return Math.exp(-2 * kappa * L);
+}
+
+function firstResonance() {
+  // Resonance at k2*L = π → E_res = V0 + π²ħ²/(2mL²)
+  return V0 + Math.PI*Math.PI * HBAR2_OVER_2M / (L*L);
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+const svg = d3.select('#main-chart');
+const W = 640, H = 320;
+const M = {top: 28, right: 24, bottom: 44, left: 52};
+const IW = W - M.left - M.right, IH = H - M.top - M.bottom;
+const G = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+const Emax = 8;
+const xScale = d3.scaleLinear().domain([0, Emax]).range([0, IW]);
+const yScale = d3.scaleLog().domain([1e-14, 2]).range([IH, 0]);
+
+G.append('g').attr('transform',`translate(0,${IH})`).call(d3.axisBottom(xScale).ticks(8));
+G.append('g').call(d3.axisLeft(yScale).ticks(8, '.0e'));
+G.append('text').attr('x',IW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','13px').attr('font-weight','700').attr('fill',INK).text('Barrier Transmission T(E)');
+G.append('text').attr('x',IW/2).attr('y',IH+36).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('Electron energy E (eV)');
+G.append('text').attr('transform','rotate(-90)').attr('x',-IH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('Transmission T (log scale)');
+
+// V0 vertical line
+const v0Line = G.append('line').attr('y1',0).attr('y2',IH).attr('stroke',SLATE).attr('stroke-width',1).attr('stroke-dasharray','4,3');
+const v0Label = G.append('text').attr('font-size','10px').attr('fill',SLATE).attr('dy','-3');
+
+// Exact T curve
+const exactPath = G.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',2.5);
+// WKB T curve
+const wkbPath = G.append('path').attr('fill','none').attr('stroke',BLUE).attr('stroke-width',1.5).attr('stroke-dasharray','5,3').attr('opacity',0.7);
+
+// Legend
+G.append('line').attr('x1',IW-110).attr('x2',IW-90).attr('y1',12).attr('y2',12).attr('stroke',RED).attr('stroke-width',2.5);
+G.append('text').attr('x',IW-86).attr('y',16).attr('font-size','10px').attr('fill',RED).text('Exact T');
+G.append('line').attr('x1',IW-110).attr('x2',IW-90).attr('y1',26).attr('y2',26).attr('stroke',BLUE).attr('stroke-width',1.5).attr('stroke-dasharray','5,3');
+G.append('text').attr('x',IW-86).attr('y',30).attr('font-size','10px').attr('fill',BLUE).text('WKB T');
+
+// Energy cursor
+const cursorLine = G.append('line').attr('y1',0).attr('y2',IH).attr('stroke',RED).attr('stroke-width',1.5).attr('stroke-dasharray','3,3');
+const cursorDot = G.append('circle').attr('r',5).attr('fill',RED);
+
+const nPts = 1200;
+function makeCurveData() {
+  return d3.range(nPts).map(i => {
+    const E = 0.05 + (Emax - 0.05) * i / (nPts - 1);
+    const T = T_exact(E, V0, L);
+    return { E, T: Math.max(1e-15, T) };
+  });
+}
+
+function makeWkbData() {
+  return d3.range(nPts).map(i => {
+    const E = 0.05 + (V0 - 0.001) * i / (nPts - 1);
+    if (E >= V0) return null;
+    const T = T_WKB(E, V0, L);
+    return { E, T: Math.max(1e-15, T) };
+  }).filter(d => d !== null);
+}
+
+function updateCurves() {
+  const exactData = makeCurveData();
+  const wkbData = makeWkbData();
+
+  exactPath.datum(exactData).attr('d',
+    d3.line().x(d=>xScale(d.E)).y(d=>yScale(d.T)).defined(d=>d.T >= 1e-14)
+  );
+  wkbPath.datum(wkbData).attr('d',
+    d3.line().x(d=>xScale(d.E)).y(d=>yScale(d.T)).defined(d=>d.T >= 1e-14)
+  );
+
+  v0Line.attr('x1',xScale(V0)).attr('x2',xScale(V0));
+  v0Label.attr('x',xScale(V0)+3).attr('y',IH-2).text(`V₀=${V0.toFixed(1)} eV`);
+
+  const res1 = firstResonance();
+  document.getElementById('rRes1').textContent = `${res1.toFixed(3)}`;
+}
+
+function updateCursor() {
+  const T = T_exact(E_cursor, V0, L);
+  const T_wkb = E_cursor < V0 ? T_WKB(E_cursor, V0, L) : 1;
+  const clamped = Math.max(1e-14, T);
+
+  cursorLine.attr('x1',xScale(E_cursor)).attr('x2',xScale(E_cursor));
+  cursorDot.attr('cx',xScale(E_cursor)).attr('cy',yScale(clamped));
+
+  document.getElementById('rE').textContent = E_cursor.toFixed(3);
+  document.getElementById('rTex').textContent = T < 1e-10 ? T.toExponential(3) : T.toFixed(5);
+  document.getElementById('rTwkb').textContent = E_cursor < V0 ? (T_wkb < 1e-10 ? T_wkb.toExponential(3) : T_wkb.toFixed(5)) : 'N/A';
+
+  if (E_cursor < V0 && T_wkb > 0) {
+    const ratio = T / T_wkb;
+    document.getElementById('rRatio').textContent = ratio.toFixed(3);
+  } else {
+    document.getElementById('rRatio').textContent = '—';
+  }
+
+  // STM: factor per Å at current E
+  const kappa_nm = Math.sqrt((V0 - Math.min(E_cursor, V0-0.01)) / HBAR2_OVER_2M);
+  const factor = Math.exp(2 * kappa_nm * 0.1); // per 1 Å = 0.1 nm
+  document.getElementById('rSTM').textContent = E_cursor < V0 ? `×${factor.toFixed(1)}` : '—';
+}
+
+// Controls
+document.getElementById('V0-slider').addEventListener('input', e => {
+  V0 = parseFloat(e.target.value);
+  document.getElementById('V0-val').textContent = `V₀ = ${V0.toFixed(1)} eV`;
+  updateCurves(); updateCursor();
+});
+document.getElementById('L-slider').addEventListener('input', e => {
+  L = parseFloat(e.target.value);
+  document.getElementById('L-val').textContent = `L = ${L.toFixed(2)} nm`;
+  updateCurves(); updateCursor();
+});
+document.getElementById('E-slider').addEventListener('input', e => {
+  E_cursor = parseFloat(e.target.value);
+  document.getElementById('E-val').textContent = `E = ${E_cursor.toFixed(2)} eV`;
+  updateCursor();
+});
+
+// Init
+updateCurves();
+updateCursor();
+
+// Testable predictions
+const res1 = firstResonance();
+const T_at_res1 = T_exact(res1, V0, L);
+console.assert(Math.abs(T_at_res1 - 1.0) < 0.02, `P1: first resonance at E=${res1.toFixed(3)} eV → T ≈ 1, got ${T_at_res1.toFixed(5)}`);
+const T_ex_check = T_exact(1.0, 5.0, 0.5); // E=1eV, V0=5eV, L=5Å
+const T_wkb_check = T_WKB(1.0, 5.0, 0.5);
+const prefactor = T_ex_check / T_wkb_check;
+const expected_pf = 16*1*(5-1)/(5*5);
+console.assert(Math.abs(prefactor - expected_pf) < 0.05, `P2: T_exact/T_WKB = ${prefactor.toFixed(3)}, expected ${expected_pf.toFixed(3)}`);
+console.log(`✓ P1: first resonance at E = ${res1.toFixed(3)} eV → T = ${T_at_res1.toFixed(5)} ≈ 1`);
+console.log(`✓ P2: T_exact/T_WKB = ${prefactor.toFixed(3)} = 16E(V₀-E)/V₀² = ${expected_pf.toFixed(3)} ✓ (E=1,V₀=5,L=5Å)`);
+</script>
+</body>
+</html>

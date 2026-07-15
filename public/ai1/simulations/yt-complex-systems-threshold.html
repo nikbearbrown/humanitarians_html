@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complex Systems: One Local Rule, No Central Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  .subtitle {
+    font-size: 0.78rem;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 18px;
+    max-width: 680px;
+  }
+  .layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  canvas#grid {
+    border: 1px solid #D4D4D4;
+    display: block;
+  }
+  .controls {
+    background: #f9f9f9;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 12px 16px;
+    width: 600px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+  }
+  label { font-weight: 600; color: #2A1A0E; white-space: nowrap; }
+  input[type=range] { width: 100px; accent-color: #C8102E; }
+  .val-display { font-weight: 700; color: #C8102E; min-width: 28px; }
+  button {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-red { background: #C8102E; color: #fff; }
+  .btn-red:hover { background: #a00d24; }
+  .btn-slate { background: #545454; color: #fff; }
+  .btn-slate:hover { background: #3a3a3a; }
+  .btn-outline { background: #fff; color: #2A1A0E; border: 1.5px solid #D4D4D4; }
+  .btn-outline:hover { background: #f0f0f0; }
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 180px;
+  }
+  .bar-chart-wrap {
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 14px;
+    background: #fff;
+  }
+  .bar-chart-wrap h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #2A1A0E;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+  }
+  .bar-label { width: 52px; color: #545454; font-weight: 600; }
+  .bar-bg {
+    flex: 1;
+    height: 18px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.2s ease;
+  }
+  .bar-pct { min-width: 36px; text-align: right; font-weight: 700; color: #2A1A0E; }
+  .stats-panel {
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 0.75rem;
+    line-height: 1.8;
+  }
+  .stats-panel h3 { font-weight: 700; margin-bottom: 8px; font-size: 0.78rem; }
+  .stat-val { font-weight: 700; color: #C8102E; }
+  .disrupted-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+  .step-counter { font-size: 0.72rem; color: #545454; }
+</style>
+</head>
+<body>
+<h1>Complex Systems: One Local Rule, No Central Plan</h1>
+<p class="subtitle">One rule — flip job if fewer than θ of your neighbors share it. Watch 900 agents self-organize. Then hit Disrupt and see the colony recover.</p>
+
+<div class="layout">
+  <div class="left-col">
+    <canvas id="grid" width="600" height="600"></canvas>
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>θ threshold:</label>
+        <input type="range" id="theta" min="0.1" max="0.9" step="0.05" value="0.3">
+        <span class="val-display" id="thetaVal">0.30</span>
+      </div>
+      <div class="ctrl-group">
+        <label>Speed (steps/s):</label>
+        <input type="range" id="speed" min="1" max="20" step="1" value="5">
+        <span class="val-display" id="speedVal">5</span>
+      </div>
+      <button class="btn-red" id="btnDisrupt">Disrupt</button>
+      <button class="btn-slate" id="btnReset">Reset</button>
+      <button class="btn-outline" id="btnPreset1">θ=0.3 (fast, overshoot)</button>
+      <button class="btn-outline" id="btnPreset2">θ=0.7 (slow, stable)</button>
+      <button class="btn-outline" id="btnPause" style="min-width:70px;">Pause</button>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="bar-chart-wrap">
+      <h3>Role Distribution</h3>
+      <div class="bar-row">
+        <span class="bar-label">Red</span>
+        <div class="bar-bg"><div class="bar-fill" id="bar0" style="background:#C8102E; width:25%;"></div></div>
+        <span class="bar-pct" id="pct0">25%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Slate</span>
+        <div class="bar-bg"><div class="bar-fill" id="bar1" style="background:#545454; width:25%;"></div></div>
+        <span class="bar-pct" id="pct1">25%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Teal</span>
+        <div class="bar-bg"><div class="bar-fill" id="bar2" style="background:#1F6F5C; width:25%;"></div></div>
+        <span class="bar-pct" id="pct2">25%</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Orange</span>
+        <div class="bar-bg"><div class="bar-fill" id="bar3" style="background:#E07020; width:25%;"></div></div>
+        <span class="bar-pct" id="pct3">25%</span>
+      </div>
+    </div>
+
+    <div class="stats-panel">
+      <h3>Statistics</h3>
+      <div>Step: <span class="stat-val" id="stepCount">0</span></div>
+      <div class="step-counter" id="disruptInfo">No disruption yet</div>
+      <div>Recovery steps: <span class="stat-val" id="recoverSteps">—</span></div>
+      <div id="disruptedRoleWrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GRID = 30;
+const CELL = 20; // 600/30
+const JOB_COLORS = ['#C8102E', '#545454', '#1F6F5C', '#E07020'];
+const JOB_NAMES = ['Red', 'Slate', 'Teal', 'Orange'];
+
+let grid = [];
+let theta = 0.30;
+let running = true;
+let stepCount = 0;
+let disruptedRole = -1;
+let disruptStep = -1;
+let recoveredStep = -1;
+let speed = 5;
+let lastStepTime = 0;
+let animId;
+
+function initGrid() {
+  grid = [];
+  for (let i = 0; i < GRID; i++) {
+    grid.push([]);
+    for (let j = 0; j < GRID; j++) {
+      grid[i].push(Math.floor(Math.random() * 4));
+    }
+  }
+  stepCount = 0;
+  disruptedRole = -1;
+  disruptStep = -1;
+  recoveredStep = -1;
+  document.getElementById('disruptInfo').textContent = 'No disruption yet';
+  document.getElementById('recoverSteps').textContent = '—';
+  document.getElementById('disruptedRoleWrap').innerHTML = '';
+}
+
+const canvas = document.getElementById('grid');
+const ctx = canvas.getContext('2d');
+
+function drawGrid() {
+  for (let i = 0; i < GRID; i++) {
+    for (let j = 0; j < GRID; j++) {
+      ctx.fillStyle = JOB_COLORS[grid[i][j]];
+      ctx.fillRect(j * CELL, i * CELL, CELL - 1, CELL - 1);
+    }
+  }
+}
+
+function getMooreNeighbors(i, j) {
+  const neighbors = [];
+  for (let di = -1; di <= 1; di++) {
+    for (let dj = -1; dj <= 1; dj++) {
+      if (di === 0 && dj === 0) continue;
+      const ni = (i + di + GRID) % GRID;
+      const nj = (j + dj + GRID) % GRID;
+      neighbors.push(grid[ni][nj]);
+    }
+  }
+  return neighbors;
+}
+
+function stepSimulation() {
+  const newGrid = grid.map(row => [...row]);
+  for (let i = 0; i < GRID; i++) {
+    for (let j = 0; j < GRID; j++) {
+      const neighbors = getMooreNeighbors(i, j);
+      const counts = [0, 0, 0, 0];
+      neighbors.forEach(n => counts[n]++);
+      const total = neighbors.length; // 8
+      const myJob = grid[i][j];
+      const myFrac = counts[myJob] / total;
+      if (myFrac <= theta) {
+        // Switch to most common neighbor job
+        let best = -1, bestCount = -1;
+        for (let k = 0; k < 4; k++) {
+          if (counts[k] > bestCount && k !== myJob) {
+            bestCount = counts[k];
+            best = k;
+          }
+        }
+        if (best >= 0 && counts[best] / total > theta) {
+          newGrid[i][j] = best;
+        }
+      }
+    }
+  }
+  grid = newGrid;
+  stepCount++;
+}
+
+function getRoleCounts() {
+  const counts = [0, 0, 0, 0];
+  grid.forEach(row => row.forEach(c => counts[c]++));
+  return counts;
+}
+
+function updateBars() {
+  const counts = getRoleCounts();
+  const total = GRID * GRID;
+  for (let k = 0; k < 4; k++) {
+    const pct = (counts[k] / total * 100).toFixed(1);
+    document.getElementById(`bar${k}`).style.width = pct + '%';
+    document.getElementById(`pct${k}`).textContent = pct + '%';
+  }
+  document.getElementById('stepCount').textContent = stepCount;
+
+  // Check recovery
+  if (disruptedRole >= 0 && recoveredStep < 0) {
+    const frac = counts[disruptedRole] / total;
+    if (frac >= 0.20) {
+      recoveredStep = stepCount;
+      document.getElementById('recoverSteps').textContent = recoveredStep - disruptStep;
+    }
+  }
+}
+
+function disrupt() {
+  const role = Math.floor(Math.random() * 4);
+  disruptedRole = role;
+  disruptStep = stepCount;
+  recoveredStep = -1;
+  // Remove 80% of that role
+  const affected = [];
+  for (let i = 0; i < GRID; i++)
+    for (let j = 0; j < GRID; j++)
+      if (grid[i][j] === role) affected.push([i,j]);
+  const removeCount = Math.floor(affected.length * 0.80);
+  d3.shuffle(affected).slice(0, removeCount).forEach(([i,j]) => {
+    grid[i][j] = (role + 1 + Math.floor(Math.random() * 3)) % 4;
+  });
+  document.getElementById('disruptInfo').textContent = `Disrupted: ${JOB_NAMES[role]} (−80%)`;
+  document.getElementById('recoverSteps').textContent = '—';
+  document.getElementById('disruptedRoleWrap').innerHTML =
+    `<div style="margin-top:4px;"><span class="disrupted-badge" style="background:${JOB_COLORS[role]};color:#fff">${JOB_NAMES[role]}</span></div>`;
+}
+
+let paused = false;
+function loop(ts) {
+  if (!paused) {
+    const interval = 1000 / speed;
+    if (ts - lastStepTime >= interval) {
+      stepSimulation();
+      drawGrid();
+      updateBars();
+      lastStepTime = ts;
+    }
+  }
+  animId = requestAnimationFrame(loop);
+}
+
+// Controls
+document.getElementById('theta').addEventListener('input', function() {
+  theta = parseFloat(this.value);
+  document.getElementById('thetaVal').textContent = theta.toFixed(2);
+});
+document.getElementById('speed').addEventListener('input', function() {
+  speed = parseInt(this.value);
+  document.getElementById('speedVal').textContent = speed;
+});
+document.getElementById('btnDisrupt').addEventListener('click', disrupt);
+document.getElementById('btnReset').addEventListener('click', () => { initGrid(); drawGrid(); updateBars(); });
+document.getElementById('btnPreset1').addEventListener('click', () => {
+  theta = 0.3;
+  document.getElementById('theta').value = 0.3;
+  document.getElementById('thetaVal').textContent = '0.30';
+});
+document.getElementById('btnPreset2').addEventListener('click', () => {
+  theta = 0.7;
+  document.getElementById('theta').value = 0.7;
+  document.getElementById('thetaVal').textContent = '0.70';
+});
+document.getElementById('btnPause').addEventListener('click', function() {
+  paused = !paused;
+  this.textContent = paused ? 'Resume' : 'Pause';
+});
+
+initGrid();
+drawGrid();
+updateBars();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

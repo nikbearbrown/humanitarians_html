@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Doctors Get Medical Tests Wrong: Bayes Factor</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    width: 900px;
+    min-height: 550px;
+    overflow-x: hidden;
+  }
+  #app {
+    width: 900px;
+    min-height: 550px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 20px 12px 20px;
+  }
+  h1 {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2A1A0E;
+    border-bottom: 2px solid #C8102E;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .main-row {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+  }
+  /* LEFT SIDEBAR */
+  .left-panel {
+    width: 190px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .slider-group label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .slider-group .val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 4px;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .slider-desc {
+    font-size: 9px;
+    color: #545454;
+    margin-top: 2px;
+  }
+  /* CENTER — dot grid */
+  .center-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  #grid-svg {
+    display: block;
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #545454;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  /* RIGHT SIDEBAR */
+  .right-panel {
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-left: 12px;
+    border-left: 1px solid #D4D4D4;
+  }
+  .stat-block {
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    padding: 10px 12px;
+    border-radius: 2px;
+  }
+  .stat-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .stat-value-big {
+    font-size: 28px;
+    font-weight: 900;
+    color: #C8102E;
+    line-height: 1;
+  }
+  .stat-value-slate {
+    font-size: 13px;
+    font-weight: 700;
+    color: #545454;
+  }
+  .stat-value-normal {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2A1A0E;
+  }
+  .doctor-line {
+    font-size: 10px;
+    color: #545454;
+    margin-top: 4px;
+  }
+  .counts-row {
+    font-size: 10px;
+    font-weight: 600;
+    color: #2A1A0E;
+    line-height: 1.6;
+  }
+  .counts-row span.tp { color: #C8102E; }
+  .counts-row span.fp { color: #E07020; }
+  .counts-row span.tn { color: #999; }
+  .counts-row span.fn { color: #8B0000; }
+  .bayes-block {
+    font-size: 10px;
+    font-weight: 600;
+    color: #2A1A0E;
+    line-height: 1.6;
+  }
+  .bayes-block .bf-val {
+    font-size: 16px;
+    font-weight: 900;
+    color: #2A1A0E;
+  }
+  .formula {
+    font-size: 9px;
+    color: #545454;
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .hook-text {
+    font-size: 9.5px;
+    color: #545454;
+    line-height: 1.5;
+    border-top: 1px solid #D4D4D4;
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+  .grid-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Why Doctors Get Medical Tests Wrong: Bayes Factor</h1>
+  <div class="main-row">
+    <!-- LEFT SIDEBAR -->
+    <div class="left-panel">
+      <div class="slider-group">
+        <label>Prevalence (% population)</label>
+        <div class="val" id="prev-val">1.0%</div>
+        <input type="range" id="prev-slider" min="0.1" max="10" step="0.1" value="1.0">
+        <div class="slider-desc">How many people actually have the disease</div>
+      </div>
+      <div class="slider-group">
+        <label>Sensitivity / TPR</label>
+        <div class="val" id="sens-val">90%</div>
+        <input type="range" id="sens-slider" min="50" max="99" step="1" value="90">
+        <div class="slider-desc">P(positive | disease). Test's true positive rate</div>
+      </div>
+      <div class="slider-group">
+        <label>Specificity / TNR</label>
+        <div class="val" id="spec-val">91%</div>
+        <input type="range" id="spec-slider" min="50" max="99" step="1" value="91">
+        <div class="slider-desc">P(negative | no disease). Lower = more false alarms</div>
+      </div>
+      <div class="hook-text">
+        Each dot = 1 person out of 1000.<br>
+        Only <strong style="color:#C8102E">red dots</strong> have the disease AND tested positive.<br>
+        Move the sliders to see how rare true positives really are.
+      </div>
+    </div>
+
+    <!-- CENTER DOT GRID -->
+    <div class="center-panel">
+      <div class="grid-label">1000 Representative People</div>
+      <svg id="grid-svg" width="460" height="390"></svg>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#C8102E"></div>True Positive</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E07020"></div>False Positive</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8B0000"></div>False Negative</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D4D4D4; border:1px solid #bbb"></div>True Negative</div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="right-panel">
+      <div class="stat-block">
+        <div class="stat-label">Posterior P(disease | +)</div>
+        <div class="stat-value-big" id="posterior-val">9.2%</div>
+        <div class="doctor-line">Doctor's typical guess: <strong>90%</strong></div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Positive tests breakdown</div>
+        <div class="counts-row">
+          <span class="tp" id="tp-count">TP: 9</span><br>
+          <span class="fp" id="fp-count">FP: 89</span><br>
+          <span class="fn" id="fn-count">FN: 1</span><br>
+          <span class="tn" id="tn-count">TN: 901</span>
+        </div>
+      </div>
+      <div class="stat-block bayes-block">
+        <div class="stat-label">Bayes Factor</div>
+        <div class="bf-val" id="bf-val">10.0×</div>
+        <div class="formula">Sensitivity / (1 − Specificity)</div>
+        <div class="formula" id="bf-formula">= 90% / 9% = 10.0</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-label">Prior vs Posterior Odds</div>
+        <div class="counts-row" id="odds-text" style="font-size:9px; line-height:1.7;">
+          Prior odds: 1 : 99<br>
+          Posterior odds: 1 : 11<br>
+          Still not 9-in-10!
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const N = 1000;
+const COLS = 40, ROWS = 25;
+const DOT_R = 4.5;
+const PAD_X = 8, PAD_Y = 8;
+const CELL_W = (460 - 2*PAD_X) / COLS;
+const CELL_H = (390 - 2*PAD_Y) / ROWS;
+
+const svg = d3.select('#grid-svg');
+
+// Pre-build dot positions
+const dots = [];
+for (let i = 0; i < N; i++) {
+  const col = i % COLS;
+  const row = Math.floor(i / COLS);
+  dots.push({
+    i,
+    x: PAD_X + col * CELL_W + CELL_W / 2,
+    y: PAD_Y + row * CELL_H + CELL_H / 2,
+    type: 'tn'
+  });
+}
+
+const circles = svg.selectAll('circle')
+  .data(dots)
+  .join('circle')
+  .attr('cx', d => d.x)
+  .attr('cy', d => d.y)
+  .attr('r', DOT_R)
+  .attr('fill', '#D4D4D4')
+  .attr('stroke', 'none');
+
+function colorFor(type) {
+  if (type === 'tp') return '#C8102E';
+  if (type === 'fp') return '#E07020';
+  if (type === 'fn') return '#8B0000';
+  return '#D4D4D4';
+}
+
+function radiusFor(type) {
+  if (type === 'fn') return 3;
+  if (type === 'tp') return 5;
+  return DOT_R;
+}
+
+function update() {
+  const prev = +document.getElementById('prev-slider').value / 100;
+  const sens = +document.getElementById('sens-slider').value / 100;
+  const spec = +document.getElementById('spec-slider').value / 100;
+
+  document.getElementById('prev-val').textContent = (+document.getElementById('prev-slider').value).toFixed(1) + '%';
+  document.getElementById('sens-val').textContent = document.getElementById('sens-slider').value + '%';
+  document.getElementById('spec-val').textContent = document.getElementById('spec-slider').value + '%';
+
+  const diseased = Math.round(N * prev);
+  const healthy = N - diseased;
+
+  const tp = Math.round(diseased * sens);
+  const fn = diseased - tp;
+  const tn = Math.round(healthy * spec);
+  const fp = healthy - tn;
+
+  const posterior = (tp + fp) > 0 ? tp / (tp + fp) : 0;
+  const fpr = 1 - spec;
+  const bf = fpr > 0 ? sens / fpr : Infinity;
+
+  document.getElementById('posterior-val').textContent = (posterior * 100).toFixed(1) + '%';
+  document.getElementById('tp-count').textContent = 'TP: ' + tp;
+  document.getElementById('fp-count').textContent = 'FP: ' + fp;
+  document.getElementById('fn-count').textContent = 'FN: ' + fn;
+  document.getElementById('tn-count').textContent = 'TN: ' + tn;
+
+  const bfStr = isFinite(bf) ? bf.toFixed(1) + '×' : '∞';
+  document.getElementById('bf-val').textContent = bfStr;
+  document.getElementById('bf-formula').textContent =
+    '= ' + (sens*100).toFixed(0) + '% / ' + (fpr*100).toFixed(0) + '% = ' + (isFinite(bf) ? bf.toFixed(1) : '∞');
+
+  // Prior vs Posterior odds
+  const priorOdds = prev / (1 - prev);
+  const postOdds = posterior / (1 - posterior);
+  const priorStr = prev < 0.05 ? `1 : ${Math.round(1/priorOdds)}` : `${priorOdds.toFixed(2)} : 1`;
+  const postStr = posterior < 0.5 ? `1 : ${Math.round((1-posterior)/posterior)}` : `${postOdds.toFixed(2)} : 1`;
+  document.getElementById('odds-text').innerHTML =
+    `Prior odds: ${priorStr}<br>Posterior odds: ${postStr}<br>${posterior < 0.5 ? '<strong style="color:#C8102E">Still not majority!</strong>' : '<strong style="color:#C8102E">Now majority disease</strong>'}`;
+
+  // Assign types to dots: fill in order TP, FN, FP, TN
+  // Layout: diseased dots first (tp then fn), then healthy (fp then tn)
+  const types = [];
+  for (let i = 0; i < tp; i++) types.push('tp');
+  for (let i = 0; i < fn; i++) types.push('fn');
+  for (let i = 0; i < fp; i++) types.push('fp');
+  for (let i = 0; i < tn; i++) types.push('tn');
+
+  circles
+    .data(types)
+    .transition().duration(300)
+    .attr('fill', d => colorFor(d))
+    .attr('r', d => radiusFor(d))
+    .attr('stroke', d => d === 'fn' ? '#600' : 'none')
+    .attr('stroke-width', d => d === 'fn' ? 0.5 : 0);
+}
+
+document.getElementById('prev-slider').addEventListener('input', update);
+document.getElementById('sens-slider').addEventListener('input', update);
+document.getElementById('spec-slider').addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>

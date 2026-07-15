@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Filter Leakage: 5000 Random Predictors Report 0% Error</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    color: #2A1A0E;
+    max-width: 900px;
+  }
+  #outer {
+    width: 900px;
+    border: 1px solid #D4D4D4;
+  }
+  #ctrl-bar {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #D4D4D4;
+    background: #fafafa;
+    flex-wrap: wrap;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  .ctrl-label { font-size: 11px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ctrl-row { display: flex; align-items: center; gap: 8px; }
+  input[type=range] { width: 160px; accent-color: #C8102E; cursor: pointer; }
+  .ctrl-val { font-size: 14px; font-weight: 700; color: #2A1A0E; min-width: 52px; }
+  #pipelines {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #D4D4D4;
+  }
+  .pipeline {
+    flex: 1;
+    padding: 16px;
+  }
+  .pipeline.wrong { border-right: 1px solid #D4D4D4; }
+  .pipeline-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    text-align: center;
+  }
+  .pipeline.wrong .pipeline-title { background: #fff0f0; color: #C8102E; border: 1px solid #C8102E; }
+  .pipeline.correct .pipeline-title { background: #f0fff4; color: #1a7a3a; border: 1px solid #1a7a3a; }
+  .pipe-box {
+    border: 1px solid #D4D4D4;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    background: #fff;
+    position: relative;
+  }
+  .pipe-box.danger { border-color: #C8102E; background: #fff6f6; }
+  .pipe-box.safe { border-color: #1a7a3a; background: #f6fff8; }
+  .warning-badge {
+    display: inline-block;
+    background: #C8102E;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    animation: glow 1.2s ease-in-out infinite alternate;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 4px #C8102E; }
+    to { box-shadow: 0 0 12px #C8102E, 0 0 4px #ff6666; }
+  }
+  .arrow {
+    text-align: center;
+    font-size: 18px;
+    color: #D4D4D4;
+    margin: 2px 0;
+    line-height: 1;
+  }
+  .output-box {
+    border-radius: 4px;
+    padding: 12px;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .output-box.lie { background: #fff0f0; color: #C8102E; border: 2px solid #C8102E; }
+  .output-box.honest { background: #f0fff4; color: #1a7a3a; border: 2px solid #1a7a3a; }
+  .output-label { font-size: 11px; font-weight: 600; margin-top: 4px; opacity: 0.7; }
+  .exposure-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .exposure-row.bad { background: #fff0f0; color: #C8102E; }
+  .exposure-row.good { background: #f0fff4; color: #1a7a3a; }
+  .dot-ind {
+    width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+  }
+  .dot-ind.red { background: #C8102E; }
+  .dot-ind.green { background: #1a7a3a; }
+  #formula-bar {
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+    border-bottom: 1px solid #D4D4D4;
+    flex-wrap: wrap;
+  }
+  .formula-cell {
+    flex: 1;
+    min-width: 200px;
+    background: #2A1A0E;
+    color: #fff;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .formula-cell strong { color: #C8102E; }
+  .formula-cell.ok strong { color: #6adf8c; }
+</style>
+</head>
+<body>
+<h1>CV Filter Leakage: 5000 Random Predictors Report 0% Error</h1>
+
+<div id="outer">
+  <div id="ctrl-bar">
+    <div class="ctrl-group">
+      <div class="ctrl-label">Predictors (N)</div>
+      <div class="ctrl-row">
+        <input type="range" id="n-slider" min="100" max="5000" step="100" value="1000">
+        <span class="ctrl-val" id="n-val">1,000</span>
+      </div>
+    </div>
+    <div style="font-size:12px; color:#545454; line-height:1.6;">
+      Labels: <strong>50</strong> (fixed, random) &nbsp;|&nbsp; Folds: <strong>5</strong> &nbsp;|&nbsp; Kept after filter: <strong>100</strong>
+    </div>
+  </div>
+
+  <div id="pipelines">
+    <div class="pipeline wrong">
+      <div class="pipeline-title">Wrong — Label Leakage</div>
+      <div class="pipe-box danger">
+        All <strong id="n-label-w">1,000</strong> predictors + ALL 50 labels
+        <span class="warning-badge">LABELS EXPOSED</span>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="pipe-box">
+        Filter to <strong>top 100</strong> by correlation with <strong>ALL 50 labels</strong>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="pipe-box">
+        Cross-validate on top 100<br>
+        <span style="font-size:10px; color:#545454;">(test labels already seen during filter)</span>
+      </div>
+      <div class="exposure-row bad">
+        <div class="dot-ind red"></div>
+        Labels seen before test fold? YES
+      </div>
+      <div class="output-box lie">
+        CV Error ≈ <span id="wrong-error">3%</span>
+        <div class="output-label">A LIE — optimism bias from leakage</div>
+      </div>
+    </div>
+
+    <div class="pipeline correct">
+      <div class="pipeline-title">Correct — Within-Fold Filtering</div>
+      <div class="pipe-box safe">
+        <strong id="n-label-c">1,000</strong> predictors · Split into <strong>5 folds</strong><br>
+        <span style="font-size:10px; color:#545454;">Each fold: 40 train labels + 10 test labels held out</span>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="pipe-box">
+        For each fold: Filter on <strong>training labels only</strong><br>
+        <span style="font-size:10px; color:#545454;">40 labels · test fold never touched</span>
+      </div>
+      <div class="arrow">↓</div>
+      <div class="pipe-box safe">
+        Evaluate on held-out fold<br>
+        <span style="font-size:10px; color:#545454;">Labels are genuinely unseen</span>
+      </div>
+      <div class="exposure-row good">
+        <div class="dot-ind green"></div>
+        Labels seen before test fold? NO
+      </div>
+      <div class="output-box honest">
+        CV Error ≈ 50%
+        <div class="output-label">Honest — random predictors are worthless</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="formula-bar">
+    <div class="formula-cell">
+      <strong>Wrong pipeline:</strong><br>
+      E[reported error] → 0% as N → ∞<br>
+      With N random predictors filtered by ALL labels,<br>
+      the best-of-N by chance looks perfect.
+    </div>
+    <div class="formula-cell ok">
+      <strong>Correct pipeline:</strong><br>
+      Within-fold error → true error ≈ 50%<br>
+      Random predictors carry zero signal;<br>
+      honest CV reveals the null result.
+    </div>
+  </div>
+</div>
+
+<script>
+// Approximate expected CV error for the leaky pipeline:
+// With N random features and M labels, the best correlated feature
+// by chance achieves correlation ~ sqrt(2*log(N)/M) with random labels.
+// Reported error approximates: max(0, 50% - 35%*log10(N/100))
+function wrongError(N) {
+  // Empirical approximation: with more features, leakage error collapses
+  const baseline = 0.50;
+  const leakage = 0.42 * Math.log10(N / 100 + 1) / Math.log10(51);
+  return Math.max(0.002, baseline - leakage);
+}
+
+function update() {
+  const N = +document.getElementById("n-slider").value;
+  document.getElementById("n-val").textContent = N.toLocaleString();
+  document.getElementById("n-label-w").textContent = N.toLocaleString();
+  document.getElementById("n-label-c").textContent = N.toLocaleString();
+
+  const err = wrongError(N);
+  document.getElementById("wrong-error").textContent =
+    err < 0.005 ? "< 1%" : (err * 100).toFixed(0) + "%";
+}
+
+document.getElementById("n-slider").addEventListener("input", update);
+update();
+</script>
+</body>
+</html>

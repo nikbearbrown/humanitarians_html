@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandelbrot Set Hidden Inside Newton's Method</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 6px;
+    max-width: 800px;
+  }
+  .subtitle {
+    font-size: 0.8rem;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+  .main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .canvas-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .canvas-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  canvas {
+    border: 1px solid #D4D4D4;
+    cursor: crosshair;
+    display: block;
+  }
+  .info-panel {
+    background: #FFFFFF;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 16px;
+    min-width: 220px;
+    max-width: 240px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+  }
+  .info-panel h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #2A1A0E;
+    border-bottom: 1px solid #D4D4D4;
+    padding-bottom: 6px;
+  }
+  .info-row { margin-bottom: 4px; }
+  .info-label { color: #545454; }
+  .info-value { font-weight: 600; color: #2A1A0E; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+  .badge-converge { background: #1a3a6e; color: #fff; }
+  .badge-cycle { background: #C8102E; color: #fff; }
+  .badge-diverge { background: #545454; color: #fff; }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+    font-size: 0.72rem;
+  }
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .reference-box {
+    margin-top: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 0.7rem;
+    line-height: 1.6;
+    color: #2A1A0E;
+  }
+  .status-bar {
+    margin-top: 8px;
+    font-size: 0.7rem;
+    color: #545454;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<h1>Mandelbrot Set Hidden Inside Newton's Method</h1>
+<p class="subtitle">Newton iteration on p(z) = (z+1)(z−1)(z−λ) reveals Mandelbrot structure in λ-parameter space. Click left canvas to inspect dynamical basins.</p>
+
+<div class="main-layout">
+  <div class="canvas-wrap">
+    <div class="canvas-label">λ-Parameter Space (click to pick λ)</div>
+    <canvas id="lambdaCanvas" width="350" height="350"></canvas>
+    <div class="status-bar" id="renderStatus">Computing…</div>
+  </div>
+
+  <div class="canvas-wrap">
+    <div class="canvas-label">Dynamical Plane (Newton Basins)</div>
+    <canvas id="dynamicCanvas" width="350" height="350"></canvas>
+  </div>
+
+  <div class="info-panel">
+    <h3>Current λ</h3>
+    <div class="info-row"><span class="info-label">Re(λ): </span><span class="info-value" id="lambdaRe">—</span></div>
+    <div class="info-row"><span class="info-label">Im(λ): </span><span class="info-value" id="lambdaIm">—</span></div>
+    <div class="info-row"><span class="info-label">Seed z₀ = λ/3:</span></div>
+    <div class="info-row"><span class="info-label">Re(z₀): </span><span class="info-value" id="z0Re">—</span></div>
+    <div class="info-row"><span class="info-label">Im(z₀): </span><span class="info-value" id="z0Im">—</span></div>
+    <div id="convergeBadge"></div>
+    <hr style="margin:10px 0; border-color:#D4D4D4;">
+    <div style="font-size:0.72rem; font-weight:600; margin-bottom:6px;">Basin Colors</div>
+    <div class="legend-row"><div class="legend-swatch" style="background:#1a3a8f;"></div> Root r₁ = +1</div>
+    <div class="legend-row"><div class="legend-swatch" style="background:#8f1a2a;"></div> Root r₂ = −1</div>
+    <div class="legend-row"><div class="legend-swatch" style="background:#1a6b3c;"></div> Root r₃ = λ</div>
+    <div class="legend-row"><div class="legend-swatch" style="background:#c8102e;"></div> λ-space: 2-cycle / no conv.</div>
+    <div class="reference-box">
+      <b>Key formula:</b><br>
+      p(z) = (z+1)(z−1)(z−λ)<br>
+      Newton step:<br>
+      z → z − p(z)/p′(z)<br><br>
+      <b>Mandelbrot boundary:</b><br>
+      |c| ≈ 1/4 (main cardioid)<br><br>
+      Centroid λ/3 lies at<br>
+      the Mandelbrot boundary<br>
+      when λ traces the<br>
+      cardioid of the M-set.
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Complex arithmetic helpers ----
+function cadd(a, b) { return [a[0]+b[0], a[1]+b[1]]; }
+function csub(a, b) { return [a[0]-b[0], a[1]-b[1]]; }
+function cmul(a, b) { return [a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]]; }
+function cdiv(a, b) {
+  const d = b[0]*b[0]+b[1]*b[1];
+  return [(a[0]*b[0]+a[1]*b[1])/d, (a[1]*b[0]-a[0]*b[1])/d];
+}
+function cabs2(a) { return a[0]*a[0]+a[1]*a[1]; }
+function cabs(a) { return Math.sqrt(cabs2(a)); }
+
+// p(z) = (z+1)(z-1)(z-λ) = (z²-1)(z-λ)
+function p(z, lam) {
+  const z2m1 = csub(cmul(z,z), [1,0]);
+  return cmul(z2m1, csub(z, lam));
+}
+// p'(z) = 3z² - 2λz - 1
+function dp(z, lam) {
+  const z2 = cmul(z, z);
+  const term1 = [3*z2[0], 3*z2[1]];
+  const term2 = cmul([2*lam[0], 2*lam[1]], z);
+  return csub(csub(term1, term2), [1, 0]);
+}
+
+const MAX_ITER = 50;
+const TOL = 1e-6;
+
+function newtonIterate(z0, lam) {
+  let z = [z0[0], z0[1]];
+  const roots = [[1,0],[-1,0],[lam[0],lam[1]]];
+  for (let i = 0; i < MAX_ITER; i++) {
+    const pv = p(z, lam);
+    const dpv = dp(z, lam);
+    if (cabs2(dpv) < 1e-20) break;
+    const dz = cdiv(pv, dpv);
+    z = csub(z, dz);
+    for (let r = 0; r < 3; r++) {
+      if (cabs(csub(z, roots[r])) < TOL) return { root: r, iter: i };
+    }
+    if (cabs2(z) > 1e8) break;
+  }
+  return { root: -1, iter: MAX_ITER };
+}
+
+// ---- Left canvas: λ-space ----
+const lambdaCanvas = document.getElementById('lambdaCanvas');
+const lctx = lambdaCanvas.getContext('2d');
+const W = 350, H = 350;
+const lambdaRange = 3; // [-3,3] x [-3,3]
+
+const imgData = lctx.createImageData(W, H);
+let renderComplete = false;
+let currentLambda = [0.5, 0.5];
+
+function pixelToLambda(px, py) {
+  return [
+    (px / W) * 2 * lambdaRange - lambdaRange,
+    lambdaRange - (py / H) * 2 * lambdaRange
+  ];
+}
+
+// Color maps for λ-space
+// Root 0 (+1): blue shades; Root 1 (-1): purple shades; Root 2 (λ): green; -1: red
+const rootColors = [
+  [26, 58, 143],   // blue
+  [100, 26, 143],  // purple
+  [26, 107, 60],   // green
+];
+
+let renderRow = 0;
+function renderLambdaChunk() {
+  const chunkSize = 20;
+  for (let row = renderRow; row < Math.min(renderRow + chunkSize, H); row++) {
+    for (let px = 0; px < W; px++) {
+      const lam = pixelToLambda(px, row);
+      // Seed: centroid = lam/3
+      const z0 = [lam[0]/3, lam[1]/3];
+      const res = newtonIterate(z0, lam);
+      const idx = (row * W + px) * 4;
+      if (res.root >= 0) {
+        const c = rootColors[res.root];
+        const brightness = 0.4 + 0.6 * (1 - res.iter / MAX_ITER);
+        imgData.data[idx]   = Math.round(c[0] * brightness);
+        imgData.data[idx+1] = Math.round(c[1] * brightness);
+        imgData.data[idx+2] = Math.round(c[2] * brightness);
+        imgData.data[idx+3] = 255;
+      } else {
+        // No convergence: red gradient by iter
+        const t = Math.min(1, res.iter / 30);
+        imgData.data[idx]   = 180 + Math.round(t * 20);
+        imgData.data[idx+1] = Math.round(t * 15);
+        imgData.data[idx+2] = Math.round(t * 15);
+        imgData.data[idx+3] = 255;
+      }
+    }
+  }
+  renderRow += chunkSize;
+  lctx.putImageData(imgData, 0, 0);
+  drawLambdaCrosshair();
+  if (renderRow < H) {
+    document.getElementById('renderStatus').textContent = `Computing λ-space… ${Math.round(renderRow/H*100)}%`;
+    requestAnimationFrame(renderLambdaChunk);
+  } else {
+    renderComplete = true;
+    document.getElementById('renderStatus').textContent = 'Click left canvas to select λ';
+    drawLambdaCrosshair();
+  }
+}
+
+function drawLambdaCrosshair() {
+  // Overdraw crosshair for current lambda
+  const px = (currentLambda[0] + lambdaRange) / (2 * lambdaRange) * W;
+  const py = (lambdaRange - currentLambda[1]) / (2 * lambdaRange) * H;
+  lctx.save();
+  lctx.strokeStyle = '#FFFFFF';
+  lctx.lineWidth = 1.5;
+  lctx.beginPath();
+  lctx.moveTo(px - 8, py); lctx.lineTo(px + 8, py);
+  lctx.moveTo(px, py - 8); lctx.lineTo(px, py + 8);
+  lctx.stroke();
+  lctx.restore();
+}
+
+renderLambdaChunk();
+
+// ---- Right canvas: dynamical plane ----
+const dynamicCanvas = document.getElementById('dynamicCanvas');
+const dctx = dynamicCanvas.getContext('2d');
+const DW = 350, DH = 350;
+const dynRange = 2.5;
+
+const dynImgData = dctx.createImageData(DW, DH);
+
+function renderDynamicPlane(lam) {
+  const roots = [[1,0],[-1,0],[lam[0],lam[1]]];
+  const basinColors = [
+    [40, 80, 200],
+    [200, 30, 60],
+    [30, 160, 80],
+  ];
+  for (let py = 0; py < DH; py++) {
+    for (let px = 0; px < DW; px++) {
+      const z0 = [
+        (px / DW) * 2 * dynRange - dynRange,
+        dynRange - (py / DH) * 2 * dynRange
+      ];
+      const res = newtonIterate(z0, lam);
+      const idx = (py * DW + px) * 4;
+      if (res.root >= 0) {
+        const c = basinColors[res.root];
+        const brightness = 0.35 + 0.65 * (1 - res.iter / MAX_ITER);
+        dynImgData.data[idx]   = Math.round(c[0] * brightness);
+        dynImgData.data[idx+1] = Math.round(c[1] * brightness);
+        dynImgData.data[idx+2] = Math.round(c[2] * brightness);
+        dynImgData.data[idx+3] = 255;
+      } else {
+        dynImgData.data[idx]   = 30;
+        dynImgData.data[idx+1] = 30;
+        dynImgData.data[idx+2] = 30;
+        dynImgData.data[idx+3] = 255;
+      }
+    }
+  }
+  dctx.putImageData(dynImgData, 0, 0);
+
+  // Draw roots
+  roots.forEach((r, i) => {
+    const rpx = (r[0] + dynRange) / (2*dynRange) * DW;
+    const rpy = (dynRange - r[1]) / (2*dynRange) * DH;
+    dctx.save();
+    dctx.fillStyle = '#FFFFFF';
+    dctx.strokeStyle = '#2A1A0E';
+    dctx.lineWidth = 1.5;
+    dctx.beginPath();
+    dctx.arc(rpx, rpy, 5, 0, Math.PI*2);
+    dctx.fill();
+    dctx.stroke();
+    dctx.restore();
+  });
+
+  // Draw centroid z0 = lam/3
+  const cx = lam[0]/3, cy = lam[1]/3;
+  const cpx = (cx + dynRange) / (2*dynRange) * DW;
+  const cpy = (dynRange - cy) / (2*dynRange) * DH;
+  dctx.save();
+  dctx.fillStyle = '#FFFFFF';
+  dctx.strokeStyle = '#FFD700';
+  dctx.lineWidth = 2;
+  dctx.beginPath();
+  dctx.arc(cpx, cpy, 6, 0, Math.PI*2);
+  dctx.fill();
+  dctx.stroke();
+  dctx.font = '600 11px Montserrat, sans-serif';
+  dctx.fillStyle = '#2A1A0E';
+  dctx.fillText('z₀', cpx + 8, cpy - 6);
+  dctx.restore();
+}
+
+function updateInfoPanel(lam) {
+  document.getElementById('lambdaRe').textContent = lam[0].toFixed(4);
+  document.getElementById('lambdaIm').textContent = (lam[1] >= 0 ? '+' : '') + lam[1].toFixed(4) + 'i';
+  document.getElementById('z0Re').textContent = (lam[0]/3).toFixed(4);
+  document.getElementById('z0Im').textContent = ((lam[1] >= 0 ? '+' : '') + (lam[1]/3).toFixed(4)) + 'i';
+  const z0 = [lam[0]/3, lam[1]/3];
+  const res = newtonIterate(z0, lam);
+  const badge = document.getElementById('convergeBadge');
+  if (res.root >= 0) {
+    const rootNames = ['+1', '−1', 'λ'];
+    badge.innerHTML = `<span class="badge badge-converge">Converges → root ${rootNames[res.root]}</span>`;
+  } else {
+    badge.innerHTML = `<span class="badge badge-cycle">2-cycle / diverges</span>`;
+  }
+}
+
+// Initial render
+renderDynamicPlane(currentLambda);
+updateInfoPanel(currentLambda);
+
+// Click handler
+lambdaCanvas.addEventListener('click', (e) => {
+  const rect = lambdaCanvas.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const py = e.clientY - rect.top;
+  currentLambda = pixelToLambda(px * (W / rect.width), py * (H / rect.height));
+  lctx.putImageData(imgData, 0, 0);
+  drawLambdaCrosshair();
+  renderDynamicPlane(currentLambda);
+  updateInfoPanel(currentLambda);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uncertainty Principle Explorer</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 0.88rem;
+    color: #545454;
+    margin-bottom: 20px;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  label {
+    font-size: 0.78rem;
+    color: #545454;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input[type=range] {
+    width: 200px;
+    accent-color: #C8102E;
+  }
+  .val-display {
+    font-size: 0.82rem;
+    color: #2A1A0E;
+    font-weight: 700;
+  }
+  .readout {
+    font-size: 0.9rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 8px 14px;
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .charts {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+  .axis-label { font-size: 11px; fill: #545454; }
+  .chart-title { font-size: 12px; fill: #2A1A0E; font-weight: 700; }
+  .tick text { font-size: 10px; fill: #545454; }
+</style>
+</head>
+<body>
+<h1>Uncertainty Principle Explorer</h1>
+<div class="subtitle">Robertson bound σ<sub>x</sub> · σ<sub>p</sub> ≥ ℏ/2 — the state itself has a joint width floor, before any measurement.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>σ<sub>x</sub> (ℏ = 1 units)</label>
+    <input type="range" id="sigx-slider" min="0.1" max="10" step="0.05" value="1.0">
+    <span class="val-display" id="sigx-val">σₓ = 1.000</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Toggle extra states</label>
+    <select id="state-toggle" style="padding:4px 8px; font-size:0.82rem; border:1px solid #ddd;">
+      <option value="gaussian">Gaussian only</option>
+      <option value="ho">+ HO excited states (n=1–4)</option>
+    </select>
+  </div>
+</div>
+
+<div class="readout">
+  <div>σₓ = <span id="rx">1.000</span></div>
+  <div>σₚ = <span id="rp">0.500</span></div>
+  <div>σₓ·σₚ = <span id="rproduct">0.500</span></div>
+  <div>Ratio / (ℏ/2) = <span id="rratio">1.000</span></div>
+</div>
+
+<div class="charts">
+  <svg id="waveform" width="300" height="280"></svg>
+  <svg id="hyperbola" width="380" height="280"></svg>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const HBAR = 1.0; // natural units
+
+let sigx = 1.0;
+
+// ── Waveform panel ──────────────────────────────────────────────────────────
+const wSvg = d3.select('#waveform');
+const wW = 300, wH = 280;
+const wMargin = {top: 28, right: 18, bottom: 48, left: 48};
+const wInW = wW - wMargin.left - wMargin.right;
+const wInH = wH - wMargin.top - wMargin.bottom;
+const wG = wSvg.append('g').attr('transform', `translate(${wMargin.left},${wMargin.top})`);
+
+const xRange = [-15, 15];
+const wX = d3.scaleLinear().domain(xRange).range([0, wInW]);
+const wY = d3.scaleLinear().domain([0, 0.85]).range([wInH, 0]);
+
+wG.append('g').attr('class', 'axis').attr('transform', `translate(0,${wInH})`).call(d3.axisBottom(wX).ticks(6));
+wG.append('g').attr('class', 'axis').call(d3.axisLeft(wY).ticks(4));
+
+wG.append('text').attr('class', 'chart-title').attr('x', wInW/2).attr('y', -10).attr('text-anchor', 'middle').text('Position wavefunction |ψ(x)|²');
+wG.append('text').attr('class', 'axis-label').attr('x', wInW/2).attr('y', wInH+38).attr('text-anchor', 'middle').text('x (natural units)');
+wG.append('text').attr('class', 'axis-label').attr('transform', 'rotate(-90)').attr('x', -wInH/2).attr('y', -36).attr('text-anchor', 'middle').text('|ψ|²');
+
+// Gaussian waveform path
+const wLine = d3.line()
+  .x(d => wX(d.x))
+  .y(d => wY(d.y))
+  .curve(d3.curveBasis);
+
+const wPath = wG.append('path').attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 2.5);
+
+// Add zero line
+wG.append('line').attr('x1', wX(xRange[0])).attr('x2', wX(xRange[1])).attr('y1', wY(0)).attr('y2', wY(0)).attr('stroke', '#ddd');
+
+function gaussianPsi(x, sig) {
+  return (1 / (Math.sqrt(2 * Math.PI) * sig)) * Math.exp(-x * x / (2 * sig * sig));
+}
+
+function updateWaveform() {
+  const nPts = 300;
+  const data = d3.range(nPts).map(i => {
+    const x = xRange[0] + (xRange[1] - xRange[0]) * i / (nPts - 1);
+    return { x, y: gaussianPsi(x, sigx) };
+  });
+  const maxY = 1 / (Math.sqrt(2 * Math.PI) * sigx) * 1.15;
+  wY.domain([0, maxY]);
+  wG.select('.axis').remove();
+  wG.append('g').attr('class', 'axis').attr('transform', `translate(0,${wInH})`).call(d3.axisBottom(wX).ticks(6));
+  wPath.datum(data).attr('d', wLine);
+}
+
+// ── Hyperbola panel ──────────────────────────────────────────────────────────
+const hSvg = d3.select('#hyperbola');
+const hW = 380, hH = 280;
+const hMargin = {top: 28, right: 24, bottom: 52, left: 60};
+const hInW = hW - hMargin.left - hMargin.right;
+const hInH = hH - hMargin.top - hMargin.bottom;
+const hG = hSvg.append('g').attr('transform', `translate(${hMargin.left},${hMargin.top})`);
+
+const logRange = [Math.log10(0.08), Math.log10(12)];
+const hX = d3.scaleLog().domain([0.08, 12]).range([0, hInW]);
+const hY = d3.scaleLog().domain([0.04, 15]).range([hInH, 0]);
+
+hG.append('g').attr('class', 'axis').attr('transform', `translate(0,${hInH})`).call(d3.axisBottom(hX).ticks(5, '.1f'));
+hG.append('g').attr('class', 'axis').call(d3.axisLeft(hY).ticks(5, '.1f'));
+
+hG.append('text').attr('class', 'chart-title').attr('x', hInW/2).attr('y', -10).attr('text-anchor', 'middle').text('Uncertainty Hyperbola (log–log)');
+hG.append('text').attr('class', 'axis-label').attr('x', hInW/2).attr('y', hInH+40).attr('text-anchor', 'middle').text('σₓ');
+hG.append('text').attr('class', 'axis-label').attr('transform', 'rotate(-90)').attr('x', -hInH/2).attr('y', -46).attr('text-anchor', 'middle').text('σₚ');
+
+// Robertson floor hyperbola σ_p = ħ/2 / σ_x
+const hyperbolaData = d3.range(200).map(i => {
+  const sx = Math.exp(Math.log(0.08) + (Math.log(12) - Math.log(0.08)) * i / 199);
+  return { sx, sp: HBAR / (2 * sx) };
+});
+
+hG.append('path')
+  .datum(hyperbolaData)
+  .attr('fill', 'none')
+  .attr('stroke', INK)
+  .attr('stroke-width', 1.5)
+  .attr('d', d3.line().x(d => hX(d.sx)).y(d => hY(d.sp)));
+
+// Floor label
+hG.append('text')
+  .attr('x', hX(0.3))
+  .attr('y', hY(HBAR/(2*0.3)) - 8)
+  .attr('font-size', '10px')
+  .attr('fill', SLATE)
+  .text('σₓσₚ = ℏ/2');
+
+// HO ground state fixed marker (σ_x = 1/√2, σ_p = 1/√2 for ħ=mω=1)
+const hoSigX = 1 / Math.SQRT2;
+const hoSigP = 1 / Math.SQRT2;
+hG.append('circle')
+  .attr('cx', hX(hoSigX)).attr('cy', hY(hoSigP))
+  .attr('r', 6).attr('fill', 'none').attr('stroke', SLATE).attr('stroke-width', 2);
+hG.append('text')
+  .attr('x', hX(hoSigX) + 8).attr('y', hY(hoSigP) + 4)
+  .attr('font-size', '10px').attr('fill', SLATE)
+  .text('HO n=0');
+
+// ISW ground state fixed marker (σ_x ≈ 0.1809 for L=1, σ_p = π)
+const iswSigX = Math.sqrt((Math.PI*Math.PI - 6) / (12 * Math.PI * Math.PI));
+const iswSigP = Math.PI;
+hG.append('circle')
+  .attr('cx', hX(iswSigX)).attr('cy', hY(iswSigP))
+  .attr('r', 6).attr('fill', 'none').attr('stroke', SLATE).attr('stroke-width', 2).attr('stroke-dasharray', '3,2');
+hG.append('text')
+  .attr('x', hX(iswSigX) + 8).attr('y', hY(iswSigP) - 4)
+  .attr('font-size', '10px').attr('fill', SLATE)
+  .text('ISW n=1');
+
+// HO excited state dots group (shown conditionally)
+const hoExcited = hG.append('g').attr('id', 'ho-excited').attr('opacity', 0);
+for (let n = 1; n <= 4; n++) {
+  // For HO: σ_x = √(n+1/2), σ_p = √(n+1/2) in units where ħ=mω=1
+  const snx = Math.sqrt(n + 0.5);
+  const snp = Math.sqrt(n + 0.5);
+  hoExcited.append('circle')
+    .attr('cx', hX(snx)).attr('cy', hY(snp))
+    .attr('r', 4).attr('fill', 'none').attr('stroke', SLATE).attr('stroke-width', 1.5);
+  hoExcited.append('text')
+    .attr('x', hX(snx) + 6).attr('y', hY(snp) + 4)
+    .attr('font-size', '9px').attr('fill', SLATE)
+    .text(`n=${n}`);
+}
+
+// Moving point (Gaussian, always on hyperbola)
+const movingDot = hG.append('circle')
+  .attr('r', 7).attr('fill', RED).attr('stroke', 'white').attr('stroke-width', 1.5);
+
+function updateHyperbola() {
+  const sp = HBAR / (2 * sigx);
+  const clampedSx = Math.max(0.08, Math.min(12, sigx));
+  const clampedSp = Math.max(0.04, Math.min(15, sp));
+  movingDot.attr('cx', hX(clampedSx)).attr('cy', hY(clampedSp));
+}
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+const slider = document.getElementById('sigx-slider');
+const sigxVal = document.getElementById('sigx-val');
+const rxEl = document.getElementById('rx');
+const rpEl = document.getElementById('rp');
+const rproductEl = document.getElementById('rproduct');
+const rratioEl = document.getElementById('rratio');
+
+function updateReadout() {
+  const sp = HBAR / (2 * sigx);
+  rxEl.textContent = sigx.toFixed(3);
+  rpEl.textContent = sp.toFixed(3);
+  rproductEl.textContent = (sigx * sp).toFixed(3);
+  rratioEl.textContent = (sigx * sp / (HBAR / 2)).toFixed(3);
+  sigxVal.textContent = `σₓ = ${sigx.toFixed(3)}`;
+}
+
+slider.addEventListener('input', () => {
+  sigx = parseFloat(slider.value);
+  updateWaveform();
+  updateHyperbola();
+  updateReadout();
+});
+
+document.getElementById('state-toggle').addEventListener('change', e => {
+  const show = e.target.value === 'ho';
+  hoExcited.attr('opacity', show ? 1 : 0);
+});
+
+// Initial render
+updateWaveform();
+updateHyperbola();
+updateReadout();
+
+// Verification assert: at slider default, ratio = 1.000
+console.assert(Math.abs(sigx * (HBAR / (2 * sigx)) - HBAR / 2) < 1e-10, 'P1: Gaussian always saturates Robertson bound');
+console.assert(Math.abs(iswSigX * iswSigP / (HBAR / 2) - 0.5679) < 0.001, `P2: ISW ratio ≈ 0.568, got ${(iswSigX * iswSigP / (HBAR / 2)).toFixed(4)}`);
+console.log('✓ P1: Gaussian σₓσₚ =', (sigx * HBAR/(2*sigx)).toFixed(6), '= ħ/2');
+console.log('✓ P2: ISW σₓσₚ / (ħ/2) =', (iswSigX * iswSigP / (HBAR/2)).toFixed(4), '≈ 0.568');
+</script>
+</body>
+</html>

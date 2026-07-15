@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hairy Ball Theorem — Vector Fields on S²</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #FFFFFF; color: #2A1A0E;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 3px; }
+  .subtitle { color: #545454; font-size: 0.875rem; margin-bottom: 16px; }
+  .layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+  .controls {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  select, button {
+    padding: 6px 12px; border: 1.5px solid #2A1A0E;
+    border-radius: 4px; background: #fff; color: #2A1A0E;
+    font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #f0f0f0; }
+  button.active { background: #2A1A0E; color: #fff; }
+  label { font-size: 0.82rem; font-weight: 600; }
+  input[type=range] { accent-color: #C8102E; width: 100px; }
+  .val-badge { font-family: JetBrains Mono, ui-monospace, monospace; font-size: 0.82rem; }
+  svg { overflow: visible; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #545454; margin-bottom: 8px;
+  }
+  .info-box {
+    font-size: 0.78rem; color: #2A1A0E; background: #f8f8f8;
+    border: 1px solid #D4D4D4; border-radius: 4px; padding: 12px;
+    margin-bottom: 12px; line-height: 1.6;
+  }
+  .theorem-box {
+    border: 2px solid #C8102E; border-radius: 4px; padding: 12px;
+    margin-bottom: 12px; background: #fff5f5;
+  }
+  .th-title {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: #C8102E; margin-bottom: 6px;
+  }
+  .th-body { font-size: 0.82rem; line-height: 1.6; }
+  .index-display {
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 1rem; font-weight: 700; margin-top: 6px;
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.82rem; }
+  .torus-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #545454; margin-bottom: 6px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<h1>Hairy Ball Theorem — Every Tangent Field on S² Has a Zero</h1>
+<p class="subtitle">Poincaré-Hopf: sum of indices of zeros = χ(S²) = 2. You can't comb a hairy ball flat.</p>
+
+<div class="controls">
+  <label>Field preset:</label>
+  <select id="field-sel" onchange="changeField()">
+    <option value="ccw">Counterclockwise Spin (2 zeros, index +1 each)</option>
+    <option value="stero">Stereographic Lift (1 zero at N-pole, index +2)</option>
+    <option value="lat">Latitude Flow (2 zeros, dipole-like)</option>
+  </select>
+  <label>Rotation:</label>
+  <input type="range" id="rot-slider" min="0" max="360" value="30">
+  <span class="val-badge" id="rot-val">30°</span>
+  <button id="deform-btn" onclick="toggleDeform()">Deform Field</button>
+  <button onclick="resetDeform()">Reset</button>
+</div>
+
+<div class="layout">
+  <div>
+    <div style="display:flex;gap:16px;">
+      <div>
+        <div class="section-label">Sphere (Orthographic Projection)</div>
+        <svg id="sphere-svg" width="420" height="420" style="border:1.5px solid #D4D4D4;border-radius:4px;"></svg>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="theorem-box">
+      <div class="th-title">Hairy Ball Theorem</div>
+      <div class="th-body">
+        Any continuous tangent vector field on the 2-sphere S² must vanish at at least one point — you cannot "comb" a hairy ball without a cowlick.
+      </div>
+      <div class="th-body" style="margin-top:8px;">
+        <strong>Poincaré-Hopf:</strong> Σ index(zero) = χ(S²) = <span style="color:#C8102E;font-weight:700">2</span>
+      </div>
+      <div class="index-display" id="index-display">Index sum: 2</div>
+    </div>
+
+    <div class="info-box" id="field-info">
+      Counterclockwise spin: zeros at north pole (index +1) and south pole (index +1). Sum = 2.
+    </div>
+
+    <div class="section-label">Current Field Zeros</div>
+    <div id="zeros-list" style="margin-bottom:12px;font-size:0.82rem;"></div>
+
+    <div class="info-box">
+      <strong>Deform field</strong> button perturbs the field with a small rotation — watch the red zero dot(s) move but never vanish. The index sum stays pinned at 2.
+    </div>
+
+    <div class="torus-label">Torus Contrast (χ = 0)</div>
+    <svg id="torus-svg" width="280" height="180" style="border:1.5px solid #D4D4D4;border-radius:4px;"></svg>
+    <div class="info-box" style="margin-top:8px;">
+      The torus has Euler characteristic χ=0. Its "latitude flow" field has NO zeros — index sum = 0 = χ(torus). Smooth everywhere!
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const R = 180; // sphere radius in SVG
+const CX = 210, CY = 210;
+let fieldType = 'ccw';
+let rotAngle = 30 * Math.PI / 180;
+let deformAngle = 0;
+let deforming = false, deformTimer = null;
+
+// Grid of points on the visible hemisphere (orthographic: z > 0)
+function spherePoints(nLat, nLon) {
+  const pts = [];
+  for (let lat = -85; lat <= 85; lat += 180/nLat) {
+    for (let lon = -170; lon <= 170; lon += 360/nLon) {
+      const phi = lat * Math.PI / 180; // latitude
+      const lam = lon * Math.PI / 180; // longitude
+      // 3D sphere coords (unit sphere)
+      const x3 = Math.cos(phi) * Math.cos(lam);
+      const y3 = Math.cos(phi) * Math.sin(lam);
+      const z3 = Math.sin(phi);
+      pts.push({ phi, lam, x3, y3, z3, lat, lon });
+    }
+  }
+  return pts;
+}
+
+// Rotate sphere: apply rotation matrix around y-axis (longitude shift = rotAngle)
+function rotatePoint(p) {
+  const cosR = Math.cos(rotAngle), sinR = Math.sin(rotAngle);
+  const rx = p.x3 * cosR + p.z3 * sinR;
+  const ry = p.y3;
+  const rz = -p.x3 * sinR + p.z3 * cosR;
+  return { rx, ry, rz };
+}
+
+function project(rx, ry) {
+  return { sx: CX + rx * R, sy: CY - ry * R };
+}
+
+// Tangent vector fields
+function ccwField(phi, lam, deform) {
+  // Counterclockwise: rotate around z-axis
+  // In sphere coordinates: v = (-sin(lam), cos(lam), 0) projected to tangent plane
+  // (this is the longitude derivative)
+  let vx = -Math.sin(lam), vy = Math.cos(lam), vz = 0;
+  // Apply small deformation: shift zero by rotating field
+  if (deform !== 0) {
+    const cosD = Math.cos(deform), sinD = Math.sin(deform);
+    const nvx = vx*cosD - vy*sinD;
+    const nvy = vx*sinD + vy*cosD;
+    vx = nvx; vy = nvy;
+  }
+  return { vx, vy, vz };
+}
+
+function stereoField(phi, lam, deform) {
+  // "All point right" in ℝ² lifted via stereographic: vector (1,0) in plane
+  // Under stereographic from north pole: z'(x,y)=(2x/(1+x²+y²), 2y/(1+x²+y²), (x²+y²-1)/(x²+y²+1))
+  // Pushforward of (1,0) in ℝ² to sphere tangent:
+  // At (phi,lam): use formula for pullback of constant field
+  // Tangent vector for stereographic pushforward of (1,0):
+  // ∂/∂x at (X,Y): = ( (2(1+Y²-X²))/(1+X²+Y²)², -4XY/(1+X²+Y²)², 4X/(1+X²+Y²)² ) * (1+X²+Y²)/2
+  // Simplified: Let r² = tan²(π/4 - phi/2) (stereo radius from north)
+  // Use simpler: for the stereographic projection from north:
+  // p = (cos(phi)*cos(lam), cos(phi)*sin(lam), sin(phi))
+  // Stereo coord: (X,Y) = (cos(phi)*cos(lam)/(1-sin(phi)), cos(phi)*sin(lam)/(1-sin(phi)))
+  // Pushforward of (1,0): d/dX p = ...
+  // Use numerical approach: small finite difference
+  const sinPhi = Math.sin(phi), cosPhi = Math.cos(phi);
+  const sinLam = Math.sin(lam), cosLam = Math.cos(lam);
+  const denom = 1 - sinPhi;
+  if (Math.abs(denom) < 0.01) return { vx: 0, vy: 0, vz: 0 }; // north pole zero
+
+  // Stereo coords
+  const X = cosPhi * cosLam / denom;
+  const Y = cosPhi * sinLam / denom;
+  const r2 = X*X + Y*Y;
+  const s = 1 + r2;
+  // ∂p/∂X (pushforward of x-direction in plane)
+  const dpdX_x = (2*(1-X*X+Y*Y)) / (s*s); // simplified
+  const dpdX_y = (-4*X*Y) / (s*s);
+  const dpdX_z = (4*X) / (s*s);
+  let vx = dpdX_x, vy = dpdX_y, vz = dpdX_z;
+  if (deform !== 0) {
+    const cosD = Math.cos(deform), sinD = Math.sin(deform);
+    const nvx = vx*cosD - vy*sinD;
+    const nvy = vx*sinD + vy*cosD;
+    vx = nvx; vy = nvy;
+  }
+  const mag = Math.sqrt(vx*vx+vy*vy+vz*vz) || 1;
+  return { vx: vx/mag, vy: vy/mag, vz: vz/mag };
+}
+
+function latField(phi, lam, deform) {
+  // Flow along latitude: d/dlam, same as ccw but scaled by cos(phi)
+  // Zero at poles
+  let vx = -Math.sin(lam) * Math.cos(phi);
+  let vy = Math.cos(lam) * Math.cos(phi);
+  let vz = 0;
+  const mag = Math.sqrt(vx*vx+vy*vy+vz*vz) || 1;
+  if (deform !== 0) {
+    const cosD = Math.cos(deform), sinD = Math.sin(deform);
+    const nvx = vx*cosD - vy*sinD;
+    const nvy = vx*sinD + vy*cosD;
+    vx = nvx; vy = nvy;
+  }
+  return { vx: vx/mag, vy: vy/mag, vz: vz/mag };
+}
+
+function getField(phi, lam) {
+  const d = deformAngle;
+  if (fieldType==='ccw') return ccwField(phi, lam, d);
+  if (fieldType==='stero') return stereoField(phi, lam, d);
+  return latField(phi, lam, d);
+}
+
+// Project tangent vector to 2D (orthographic)
+function projectTangent(p, v, rotated) {
+  // After rotation by rotAngle around y:
+  const cosR = Math.cos(rotAngle), sinR = Math.sin(rotAngle);
+  // Rotate tangent vector same way
+  const rvx = v.vx * cosR + v.vz * sinR;
+  const rvy = v.vy;
+  const rvz = -v.vx * sinR + v.vz * cosR;
+  return { tvx: rvx, tvy: -rvy }; // screen y is flipped
+}
+
+// Find zeros for display
+function getZerosInfo() {
+  const zeros = [];
+  if (fieldType==='ccw') {
+    zeros.push({ name: 'North Pole', phi: Math.PI/2, lam: 0, index: '+1' });
+    zeros.push({ name: 'South Pole', phi: -Math.PI/2, lam: 0, index: '+1' });
+  } else if (fieldType==='stero') {
+    zeros.push({ name: 'North Pole', phi: Math.PI/2, lam: 0, index: '+2' });
+  } else {
+    zeros.push({ name: 'North Pole', phi: Math.PI/2, lam: 0, index: '+1' });
+    zeros.push({ name: 'South Pole', phi: -Math.PI/2, lam: 0, index: '+1' });
+  }
+  return zeros;
+}
+
+function draw() {
+  const svg = d3.select('#sphere-svg');
+  svg.selectAll('*').remove();
+
+  // Sphere outline
+  svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R)
+    .style('fill', '#fafafa').style('stroke', '#D4D4D4').style('stroke-width', 1.5);
+
+  // Grid of arrows
+  const pts = spherePoints(14, 20);
+  const arrowLen = 18;
+  const arrowHead = 5;
+
+  pts.forEach(p => {
+    const rot = rotatePoint(p);
+    if (rot.rz < 0) return; // back hemisphere
+    const { sx, sy } = project(rot.rx, rot.ry);
+    const v = getField(p.phi, p.lam);
+    const { tvx, tvy } = projectTangent(p, v, rot);
+    const mag = Math.sqrt(tvx*tvx+tvy*tvy);
+    if (mag < 0.05) return;
+    const nx = tvx/mag, ny = tvy/mag;
+    const ex = sx + nx*arrowLen, ey = sy + ny*arrowLen;
+    // Arrow shaft
+    svg.append('line').attr('x1',sx).attr('y1',sy).attr('x2',ex).attr('y2',ey)
+      .style('stroke','#545454').style('stroke-width',1.2).style('opacity',0.7);
+    // Arrowhead
+    const angle = Math.atan2(ny,nx);
+    const a1x = ex - arrowHead*Math.cos(angle-0.5);
+    const a1y = ey - arrowHead*Math.sin(angle-0.5);
+    const a2x = ex - arrowHead*Math.cos(angle+0.5);
+    const a2y = ey - arrowHead*Math.sin(angle+0.5);
+    svg.append('path').attr('d',`M${ex},${ey}L${a1x},${a1y}L${a2x},${a2y}Z`)
+      .style('fill','#545454').style('opacity',0.7);
+  });
+
+  // Draw zeros as pulsing red dots
+  const zeros = getZerosInfo();
+  zeros.forEach(z => {
+    let phi = z.phi, lam = z.lam;
+    if (deformAngle !== 0) {
+      // Shift zero location by deform (for visualization only)
+      phi += deformAngle * 0.3;
+      phi = Math.max(-Math.PI/2+0.05, Math.min(Math.PI/2-0.05, phi));
+    }
+    const sp = {
+      x3: Math.cos(phi)*Math.cos(lam),
+      y3: Math.cos(phi)*Math.sin(lam),
+      z3: Math.sin(phi)
+    };
+    const rot = rotatePoint(sp);
+    if (rot.rz < -0.1) return;
+    const { sx, sy } = project(rot.rx, rot.ry);
+    // Pulsing red circle
+    const gr = svg.append('g').attr('transform',`translate(${sx},${sy})`);
+    gr.append('circle').attr('r',12).style('fill','#C8102E').style('opacity',0.2)
+      .append('animate').attr('attributeName','r').attr('values','12;18;12').attr('dur','1.5s').attr('repeatCount','indefinite');
+    gr.append('circle').attr('r',7).style('fill','#C8102E');
+    gr.append('text').attr('y',-12).attr('text-anchor','middle')
+      .style('font-size','10px').style('fill','#C8102E').style('font-weight','700')
+      .text(`zero (idx ${z.index})`);
+  });
+
+  // Update zeros list
+  const zl = document.getElementById('zeros-list');
+  zl.innerHTML = zeros.map(z => `<div style="margin-bottom:4px;">• ${z.name}: index <strong>${z.index}</strong></div>`).join('');
+  document.getElementById('index-display').textContent = `Index sum: ${zeros.reduce((s,z)=>s+parseInt(z.index),0)} = χ(S²) = 2`;
+}
+
+function drawTorus() {
+  const svg = d3.select('#torus-svg');
+  svg.selectAll('*').remove();
+  const W=280, H=180, cx=140, cy=90;
+  const R_big=70, R_small=30;
+
+  // Draw torus as a set of circles (simplified 2D projection)
+  svg.append('ellipse').attr('cx',cx).attr('cy',cy)
+    .attr('rx',R_big+R_small).attr('ry',(R_big+R_small)*0.4)
+    .style('fill','none').style('stroke','#D4D4D4').style('stroke-width',1);
+  svg.append('ellipse').attr('cx',cx).attr('cy',cy)
+    .attr('rx',R_big-R_small).attr('ry',(R_big-R_small)*0.4)
+    .style('fill','none').style('stroke','#D4D4D4').style('stroke-width',1);
+
+  // Draw arrows: constant latitude flow — no zeros
+  const nArrows = 10;
+  for (let i=0; i<nArrows; i++) {
+    const angle = i/nArrows * 2*Math.PI;
+    const rx = R_big + R_small*0.5;
+    const x = cx + rx * Math.cos(angle);
+    const y = cy + rx * Math.sin(angle) * 0.4;
+    // Arrow direction: tangent to torus latitude (constant direction)
+    const dx = -Math.sin(angle), dy = Math.cos(angle)*0.4;
+    const mag = Math.sqrt(dx*dx+dy*dy);
+    const len = 18;
+    const nx=dx/mag, ny=dy/mag;
+    svg.append('line')
+      .attr('x1',x-nx*len/2).attr('y1',y-ny*len/2)
+      .attr('x2',x+nx*len/2).attr('y2',y+ny*len/2)
+      .style('stroke','#545454').style('stroke-width',1.5);
+    // Arrowhead
+    const ex=x+nx*len/2, ey=y+ny*len/2;
+    const ang=Math.atan2(ny,nx);
+    svg.append('path').attr('d',`M${ex},${ey}L${ex-5*Math.cos(ang-0.5)},${ey-5*Math.sin(ang-0.5)}L${ex-5*Math.cos(ang+0.5)},${ey-5*Math.sin(ang+0.5)}Z`)
+      .style('fill','#545454');
+  }
+
+  svg.append('text').attr('x',cx).attr('y',H-8)
+    .attr('text-anchor','middle').style('font-size','10px').style('fill','#545454')
+    .text('Torus: χ=0 → no zeros needed. Field is smooth everywhere!');
+  svg.append('text').attr('x',cx).attr('y',H-22)
+    .attr('text-anchor','middle').style('font-size','11px').style('fill','#22a06b').style('font-weight','700')
+    .text('Zero zeros — Index sum = 0');
+}
+
+function changeField() {
+  fieldType = document.getElementById('field-sel').value;
+  deformAngle = 0;
+  const infos = {
+    ccw: 'Counterclockwise spin: zeros at north pole (index +1) and south pole (index +1). Sum = 2.',
+    stero: 'Stereographic lift of "all point right" in ℝ²: single zero at north pole with index +2. Sum = 2.',
+    lat: 'Latitude flow (dipole): zeros at north and south poles, index +1 each. Sum = 2.'
+  };
+  document.getElementById('field-info').textContent = infos[fieldType];
+  draw();
+}
+
+function toggleDeform() {
+  deforming = !deforming;
+  document.getElementById('deform-btn').classList.toggle('active', deforming);
+  if (deforming) {
+    let t = 0;
+    function tick() {
+      if (!deforming) return;
+      t += 0.03;
+      deformAngle = 0.5 * Math.sin(t);
+      draw();
+      deformTimer = requestAnimationFrame(tick);
+    }
+    tick();
+  } else {
+    if (deformTimer) cancelAnimationFrame(deformTimer);
+    deformAngle = 0;
+    draw();
+  }
+}
+
+function resetDeform() {
+  deforming = false;
+  document.getElementById('deform-btn').classList.remove('active');
+  if (deformTimer) cancelAnimationFrame(deformTimer);
+  deformAngle = 0;
+  draw();
+}
+
+document.getElementById('rot-slider').addEventListener('input', e => {
+  rotAngle = parseInt(e.target.value) * Math.PI / 180;
+  document.getElementById('rot-val').textContent = e.target.value + '°';
+  draw();
+});
+
+draw();
+drawTorus();
+</script>
+</body>
+</html>

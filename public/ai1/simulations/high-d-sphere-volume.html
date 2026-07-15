@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>High-D Sphere Volume: Peaks at n=5, Then Shrinks to Zero</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF; color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px; min-height: 100vh;
+  }
+  h1 { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 5px; letter-spacing: -0.3px; }
+  .subtitle { font-size: 12px; color: #545454; text-align: center; margin-bottom: 16px; }
+
+  .top-row { display: flex; width: 900px; border: 1px solid #D4D4D4; border-radius: 6px 6px 0 0; overflow: hidden; }
+
+  .chart-main { flex: 1; padding: 14px 10px 8px 10px; background: #FFFFFF; }
+  .chart-right { width: 280px; border-left: 1px solid #D4D4D4; background: #FAFAFA; padding: 14px 10px; }
+  .panel-title { font-size: 10px; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+
+  .controls-area {
+    width: 900px; background: #FAFAFA; border: 1px solid #D4D4D4; border-top: none;
+    border-radius: 0 0 6px 6px; padding: 12px 20px;
+    display: flex; flex-wrap: wrap; gap: 20px; align-items: center;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  label { font-size: 10px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; }
+  input[type=range] { width: 220px; accent-color: #C8102E; cursor: pointer; }
+
+  .info-box {
+    background: #2A1A0E; color: #FFFFFF; border-radius: 4px;
+    padding: 10px 14px; font-size: 13px; min-width: 280px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .info-box .val { font-size: 20px; font-weight: 700; color: #C8102E; }
+  .info-box .sub { font-size: 11px; color: #D4D4D4; }
+
+  .toggle-btn {
+    font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 600;
+    padding: 6px 14px; border: 2px solid #545454; border-radius: 4px;
+    background: #FFFFFF; color: #545454; cursor: pointer; transition: all 0.12s;
+  }
+  .toggle-btn.active { background: #545454; color: #FFFFFF; }
+
+  /* Key values table */
+  .kv-table { font-size: 11px; width: 100%; }
+  .kv-table th { font-size: 9px; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 5px; border-bottom: 1px solid #D4D4D4; }
+  .kv-table td { padding: 4px 5px; border-bottom: 1px solid #F0F0F0; }
+  .kv-table td:first-child { font-weight: 700; color: #C8102E; }
+  .kv-table tr.peak td { background: #FFF0F0; }
+
+  svg text { font-family: 'Montserrat', sans-serif; }
+</style>
+</head>
+<body>
+<h1>High-D Sphere Volume: Peaks at n=5, Then Shrinks to Zero</h1>
+<p class="subtitle">Unit sphere volume peaks at n=5 (V₅ ≈ 5.264), then collapses toward zero. In high dimensions, the sphere is negligible inside its own bounding box.</p>
+
+<div class="top-row">
+  <!-- Main bar chart -->
+  <div class="chart-main">
+    <div class="panel-title" id="mainChartTitle">V_n (unit sphere volume)</div>
+    <svg id="mainSvg" width="610" height="370"></svg>
+  </div>
+
+  <!-- Right: log-scale + key table -->
+  <div class="chart-right">
+    <div class="panel-title">Log-Scale V_n vs n</div>
+    <svg id="logSvg" width="260" height="195"></svg>
+    <div style="margin-top:12px;">
+      <div class="panel-title">Key Values</div>
+      <table class="kv-table">
+        <thead><tr><th>n</th><th>V_n</th><th>% of box</th></tr></thead>
+        <tbody id="kvBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="controls-area">
+  <div class="ctrl-group">
+    <label>Dimension n (cursor)</label>
+    <input type="range" id="nSlider" min="0" max="25" step="1" value="5">
+  </div>
+  <div class="info-box" id="infoBox">
+    <div class="sub">At n = <span id="infoN">5</span></div>
+    <div class="val" id="infoV">V = 5.2638</div>
+    <div class="sub">Fraction of bounding box: <span id="infoFrac">16.45%</span></div>
+    <div class="sub" id="infoFracAbs">Sphere is 16.45% of its bounding box</div>
+  </div>
+  <div class="ctrl-group">
+    <label>Display mode</label>
+    <div style="display:flex;gap:8px;">
+      <button class="toggle-btn active" id="btnVn" onclick="setMode('vn')">Show V_n</button>
+      <button class="toggle-btn" id="btnFrac" onclick="setMode('frac')">Show V_n/2^n</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Compute V_n via recurrence: V_0=1, V_1=2, V_n = (2π/n)*V_{n-2}
+function computeVols(maxN) {
+  const V = [1, 2];
+  for (let n = 2; n <= maxN; n++) {
+    V.push((2 * Math.PI / n) * V[n-2]);
+  }
+  return V;
+}
+
+const MAXN = 25;
+const V = computeVols(MAXN);
+const nArr = d3.range(0, MAXN+1);
+const frac = nArr.map(n => V[n] / Math.pow(2, n));
+
+let mode = "vn"; // "vn" or "frac"
+
+// Key values table
+const kvData = [
+  {n:0, label:"n=0"}, {n:1, label:"n=1"}, {n:2, label:"n=2"}, {n:3, label:"n=3"},
+  {n:4, label:"n=4"}, {n:5, label:"n=5 (PEAK)"}, {n:6, label:"n=6"},
+  {n:8, label:"n=8"}, {n:10, label:"n=10"}, {n:15, label:"n=15"}, {n:20, label:"n=20"}
+];
+
+const kvBody = document.getElementById("kvBody");
+kvData.forEach(d => {
+  const tr = document.createElement("tr");
+  if (d.n === 5) tr.className = "peak";
+  const pct = (frac[d.n] * 100);
+  const pctStr = pct >= 0.01 ? pct.toFixed(pct < 1 ? 4 : 2)+"%" : pct.toExponential(2)+"%";
+  tr.innerHTML = `<td>${d.n}</td><td>${V[d.n].toFixed(4)}</td><td>${pctStr}</td>`;
+  kvBody.appendChild(tr);
+});
+
+// ---- Main bar chart ----
+const mainSvg = d3.select("#mainSvg");
+const MW = 610, MH = 370;
+const mMargin = {top:10, right:15, bottom:45, left:55};
+const mw = MW - mMargin.left - mMargin.right;
+const mh = MH - mMargin.top - mMargin.bottom;
+
+const mg = mainSvg.append("g").attr("transform",`translate(${mMargin.left},${mMargin.top})`);
+
+const xS = d3.scaleBand().domain(nArr).range([0, mw]).padding(0.12);
+const yMaxVn = d3.max(V) * 1.08;
+const yMaxFrac = d3.max(frac) * 1.08;
+
+let yS = d3.scaleLinear().domain([0, yMaxVn]).range([mh, 0]);
+
+const xAxis = mg.append("g").attr("transform",`translate(0,${mh})`);
+const yAxis = mg.append("g");
+
+function drawAxes() {
+  xAxis.call(d3.axisBottom(xS).tickValues(nArr.filter(n => n % 5 === 0 || n < 6)))
+    .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+  yAxis.call(d3.axisLeft(yS).ticks(6).tickFormat(d3.format(".2f")))
+    .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+}
+
+mg.append("text").attr("x",mw/2).attr("y",mh+38).attr("text-anchor","middle")
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","11").attr("fill","#545454").text("Dimension n");
+const yLabel = mg.append("text").attr("transform","rotate(-90)").attr("x",-mh/2).attr("y",-42)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif").attr("font-size","11").attr("fill","#545454");
+
+// Bars
+const bars = mg.selectAll("rect.bar").data(nArr).enter().append("rect").attr("class","bar")
+  .attr("x", n => xS(n)).attr("width", xS.bandwidth())
+  .attr("y", mh).attr("height", 0)
+  .attr("fill", n => n === 5 ? "#C8102E" : "#545454").attr("opacity", 0.8);
+
+// Cursor bar highlight
+const cursorRect = mg.append("rect").attr("class","cursor-rect")
+  .attr("y",0).attr("height",mh).attr("fill","#C8102E").attr("opacity",0.08).attr("pointer-events","none");
+
+// Peak annotation
+const peakAnnot = mg.append("g");
+peakAnnot.append("line").attr("class","peak-line")
+  .attr("stroke","#C8102E").attr("stroke-width",1).attr("stroke-dasharray","3,2").attr("opacity",0.7);
+peakAnnot.append("text").attr("class","peak-text")
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","10").attr("fill","#C8102E").attr("font-weight","700");
+
+// Cursor line
+const cursorLine = mg.append("line").attr("y1",0).attr("y2",mh)
+  .attr("stroke","#2A1A0E").attr("stroke-width",1).attr("stroke-dasharray","3,2").attr("opacity",0.5);
+
+let curN = 5;
+
+function getDisplayData() {
+  return mode === "vn" ? V : frac;
+}
+
+function getYMax() {
+  return mode === "vn" ? yMaxVn : yMaxFrac;
+}
+
+function updateChart() {
+  const data = getDisplayData();
+  const yMax = getYMax();
+  yS = d3.scaleLinear().domain([0, yMax]).range([mh, 0]);
+  drawAxes();
+
+  bars.data(nArr)
+    .attr("x", n => xS(n))
+    .attr("width", xS.bandwidth())
+    .attr("y", n => yS(data[n]))
+    .attr("height", n => mh - yS(data[n]))
+    .attr("fill", n => (mode === "vn" ? n === 5 : false) ? "#C8102E" : n === curN ? "#C8102E" : "#545454")
+    .attr("opacity", n => n === curN ? 1.0 : 0.75);
+
+  // Peak annotation (only in vn mode)
+  if (mode === "vn") {
+    const px5 = xS(5) + xS.bandwidth()/2;
+    const py5 = yS(V[5]);
+    peakAnnot.style("display","block");
+    peakAnnot.select(".peak-line")
+      .attr("x1",px5).attr("y1",py5-4).attr("x2",px5).attr("y2",py5-30);
+    peakAnnot.select(".peak-text")
+      .attr("x",px5).attr("y",py5-34).attr("text-anchor","middle")
+      .text("V₅ = 8π²/15 ≈ 5.264 (maximum)");
+  } else {
+    peakAnnot.style("display","none");
+  }
+
+  yLabel.text(mode === "vn" ? "V_n (unit n-sphere volume)" : "V_n / 2^n (fraction of bounding cube)");
+  document.getElementById("mainChartTitle").textContent = mode === "vn"
+    ? "V_n (unit sphere volume, recurrence V_n = (2π/n)·V_{n-2})"
+    : "V_n / 2^n  (sphere volume as fraction of bounding cube 2^n)";
+
+  updateCursor(curN);
+}
+
+function updateCursor(n) {
+  curN = n;
+  const data = getDisplayData();
+  const bx = xS(n);
+  const bw = xS.bandwidth();
+
+  cursorRect.attr("x",bx).attr("width",bw);
+  cursorLine.attr("x1",bx+bw/2).attr("x2",bx+bw/2);
+
+  bars.attr("fill", d => {
+    if (d === n) return "#C8102E";
+    if (mode === "vn" && d === 5 && n !== 5) return "#C8102E";
+    return "#545454";
+  }).attr("opacity", d => d === n ? 1.0 : 0.75);
+
+  // Info box
+  document.getElementById("infoN").textContent = n;
+  const vn = V[n];
+  const fn = frac[n];
+  document.getElementById("infoV").textContent = `V = ${vn.toFixed(5)}`;
+  const pct = (fn*100);
+  const pctStr = pct >= 0.001 ? pct.toFixed(pct < 1 ? 5 : 2)+"%" : pct.toExponential(2)+"%";
+  document.getElementById("infoFrac").textContent = pctStr;
+  document.getElementById("infoFracAbs").textContent = `Sphere is ${pctStr} of its bounding box`;
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById("btnVn").classList.toggle("active", m === "vn");
+  document.getElementById("btnFrac").classList.toggle("active", m === "frac");
+  updateChart();
+}
+
+// ---- Log chart (right) ----
+const logSvg = d3.select("#logSvg");
+const LW = 260, LH = 195;
+const lMargin = {top:10, right:10, bottom:35, left:50};
+const lw = LW - lMargin.left - lMargin.right;
+const lh = LH - lMargin.top - lMargin.bottom;
+const lg = logSvg.append("g").attr("transform",`translate(${lMargin.left},${lMargin.top})`);
+
+const lxS = d3.scaleLinear().domain([0,25]).range([0,lw]);
+const validV = V.map((v,i) => v > 1e-20 ? Math.log10(v) : -20);
+const lyS = d3.scaleLinear().domain([d3.min(validV), d3.max(validV)]).range([lh, 0]);
+
+lg.append("g").attr("transform",`translate(0,${lh})`).call(d3.axisBottom(lxS).ticks(6))
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","9");
+lg.append("g").call(d3.axisLeft(lyS).ticks(5).tickFormat(d => "10^"+d.toFixed(0)))
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","8");
+
+lg.append("text").attr("x",lw/2).attr("y",lh+28).attr("text-anchor","middle")
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","9").attr("fill","#545454").text("n");
+lg.append("text").attr("transform","rotate(-90)").attr("x",-lh/2).attr("y",-42)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif").attr("font-size","9").attr("fill","#545454").text("log₁₀(V_n)");
+
+const logLineGen = d3.line()
+  .x((d,i) => lxS(i))
+  .y(d => lyS(d));
+
+lg.append("path").datum(validV).attr("d",logLineGen).attr("fill","none").attr("stroke","#545454").attr("stroke-width",2);
+
+// V_n/2^n line
+const logFrac = frac.map(f => f > 1e-30 ? Math.log10(f) : -30);
+const lyS2 = d3.scaleLinear().domain([d3.min(logFrac), 0]).range([lh, 0]);
+const logLineGen2 = d3.line().x((d,i) => lxS(i)).y(d => lyS2(d));
+lg.append("path").datum(logFrac).attr("d",logLineGen2).attr("fill","none").attr("stroke","#C8102E").attr("stroke-width",1.5).attr("stroke-dasharray","4,2");
+
+// Peak dot
+lg.append("circle").attr("cx",lxS(5)).attr("cy",lyS(validV[5])).attr("r",4).attr("fill","#C8102E");
+
+// Log cursor
+const logCursor = lg.append("line").attr("y1",0).attr("y2",lh)
+  .attr("stroke","#2A1A0E").attr("stroke-width",1).attr("stroke-dasharray","2,2").attr("opacity",0.5);
+
+// Legend
+lg.append("line").attr("x1",lw-80).attr("y1",10).attr("x2",lw-60).attr("y2",10).attr("stroke","#545454").attr("stroke-width",2);
+lg.append("text").attr("x",lw-56).attr("y",13).attr("font-family","Montserrat,sans-serif").attr("font-size","8").attr("fill","#545454").text("V_n");
+lg.append("line").attr("x1",lw-80).attr("y1",22).attr("x2",lw-60).attr("y2",22).attr("stroke","#C8102E").attr("stroke-width",1.5).attr("stroke-dasharray","4,2");
+lg.append("text").attr("x",lw-56).attr("y",25).attr("font-family","Montserrat,sans-serif").attr("font-size","8").attr("fill","#C8102E").text("V_n/2^n");
+
+function updateLogCursor(n) {
+  logCursor.attr("x1",lxS(n)).attr("x2",lxS(n));
+}
+
+document.getElementById("nSlider").addEventListener("input", function() {
+  const n = +this.value;
+  updateCursor(n);
+  updateLogCursor(n);
+});
+
+// Initialize
+drawAxes();
+updateChart();
+updateLogCursor(5);
+</script>
+</body>
+</html>

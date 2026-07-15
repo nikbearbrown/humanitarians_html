@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Karatsuba Multiplication: 3 Recursive Calls Beat 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    max-width: 900px;
+    margin-bottom: 14px;
+    line-height: 1.3;
+  }
+  .top-row {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    width: 900px;
+  }
+  svg { display: block; }
+  .right-panel {
+    width: 210px;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    padding: 10px 0 0 14px;
+  }
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .slider-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2A1A0E;
+  }
+  .slider-sub {
+    font-size: 10px;
+    color: #545454;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .readout-box {
+    background: #FFFFFF;
+    border: 1.5px solid #D4D4D4;
+    padding: 10px;
+    border-radius: 3px;
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: #2A1A0E;
+  }
+  .readout-box strong { font-weight: 700; }
+  .readout-box .naive { color: #545454; }
+  .readout-box .kara  { color: #C8102E; }
+  .readout-box .speedup { color: #2A1A0E; font-weight: 700; }
+  table.key-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  table.key-table th {
+    font-weight: 700;
+    color: #545454;
+    text-align: right;
+    padding: 2px 4px;
+    border-bottom: 1.5px solid #D4D4D4;
+    white-space: nowrap;
+  }
+  table.key-table th:first-child { text-align: left; }
+  table.key-table td {
+    text-align: right;
+    padding: 2px 4px;
+    border-bottom: 1px solid #D4D4D4;
+    color: #2A1A0E;
+    white-space: nowrap;
+  }
+  table.key-table td:first-child { text-align: left; font-weight: 600; }
+  table.key-table td.kara { color: #C8102E; }
+  table.key-table td.speedup { font-weight: 700; }
+  .box-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+  }
+  .bottom-row {
+    width: 900px;
+    margin-top: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .tree-panel {
+    background: #FFFFFF;
+    border: 1.5px solid #D4D4D4;
+    border-radius: 3px;
+    padding: 10px 12px 8px;
+  }
+  .tree-panel h3 {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+  .trees-row {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+  }
+  .tree-half {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .tree-half h4 {
+    font-size: 10.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .tree-half.naive h4 { color: #545454; }
+  .tree-half.kara h4 { color: #C8102E; }
+  .tree-stat {
+    font-size: 10px;
+    color: #2A1A0E;
+    text-align: center;
+  }
+  .tree-stat strong { font-weight: 700; }
+  .axis text { font-family: 'Montserrat',sans-serif; font-size: 11px; fill: #545454; }
+  .axis path, .axis line { stroke: #D4D4D4; }
+</style>
+</head>
+<body>
+<h1>Karatsuba Multiplication: 3 Recursive Calls Beat 4</h1>
+<div class="top-row">
+  <svg id="chart"></svg>
+  <div class="right-panel">
+    <div class="slider-row">
+      <span class="slider-label">n (digits): <span id="n-val">100</span></span>
+      <span class="slider-sub">Move cursor across chart</span>
+      <input type="range" id="n-slider" min="0" max="1" step="0.001" value="0.4">
+      <!-- will be log-mapped -->
+    </div>
+    <div class="readout-box" id="readout">
+      <strong>At n = 100:</strong><br>
+      <span class="naive">Naive:      <strong>10,000</strong></span><br>
+      <span class="kara">Karatsuba:  <strong>1,000</strong></span><br>
+      <span class="speedup">Speedup:    <strong>10×</strong></span>
+    </div>
+    <div>
+      <div class="box-title">Key values</div>
+      <table class="key-table">
+        <thead>
+          <tr><th>n</th><th>Naive</th><th class="kara">Kara</th><th>Speed</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>10</td><td>100</td><td class="kara">45</td><td class="speedup">2.2×</td></tr>
+          <tr><td>100</td><td>10,000</td><td class="kara">1,000</td><td class="speedup">10×</td></tr>
+          <tr><td>1,000</td><td>1,000,000</td><td class="kara">31,623</td><td class="speedup">32×</td></tr>
+          <tr><td>10k</td><td>100M</td><td class="kara">1M</td><td class="speedup">100×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="readout-box" style="font-size:10px; line-height:1.55">
+      <strong>Complexity:</strong><br>
+      Naive: <span style="color:#545454">O(n²)</span><br>
+      Karatsuba: <span style="color:#C8102E">O(n^log₂3) = O(n^1.585)</span><br>
+      Crossover: <strong>n ≈ 20</strong>
+    </div>
+  </div>
+</div>
+<div class="bottom-row" id="bottom-row"></div>
+
+<script>
+// ── chart layout ──────────────────────────────────────────────────────────────
+const W = 690, H = 360;
+const margin = { top: 36, right: 24, bottom: 56, left: 70 };
+const pw = W - margin.left - margin.right;
+const ph = H - margin.top - margin.bottom;
+
+const svg = d3.select('#chart').attr('width', W).attr('height', H);
+const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+// ── scales ────────────────────────────────────────────────────────────────────
+const nMin = 2, nMax = 10000;
+const opMin = 1, opMax = 2e8;
+
+const xScale = d3.scaleLog().domain([nMin, nMax]).range([0, pw]);
+const yScale = d3.scaleLog().domain([opMin, opMax]).range([ph, 0]);
+
+// ── axes ──────────────────────────────────────────────────────────────────────
+const xAxis = d3.axisBottom(xScale)
+  .tickValues([2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000])
+  .tickFormat(d3.format('~s'))
+  .tickSize(-ph);
+
+const yAxis = d3.axisLeft(yScale)
+  .ticks(7, '~s')
+  .tickSize(-pw);
+
+g.append('g').attr('class', 'axis x-axis').attr('transform', `translate(0,${ph})`).call(xAxis);
+g.append('g').attr('class', 'axis y-axis').call(yAxis);
+
+g.selectAll('.x-axis .tick line, .y-axis .tick line')
+  .attr('stroke', '#D4D4D4').attr('stroke-dasharray', '3,3');
+g.selectAll('.x-axis path, .y-axis path').attr('stroke', '#D4D4D4');
+
+// Axis labels
+svg.append('text')
+  .attr('x', margin.left + pw / 2).attr('y', H - 8)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('n  (number of digits, log scale)');
+
+svg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(margin.top + ph / 2)).attr('y', 16)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('Operations  (log scale)');
+
+svg.append('text')
+  .attr('x', margin.left + pw / 2).attr('y', 18)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '12px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('Naive O(n²) vs Karatsuba O(n^1.585)');
+
+// ── op functions ──────────────────────────────────────────────────────────────
+const log2_3 = Math.log(3) / Math.log(2); // ≈ 1.585
+
+// Karatsuba has small overhead for small n; crossover ~n=20
+function naiveOps(n) { return n * n; }
+function karatsubaOps(n) {
+  // Small-n overhead factor that decays, crossover at ~20
+  const overhead = 1 + 20 / n;
+  return Math.pow(n, log2_3) * overhead;
+}
+
+// ── curves ────────────────────────────────────────────────────────────────────
+const nPoints = [];
+for (let i = 0; i <= 500; i++) {
+  const n = Math.pow(10, Math.log10(nMin) + (i / 500) * (Math.log10(nMax) - Math.log10(nMin)));
+  nPoints.push(n);
+}
+
+const lineGen = d3.line()
+  .x(d => xScale(d[0]))
+  .y(d => yScale(Math.max(opMin, d[1])))
+  .defined(d => d[1] >= opMin);
+
+// Naive curve
+g.append('path')
+  .datum(nPoints.map(n => [n, naiveOps(n)]))
+  .attr('fill', 'none').attr('stroke', '#545454').attr('stroke-width', 2.5)
+  .attr('d', lineGen);
+
+// Karatsuba curve
+g.append('path')
+  .datum(nPoints.map(n => [n, karatsubaOps(n)]))
+  .attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2.5)
+  .attr('d', lineGen);
+
+// ── curve labels ─────────────────────────────────────────────────────────────
+const n_label = 3000;
+g.append('text')
+  .attr('x', xScale(n_label)).attr('y', yScale(naiveOps(n_label)) - 8)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '11px')
+  .attr('font-weight', '700').attr('fill', '#545454')
+  .text('Naive O(n²)');
+
+g.append('text')
+  .attr('x', xScale(n_label)).attr('y', yScale(karatsubaOps(n_label)) + 16)
+  .attr('text-anchor', 'middle')
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '11px')
+  .attr('font-weight', '700').attr('fill', '#C8102E')
+  .text('Karatsuba O(n^1.585)');
+
+// ── crossover annotation ──────────────────────────────────────────────────────
+const nCross = 20;
+g.append('line')
+  .attr('x1', xScale(nCross)).attr('x2', xScale(nCross))
+  .attr('y1', 0).attr('y2', ph)
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '5,4');
+
+g.append('rect')
+  .attr('x', xScale(nCross) - 72).attr('y', ph / 3 - 14)
+  .attr('width', 140).attr('height', 30).attr('rx', 3)
+  .attr('fill', '#FFFFFF').attr('stroke', '#D4D4D4');
+g.append('text')
+  .attr('x', xScale(nCross) + 4).attr('y', ph / 3)
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10.5px')
+  .attr('font-weight', '700').attr('fill', '#2A1A0E')
+  .text('Karatsuba wins here');
+g.append('text')
+  .attr('x', xScale(nCross) + 4).attr('y', ph / 3 + 12)
+  .attr('font-family', 'Montserrat,sans-serif').attr('font-size', '10px')
+  .attr('fill', '#545454')
+  .text('n ≈ 20');
+
+// ── cursor line & dot ─────────────────────────────────────────────────────────
+const cursorLine = g.append('line')
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '4,3')
+  .attr('y1', 0).attr('y2', ph);
+
+const naiveDot = g.append('circle').attr('r', 5).attr('fill', '#545454').attr('stroke', '#FFFFFF').attr('stroke-width', 1.5);
+const karaDot = g.append('circle').attr('r', 5).attr('fill', '#C8102E').attr('stroke', '#FFFFFF').attr('stroke-width', 1.5);
+
+function formatOps(v) {
+  if (v >= 1e8) return (v / 1e8).toFixed(1) + 'M×100';
+  if (v >= 1e6) return d3.format(',.0f')(v / 1e6) + 'M';
+  if (v >= 1e3) return d3.format(',.0f')(v / 1e3) + 'k';
+  return d3.format(',.0f')(v);
+}
+
+function updateCursor(n) {
+  const naive = naiveOps(n);
+  const kara = karatsubaOps(n);
+  const speedup = naive / kara;
+  const cx = xScale(n);
+
+  cursorLine.attr('x1', cx).attr('x2', cx);
+  naiveDot.attr('cx', cx).attr('cy', yScale(Math.max(opMin, naive)));
+  karaDot.attr('cx', cx).attr('cy', yScale(Math.max(opMin, kara)));
+
+  const nFmt = n >= 10000 ? '10,000' : n >= 1000 ? d3.format(',.0f')(n) : Math.round(n).toString();
+  document.getElementById('n-val').textContent = nFmt;
+  document.getElementById('readout').innerHTML = `
+    <strong>At n = ${nFmt}:</strong><br>
+    <span class="naive">Naive:     <strong>${formatOps(naive)}</strong></span><br>
+    <span class="kara">Karatsuba: <strong>${formatOps(kara)}</strong></span><br>
+    <span class="speedup">Speedup:   <strong>${speedup.toFixed(1)}×</strong></span>
+  `;
+}
+
+// Slider maps [0,1] → log scale [nMin, nMax]
+document.getElementById('n-slider').addEventListener('input', function() {
+  const t = +this.value;
+  const n = Math.pow(10, Math.log10(nMin) + t * (Math.log10(nMax) - Math.log10(nMin)));
+  updateCursor(n);
+  updateTreePanel(n);
+});
+
+// ── recursion tree panel ──────────────────────────────────────────────────────
+function buildTreePanel(n_current) {
+  const bottomRow = document.getElementById('bottom-row');
+  bottomRow.innerHTML = '';
+
+  // Levels = ceil(log2(n)) but cap at 5 for display
+  const levels = Math.max(2, Math.min(5, Math.ceil(Math.log2(Math.max(2, n_current)))));
+  const naiveLeaves = Math.pow(4, levels);
+  const karaLeaves = Math.pow(3, levels);
+
+  // Panel
+  const panel = document.createElement('div');
+  panel.className = 'tree-panel';
+  panel.style.flex = '1';
+  panel.innerHTML = `<h3>Recursion trees at depth = ${levels}  (n ≈ ${Math.round(Math.pow(2, levels))} half-sizes per level)</h3>`;
+
+  const treesRow = document.createElement('div');
+  treesRow.className = 'trees-row';
+
+  // Build naive tree SVG
+  const naiveSVG = buildTreeSVG(levels, 4, '#545454', 'Naive: 4 calls/level');
+  const karaSVG = buildTreeSVG(levels, 3, '#C8102E', 'Karatsuba: 3 calls/level');
+
+  const naiveHalf = document.createElement('div');
+  naiveHalf.className = 'tree-half naive';
+  naiveHalf.innerHTML = `<h4>Naive: 4 branches</h4>`;
+  naiveHalf.appendChild(naiveSVG);
+  const naiveStat = document.createElement('div');
+  naiveStat.className = 'tree-stat';
+  naiveStat.innerHTML = `4<sup>${levels}</sup> = <strong>${naiveLeaves.toLocaleString()}</strong> leaves`;
+  naiveHalf.appendChild(naiveStat);
+
+  const karaHalf = document.createElement('div');
+  karaHalf.className = 'tree-half kara';
+  karaHalf.innerHTML = `<h4>Karatsuba: 3 branches</h4>`;
+  karaHalf.appendChild(karaSVG);
+  const karaStat = document.createElement('div');
+  karaStat.className = 'tree-stat';
+  karaStat.innerHTML = `3<sup>${levels}</sup> = <strong>${karaLeaves.toLocaleString()}</strong> leaves`;
+  karaHalf.appendChild(karaStat);
+
+  treesRow.appendChild(naiveHalf);
+
+  // VS divider
+  const vs = document.createElement('div');
+  vs.style.cssText = 'display:flex;align-items:center;font-size:16px;font-weight:700;color:#D4D4D4;padding-top:20px';
+  vs.textContent = 'vs';
+  treesRow.appendChild(vs);
+
+  treesRow.appendChild(karaHalf);
+  panel.appendChild(treesRow);
+
+  // Ratio
+  const ratio = naiveLeaves / karaLeaves;
+  const ratioDiv = document.createElement('div');
+  ratioDiv.style.cssText = 'text-align:center;margin-top:8px;font-size:11px;font-weight:700;color:#2A1A0E';
+  ratioDiv.innerHTML = `4<sup>${levels}</sup> / 3<sup>${levels}</sup> = (4/3)<sup>${levels}</sup> ≈ <span style="color:#C8102E">${ratio.toFixed(1)}× fewer leaf operations</span>`;
+  panel.appendChild(ratioDiv);
+
+  bottomRow.appendChild(panel);
+}
+
+function buildTreeSVG(levels, branches, color, title) {
+  const TW = 360, TH = 130;
+  const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svgEl.setAttribute('width', TW);
+  svgEl.setAttribute('height', TH);
+
+  // Draw tree level by level
+  // Each node at level d has x position spacing = TW / (branches^d + 1)
+  const nodeR = 5;
+  const levelH = Math.min(28, (TH - 10) / (levels + 1));
+
+  function drawLevel(parentNodes, depth) {
+    if (depth > levels) return;
+    const childNodes = [];
+    const spacing = TW / (parentNodes.length * branches + 1);
+    let idx = 0;
+    parentNodes.forEach(parent => {
+      for (let b = 0; b < branches; b++) {
+        const cx = spacing * (idx + 1);
+        const cy = 10 + depth * levelH;
+        idx++;
+        childNodes.push({ cx, cy });
+        // Line to parent
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', parent.cx);
+        line.setAttribute('y1', parent.cy);
+        line.setAttribute('x2', cx);
+        line.setAttribute('y2', cy);
+        line.setAttribute('stroke', color);
+        line.setAttribute('stroke-width', depth === levels ? '1' : '1.5');
+        line.setAttribute('opacity', '0.6');
+        svgEl.appendChild(line);
+        // Node (only draw if not too many)
+        if (Math.pow(branches, depth) <= 81) {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', cx);
+          circle.setAttribute('cy', cy);
+          circle.setAttribute('r', Math.max(2, nodeR - depth));
+          circle.setAttribute('fill', depth === levels ? color : '#FFFFFF');
+          circle.setAttribute('stroke', color);
+          circle.setAttribute('stroke-width', '1.5');
+          svgEl.appendChild(circle);
+        }
+      }
+    });
+    drawLevel(childNodes, depth + 1);
+  }
+
+  const root = { cx: TW / 2, cy: 10 };
+  // Root node
+  const rootCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  rootCircle.setAttribute('cx', root.cx); rootCircle.setAttribute('cy', root.cy);
+  rootCircle.setAttribute('r', nodeR); rootCircle.setAttribute('fill', '#FFFFFF');
+  rootCircle.setAttribute('stroke', color); rootCircle.setAttribute('stroke-width', '2');
+  svgEl.appendChild(rootCircle);
+
+  drawLevel([root], 1);
+
+  return svgEl;
+}
+
+let lastN = 100;
+function updateTreePanel(n) {
+  lastN = n;
+  buildTreePanel(n);
+}
+
+// Init
+updateCursor(100);
+buildTreePanel(100);
+</script>
+</body>
+</html>

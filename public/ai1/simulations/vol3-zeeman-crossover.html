@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeeman Crossover — Hydrogen 2p Manifold</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 24px;
+  }
+  .layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 980px;
+  }
+  #chart-area {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .side-panel {
+    flex: 0 0 220px;
+    border: 1px solid #E0D8D0;
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 13px;
+  }
+  .side-panel h2 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+    color: #545454;
+  }
+  .regime-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .regime-weak { background: #F0EBE5; color: #2A1A0E; }
+  .regime-pb { background: #C8102E; color: #fff; }
+  .energy-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid #F0EBE5;
+    font-size: 12px;
+  }
+  .energy-row:last-child { border-bottom: none; }
+  .state-label { font-weight: 600; color: #2A1A0E; }
+  .state-label.red { color: #C8102E; }
+  .energy-val { color: #545454; font-family: 'Courier New', monospace; font-size: 11px; }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 0;
+    width: 100%;
+    max-width: 980px;
+  }
+  .slider-row label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .slider-row input[type=range] {
+    flex: 1;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    min-width: 44px;
+    text-align: right;
+    color: #545454;
+  }
+  .axis text { fill: #545454; font-family: Inter, Helvetica, sans-serif; font-size: 11px; }
+  .axis line, .axis path { stroke: #C0B8B0; }
+  .tick line { stroke: #E8E2DC; }
+</style>
+</head>
+<body>
+
+<h1>Zeeman Crossover — Hydrogen 2<i>p</i> Manifold</h1>
+<p class="subtitle">Fine structure + external field: weak-field anomalous Zeeman → Paschen-Back regime</p>
+
+<div class="layout">
+  <div id="chart-area"></div>
+  <div class="side-panel">
+    <h2>Current B</h2>
+    <div id="regime-badge" class="regime-badge regime-weak">Weak field</div>
+    <div id="energy-table"></div>
+    <div style="margin-top:14px; font-size:11px; color:#545454; line-height:1.5;">
+      <b>6 states</b>: |j, m<sub>j</sub>⟩<br>
+      <span style="color:#C8102E">—</span> m<sub>j</sub> = +3/2 (j=3/2)<br>
+      <span>—</span> other j=3/2 states<br>
+      <span style="color:#545454">- -</span> j=1/2 states
+    </div>
+    <div style="margin-top:14px; font-size:11px; color:#545454; line-height:1.6;">
+      &Delta;E<sub>fs</sub> = 4.5×10⁻⁵ eV<br>
+      B<sub>c</sub> ≈ 0.78 T
+    </div>
+  </div>
+</div>
+
+<div class="slider-row">
+  <label for="B-slider">B field (T)</label>
+  <input type="range" id="B-slider" min="0" max="5" step="0.01" value="0.5">
+  <span class="slider-val" id="B-val">0.50 T</span>
+</div>
+
+<script>
+// ─── Physics constants ───────────────────────────────────────────────────────
+const muB   = 5.788e-5;   // eV/T
+const A     = 3e-5;       // eV  (spin-orbit coupling constant)
+const dEfs  = 4.5e-5;     // eV  (fine-structure splitting, = 3A/2)
+const Bc    = dEfs / muB; // ≈ 0.777 T
+
+// ─── Energy eigenvalues via analytic 2×2 diagonalisation ────────────────────
+// Uncoupled basis order: |+1,+½⟩, |+1,-½⟩, |0,+½⟩, |0,-½⟩, |-1,+½⟩, |-1,-½⟩
+// m_j blocks:
+//   m_j=+3/2 : only |+1,+½⟩     → E = A/2 + 2*muB*B
+//   m_j=-3/2 : only |-1,-½⟩     → E = A/2 - 2*muB*B
+//   m_j=+1/2 : |+1,-½⟩, |0,+½⟩  → 2×2
+//   m_j=-1/2 : |0,-½⟩,  |-1,+½⟩ → 2×2
+
+function eig2(a, b, c) {
+  // [[a, c], [c, b]] → eigenvalues low, high
+  const mid  = (a + b) / 2;
+  const half = Math.sqrt(((a - b) / 2) ** 2 + c * c);
+  return [mid - half, mid + half];
+}
+
+function computeEigenvalues(B) {
+  const z = muB * B;
+
+  // m_j = +3/2
+  const E1 = A / 2 + 2 * z;
+
+  // m_j = -3/2
+  const E6 = A / 2 - 2 * z;
+
+  // m_j = +1/2 block
+  // H_11 = -A/2 + 0*z (state |+1,-½⟩, m_ℓ+2m_s = 1-1 = 0)
+  // H_22 = 0   + 1*z (state |0,+½⟩,  m_ℓ+2m_s = 0+1 = 1)
+  // H_12 = A*√2/2
+  const [E_low_p, E_high_p] = eig2(-A / 2, z, A * Math.SQRT2 / 2);
+
+  // m_j = -1/2 block
+  // H_11 = 0   + (-1)*z (state |0,-½⟩,  m_ℓ+2m_s = -1)
+  // H_22 = -A/2 + 0*z  (state |-1,+½⟩, m_ℓ+2m_s = 0)
+  // H_12 = A*√2/2
+  const [E_low_m, E_high_m] = eig2(-z, -A / 2, A * Math.SQRT2 / 2);
+
+  // Return sorted: lowest to highest (at B=0 order: high_m=-A, low_p=-A, low_m=-A, high_p=A/2, E6=A/2, E1=A/2)
+  // Label by m_j for display
+  return [
+    { E: E6,      mj: '-3/2', j: '3/2', key: 'mj_m32' },
+    { E: E_low_m, mj: '-1/2', j: '1/2', key: 'mj_m12_lo' },
+    { E: E_low_p, mj: '+1/2', j: '1/2', key: 'mj_p12_lo' },
+    { E: E_high_m,mj: '-1/2', j: '3/2', key: 'mj_m12_hi' },
+    { E: E_high_p,mj: '+1/2', j: '3/2', key: 'mj_p12_hi' },
+    { E: E1,      mj: '+3/2', j: '3/2', key: 'mj_p32' },
+  ];
+}
+
+// ─── Precompute curves over B = 0…5T ─────────────────────────────────────────
+const N_B   = 300;
+const B_max = 5;
+const Bvals = d3.range(N_B + 1).map(i => i * B_max / N_B);
+
+// curves[stateIdx] = array of {B, E}
+const stateKeys = ['mj_m32','mj_m12_lo','mj_p12_lo','mj_m12_hi','mj_p12_hi','mj_p32'];
+const curves = {};
+stateKeys.forEach(k => { curves[k] = []; });
+
+Bvals.forEach(B => {
+  const states = computeEigenvalues(B);
+  states.forEach(s => curves[s.key].push({ B, E: s.E }));
+});
+
+// ─── SVG setup ───────────────────────────────────────────────────────────────
+const margin = { top: 36, right: 24, bottom: 50, left: 70 };
+const W = 620, H = 420;
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top  - margin.bottom;
+
+const svg = d3.select('#chart-area')
+  .append('svg')
+  .attr('width', W).attr('height', H)
+  .style('display', 'block');
+
+const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().domain([0, B_max]).range([0, innerW]);
+const yScale = d3.scaleLinear().domain([-5e-4, 5e-4]).range([innerH, 0]);
+
+// Grid
+g.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yScale).tickSize(-innerW).ticks(8).tickFormat(''))
+  .call(gg => gg.selectAll('line').attr('stroke', '#F0EBE5').attr('stroke-dasharray', '2,2'))
+  .call(gg => gg.select('.domain').remove());
+
+// Axes
+g.append('g').attr('class', 'axis')
+  .attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xScale).ticks(10))
+  .call(ax => ax.append('text')
+    .attr('x', innerW / 2).attr('y', 38)
+    .attr('fill', '#2A1A0E').attr('font-weight', 600).attr('font-size', 13)
+    .text('B  (T)'));
+
+g.append('g').attr('class', 'axis')
+  .call(d3.axisLeft(yScale).tickFormat(d => (d * 1e5).toFixed(1)))
+  .call(ax => ax.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -innerH / 2).attr('y', -54)
+    .attr('fill', '#2A1A0E').attr('font-weight', 600).attr('font-size', 13)
+    .attr('text-anchor', 'middle')
+    .text('Energy  (×10⁻⁵ eV)'));
+
+// Fine-structure guide lines
+[-dEfs / 2, dEfs / 2].forEach(E => {
+  g.append('line')
+    .attr('x1', 0).attr('x2', innerW)
+    .attr('y1', yScale(E)).attr('y2', yScale(E))
+    .attr('stroke', '#C0B8B0').attr('stroke-dasharray', '6,4').attr('stroke-width', 1);
+});
+
+// Crossover marker
+g.append('line')
+  .attr('x1', xScale(Bc)).attr('x2', xScale(Bc))
+  .attr('y1', 0).attr('y2', innerH)
+  .attr('stroke', '#C8102E').attr('stroke-dasharray', '8,4')
+  .attr('stroke-width', 1).attr('opacity', 0.6);
+
+g.append('text')
+  .attr('x', xScale(Bc) + 4).attr('y', 14)
+  .attr('fill', '#C8102E').attr('font-size', 11).attr('font-weight', 600)
+  .text('Bc ≈ 0.78 T');
+
+// Regime labels
+g.append('text')
+  .attr('x', xScale(0.3)).attr('y', yScale(-4.2e-4))
+  .attr('fill', '#545454').attr('font-size', 11).attr('text-anchor', 'middle')
+  .text('Anomalous Zeeman');
+
+g.append('text')
+  .attr('x', xScale(3.5)).attr('y', yScale(-4.2e-4))
+  .attr('fill', '#545454').attr('font-size', 11).attr('text-anchor', 'middle')
+  .text('Paschen-Back');
+
+// ─── Draw energy curves ───────────────────────────────────────────────────────
+const lineGen = d3.line()
+  .x(d => xScale(d.B))
+  .y(d => yScale(d.E))
+  .curve(d3.curveCatmullRom.alpha(0.5));
+
+const curveColors = {
+  mj_p32:    '#C8102E',   // RED accent for m_j=+3/2
+  mj_p12_hi: '#2A1A0E',
+  mj_m12_hi: '#2A1A0E',
+  mj_m32:    '#2A1A0E',
+  mj_p12_lo: '#545454',
+  mj_m12_lo: '#545454',
+};
+const curveDash = {
+  mj_p12_lo: '5,3',
+  mj_m12_lo: '5,3',
+};
+
+stateKeys.forEach(k => {
+  g.append('path')
+    .datum(curves[k])
+    .attr('class', `curve-${k}`)
+    .attr('fill', 'none')
+    .attr('stroke', curveColors[k])
+    .attr('stroke-width', k === 'mj_p32' ? 2.2 : 1.6)
+    .attr('stroke-dasharray', curveDash[k] || null)
+    .attr('d', lineGen);
+});
+
+// ─── Dots at current B ────────────────────────────────────────────────────────
+const dotGroup = g.append('g');
+
+function updateDots(B) {
+  const states = computeEigenvalues(B);
+  const dots = dotGroup.selectAll('.dot').data(states, d => d.key);
+
+  dots.join(
+    enter => enter.append('circle')
+      .attr('class', 'dot')
+      .attr('r', 5)
+      .attr('stroke', '#FFFFFF')
+      .attr('stroke-width', 1.5),
+    update => update,
+    exit => exit.remove()
+  )
+    .attr('cx', xScale(B))
+    .attr('cy', d => yScale(d.E))
+    .attr('fill', d => d.key === 'mj_p32' ? '#C8102E' : '#2A1A0E');
+}
+
+// ─── Side panel updater ───────────────────────────────────────────────────────
+const stateLabels = {
+  mj_p32:    '|3/2, +3/2⟩',
+  mj_p12_hi: '|3/2, +1/2⟩',
+  mj_m12_hi: '|3/2, -1/2⟩',
+  mj_m32:    '|3/2, -3/2⟩',
+  mj_p12_lo: '|1/2, +1/2⟩',
+  mj_m12_lo: '|1/2, -1/2⟩',
+};
+
+function updatePanel(B) {
+  const states = computeEigenvalues(B);
+  const isWeak = B < Bc;
+
+  const badge = document.getElementById('regime-badge');
+  badge.className = 'regime-badge ' + (isWeak ? 'regime-weak' : 'regime-pb');
+  badge.textContent = isWeak ? 'Weak field (Zeeman)' : 'Paschen-Back';
+
+  const table = document.getElementById('energy-table');
+  table.innerHTML = '';
+
+  const sorted = [...states].sort((a, b) => b.E - a.E);
+  sorted.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'energy-row';
+    row.innerHTML = `
+      <span class="state-label${s.key === 'mj_p32' ? ' red' : ''}">${stateLabels[s.key]}</span>
+      <span class="energy-val">${(s.E * 1e5).toFixed(2)}</span>
+    `;
+    table.appendChild(row);
+  });
+
+  const unit = document.createElement('div');
+  unit.style.cssText = 'font-size:10px;color:#999;margin-top:3px;text-align:right;';
+  unit.textContent = '×10⁻⁵ eV';
+  table.appendChild(unit);
+}
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+const slider = document.getElementById('B-slider');
+const bVal   = document.getElementById('B-val');
+
+function update(B) {
+  bVal.textContent = B.toFixed(2) + ' T';
+  updateDots(B);
+  updatePanel(B);
+}
+
+slider.addEventListener('input', () => update(+slider.value));
+update(0.5);
+</script>
+</body>
+</html>

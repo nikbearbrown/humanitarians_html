@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<!-- SIM 4 — Moser's Circle
+     Regions(n) = 1 + C(n,2) + C(n,4).
+     n=5→16, n=6→31 (not 32).
+     Euler's formula V - E + F = 2, inner regions = F - 1.
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moser's Circle</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: var(--slate); margin: 0 0 20px; }
+  #main-row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  #circle-area { flex: 0 0 420px; }
+  #side-panel { flex: 1; min-width: 260px; }
+  #controls {
+    display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    align-items: center;
+  }
+  button {
+    padding: 6px 16px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: #F6D8DC; }
+  button#reset-btn { border-color: var(--slate); color: var(--slate); }
+  .hint { font-size: 12px; color: var(--slate); margin-bottom: 12px; }
+  #circle-svg { display: block; cursor: crosshair; }
+  .counter-row { display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
+  .counter-box {
+    border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 12px 16px; flex: 1; min-width: 140px;
+  }
+  .counter-label { font-size: 11px; color: var(--slate); text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 600; margin-bottom: 2px; }
+  .counter-val {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 32px; font-weight: 700; line-height: 1;
+  }
+  .counter-val.diverge { color: var(--red); }
+  .counter-sub { font-size: 11px; color: var(--slate); margin-top: 2px; }
+  /* Pascal triangle */
+  #pascal-section { margin-top: 16px; }
+  .section-title { font-size: 12px; color: var(--slate); text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 600; margin-bottom: 8px; }
+  #pascal-table { border-collapse: collapse; font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; }
+  #pascal-table td {
+    width: 32px; height: 26px; text-align: center;
+    border: 1px solid transparent; border-radius: 3px;
+    color: var(--slate);
+  }
+  #pascal-table td.hl-c2 { background: #F6D8DC; color: var(--red); font-weight: 700; }
+  #pascal-table td.hl-c4 { background: #C8102E22; color: var(--red); font-weight: 700; }
+  #pascal-table td.hl-row { color: var(--ink); }
+  #n-display { font-size: 13px; color: var(--slate); margin-bottom: 8px; }
+  #formula-box {
+    background: #FAFAFA; border: 1px solid var(--border);
+    border-radius: 3px; padding: 10px 14px;
+    font-size: 12px; color: var(--slate);
+    margin-bottom: 12px; line-height: 1.8;
+  }
+  #formula-box .formula {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: var(--ink); font-size: 13px;
+  }
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 20px; padding-top: 14px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Moser's Circle Problem</h1>
+  <p class="sub">
+    How many regions does a circle divide into when n points on its boundary are connected by all chords?
+    The answer follows a pattern — until it doesn't.
+  </p>
+
+  <div id="main-row">
+    <div id="circle-area">
+      <div id="controls">
+        <button id="add-btn">Place Next Point</button>
+        <button id="reset-btn">Reset</button>
+        <span style="font-size:13px;color:var(--slate);">or click the circle</span>
+      </div>
+      <p class="hint">Click on the circle boundary (or use the button) to place points. Max 10.</p>
+      <svg id="circle-svg" width="420" height="420"></svg>
+    </div>
+
+    <div id="side-panel">
+      <div id="n-display">n = 0 points</div>
+      <div class="counter-row">
+        <div class="counter-box">
+          <div class="counter-label">Predicted 2^(n−1)</div>
+          <div class="counter-val" id="pred-val">—</div>
+          <div class="counter-sub" id="pred-sub"></div>
+        </div>
+        <div class="counter-box">
+          <div class="counter-label">Actual Regions</div>
+          <div class="counter-val" id="actual-val">1</div>
+          <div class="counter-sub" id="actual-sub"></div>
+        </div>
+      </div>
+
+      <div id="formula-box">
+        <div class="formula">R(n) = 1 + C(n,2) + C(n,4)</div>
+        <div id="formula-expanded" style="color:var(--slate);font-size:11px;margin-top:4px;"></div>
+      </div>
+
+      <div id="pascal-section">
+        <div class="section-title">Pascal's Triangle — C(n,2) and C(n,4) highlighted</div>
+        <table id="pascal-table"></table>
+      </div>
+
+      <div style="margin-top:16px;font-size:13px;color:var(--slate);">
+        <strong style="color:var(--ink)">Method:</strong>
+        Euler's formula V − E + F = 2.
+        Count chord intersections (V), chord segments between them (E), apply formula.
+        Inner regions = F − 1.
+      </div>
+    </div>
+  </div>
+
+  <div id="predictions">
+    <div class="pred">
+      <strong>P1:</strong> n=5 → 16 regions (matches 2<sup>4</sup> = 16). Formula: 1+10+5 = 16 ✓
+    </div>
+    <div class="pred">
+      <strong>P2:</strong> n=6 → 31 regions (NOT 32). Formula: 1+C(6,2)+C(6,4) = 1+15+15 = 31.
+      <span style="color:var(--red);font-weight:700">First failure of the power-of-2 pattern.</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+const CX = 210, CY = 210, R = 180;
+const EPS = 1e-9;
+const MAX_POINTS = 10;
+
+let points = []; // angles on circle
+
+// Pre-jittered placement positions to avoid 3-concurrent chords
+// We place points at specific angles that guarantee generic position
+const PRESET_ANGLES = [
+  0.00, 1.13, 2.31, 3.57, 4.93, 0.47, 1.91, 3.12, 4.44, 5.77
+];
+
+function choose(n, k) {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  let r = 1;
+  for (let i = 0; i < k; i++) {
+    r = r * (n - i) / (i + 1);
+  }
+  return Math.round(r);
+}
+
+function formulaRegions(n) {
+  return 1 + choose(n, 2) + choose(n, 4);
+}
+
+// Intersection of two line segments (p1,p2) and (p3,p4)
+// Returns intersection point or null
+function segIntersect(p1, p2, p3, p4) {
+  const d1x = p2.x - p1.x, d1y = p2.y - p1.y;
+  const d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+  const cross = d1x * d2y - d1y * d2x;
+  if (Math.abs(cross) < EPS) return null; // parallel
+  const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / cross;
+  const u = ((p3.x - p1.x) * d1y - (p3.y - p1.y) * d1x) / cross;
+  if (t > EPS && t < 1 - EPS && u > EPS && u < 1 - EPS) {
+    return { x: p1.x + t * d1x, y: p1.y + t * d1y };
+  }
+  return null;
+}
+
+// Count regions using Euler's formula on the planar graph
+// V = n (boundary) + interior intersections
+// E = sum of (segments per chord), computed from intersections along each chord
+// F = 2 + E - V (Euler: V - E + F = 2)
+// Inner regions = F - 1
+function countRegions(pts) {
+  const n = pts.length;
+  if (n < 2) return 1;
+
+  // Get all chord pairs
+  const chords = [];
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      chords.push([i, j]);
+    }
+  }
+
+  // Find all interior intersection points
+  const interiorPts = [];
+  for (let a = 0; a < chords.length; a++) {
+    for (let b = a + 1; b < chords.length; b++) {
+      const [i, j] = chords[a];
+      const [k, l] = chords[b];
+      // Chords share an endpoint? Skip
+      if (i === k || i === l || j === k || j === l) continue;
+      const pt = segIntersect(pts[i], pts[j], pts[k], pts[l]);
+      if (pt) interiorPts.push(pt);
+    }
+  }
+
+  // Deduplicate interior points (within EPS)
+  const uniqueInt = [];
+  interiorPts.forEach(p => {
+    const dup = uniqueInt.some(q => Math.hypot(q.x - p.x, q.y - p.y) < 1e-6);
+    if (!dup) uniqueInt.push(p);
+  });
+
+  const V = n + uniqueInt.length;
+
+  // Count edges: for each chord, count how many interior points lie on it
+  // Each chord with k interior points contributes k+1 segments
+  let E = 0;
+  chords.forEach(([i, j]) => {
+    let count = 0;
+    uniqueInt.forEach(p => {
+      // Is p on segment pts[i]..pts[j]?
+      const dx = pts[j].x - pts[i].x, dy = pts[j].y - pts[i].y;
+      const len2 = dx*dx + dy*dy;
+      const t = ((p.x - pts[i].x)*dx + (p.y - pts[i].y)*dy) / len2;
+      if (t > EPS && t < 1 - EPS) {
+        const px = pts[i].x + t*dx, py = pts[i].y + t*dy;
+        if (Math.hypot(px - p.x, py - p.y) < 1e-6) count++;
+      }
+    });
+    E += count + 1;
+  });
+
+  // Also count the boundary arcs of the circle between consecutive boundary points
+  // Each arc is an edge (n arcs total for n points on circle)
+  E += n;
+
+  // Euler: V - E + F = 2 (including outer face)
+  const F = 2 + E - V;
+  const inner = F - 1; // subtract outer face
+  return Math.max(1, inner);
+}
+
+// SVG setup
+const svg = d3.select('#circle-svg');
+
+// Circle
+svg.append('circle')
+  .attr('cx', CX).attr('cy', CY).attr('r', R)
+  .attr('fill', '#FAFAFA').attr('stroke', INK).attr('stroke-width', 2)
+  .style('cursor', 'crosshair')
+  .on('click', function(event) {
+    if (points.length >= MAX_POINTS) return;
+    const [mx, my] = d3.pointer(event);
+    const dx = mx - CX, dy = my - CY;
+    const angle = Math.atan2(dy, dx);
+    addPoint(angle);
+  });
+
+const chordGroup = svg.append('g').attr('id', 'chords');
+const intersectGroup = svg.append('g').attr('id', 'intersects');
+const pointGroup = svg.append('g').attr('id', 'point-marks');
+const labelGroup = svg.append('g').attr('id', 'point-labels');
+
+function ptFromAngle(angle) {
+  return { x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle) };
+}
+
+function addPoint(angle) {
+  if (points.length >= MAX_POINTS) return;
+  points.push(angle);
+  redraw();
+}
+
+function redraw() {
+  const n = points.length;
+  const pts = points.map(a => ptFromAngle(a));
+
+  // Clear
+  chordGroup.selectAll('*').remove();
+  intersectGroup.selectAll('*').remove();
+  pointGroup.selectAll('*').remove();
+  labelGroup.selectAll('*').remove();
+
+  // Draw chords
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 1; j < n; j++) {
+      chordGroup.append('line')
+        .attr('x1', pts[i].x).attr('y1', pts[i].y)
+        .attr('x2', pts[j].x).attr('y2', pts[j].y)
+        .attr('stroke', SLATE).attr('stroke-width', 1)
+        .attr('opacity', 0.5);
+    }
+  }
+
+  // Draw intersection dots
+  const interiorPts = [];
+  for (let a = 0; a < n; a++) {
+    for (let b = a + 1; b < n; b++) {
+      for (let c = a + 1; c < n; c++) {
+        for (let d = c + 1; d < n; d++) {
+          if (a === c || a === d || b === c || b === d) continue;
+          const pt = segIntersect(pts[a], pts[b], pts[c], pts[d]);
+          if (pt) {
+            const dup = interiorPts.some(q => Math.hypot(q.x - pt.x, q.y - pt.y) < 1e-6);
+            if (!dup) interiorPts.push(pt);
+          }
+        }
+      }
+    }
+  }
+
+  interiorPts.forEach(p => {
+    intersectGroup.append('circle')
+      .attr('cx', p.x).attr('cy', p.y).attr('r', 2.5)
+      .attr('fill', SLATE).attr('opacity', 0.6);
+  });
+
+  // Draw boundary points
+  pts.forEach((p, i) => {
+    pointGroup.append('circle')
+      .attr('cx', p.x).attr('cy', p.y).attr('r', 6)
+      .attr('fill', RED).attr('stroke', '#fff').attr('stroke-width', 1.5);
+    const lx = CX + (R + 18) * Math.cos(points[i]);
+    const ly = CY + (R + 18) * Math.sin(points[i]);
+    labelGroup.append('text')
+      .attr('x', lx).attr('y', ly + 4)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 12).attr('font-weight', 700)
+      .attr('fill', INK).attr('font-family', 'Inter,sans-serif')
+      .text(i + 1);
+  });
+
+  // Compute regions
+  const actual = countRegions(pts);
+  const predicted = n > 0 ? Math.pow(2, n - 1) : 1;
+  const formula = formulaRegions(n);
+
+  // Update displays
+  document.getElementById('n-display').textContent = `n = ${n} point${n !== 1 ? 's' : ''}`;
+  document.getElementById('pred-val').textContent = n > 0 ? predicted : '—';
+  document.getElementById('pred-sub').textContent = n > 0 ? `= 2^${n-1}` : '';
+  document.getElementById('actual-val').textContent = actual;
+  document.getElementById('actual-sub').textContent = `formula: 1+C(${n},2)+C(${n},4) = ${formula}`;
+
+  const actualEl = document.getElementById('actual-val');
+  const predEl = document.getElementById('pred-val');
+  if (n >= 6 && actual !== predicted) {
+    actualEl.className = 'counter-val diverge';
+    predEl.className = 'counter-val diverge';
+  } else {
+    actualEl.className = 'counter-val';
+    predEl.className = 'counter-val';
+  }
+
+  // Formula expansion
+  const c2 = choose(n, 2), c4 = choose(n, 4);
+  document.getElementById('formula-expanded').textContent =
+    n > 0 ? `1 + C(${n},2) + C(${n},4) = 1 + ${c2} + ${c4} = ${1+c2+c4}` : '';
+
+  // Pascal triangle
+  buildPascal(n);
+}
+
+function buildPascal(currentN) {
+  const table = document.getElementById('pascal-table');
+  table.innerHTML = '';
+  const maxRow = Math.max(8, currentN + 1);
+  for (let row = 0; row <= Math.min(maxRow, 9); row++) {
+    const tr = document.createElement('tr');
+    // Padding
+    for (let pad = 0; pad < Math.min(maxRow, 9) - row; pad++) {
+      const td = document.createElement('td'); tr.appendChild(td);
+    }
+    for (let col = 0; col <= row; col++) {
+      const td = document.createElement('td');
+      const val = choose(row, col);
+      td.textContent = val;
+      if (row === currentN) td.classList.add('hl-row');
+      if (row === currentN && col === 2) td.classList.add('hl-c2');
+      if (row === currentN && col === 4) td.classList.add('hl-c4');
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+}
+
+document.getElementById('add-btn').addEventListener('click', () => {
+  if (points.length >= MAX_POINTS) return;
+  const angle = PRESET_ANGLES[points.length];
+  addPoint(angle);
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  points = [];
+  redraw();
+});
+
+// Initial draw
+redraw();
+</script>
+</body>
+</html>

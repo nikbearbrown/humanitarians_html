@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Bloch Sphere Qubit Explorer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:#2A1A0E;font-family:'Inter',Helvetica,sans-serif;padding:24px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.sub{font-size:13px;color:#545454;margin-top:4px;margin-bottom:16px}
+.gates{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+button{padding:6px 16px;font-size:13px;font-weight:700;border:1.5px solid #2A1A0E;background:#fff;color:#2A1A0E;cursor:pointer;border-radius:3px;letter-spacing:.3px}
+button:hover{background:#2A1A0E;color:#fff}
+button.red{border-color:#C8102E;color:#C8102E}
+button.red:hover{background:#C8102E;color:#fff}
+.gate-sep{width:1px;height:24px;background:#ddd}
+.panels{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.panel{flex:1;min-width:280px}
+.ptitle{font-size:11px;font-weight:700;color:#545454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+svg{display:block}
+.rdout{font-size:12px;color:#545454;margin-top:10px;line-height:1.8}
+.rdout b{color:#C8102E}
+.bar-row{display:flex;align-items:center;gap:8px;margin:5px 0}
+.bar-label{font-size:12px;color:#545454;width:56px;text-align:right}
+.bar-bg{height:18px;background:#f0ece4;border-radius:2px;flex:1;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.bar-val{font-size:12px;color:#2A1A0E;width:44px}
+.info{background:#fff8f5;border-left:3px solid #C8102E;padding:8px 12px;font-size:11px;margin-top:12px;line-height:1.7}
+.seq{font-size:13px;font-weight:700;letter-spacing:1.5px;margin-top:4px;min-height:22px;color:#2A1A0E;word-break:break-all}
+</style>
+</head>
+<body>
+<h1>Bloch Sphere Qubit Explorer</h1>
+<div class="sub">Quantum gates rotate the Bloch vector. X Y Z are π-rotations. H swaps poles. S T are z-rotations by π/2 and π/4.</div>
+
+<div class="gates">
+  <button onclick="applyGate('X')">X</button>
+  <button onclick="applyGate('Y')">Y</button>
+  <button onclick="applyGate('Z')">Z</button>
+  <div class="gate-sep"></div>
+  <button onclick="applyGate('H')">H</button>
+  <button onclick="applyGate('S')">S</button>
+  <button onclick="applyGate('T')">T</button>
+  <div class="gate-sep"></div>
+  <button class="red" onclick="resetState()">Reset |0⟩</button>
+  <button onclick="clearPath()">Clear path</button>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="ptitle">Bloch Sphere</div>
+    <svg id="svgBloch" width="340" height="360"></svg>
+    <div class="rdout">
+      θ = <b id="rTheta">0.0°</b> &nbsp;|&nbsp; φ = <b id="rPhi">0.0°</b><br>
+      State: <b id="rState">|0⟩</b>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">Measurement Probabilities</div>
+    <div style="margin-top:16px">
+      <div class="bar-row"><div class="bar-label">P(|0⟩)</div><div class="bar-bg"><div class="bar-fill" id="bP0" style="background:#2A1A0E;width:100%"></div></div><div class="bar-val" id="bvP0">1.000</div></div>
+      <div class="bar-row"><div class="bar-label">P(|1⟩)</div><div class="bar-bg"><div class="bar-fill" id="bP1" style="background:#C8102E;width:0%"></div></div><div class="bar-val" id="bvP1">0.000</div></div>
+      <div class="bar-row"><div class="bar-label">P(|+⟩)</div><div class="bar-bg"><div class="bar-fill" id="bPp" style="background:#545454;width:50%"></div></div><div class="bar-val" id="bvPp">0.500</div></div>
+      <div class="bar-row"><div class="bar-label">P(|−⟩)</div><div class="bar-bg"><div class="bar-fill" id="bPm" style="background:#545454;width:50%"></div></div><div class="bar-val" id="bvPm">0.500</div></div>
+    </div>
+    <div class="ptitle" style="margin-top:18px">Gate sequence</div>
+    <div class="seq" id="gateSeq">—</div>
+    <div class="info">
+      <b>H² = I</b>: two Hadamards return to start<br>
+      <b>S² = Z</b>: two quarter-turns = one half-turn<br>
+      <b>Z = H·X·H</b>: H conjugates X to Z<br>
+      <b>T⁴ = Z</b>: four T-gates = π rotation
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Orthographic projection: AZ=30°, EL=25°
+const AZ = 30 * Math.PI / 180;
+const EL = 25 * Math.PI / 180;
+const CX = 170, CY = 185, R = 130;
+
+function proj(x3, y3, z3) {
+  const xs = x3 * Math.cos(AZ) - y3 * Math.sin(AZ);
+  const yd = x3 * Math.sin(AZ) + y3 * Math.cos(AZ);
+  const ys = -z3 * Math.cos(EL) + yd * Math.sin(EL);
+  return [CX + xs * R, CY + ys * R];
+}
+
+// depth into screen (positive = in front)
+function depth(x3, y3) { return x3 * Math.sin(AZ) + y3 * Math.cos(AZ); }
+
+const svg = d3.select('#svgBloch').attr('width', 340).attr('height', 360);
+const defs = svg.append('defs');
+const grad = defs.append('radialGradient').attr('id', 'sGrad').attr('cx', '35%').attr('cy', '30%');
+grad.append('stop').attr('offset', '0%').attr('stop-color', '#f8f4ee');
+grad.append('stop').attr('offset', '100%').attr('stop-color', '#ddd6c8');
+
+// Equator minor radius in screen coords
+const ry_eq = R * Math.sin(EL);
+
+// ── Draw order: back → sphere fill (covers) → front → dynamic
+
+// Back equator arc (dashed, upper half of the ellipse = back side)
+svg.append('path')
+  .attr('d', `M ${CX + R},${CY} A ${R},${ry_eq},0,0,0,${CX - R},${CY}`)
+  .attr('fill', 'none').attr('stroke', '#ccc').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,2');
+
+// Back axes: x− y− z−
+[[-1,0,0],[0,-1,0],[0,0,-1]].forEach(([a,b,c]) => {
+  const [px, py] = proj(a, b, c);
+  svg.append('line').attr('x1',CX).attr('y1',CY).attr('x2',px).attr('y2',py)
+    .attr('stroke','#ddd').attr('stroke-width',1).attr('stroke-dasharray','3,2');
+});
+
+// Sphere fill (covers back elements)
+svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', R)
+  .attr('fill', 'url(#sGrad)').attr('stroke', '#c0b8b0').attr('stroke-width', 1.5);
+
+// Front equator arc (solid, lower half)
+svg.append('path')
+  .attr('d', `M ${CX + R},${CY} A ${R},${ry_eq},0,0,1,${CX - R},${CY}`)
+  .attr('fill', 'none').attr('stroke', '#aaa').attr('stroke-width', 1.2);
+
+// Front axes: x+ y+ z+
+[
+  {v:[1,0,0], lbl:'x', color:'#888'},
+  {v:[0,1,0], lbl:'y', color:'#888'},
+  {v:[0,0,1], lbl:'z', color:'#545454', w:1.5}
+].forEach(({v, lbl, color, w=1.2}) => {
+  const [px, py] = proj(...v);
+  svg.append('line').attr('x1',CX).attr('y1',CY).attr('x2',px).attr('y2',py)
+    .attr('stroke',color).attr('stroke-width',w);
+  const [lx, ly] = proj(v[0]*1.15, v[1]*1.15, v[2]*1.15);
+  svg.append('text').attr('x',lx).attr('y',ly).attr('dy','0.35em')
+    .attr('text-anchor','middle').attr('font-size',10).attr('fill',color).text(lbl);
+});
+
+// Pole labels
+const p0 = proj(0,0,1.12), p1 = proj(0,0,-1.12);
+svg.append('text').attr('x',p0[0]+5).attr('y',p0[1]).attr('dy','0.35em').attr('font-size',10).attr('fill','#545454').text('|0⟩');
+svg.append('text').attr('x',p1[0]+5).attr('y',p1[1]).attr('dy','0.35em').attr('font-size',10).attr('fill','#545454').text('|1⟩');
+const pp = proj(1.12,0,0), pm = proj(-1.12,0,0);
+svg.append('text').attr('x',pp[0]).attr('y',pp[1]-8).attr('text-anchor','middle').attr('font-size',9).attr('fill','#888').text('|+⟩');
+svg.append('text').attr('x',pm[0]).attr('y',pm[1]-8).attr('text-anchor','middle').attr('font-size',9).attr('fill','#888').text('|−⟩');
+
+// Path polyline and vector (dynamic, drawn on top)
+const pathLine = svg.append('path').attr('fill','none').attr('stroke','#C8102E')
+  .attr('stroke-width',1.5).attr('opacity',0.65);
+const vecLine = svg.append('line').attr('x1',CX).attr('y1',CY)
+  .attr('stroke','#2A1A0E').attr('stroke-width',2.5);
+const vecDot = svg.append('circle').attr('r',8).attr('fill','#C8102E')
+  .attr('stroke','#fff').attr('stroke-width',2.5);
+
+// ─── State and gate logic
+let rx=0, ry=0, rz=1; // |0⟩
+let pathPts=[[0,0,1]];
+let gateSeq=[];
+
+const GATES = {
+  X: (x,y,z) => [x,-y,-z],
+  Y: (x,y,z) => [-x,y,-z],
+  Z: (x,y,z) => [-x,-y,z],
+  H: (x,y,z) => [z,-y,x],
+  S: (x,y,z) => [-y,x,z],
+  T: (x,y,z) => [(x-y)*Math.SQRT1_2, (x+y)*Math.SQRT1_2, z]
+};
+
+function applyGate(name) {
+  [rx,ry,rz] = GATES[name](rx,ry,rz);
+  const r = Math.sqrt(rx*rx+ry*ry+rz*rz);
+  if(r>1e-12){rx/=r;ry/=r;rz/=r;}
+  pathPts.push([rx,ry,rz]);
+  gateSeq.push(name);
+  if(gateSeq.length>28) gateSeq.shift();
+  renderState();
+}
+
+function resetState(){rx=0;ry=0;rz=1;pathPts=[[0,0,1]];gateSeq=[];renderState();}
+function clearPath(){pathPts=[[rx,ry,rz]];renderState();}
+
+function renderState(){
+  const r=Math.sqrt(rx*rx+ry*ry+rz*rz);
+  const theta=Math.acos(Math.max(-1,Math.min(1,rz/Math.max(r,1e-12))));
+  const phi=Math.atan2(ry,rx);
+
+  document.getElementById('rTheta').textContent=(theta*180/Math.PI).toFixed(1)+'°';
+  document.getElementById('rPhi').textContent=(phi*180/Math.PI).toFixed(1)+'°';
+
+  let lbl='superposition';
+  if(rz>0.999) lbl='|0⟩';
+  else if(rz<-0.999) lbl='|1⟩';
+  else if(rx>0.999) lbl='|+⟩';
+  else if(rx<-0.999) lbl='|−⟩';
+  else if(ry>0.999) lbl='|i+⟩';
+  else if(ry<-0.999) lbl='|i−⟩';
+  document.getElementById('rState').textContent=lbl;
+
+  const P0=0.5*(1+rz), P1=0.5*(1-rz);
+  const Pp=0.5*(1+rx), Pm=0.5*(1-rx);
+  document.getElementById('bP0').style.width=(P0*100)+'%';
+  document.getElementById('bvP0').textContent=P0.toFixed(3);
+  document.getElementById('bP1').style.width=(P1*100)+'%';
+  document.getElementById('bvP1').textContent=P1.toFixed(3);
+  document.getElementById('bPp').style.width=(Pp*100)+'%';
+  document.getElementById('bvPp').textContent=Pp.toFixed(3);
+  document.getElementById('bPm').style.width=(Pm*100)+'%';
+  document.getElementById('bvPm').textContent=Pm.toFixed(3);
+
+  document.getElementById('gateSeq').textContent=gateSeq.length?gateSeq.join(' '):'—';
+
+  const [ex,ey]=proj(rx,ry,rz);
+  vecLine.attr('x2',ex).attr('y2',ey);
+  vecDot.attr('cx',ex).attr('cy',ey);
+
+  if(pathPts.length>1){
+    const pts2d=pathPts.map(([x,y,z])=>proj(x,y,z));
+    pathLine.attr('d',d3.line().x(d=>d[0]).y(d=>d[1])(pts2d));
+  } else {
+    pathLine.attr('d','');
+  }
+}
+
+renderState();
+
+// ─── Testable predictions
+// P1: H²=I — apply H twice to |0⟩ → must return to |0⟩
+let [tx,ty,tz]=GATES.H(0,0,1);
+[tx,ty,tz]=GATES.H(tx,ty,tz);
+console.assert(Math.abs(tx)+Math.abs(ty)+Math.abs(tz-1)<1e-9,'P1: H²=I failed: '+[tx,ty,tz]);
+// P2: S²=Z on |+⟩=(1,0,0)
+let [sx,sy,sz]=GATES.S(1,0,0);
+[sx,sy,sz]=GATES.S(sx,sy,sz);
+const [zx,zy,zz]=GATES.Z(1,0,0);
+console.assert(Math.abs(sx-zx)+Math.abs(sy-zy)+Math.abs(sz-zz)<1e-9,'P2: S²=Z failed');
+// P3: T⁴=Z on |+⟩
+let [t4x,t4y,t4z]=[1,0,0];
+for(let i=0;i<4;i++) [t4x,t4y,t4z]=GATES.T(t4x,t4y,t4z);
+console.assert(Math.abs(t4x-zx)+Math.abs(t4y-zy)+Math.abs(t4z-zz)<1e-9,'P3: T⁴=Z failed');
+console.log('Bloch Explorer: P1 H²|0⟩=',tz.toFixed(4),'P2 S²|+⟩==Z|+⟩:',Math.abs(sx-zx)<1e-9,'P3 T⁴|+⟩==Z|+⟩:',Math.abs(t4x-zx)<1e-9);
+</script>
+</body>
+</html>

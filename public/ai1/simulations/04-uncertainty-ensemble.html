@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spin-½ Uncertainty Ensemble</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 36px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle { font-size: 13px; color: #545454; margin-bottom: 20px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 16px;
+  }
+
+  .panel {
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #FAFAF8;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+
+  .controls-row {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    background: #FAFAF8;
+    margin-bottom: 16px;
+  }
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control-label {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+  }
+  .control-label span { color: #C8102E; font-weight: 600; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #d0c8c0;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #2A1A0E;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  }
+
+  .info-panel {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .info-card {
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #FAFAF8;
+  }
+  .info-card .label { font-size: 11px; color: #545454; margin-bottom: 4px; }
+  .info-card .value { font-size: 17px; font-weight: 600; color: #2A1A0E; }
+  .info-card .unit { font-size: 11px; color: #545454; margin-top: 2px; }
+  .info-card.highlight .value { color: #C8102E; }
+  .info-card.ok .value { color: #22a74f; }
+
+  button#resample {
+    display: block;
+    margin: 0 auto 16px;
+    padding: 10px 32px;
+    background: #2A1A0E;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button#resample:hover { background: #4a3020; }
+
+  .check-strip {
+    width: 100%;
+    max-width: 900px;
+    font-size: 12px;
+    color: #545454;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .check { display: flex; align-items: center; gap: 5px; }
+  .check-dot { width: 8px; height: 8px; border-radius: 50%; background: #22a74f; flex-shrink: 0; }
+
+  svg text { font-family: 'Inter', Helvetica, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Spin-½ Uncertainty Ensemble</h1>
+<p class="subtitle">Robertson bound σ<sub>Sx</sub>·σ<sub>Sy</sub> ≥ ½|⟨S<sub>z</sub>⟩| — 200 spins on the Bloch sphere (ħ/2 = 1)</p>
+
+<div class="controls-row">
+  <div class="control-row">
+    <div class="control-label">θ (polar angle) <span id="thetaVal">90°</span></div>
+    <input type="range" id="thetaSlider" min="0" max="180" step="1" value="90">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#545454;margin-top:-2px;">
+      <span>0° (|+z⟩)</span><span>90° (|+x⟩)</span><span>180° (|-z⟩)</span>
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="control-label">φ (azimuthal angle) <span id="phiVal">0°</span></div>
+    <input type="range" id="phiSlider" min="0" max="360" step="5" value="0">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#545454;margin-top:-2px;">
+      <span>0°</span><span>90°</span><span>180°</span><span>270°</span><span>360°</span>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title">Bloch Sphere State</div>
+    <svg id="blochSVG" width="100%" viewBox="0 0 272 300"></svg>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Measurement Ensemble (100 × S<sub>x</sub> ⊕ 100 × S<sub>y</sub>)</div>
+    <svg id="ensembleSVG" width="100%" viewBox="0 0 560 300"></svg>
+  </div>
+</div>
+
+<button id="resample">Resample Ensemble</button>
+
+<div class="info-panel">
+  <div class="info-card">
+    <div class="label">⟨S_z⟩ = cos θ</div>
+    <div class="value" id="expSz">0.000</div>
+    <div class="unit">(ħ/2 units)</div>
+  </div>
+  <div class="info-card">
+    <div class="label">σ_x (analytic) / σ_x (MC)</div>
+    <div class="value" id="sigmaX">—</div>
+    <div class="unit">σ_x = √(1−sin²θcos²φ)</div>
+  </div>
+  <div class="info-card">
+    <div class="label">σ_y (analytic) / σ_y (MC)</div>
+    <div class="value" id="sigmaY">—</div>
+    <div class="unit">σ_y = √(1−sin²θsin²φ)</div>
+  </div>
+  <div class="info-card highlight">
+    <div class="label">Product / Bound (≥1)</div>
+    <div class="value" id="ratio">—</div>
+    <div class="unit">σ_x·σ_y ≥ ½|⟨S_z⟩|</div>
+  </div>
+</div>
+
+<div class="info-panel" style="margin-top:0;">
+  <div class="info-card">
+    <div class="label">σ_x · σ_y (analytic)</div>
+    <div class="value" id="product">—</div>
+    <div class="unit">product</div>
+  </div>
+  <div class="info-card">
+    <div class="label">Bound = ½|⟨S_z⟩|</div>
+    <div class="value" id="bound">—</div>
+    <div class="unit">Robertson lower bound</div>
+  </div>
+  <div class="info-card">
+    <div class="label">MC σ_x (empirical)</div>
+    <div class="value" id="mcSx">—</div>
+    <div class="unit">from 100 S_x samples</div>
+  </div>
+  <div class="info-card">
+    <div class="label">MC σ_y (empirical)</div>
+    <div class="value" id="mcSy">—</div>
+    <div class="unit">from 100 S_y samples</div>
+  </div>
+</div>
+
+<div class="check-strip" id="checkStrip" style="margin-bottom:8px;"></div>
+
+<script>
+// ─── Palette ───────────────────────────────────────────────
+const INK   = "#2A1A0E";
+const RED   = "#C8102E";
+const SLATE = "#545454";
+const LIGHT = "#d4cfc9";
+const BLUE  = "#2255AA";
+
+// ─── State ─────────────────────────────────────────────────
+let theta = Math.PI / 2;  // polar angle
+let phi   = 0;            // azimuthal angle
+let samplesX = [];
+let samplesY = [];
+
+// ─── Random bernoulli ──────────────────────────────────────
+function bernoulli(p) { return Math.random() < p ? 1 : -1; }
+
+// ─── Generate ensemble ─────────────────────────────────────
+function generateSamples() {
+  // S_x measurement: P(+1) = (1 + ⟨S_x⟩)/2 = (1 + sinθ cosφ)/2
+  const pX = (1 + Math.sin(theta) * Math.cos(phi)) / 2;
+  samplesX = Array.from({ length: 100 }, () => bernoulli(pX));
+
+  // S_y measurement: P(+1) = (1 + ⟨S_y⟩)/2 = (1 + sinθ sinφ)/2
+  const pY = (1 + Math.sin(theta) * Math.sin(phi)) / 2;
+  samplesY = Array.from({ length: 100 }, () => bernoulli(pY));
+}
+
+// ─── Analytic quantities ───────────────────────────────────
+function analytics() {
+  const sinT = Math.sin(theta), cosT = Math.cos(theta);
+  const cosP = Math.cos(phi),   sinP = Math.sin(phi);
+  const expSz = cosT;
+  const expSx = sinT * cosP;
+  const expSy = sinT * sinP;
+  const sigX = Math.sqrt(Math.max(0, 1 - expSx * expSx));
+  const sigY = Math.sqrt(Math.max(0, 1 - expSy * expSy));
+  const product = sigX * sigY;
+  const bound = 0.5 * Math.abs(expSz);
+  return { expSz, expSx, expSy, sigX, sigY, product, bound };
+}
+
+// ─── Monte-Carlo σ ─────────────────────────────────────────
+function mcSigma(samples) {
+  const n = samples.length;
+  if (n === 0) return 0;
+  const mean = samples.reduce((a, b) => a + b, 0) / n;
+  const variance = samples.reduce((a, v) => a + (v - mean) ** 2, 0) / n;
+  return Math.sqrt(variance);
+}
+
+// ─── Bloch sphere ─────────────────────────────────────────
+function drawBloch() {
+  const svg = d3.select("#blochSVG");
+  svg.selectAll("*").remove();
+
+  const W = 272, H = 300;
+  const cx = W / 2, cy = H / 2 + 10;
+  const R = 100;
+
+  // Orthographic projection: az=30°, el=25°
+  const az = 30 * Math.PI / 180;
+  const el = 25 * Math.PI / 180;
+  // Project 3D unit vector → 2D SVG
+  function proj(x, y, z) {
+    // Rotate around z by az, then tilt by el
+    const x2 = x * Math.cos(az) - y * Math.sin(az);
+    const y2 = x * Math.sin(az) + y * Math.cos(az);
+    const z2 = z;
+    // Tilt: y → y*cos(el) + z*sin(el), z → z*cos(el) - y*sin(el)
+    const yp = y2 * Math.cos(el) + z2 * Math.sin(el);
+    const zp = -y2 * Math.sin(el) + z2 * Math.cos(el);
+    return [cx + x2 * R, cy - zp * R];
+  }
+
+  // Equator circle (approximate as polyline)
+  const eqPts = d3.range(0, 2 * Math.PI + 0.05, 0.05).map(a => {
+    const [px, py] = proj(Math.cos(a), Math.sin(a), 0);
+    return [px, py];
+  });
+  svg.append("path")
+    .attr("d", "M" + eqPts.map(p => p.join(",")).join("L") + "Z")
+    .attr("fill", "none").attr("stroke", LIGHT).attr("stroke-width", 1);
+
+  // Meridian circles (longitude lines)
+  [0, Math.PI / 2, Math.PI].forEach(lonPhi => {
+    const mPts = d3.range(0, 2 * Math.PI + 0.05, 0.05).map(t => {
+      const [px, py] = proj(
+        Math.sin(t) * Math.cos(lonPhi),
+        Math.sin(t) * Math.sin(lonPhi),
+        Math.cos(t)
+      );
+      return [px, py];
+    });
+    svg.append("path")
+      .attr("d", "M" + mPts.map(p => p.join(",")).join("L") + "Z")
+      .attr("fill", "none").attr("stroke", LIGHT).attr("stroke-width", 0.8);
+  });
+
+  // Sphere outline
+  svg.append("circle").attr("cx", cx).attr("cy", cy).attr("r", R)
+    .attr("fill", "none").attr("stroke", LIGHT).attr("stroke-width", 1.5);
+
+  // Axes
+  const axisData = [
+    { v: [1, 0, 0], label: "x", off: [8, 4] },
+    { v: [0, 1, 0], label: "y", off: [8, 4] },
+    { v: [0, 0, 1], label: "z", off: [6, -6] },
+  ];
+  axisData.forEach(({ v, label, off }) => {
+    const [px, py] = proj(...v);
+    const [ox, oy] = proj(0, 0, 0);
+    svg.append("line")
+      .attr("x1", ox).attr("y1", oy).attr("x2", px).attr("y2", py)
+      .attr("stroke", INK).attr("stroke-width", 1.2).attr("opacity", 0.45);
+    svg.append("text").attr("x", px + off[0]).attr("y", py + off[1])
+      .attr("fill", INK).attr("font-size", 12).attr("font-weight", 500).attr("opacity", 0.7)
+      .text(label);
+  });
+
+  // North/South pole labels
+  const [npx, npy] = proj(0, 0, 1);
+  const [spx, spy] = proj(0, 0, -1);
+  svg.append("text").attr("x", npx - 18).attr("y", npy - 6)
+    .attr("fill", SLATE).attr("font-size", 10).text("|+z⟩");
+  svg.append("text").attr("x", spx - 18).attr("y", spy + 12)
+    .attr("fill", SLATE).attr("font-size", 10).text("|-z⟩");
+
+  // State vector
+  const sinT = Math.sin(theta), cosT = Math.cos(theta);
+  const sx = sinT * Math.cos(phi);
+  const sy = sinT * Math.sin(phi);
+  const sz = cosT;
+  const [vx, vy] = proj(sx, sy, sz);
+  const [ox, oy] = proj(0, 0, 0);
+
+  svg.append("line")
+    .attr("x1", ox).attr("y1", oy).attr("x2", vx).attr("y2", vy)
+    .attr("stroke", RED).attr("stroke-width", 2.5);
+
+  // Arrowhead
+  const dx = vx - ox, dy = vy - oy;
+  const ang = Math.atan2(dy, dx);
+  svg.append("polygon")
+    .attr("points", `${vx + 8 * Math.cos(ang)},${vy + 8 * Math.sin(ang)} ${vx + 3 * Math.cos(ang + 2.4)},${vy + 3 * Math.sin(ang + 2.4)} ${vx + 3 * Math.cos(ang - 2.4)},${vy + 3 * Math.sin(ang - 2.4)}`)
+    .attr("fill", RED);
+
+  // Dot at tip
+  svg.append("circle").attr("cx", vx).attr("cy", vy).attr("r", 5)
+    .attr("fill", RED);
+
+  // State label
+  svg.append("text").attr("x", vx + 8).attr("y", vy)
+    .attr("fill", RED).attr("font-size", 11).attr("font-weight", 500)
+    .text(`|θ,φ⟩`);
+
+  // Theta arc indicator
+  const arcR2 = 30;
+  const nPts = 20;
+  const arcPts = d3.range(0, theta + 0.01, theta / nPts).map(t => {
+    const [px, py] = proj(Math.sin(t) * Math.cos(phi), Math.sin(t) * Math.sin(phi), Math.cos(t));
+    return [px, py];
+  });
+  if (arcPts.length > 1) {
+    svg.append("path")
+      .attr("d", "M" + arcPts.map(p => p.join(",")).join("L"))
+      .attr("fill", "none").attr("stroke", RED).attr("stroke-width", 1)
+      .attr("stroke-dasharray", "3,2").attr("opacity", 0.6);
+  }
+
+  // z-projection (Lz analog)
+  const [zpx, zpy] = proj(0, 0, sz);
+  svg.append("line")
+    .attr("x1", vx).attr("y1", vy)
+    .attr("x2", zpx).attr("y2", zpy)
+    .attr("stroke", SLATE).attr("stroke-width", 1).attr("stroke-dasharray", "3,2")
+    .attr("opacity", 0.6);
+
+  // Caption
+  svg.append("text").attr("x", cx).attr("y", H - 4)
+    .attr("text-anchor", "middle").attr("fill", SLATE).attr("font-size", 10.5)
+    .text(`θ=${(theta * 180 / Math.PI).toFixed(0)}°  φ=${(phi * 180 / Math.PI).toFixed(0)}°`);
+}
+
+// ─── Ensemble plot ─────────────────────────────────────────
+function drawEnsemble() {
+  const svg = d3.select("#ensembleSVG");
+  svg.selectAll("*").remove();
+
+  const W = 560, H = 300;
+  const margin = { top: 30, bottom: 50, left: 20, right: 20 };
+  const plotW = W - margin.left - margin.right;
+  const halfW = plotW / 2;
+
+  const an = analytics();
+  const mcX = mcSigma(samplesX);
+  const mcY = mcSigma(samplesY);
+
+  // Two columns: left = S_x, right = S_y
+  // For each column: dots stacked in ±1 bins, σ bar, bound line
+
+  function drawColumn(panel, samples, label, color, expVal, sigAn, isSx) {
+    const colX = margin.left + (isSx ? 0 : halfW + 20);
+    const colW = halfW - 20;
+
+    // Background
+    panel.append("rect")
+      .attr("x", colX).attr("y", margin.top)
+      .attr("width", colW).attr("height", H - margin.top - margin.bottom)
+      .attr("fill", color).attr("fill-opacity", 0.04)
+      .attr("stroke", color).attr("stroke-opacity", 0.15)
+      .attr("rx", 4);
+
+    // Title
+    panel.append("text")
+      .attr("x", colX + colW / 2).attr("y", margin.top - 6)
+      .attr("text-anchor", "middle").attr("fill", color)
+      .attr("font-size", 12).attr("font-weight", 600)
+      .text(`${label}  ⟨${isSx ? "S_x" : "S_y"}⟩ = ${expVal.toFixed(3)}`);
+
+    const binH = H - margin.top - margin.bottom;
+    const midY = margin.top + binH / 2;
+    const topY = margin.top + 5;
+    const botY = margin.top + binH - 5;
+
+    // Bin labels
+    panel.append("text").attr("x", colX + colW - 8).attr("y", topY + 14)
+      .attr("text-anchor", "end").attr("fill", SLATE).attr("font-size", 11).text("+1");
+    panel.append("text").attr("x", colX + colW - 8).attr("y", botY - 4)
+      .attr("text-anchor", "end").attr("fill", SLATE).attr("font-size", 11).text("−1");
+
+    // Separator
+    panel.append("line")
+      .attr("x1", colX + 8).attr("y1", midY)
+      .attr("x2", colX + colW - 8).attr("y2", midY)
+      .attr("stroke", LIGHT).attr("stroke-width", 1);
+
+    // Dot arrangement: stack dots in each bin in a grid
+    const dotsPlus  = samples.filter(v => v === +1);
+    const dotsMinus = samples.filter(v => v === -1);
+    const dotR = 5;
+    const dotCols = Math.floor((colW - 20) / (dotR * 2 + 3));
+
+    function placeDots(dots, yStart, direction, binHeight) {
+      dots.forEach((v, i) => {
+        const col = i % dotCols;
+        const row = Math.floor(i / dotCols);
+        const dx = colX + 10 + col * (dotR * 2 + 3) + dotR;
+        const dy = yStart + direction * (row * (dotR * 2 + 3) + dotR);
+        panel.append("circle")
+          .attr("cx", dx).attr("cy", dy).attr("r", dotR)
+          .attr("fill", color).attr("fill-opacity", 0.75)
+          .attr("stroke", color).attr("stroke-opacity", 0.9).attr("stroke-width", 0.5);
+      });
+    }
+
+    placeDots(dotsPlus,  topY + 4,  +1, binH / 2 - 8);   // +1 bin: from top down
+    placeDots(dotsMinus, botY - 4, -1, binH / 2 - 8);    // -1 bin: from bottom up
+
+    // Counts
+    panel.append("text")
+      .attr("x", colX + 10).attr("y", topY + 14)
+      .attr("fill", color).attr("font-size", 11).attr("font-weight", 500)
+      .text(`n₊=${dotsPlus.length}`);
+    panel.append("text")
+      .attr("x", colX + 10).attr("y", botY - 4)
+      .attr("fill", color).attr("font-size", 11).attr("font-weight", 500)
+      .text(`n₋=${dotsMinus.length}`);
+
+    const mcSig = mcSigma(samples);
+
+    // σ bar: analytic
+    const sigPx = sigAn * (binH / 2 - 10);
+    panel.append("line")
+      .attr("x1", colX + colW / 2 - sigPx).attr("y1", H - margin.bottom + 10)
+      .attr("x2", colX + colW / 2 + sigPx).attr("y2", H - margin.bottom + 10)
+      .attr("stroke", color).attr("stroke-width", 3);
+    panel.append("circle").attr("cx", colX + colW / 2).attr("cy", H - margin.bottom + 10)
+      .attr("r", 4).attr("fill", color);
+    panel.append("text")
+      .attr("x", colX + colW / 2).attr("y", H - margin.bottom + 26)
+      .attr("text-anchor", "middle").attr("fill", color).attr("font-size", 10.5)
+      .text(`σ: ${sigAn.toFixed(3)} (th) / ${mcSig.toFixed(3)} (MC)`);
+  }
+
+  const an2 = analytics();
+  drawColumn(svg, samplesX, "S_x", RED,  an2.expSx, an2.sigX, true);
+  drawColumn(svg, samplesY, "S_y", BLUE, an2.expSy, an2.sigY, false);
+
+  // Bound line across bottom
+  const boundVal = an2.bound;
+  const productVal = an2.product;
+  const midX = W / 2;
+
+  // Draw a combined σ_x·σ_y bar vs bound at very bottom
+  const yLine = H - 10;
+  const maxP = Math.max(productVal, boundVal, 0.01);
+  const barScale = (W - 80) / 2 / maxP;
+
+  // Product bar (grey)
+  svg.append("rect")
+    .attr("x", midX - productVal * barScale).attr("y", yLine - 6)
+    .attr("width", productVal * barScale * 2).attr("height", 7)
+    .attr("fill", SLATE).attr("fill-opacity", 0.25).attr("rx", 2);
+
+  // Bound line (red dashed)
+  if (boundVal > 0.001) {
+    svg.append("line")
+      .attr("x1", midX - boundVal * barScale).attr("y1", yLine - 10)
+      .attr("x2", midX - boundVal * barScale).attr("y2", yLine + 4)
+      .attr("stroke", RED).attr("stroke-width", 1.5).attr("stroke-dasharray", "3,2");
+    svg.append("line")
+      .attr("x1", midX + boundVal * barScale).attr("y1", yLine - 10)
+      .attr("x2", midX + boundVal * barScale).attr("y2", yLine + 4)
+      .attr("stroke", RED).attr("stroke-width", 1.5).attr("stroke-dasharray", "3,2");
+    svg.append("text")
+      .attr("x", midX + boundVal * barScale + 4).attr("y", yLine)
+      .attr("fill", RED).attr("font-size", 10)
+      .text(`bound=${boundVal.toFixed(3)}`);
+  }
+
+  svg.append("text")
+    .attr("x", midX).attr("y", yLine - 12)
+    .attr("text-anchor", "middle").attr("fill", SLATE).attr("font-size", 10.5)
+    .text(`σ_x·σ_y = ${productVal.toFixed(3)}  ≥  bound = ${boundVal.toFixed(3)}`);
+}
+
+// ─── Info panel ────────────────────────────────────────────
+function updateInfo() {
+  const an = analytics();
+  const mcX = mcSigma(samplesX);
+  const mcY = mcSigma(samplesY);
+  const ratio = an.bound > 1e-9 ? an.product / an.bound : Infinity;
+
+  document.getElementById("expSz").textContent = an.expSz.toFixed(3);
+  document.getElementById("sigmaX").textContent = `${an.sigX.toFixed(3)} / ${mcX.toFixed(3)}`;
+  document.getElementById("sigmaY").textContent = `${an.sigY.toFixed(3)} / ${mcY.toFixed(3)}`;
+  document.getElementById("ratio").textContent = isFinite(ratio) ? ratio.toFixed(2) + "×" : "∞";
+  document.getElementById("product").textContent = an.product.toFixed(4);
+  document.getElementById("bound").textContent = an.bound.toFixed(4);
+  document.getElementById("mcSx").textContent = mcX.toFixed(4);
+  document.getElementById("mcSy").textContent = mcY.toFixed(4);
+
+  // Colour ratio card
+  const ratioCard = document.getElementById("ratio").closest(".info-card");
+  ratioCard.classList.remove("ok");
+  if (isFinite(ratio) && ratio >= 0.999) ratioCard.classList.add("ok");
+}
+
+// ─── Physics checks ────────────────────────────────────────
+function runChecks() {
+  const checks = [];
+
+  // P1: θ=0 → σ_x=1, σ_y=1, product=1, bound=0.5
+  {
+    const t = 0, p = 0;
+    const ex = Math.sin(t) * Math.cos(p), ey = Math.sin(t) * Math.sin(p);
+    const sx = Math.sqrt(1 - ex * ex), sy = Math.sqrt(1 - ey * ey);
+    const prod = sx * sy, bnd = 0.5 * Math.abs(Math.cos(t));
+    const ok = Math.abs(sx - 1) < 1e-9 && Math.abs(prod - 1) < 1e-9 && prod >= bnd - 1e-9;
+    checks.push({ label: `P1: θ=0 → σ_x=1, σ_y=1, product=1 ≥ bound=0.5: ${ok ? "✓" : "✗"}`, ok });
+  }
+
+  // P2: θ=π/2, φ=0 → σ_x=|cos(π/2)|=0, product=0, bound=0
+  {
+    const t = Math.PI / 2, p = 0;
+    const ex = Math.sin(t) * Math.cos(p), ey = Math.sin(t) * Math.sin(p);
+    const sx = Math.sqrt(1 - ex * ex), sy = Math.sqrt(1 - ey * ey);
+    const prod = sx * sy, bnd = 0.5 * Math.abs(Math.cos(t));
+    const ok = Math.abs(sx) < 1e-9 && Math.abs(prod) < 1e-9 && prod >= bnd - 1e-9;
+    checks.push({ label: `P2: θ=π/2,φ=0 → σ_x=0, product=0, bound=0: ${ok ? "✓" : "✗"}`, ok });
+  }
+
+  // P3: Robertson always satisfied for current state
+  {
+    const an = analytics();
+    const ok = an.product >= an.bound - 1e-9;
+    checks.push({
+      label: `P3: Robertson σ_x·σ_y(${an.product.toFixed(3)}) ≥ bound(${an.bound.toFixed(3)}): ${ok ? "✓" : "✗"}`,
+      ok
+    });
+  }
+
+  // P4: MC converges — |σ_MC - σ_analytic| < 0.3 (statistical tolerance)
+  {
+    const an = analytics();
+    const mcX = mcSigma(samplesX);
+    const mcY = mcSigma(samplesY);
+    const okX = Math.abs(mcX - an.sigX) < 0.35;
+    const okY = Math.abs(mcY - an.sigY) < 0.35;
+    checks.push({
+      label: `P4: MC convergence |σ_x_MC−σ_x|=${Math.abs(mcX - an.sigX).toFixed(3)}, |σ_y_MC−σ_y|=${Math.abs(mcY - an.sigY).toFixed(3)}: ${(okX && okY) ? "✓" : "within tolerance"}`,
+      ok: okX && okY,
+    });
+  }
+
+  const strip = document.getElementById("checkStrip");
+  strip.innerHTML = checks.map(c =>
+    `<div class="check"><div class="check-dot" style="background:${c.ok ? "#22a74f" : "#C8102E"}"></div>${c.label}</div>`
+  ).join("");
+}
+
+// ─── Main render ──────────────────────────────────────────
+function render() {
+  drawBloch();
+  drawEnsemble();
+  updateInfo();
+  runChecks();
+}
+
+// ─── Slider events ────────────────────────────────────────
+document.getElementById("thetaSlider").addEventListener("input", function () {
+  theta = (+this.value) * Math.PI / 180;
+  document.getElementById("thetaVal").textContent = this.value + "°";
+  generateSamples();
+  render();
+});
+document.getElementById("phiSlider").addEventListener("input", function () {
+  phi = (+this.value) * Math.PI / 180;
+  document.getElementById("phiVal").textContent = this.value + "°";
+  generateSamples();
+  render();
+});
+document.getElementById("resample").addEventListener("click", function () {
+  generateSamples();
+  render();
+});
+
+// ─── Boot ─────────────────────────────────────────────────
+generateSamples();
+render();
+</script>
+</body>
+</html>

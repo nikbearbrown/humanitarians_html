@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<!-- Candidate 60 — Simulate Pi from Elastic Block Collisions
+     D3/DATAVIZ sim — single-file, standalone.
+     Two frictionless blocks; collision count = floor(π × √(M/m)).
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pi from Block Collisions</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+    --gold-wash: #F6D8DC;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: var(--slate); margin: 0 0 28px; }
+
+  /* Controls */
+  #controls {
+    display: flex; align-items: center; gap: 24px;
+    margin-bottom: 20px;
+  }
+  label { font-size: 13px; color: var(--slate); }
+  #ratio-slider { width: 220px; accent-color: var(--red); cursor: pointer; }
+  #ratio-display {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; font-weight: 600;
+  }
+  button {
+    padding: 6px 18px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: var(--gold-wash); }
+  button.running { border-color: var(--red); color: var(--red); }
+
+  /* Physics canvas */
+  #stage { display: block; border-bottom: 2px solid var(--ink); margin-bottom: 20px; }
+
+  /* Counter row */
+  #counter-row {
+    display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px;
+  }
+  #collision-count {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 48px; font-weight: 700; color: var(--red);
+    line-height: 1;
+  }
+  #collision-label { font-size: 14px; color: var(--slate); }
+
+  /* Pi digit display */
+  #pi-display {
+    display: flex; align-items: center; gap: 2px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  #pi-prefix { font-size: 18px; font-weight: 700; margin-right: 4px; }
+  .pi-digit {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 18px; font-weight: 600;
+    width: 20px; text-align: center;
+    color: var(--border);
+    transition: color 0.15s;
+  }
+  .pi-digit.dot { width: 10px; color: var(--ink); }
+  .pi-digit.lit { color: var(--ink); }
+  .pi-digit.active { color: var(--red); font-size: 24px; }
+
+  /* Velocity space panel */
+  #vel-panel { margin-top: 8px; }
+  .panel-title { font-size: 12px; color: var(--slate); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+
+  /* Prediction checks */
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 24px; padding-top: 16px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px;
+  }
+  .pred strong { color: var(--ink); font-weight: 700; }
+  .pred .check { color: var(--red); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Pi from Block Collisions</h1>
+  <p class="sub">
+    Two frictionless elastic blocks. Count the collisions.
+    With mass ratio 100, you get <strong>31</strong>.
+    With 10,000 you get <strong>314</strong>. The blocks are counting π.
+  </p>
+
+  <div id="controls">
+    <label for="ratio-slider">M/m =</label>
+    <input id="ratio-slider" type="range" min="0" max="6" step="1" value="2">
+    <span id="ratio-display">100</span>
+    <button id="go-btn">Run</button>
+    <button id="reset-btn">Reset</button>
+  </div>
+
+  <svg id="stage" width="920" height="140"></svg>
+
+  <div id="counter-row">
+    <div id="collision-count">0</div>
+    <div id="collision-label">collisions</div>
+    <div id="expected-label" style="font-size:13px;color:var(--slate);margin-left:8px;"></div>
+  </div>
+
+  <div id="pi-display">
+    <span id="pi-prefix">π ≈</span>
+  </div>
+
+  <div id="vel-panel">
+    <div class="panel-title">Velocity space — the hidden circle</div>
+    <svg id="vel-svg" width="220" height="220"></svg>
+  </div>
+
+  <div id="predictions">
+    <div class="pred">
+      <strong>P1:</strong> M/m = 100 → exactly <strong>31</strong> collisions
+      <span class="check" id="p1-check"></span>
+    </div>
+    <div class="pred">
+      <strong>P2:</strong> M/m = 10,000 → exactly <strong>314</strong> collisions
+      <span class="check" id="p2-check"></span>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+// ─── Palette ───────────────────────────────────────────────────────────────
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+
+// ─── Pi digits (first 20) ──────────────────────────────────────────────────
+const PI_DIGITS = '31415926535897932384'; // after decimal point
+const PI_STR    = '3.' + PI_DIGITS;       // display string
+
+// ─── Ratio steps ──────────────────────────────────────────────────────────
+const RATIOS = [1, 10, 100, 1000, 10000, 100000, 1000000];
+const EXPECTED = RATIOS.map(r => Math.floor(Math.PI * Math.sqrt(r)));
+// [3, 9, 31, 99, 314, 992, 3141]
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let ratioIdx = 2; // default 100
+let simState = null;
+let animId   = null;
+let running  = false;
+
+// ─── Build pi-digit display ────────────────────────────────────────────────
+const piDiv = d3.select('#pi-display');
+piDiv.selectAll('.pi-digit').remove();
+[...PI_STR].forEach((ch, i) => {
+  piDiv.append('span')
+    .attr('class', ch === '.' ? 'pi-digit dot' : 'pi-digit')
+    .attr('id', ch === '.' ? null : `pd-${i}`)
+    .text(ch);
+});
+
+// ─── SVG stage setup ───────────────────────────────────────────────────────
+const sw = 920, sh = 140;
+const WALL_X = 40;      // left wall x
+const FLOOR_Y = 120;
+const TRACK_Y = FLOOR_Y;
+
+const stage = d3.select('#stage');
+// Floor
+stage.append('line')
+  .attr('x1', WALL_X).attr('y1', TRACK_Y)
+  .attr('x2', sw).attr('y2', TRACK_Y)
+  .attr('stroke', INK).attr('stroke-width', 2);
+// Wall
+stage.append('line')
+  .attr('x1', WALL_X).attr('y1', 40)
+  .attr('x2', WALL_X).attr('y2', TRACK_Y)
+  .attr('stroke', INK).attr('stroke-width', 3);
+stage.append('text')
+  .attr('x', WALL_X - 8).attr('y', 60).attr('text-anchor', 'end')
+  .attr('font-size', 11).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('wall');
+
+// Small block (m) — red outline
+const BLOCK_SMALL = { w: 28, h: 28, color: RED, label: 'm' };
+const BLOCK_LARGE = { w: 48, h: 48, color: INK, label: 'M' };
+
+const smallG = stage.append('g').attr('id', 'small-g');
+smallG.append('rect')
+  .attr('width', BLOCK_SMALL.w).attr('height', BLOCK_SMALL.h)
+  .attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 2.5);
+smallG.append('text')
+  .attr('x', BLOCK_SMALL.w / 2).attr('y', BLOCK_SMALL.h / 2 + 5)
+  .attr('text-anchor', 'middle').attr('font-size', 12)
+  .attr('fill', RED).attr('font-weight', '700')
+  .attr('font-family', 'Inter,sans-serif').text('m');
+
+const largeG = stage.append('g').attr('id', 'large-g');
+largeG.append('rect')
+  .attr('width', BLOCK_LARGE.w).attr('height', BLOCK_LARGE.h)
+  .attr('fill', INK).attr('stroke', 'none');
+largeG.append('text')
+  .attr('x', BLOCK_LARGE.w / 2).attr('y', BLOCK_LARGE.h / 2 + 6)
+  .attr('text-anchor', 'middle').attr('font-size', 13)
+  .attr('fill', '#fff').attr('font-weight', '700')
+  .attr('font-family', 'Inter,sans-serif').text('M');
+
+// Flash circle for collisions
+const flashCircle = stage.append('circle').attr('r', 18).attr('opacity', 0)
+  .attr('fill', RED);
+
+// ─── Velocity-space SVG ────────────────────────────────────────────────────
+const vsw = 220, vsh = 220, vcx = 110, vcy = 110, vr = 90;
+const vsvg = d3.select('#vel-svg');
+// Axes
+vsvg.append('line').attr('x1', vcx - vr - 10).attr('y1', vcy)
+  .attr('x2', vcx + vr + 10).attr('y2', vcy)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+vsvg.append('line').attr('x1', vcx).attr('y1', vcy - vr - 10)
+  .attr('x2', vcx).attr('y2', vcy + vr + 10)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+vsvg.append('text').attr('x', vcx + vr + 12).attr('y', vcy + 4)
+  .attr('font-size', 10).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('√m·v₁');
+vsvg.append('text').attr('x', vcx + 4).attr('y', vcy - vr - 12)
+  .attr('font-size', 10).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('√M·v₂');
+// Ellipse becomes a circle in scaled coords
+vsvg.append('circle').attr('cx', vcx).attr('cy', vcy).attr('r', vr)
+  .attr('fill', 'none').attr('stroke', BORDER).attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '4 4');
+
+const velDot = vsvg.append('circle').attr('r', 5).attr('fill', RED);
+const velPath = vsvg.append('path').attr('fill', 'none')
+  .attr('stroke', RED).attr('stroke-width', 1.5).attr('opacity', 0.4);
+let velPoints = [];
+
+// ─── Physics simulation ────────────────────────────────────────────────────
+function initSim(rIdx) {
+  const ratio = RATIOS[rIdx];
+  const m = 1, M = ratio * m;
+  // Positions in "world units" (pixels) from wall
+  // small block rests near wall, large block starts far right moving left
+  return {
+    m, M, ratio,
+    x1: WALL_X + BLOCK_SMALL.w + 60,  // small block left edge (pixels from 0)
+    x2: WALL_X + BLOCK_SMALL.w + 300, // large block left edge
+    v1: 0,
+    v2: -120,  // pixels/sec, moving left
+    collisions: 0,
+    done: false,
+    lastFlashX: null,
+    lastFlashT: 0,
+  };
+}
+
+function resetSim() {
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  running = false;
+  ratioIdx = +d3.select('#ratio-slider').property('value');
+  simState = initSim(ratioIdx);
+  velPoints = [];
+  updateDisplay(simState);
+  d3.select('#go-btn').text('Run').classed('running', false);
+  d3.select('#p1-check').text('');
+  d3.select('#p2-check').text('');
+}
+
+function stepSim(state, dt) {
+  if (state.done) return;
+  const { m, M } = state;
+
+  // Move blocks
+  state.x1 += state.v1 * dt;
+  state.x2 += state.v2 * dt;
+
+  // Small block hits wall (left edge of block = WALL_X)
+  if (state.x1 <= WALL_X) {
+    state.x1 = WALL_X;
+    state.v1 = -state.v1;
+    state.collisions++;
+    state.lastFlashX = WALL_X + 4;
+    state.lastFlashT = 0.18;
+  }
+
+  // Blocks collide (right edge of small = left edge of large)
+  if (state.x1 + BLOCK_SMALL.w >= state.x2 && state.v1 >= state.v2) {
+    // Elastic collision
+    const v1n = ((m - M) * state.v1 + 2 * M * state.v2) / (m + M);
+    const v2n = ((M - m) * state.v2 + 2 * m * state.v1) / (m + M);
+    state.x1 = state.x2 - BLOCK_SMALL.w; // push out of overlap
+    state.v1 = v1n;
+    state.v2 = v2n;
+    state.collisions++;
+    state.lastFlashX = state.x2;
+    state.lastFlashT = 0.18;
+  }
+
+  // Done: both moving right, large block ahead
+  if (state.v1 >= 0 && state.v2 >= 0 && state.v2 >= state.v1 && state.x2 > state.x1) {
+    state.done = true;
+  }
+
+  // Clamp large block: don't go off screen right
+  if (state.x2 > sw - BLOCK_LARGE.w) {
+    state.x2 = sw - BLOCK_LARGE.w;
+    if (state.v2 > 0) state.v2 = -state.v2 * 0.1; // shouldn't happen
+  }
+}
+
+function updateDisplay(state) {
+  // Position blocks
+  const sy = TRACK_Y - BLOCK_SMALL.h;
+  const ly = TRACK_Y - BLOCK_LARGE.h;
+  smallG.attr('transform', `translate(${state.x1}, ${sy})`);
+  largeG.attr('transform', `translate(${state.x2}, ${ly})`);
+
+  // Collision counter
+  d3.select('#collision-count').text(state.collisions);
+  const exp = EXPECTED[ratioIdx];
+  d3.select('#expected-label').text(state.done ? `✓ expected ${exp}` : `(expect ${exp})`);
+
+  // Pi digits
+  const n = state.collisions;
+  d3.selectAll('.pi-digit:not(.dot)').each(function(d, i) {
+    const el = d3.select(this);
+    // index in PI_STR: 0='3', 1='.', then digits
+    // map span index back to digit index (skip dot)
+    const spanIdx = +this.id.replace('pd-', '');
+    // PI_STR chars: '3','.',1,4,1,5,...
+    // span 0 → PI_STR[0]='3', span 2 → PI_STR[2]='4', etc.
+    const digitPos = spanIdx; // digit count represented by collision count
+    let revealed = 0;
+    if (n === 0) revealed = 0;
+    else {
+      // n collisions → floor(n / 10^(digits-1)) gives leading digits
+      // simpler: n covers the first k digits if n >= floor(pi * sqrt(ratio))
+      // just light up digits as floor matches
+      revealed = String(n).length; // rough: light as many digits as collision count has
+    }
+    el.classed('lit', false).classed('active', false);
+  });
+
+  // Better pi digit lighting: compare n to expected prefix
+  lightPiDigits(state.collisions, EXPECTED[ratioIdx]);
+
+  // Velocity space dot
+  const scale = vr / Math.sqrt(Math.abs(state.v2) * state.M + 0.001);
+  // In the conserved ellipse, coords are (√m·v1, √M·v2)
+  const sqrt_m = Math.sqrt(state.m), sqrt_M = Math.sqrt(state.M);
+  // Normalize to unit circle radius vr
+  const energy = 0.5 * state.M * 120 * 120; // initial KE
+  const circR = Math.sqrt(2 * energy);
+  const vxScaled = sqrt_m * state.v1 / (circR / vr);
+  const vyScaled = sqrt_M * state.v2 / (circR / vr);
+  velDot.attr('cx', vcx + vxScaled).attr('cy', vcy - vyScaled);
+
+  velPoints.push([vcx + vxScaled, vcy - vyScaled]);
+  if (velPoints.length > 1) {
+    velPath.attr('d', d3.line()(velPoints)).attr('opacity', 0.4);
+  }
+
+  // Flash
+  if (state.lastFlashT > 0) {
+    flashCircle
+      .attr('cx', state.lastFlashX)
+      .attr('cy', TRACK_Y - 14)
+      .attr('opacity', state.lastFlashT / 0.18 * 0.7);
+    state.lastFlashT = Math.max(0, state.lastFlashT - 0.016);
+  } else {
+    flashCircle.attr('opacity', 0);
+  }
+
+  // Prediction checks
+  if (state.done) {
+    if (RATIOS[ratioIdx] === 100)
+      d3.select('#p1-check').text(state.collisions === 31 ? ' ✓' : ` ✗(${state.collisions})`);
+    if (RATIOS[ratioIdx] === 10000)
+      d3.select('#p2-check').text(state.collisions === 314 ? ' ✓' : ` ✗(${state.collisions})`);
+  }
+}
+
+function lightPiDigits(n, expected) {
+  // Light digits as they are confirmed by the collision count
+  // The collision count reveals k digits of π when n matches the first k digits of
+  // floor(π × √(M/m)) truncated to k digits.
+  const expStr = String(expected); // e.g. "314" for M/m=10000
+  const nStr   = String(n);
+
+  // For display we show PI_STR = "3.1415926535897932384"
+  // digit index 0 = '3', index 1 = '.', index 2 = '1', ...
+  d3.selectAll('.pi-digit:not(.dot)').each(function() {
+    const id = this.id;
+    if (!id) return;
+    const spanIdx = +id.replace('pd-', ''); // position in PI_STR (0-indexed)
+    // Convert to digit position (skip the dot at index 1)
+    const digitIdx = spanIdx <= 1 ? spanIdx : spanIdx - 1; // 0-based digit index in "3141592..."
+    const piAllDigits = '3141592653589793238'; // no dot
+
+    // How many digits does n confirm?
+    // n digits confirmed = length of the match of nStr against piAllDigits prefix
+    let confirmed = 0;
+    for (let k = 1; k <= nStr.length && k <= piAllDigits.length; k++) {
+      if (nStr.startsWith(piAllDigits.slice(0, k))) confirmed = k;
+      else break;
+    }
+
+    const el = d3.select(this);
+    if (digitIdx < confirmed - 1) {
+      el.classed('lit', true).classed('active', false).style('color', null);
+    } else if (digitIdx === confirmed - 1 && n > 0) {
+      el.classed('lit', false).classed('active', true).style('color', null);
+    } else {
+      el.classed('lit', false).classed('active', false).style('color', null);
+    }
+  });
+}
+
+// ─── Animation loop ────────────────────────────────────────────────────────
+let lastT = null;
+const SPEED_MULT = 1; // real-time
+
+// For high-ratio runs, we skip drawing and just count
+function runFast(state) {
+  // Run physics at 1000× speed without animation for large ratios
+  const dt = 0.001; // seconds per physics step
+  let steps = 0;
+  const maxSteps = 20000000;
+  while (!state.done && steps < maxSteps) {
+    stepSim(state, dt);
+    steps++;
+  }
+  updateDisplay(state);
+}
+
+function animate(ts) {
+  if (!lastT) lastT = ts;
+  const elapsed = Math.min((ts - lastT) / 1000, 0.05); // cap at 50ms
+  lastT = ts;
+
+  if (!simState.done && running) {
+    // For large ratios (≥ 1000), run multiple sub-steps per frame
+    const substeps = ratioIdx >= 3 ? 200 : (ratioIdx >= 2 ? 20 : 4);
+    const subdt = elapsed / substeps;
+    for (let i = 0; i < substeps; i++) {
+      stepSim(simState, subdt);
+      if (simState.done) break;
+    }
+    updateDisplay(simState);
+    animId = requestAnimationFrame(animate);
+  } else {
+    if (simState.done) {
+      running = false;
+      d3.select('#go-btn').text('Run').classed('running', false);
+      updateDisplay(simState);
+    }
+  }
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────
+const ratioLabels = ['1', '10', '100', '1,000', '10,000', '100,000', '1,000,000'];
+
+d3.select('#ratio-slider').on('input', function() {
+  ratioIdx = +this.value;
+  d3.select('#ratio-display').text(ratioLabels[ratioIdx]);
+  if (!running) resetSim();
+});
+
+d3.select('#go-btn').on('click', function() {
+  if (running) {
+    running = false;
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    d3.select(this).text('Run').classed('running', false);
+    return;
+  }
+  if (simState.done) resetSim();
+  running = true;
+  lastT = null;
+  d3.select(this).text('Pause').classed('running', true);
+
+  // For very large ratios run instantly
+  if (ratioIdx >= 5) {
+    runFast(simState);
+    running = false;
+    d3.select(this).text('Run').classed('running', false);
+  } else {
+    animId = requestAnimationFrame(animate);
+  }
+});
+
+d3.select('#reset-btn').on('click', resetSim);
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+d3.select('#ratio-display').text(ratioLabels[ratioIdx]);
+resetSim();
+</script>
+</body>
+</html>

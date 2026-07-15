@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finite Square Well Explorer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 24px 32px 32px;
+    max-width: 760px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 20px;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+  .controls {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+  .ctrl-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #545454;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .ctrl-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] { width: 200px; accent-color: #C8102E; cursor: pointer; }
+  .val-badge { font-size: 13px; font-weight: 700; color: #2A1A0E; min-width: 72px; }
+  .sim-row { display: flex; gap: 12px; align-items: flex-start; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .svg-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+  }
+  .panel { display: flex; flex-direction: column; }
+  .readout {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #545454;
+    background: #f7f5f2;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid #e8e3dc;
+  }
+  .axis path, .axis line { stroke: #ccc; }
+  .axis text { fill: #545454; font-size: 9px; }
+</style>
+</head>
+<body>
+<h1>Finite Square Well — How Many Levels Fit?</h1>
+<p class="sub">As V₀ increases, the quarter-circle sweeps outward. Each time it crosses a new tan or cot branch, another bound state appears. At least one state always exists.</p>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <div class="ctrl-label">Well Depth V₀</div>
+    <div class="ctrl-row">
+      <input type="range" id="sliderV0" min="0.2" max="10" step="0.05" value="3.0">
+      <span class="val-badge" id="valV0">3.00 eV</span>
+    </div>
+  </div>
+</div>
+
+<div class="sim-row">
+  <div class="panel">
+    <div class="svg-label">Graphical Solution</div>
+    <svg id="graph-svg" width="330" height="300"></svg>
+  </div>
+  <div class="panel">
+    <div class="svg-label">Wavefunctions in Well</div>
+    <svg id="wf-svg" width="330" height="300"></svg>
+  </div>
+</div>
+
+<div class="readout" id="readout">V₀ = — eV | z₀ = — | N = — bound states</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+(function() {
+  // Physical constants
+  const hbar_J = 1.055e-34;  // J·s
+  const me_kg  = 9.109e-31;  // kg
+  const eV_J   = 1.602e-19;  // J per eV
+  const L_m    = 1e-9;       // 1 nm
+
+  // z₀ = (L/2)*sqrt(2*m*V₀_J)/ħ  → z₀ = C * sqrt(V₀_eV)
+  // C² = (L/2)² * 2*m*eV / ħ²
+  const C2 = (L_m / 2) ** 2 * (2 * me_kg * eV_J) / (hbar_J ** 2);
+  const C  = Math.sqrt(C2); // ≈ 2.560 for L=1nm
+
+  // Bisection root finder
+  function bisect(f, a, b) {
+    let fa = f(a);
+    const fb0 = f(b);
+    if (!isFinite(fa) || !isFinite(fb0)) return null;
+    if (fa * fb0 > 0) return null;
+    let fb = fb0;
+    for (let i = 0; i < 80; i++) {
+      const c = (a + b) / 2, fc = f(c);
+      if (Math.abs(fc) < 1e-9 || (b - a) < 1e-10) return c;
+      if (fa * fc < 0) { b = c; fb = fc; } else { a = c; fa = fc; }
+    }
+    return (a + b) / 2;
+  }
+
+  function findSolutions(z0) {
+    const eps = 0.02, sols = [];
+    // Even: z ∈ (n*π+eps, n*π+π/2-eps), n=0,1,...
+    for (let n = 0; n * Math.PI < z0; n++) {
+      const a = n * Math.PI + eps;
+      const b = n * Math.PI + Math.PI / 2 - eps;
+      if (a >= z0) break;
+      const zz = bisect(
+        z => z * Math.tan(z) - Math.sqrt(Math.max(0, z0 * z0 - z * z)),
+        a, Math.min(b, z0 - eps)
+      );
+      if (zz !== null && zz > 0 && zz < z0) sols.push({ z: zz, type: 'even' });
+    }
+    // Odd: z ∈ (n*π+π/2+eps, (n+1)*π-eps), n=0,1,...
+    for (let n = 0; n * Math.PI + Math.PI / 2 < z0; n++) {
+      const a = n * Math.PI + Math.PI / 2 + eps;
+      const b = (n + 1) * Math.PI - eps;
+      if (a >= z0) break;
+      const zz = bisect(
+        z => -z / Math.tan(z) - Math.sqrt(Math.max(0, z0 * z0 - z * z)),
+        a, Math.min(b, z0 - eps)
+      );
+      if (zz !== null && zz > 0 && zz < z0) sols.push({ z: zz, type: 'odd' });
+    }
+    return sols.sort((a, b) => a.z - b.z);
+  }
+
+  // E_n in eV from z_n: E_n = (z_n/z₀)² * V₀
+  function stateEnergy(zn, z0, V0) {
+    return (zn / z0) ** 2 * V0;
+  }
+
+  // ===== LEFT SVG: Graphical Solution =====
+  const gM = { top: 20, right: 14, bottom: 40, left: 42 };
+  const GW = 330, GH = 300;
+  const giw = GW - gM.left - gM.right;
+  const gih = GH - gM.top - gM.bottom;
+
+  const gSvg = d3.select('#graph-svg');
+  const gG   = gSvg.append('g').attr('transform', `translate(${gM.left},${gM.top})`);
+
+  gSvg.append('defs').append('clipPath').attr('id', 'g-clip')
+    .append('rect').attr('width', giw).attr('height', gih);
+
+  const gClip = gG.append('g').attr('clip-path', 'url(#g-clip)');
+
+  // Scales will be updated dynamically — store references
+  let gxScale = d3.scaleLinear().range([0, giw]);
+  let gyScale = d3.scaleLinear().range([gih, 0]);
+
+  const gxAxisG = gG.append('g').attr('class', 'axis').attr('transform', `translate(0,${gih})`);
+  const gyAxisG = gG.append('g').attr('class', 'axis');
+
+  // Axis labels
+  gG.append('text')
+    .attr('x', giw / 2).attr('y', gih + 32)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '11px').attr('font-weight', '600')
+    .text('z');
+  gG.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -gih / 2).attr('y', -34)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '11px').attr('font-weight', '600')
+    .text('f(z)');
+
+  // Legend for graphical panel
+  const gLeg = gG.append('g').attr('transform', `translate(${giw - 95}, 2)`);
+  [
+    { label: 'even (tan)', color: '#2A1A0E' },
+    { label: 'odd (−cot)', color: '#545454' },
+    { label: 'quarter circle', color: '#C8102E' },
+  ].forEach((d, i) => {
+    const row = gLeg.append('g').attr('transform', `translate(0,${i * 16})`);
+    row.append('rect').attr('width', 10).attr('height', 3).attr('y', -1.5)
+      .attr('fill', d.color).attr('rx', 1);
+    row.append('text').attr('x', 14).attr('y', 4)
+      .attr('fill', '#545454').attr('font-size', '9px').text(d.label);
+  });
+
+  // Dynamic elements in graphical panel
+  const evenPathsGroup  = gClip.append('g');
+  const oddPathsGroup   = gClip.append('g');
+  const circlePathGroup = gClip.append('g');
+  const guidesGroup     = gClip.append('g');
+  const dotsGroup       = gClip.append('g');
+
+  // ===== RIGHT SVG: Wavefunctions =====
+  const wM = { top: 20, right: 14, bottom: 40, left: 44 };
+  const WW = 330, WH = 300;
+  const wiw = WW - wM.left - wM.right;
+  const wih = WH - wM.top - wM.bottom;
+
+  const wSvg = d3.select('#wf-svg');
+  const wG   = wSvg.append('g').attr('transform', `translate(${wM.left},${wM.top})`);
+
+  wSvg.append('defs').append('clipPath').attr('id', 'w-clip')
+    .append('rect').attr('width', wiw).attr('height', wih);
+
+  const wClip = wG.append('g').attr('clip-path', 'url(#w-clip)');
+
+  let wxScale = d3.scaleLinear().domain([-1.5, 1.5]).range([0, wiw]);  // nm
+  let wyScale = d3.scaleLinear().range([wih, 0]);  // eV
+
+  const wxAxisG = wG.append('g').attr('class', 'axis').attr('transform', `translate(0,${wih})`);
+  const wyAxisG = wG.append('g').attr('class', 'axis');
+
+  wG.append('text')
+    .attr('x', wiw / 2).attr('y', wih + 32)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '11px').attr('font-weight', '600')
+    .text('x (nm)');
+  wG.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -wih / 2).attr('y', -36)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '11px').attr('font-weight', '600')
+    .text('E (eV)');
+
+  const wWallsGroup = wClip.append('g');
+  const wLevelsGroup = wClip.append('g');
+  const wWfGroup = wClip.append('g');
+
+  // ===== Update function =====
+  function update() {
+    const V0 = +document.getElementById('sliderV0').value;
+    document.getElementById('valV0').textContent = V0.toFixed(2) + ' eV';
+
+    const z0 = C * Math.sqrt(V0);
+    const sols = findSolutions(z0);
+    const N = sols.length;
+
+    // ---- Graphical panel ----
+    const xMax = Math.max(z0 + 0.8, 7);
+    const yMax = Math.max(z0 + 0.5, 5);
+    gxScale.domain([0, xMax]);
+    gyScale.domain([0, yMax]);
+
+    gxAxisG.call(d3.axisBottom(gxScale).ticks(5).tickSize(4));
+    gyAxisG.call(d3.axisLeft(gyScale).ticks(5).tickSize(4));
+
+    // π/2, π, 3π/2, ... guides
+    guidesGroup.selectAll('*').remove();
+    for (let k = 1; k * Math.PI / 2 < xMax + 0.1; k++) {
+      const xv = k * Math.PI / 2;
+      guidesGroup.append('line')
+        .attr('x1', gxScale(xv)).attr('x2', gxScale(xv))
+        .attr('y1', 0).attr('y2', gih)
+        .attr('stroke', '#ccc').attr('stroke-width', 0.8)
+        .attr('stroke-dasharray', '3,3');
+      guidesGroup.append('text')
+        .attr('x', gxScale(xv)).attr('y', gih - 2)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#bbb').attr('font-size', '8px')
+        .text(k % 2 === 1 ? `${k}π/2` : `${k / 2}π`);
+    }
+
+    // Even branches: z*tan(z), defined away from discontinuities
+    evenPathsGroup.selectAll('*').remove();
+    const nEvenBranches = Math.ceil(xMax / Math.PI) + 1;
+    for (let n = 0; n < nEvenBranches; n++) {
+      const aStart = n * Math.PI + 0.01;
+      const aEnd   = n * Math.PI + Math.PI / 2 - 0.02;
+      if (aStart > xMax) break;
+      const pts = [];
+      const steps = 80;
+      for (let i = 0; i <= steps; i++) {
+        const zv = aStart + (Math.min(aEnd, xMax) - aStart) * i / steps;
+        const yv = zv * Math.tan(zv);
+        if (isFinite(yv) && yv >= 0 && yv <= yMax * 1.05) pts.push([zv, yv]);
+      }
+      if (pts.length > 1) {
+        evenPathsGroup.append('path')
+          .attr('fill', 'none').attr('stroke', '#2A1A0E').attr('stroke-width', 1.5)
+          .attr('d', d3.line().x(d => gxScale(d[0])).y(d => gyScale(d[1]))(pts));
+      }
+    }
+
+    // Odd branches: -z/tan(z) = -z*cot(z)
+    oddPathsGroup.selectAll('*').remove();
+    const nOddBranches = Math.ceil(xMax / Math.PI) + 1;
+    for (let n = 0; n < nOddBranches; n++) {
+      const aStart = n * Math.PI + Math.PI / 2 + 0.02;
+      const aEnd   = (n + 1) * Math.PI - 0.02;
+      if (aStart > xMax) break;
+      const pts = [];
+      const steps = 80;
+      for (let i = 0; i <= steps; i++) {
+        const zv = aStart + (Math.min(aEnd, xMax) - aStart) * i / steps;
+        const yv = -zv / Math.tan(zv);
+        if (isFinite(yv) && yv >= 0 && yv <= yMax * 1.05) pts.push([zv, yv]);
+      }
+      if (pts.length > 1) {
+        oddPathsGroup.append('path')
+          .attr('fill', 'none').attr('stroke', '#545454').attr('stroke-width', 1.5)
+          .attr('d', d3.line().x(d => gxScale(d[0])).y(d => gyScale(d[1]))(pts));
+      }
+    }
+
+    // Quarter circle y = sqrt(z0² - z²)
+    circlePathGroup.selectAll('*').remove();
+    {
+      const pts = [];
+      const steps = 200;
+      for (let i = 0; i <= steps; i++) {
+        const zv = z0 * i / steps;
+        const yv = Math.sqrt(Math.max(0, z0 * z0 - zv * zv));
+        pts.push([zv, yv]);
+      }
+      circlePathGroup.append('path')
+        .attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2.5)
+        .attr('d', d3.line().x(d => gxScale(d[0])).y(d => gyScale(d[1]))(pts));
+    }
+
+    // Intersection dots
+    dotsGroup.selectAll('*').remove();
+    sols.forEach(s => {
+      const yv = Math.sqrt(Math.max(0, z0 * z0 - s.z * s.z));
+      dotsGroup.append('circle')
+        .attr('cx', gxScale(s.z)).attr('cy', gyScale(yv))
+        .attr('r', 6).attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1.5);
+    });
+
+    // ---- Wavefunction panel ----
+    const yWMax = V0 * 1.15 + 0.3;
+    wyScale.domain([0, yWMax]);
+
+    // x axis at V₀ won't work — keep x in nm, y in eV
+    wxAxisG.call(d3.axisBottom(wxScale).ticks(5).tickSize(4).tickFormat(d => d.toFixed(1)));
+    wyAxisG.call(d3.axisLeft(wyScale).ticks(5).tickSize(4).tickFormat(d => d.toFixed(1)));
+
+    wWallsGroup.selectAll('*').remove();
+    wLevelsGroup.selectAll('*').remove();
+    wWfGroup.selectAll('*').remove();
+
+    // Potential walls
+    const xWall = 0.5; // nm (L/2)
+    const wallColor = '#2A1A0E';
+    // Left wall: from 0 to V₀ at x=-0.5
+    // Right wall: from 0 to V₀ at x=+0.5
+    // Floor at y=0 from -0.5 to +0.5
+    wWallsGroup.append('line')
+      .attr('x1', wxScale(-xWall)).attr('x2', wxScale(-xWall))
+      .attr('y1', wyScale(0)).attr('y2', wyScale(V0))
+      .attr('stroke', wallColor).attr('stroke-width', 2.5);
+    wWallsGroup.append('line')
+      .attr('x1', wxScale(xWall)).attr('x2', wxScale(xWall))
+      .attr('y1', wyScale(0)).attr('y2', wyScale(V0))
+      .attr('stroke', wallColor).attr('stroke-width', 2.5);
+    // Top of walls (horizontal V₀ lines extending outward)
+    wWallsGroup.append('line')
+      .attr('x1', wxScale(-1.5)).attr('x2', wxScale(-xWall))
+      .attr('y1', wyScale(V0)).attr('y2', wyScale(V0))
+      .attr('stroke', wallColor).attr('stroke-width', 2).attr('stroke-dasharray', '5,3');
+    wWallsGroup.append('line')
+      .attr('x1', wxScale(xWall)).attr('x2', wxScale(1.5))
+      .attr('y1', wyScale(V0)).attr('y2', wyScale(V0))
+      .attr('stroke', wallColor).attr('stroke-width', 2).attr('stroke-dasharray', '5,3');
+    // Floor
+    wWallsGroup.append('line')
+      .attr('x1', wxScale(-xWall)).attr('x2', wxScale(xWall))
+      .attr('y1', wyScale(0)).attr('y2', wyScale(0))
+      .attr('stroke', wallColor).attr('stroke-width', 1.5);
+
+    // V₀ label
+    wWallsGroup.append('text')
+      .attr('x', wxScale(1.5) - 2).attr('y', wyScale(V0) - 4)
+      .attr('text-anchor', 'end').attr('fill', '#545454').attr('font-size', '10px').attr('font-weight', '700')
+      .text('V₀');
+
+    // Wavefunction scale: amplitude ~0.13*V₀ in eV units for display
+    const wfAmp = 0.13 * V0;
+
+    sols.forEach((s, idx) => {
+      const En = stateEnergy(s.z, z0, V0);
+
+      // horizontal energy level
+      wLevelsGroup.append('line')
+        .attr('x1', wxScale(-xWall)).attr('x2', wxScale(xWall))
+        .attr('y1', wyScale(En)).attr('y2', wyScale(En))
+        .attr('stroke', idx === 0 ? '#C8102E' : '#2A1A0E')
+        .attr('stroke-width', 1).attr('stroke-dasharray', '3,2').attr('opacity', 0.5);
+
+      // E_n label
+      wLevelsGroup.append('text')
+        .attr('x', wxScale(-xWall) - 3).attr('y', wyScale(En) + 3)
+        .attr('text-anchor', 'end').attr('fill', idx === 0 ? '#C8102E' : '#545454')
+        .attr('font-size', '9px').attr('font-weight', '600')
+        .text(`E${idx + 1}`);
+
+      // Wavefunction
+      const kn    = s.z / (L_m / 2);         // rad/m inside well — but we work in nm
+      const kn_nm = s.z / 0.5;               // z/L(nm)*2 = z/(0.5nm) → rad/nm  (since k=z/(L/2), L/2=0.5nm)
+      // kappa: sqrt(2*m*(V₀-En)*eV)/ħ in rad/m → rad/nm
+      const V0_J = V0 * eV_J;
+      const En_J = En * eV_J;
+      const kappa_m = Math.sqrt(Math.max(0, 2 * me_kg * (V0_J - En_J))) / hbar_J;
+      const kappa_nm = kappa_m * 1e-9; // rad/nm
+
+      // Match amplitude: inside psi = A*cos or A*sin, outside match at boundary
+      // At x=+L/2=0.5nm: inside psi_boundary and deriv must match outside psi_out
+      // We normalize to A=1 inside, compute A_out from continuity
+      const A_in = 1.0;
+      let psi_bnd, dpsi_bnd_inside; // at x=+0.5nm (right wall)
+      if (s.type === 'even') {
+        psi_bnd       = A_in * Math.cos(kn_nm * 0.5);
+        dpsi_bnd_inside = -A_in * kn_nm * Math.sin(kn_nm * 0.5);
+      } else {
+        psi_bnd       = A_in * Math.sin(kn_nm * 0.5);
+        dpsi_bnd_inside = A_in * kn_nm * Math.cos(kn_nm * 0.5);
+      }
+      // Outside: psi_out = A_out * exp(-kappa*(x-0.5)) for x>0.5
+      // Continuity: A_out = psi_bnd
+      // Deriv continuity: -kappa*A_out = dpsi_bnd_inside  — satisfied by the transcendental eq.
+      const A_out = psi_bnd;
+
+      // Build wavefunction points (x in nm)
+      const wfPts = [];
+      const xNmMin = -1.5, xNmMax = 1.5;
+      const NWF = 300;
+      for (let i = 0; i <= NWF; i++) {
+        const xNm = xNmMin + (xNmMax - xNmMin) * i / NWF;
+        let psi;
+        if (Math.abs(xNm) <= 0.5) {
+          psi = s.type === 'even'
+            ? A_in * Math.cos(kn_nm * xNm)
+            : A_in * Math.sin(kn_nm * xNm);
+        } else {
+          const dist = Math.abs(xNm) - 0.5;
+          psi = A_out * Math.exp(-kappa_nm * dist);
+          if (s.type === 'odd' && xNm < 0) psi = -psi; // odd symmetry
+        }
+        // Scale to display units and shift to E_n level
+        wfPts.push([xNm, En + wfAmp * psi]);
+      }
+
+      const wfColor = idx === 0 ? '#C8102E' : '#2A1A0E';
+      const wfOpacity = idx === 0 ? 1.0 : 0.55;
+
+      wWfGroup.append('path')
+        .attr('fill', 'none')
+        .attr('stroke', wfColor)
+        .attr('stroke-width', 1.8)
+        .attr('opacity', wfOpacity)
+        .attr('d', d3.line()
+          .x(d => wxScale(d[0]))
+          .y(d => wyScale(Math.min(d[1], yWMax)))
+          .defined(d => isFinite(d[1]))
+          (wfPts));
+    });
+
+    // Readout
+    document.getElementById('readout').textContent =
+      `V₀ = ${V0.toFixed(2)} eV | z₀ = ${z0.toFixed(3)} | N = ${N} bound state${N !== 1 ? 's' : ''}`;
+  }
+
+  document.getElementById('sliderV0').addEventListener('input', update);
+  update();
+
+  // ===== Testable Predictions =====
+  // P1: V₀=0.5 eV has ≥1 state
+  const z0_05 = C * Math.sqrt(0.5);
+  const sols05 = findSolutions(z0_05);
+  console.assert(sols05.length >= 1, 'P1: V₀=0.5eV has ≥1 state: N=' + sols05.length);
+
+  // P2: All energies < V₀ and < ISW energies
+  const z0_3 = C * Math.sqrt(3.0);
+  const sols3 = findSolutions(z0_3);
+  const E_ISW_1 = 0.3770; // eV for n=1, L=1nm
+  const E_1_finite = sols3[0] ? stateEnergy(sols3[0].z, z0_3, 3.0) : null;
+  if (E_1_finite !== null) {
+    console.assert(E_1_finite < 3.0, 'P2a: E_1 < V₀: ' + E_1_finite.toFixed(4));
+    console.assert(E_1_finite < E_ISW_1, 'P2b: E_1 < ISW_1 (' + E_ISW_1 + ' eV): ' + E_1_finite.toFixed(4));
+  }
+  console.log('Finite Well: V₀=3eV z₀=', z0_3.toFixed(3), 'N=', sols3.length,
+    'E_1=', E_1_finite ? E_1_finite.toFixed(4) : 'N/A', 'eV');
+
+  // Expose findSolutions and stateEnergy for inline use in assertions
+  window._fw = { findSolutions, stateEnergy, C };
+})();
+</script>
+</body>
+</html>

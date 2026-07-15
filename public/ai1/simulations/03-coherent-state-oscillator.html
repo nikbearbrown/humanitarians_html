@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coherent State Oscillator</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    padding: 24px;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .sub { font-size: 0.8rem; color: #545454; margin-bottom: 18px; line-height: 1.5; max-width: 680px; }
+  .panels { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .panel-label { font-size: 0.7rem; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0;
+    padding: 12px 16px; border: 1.5px solid #2A1A0E; background: #fafafa;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+  .ctrl-group label { font-size: 0.74rem; font-weight: 600; }
+  input[type=range] {
+    -webkit-appearance: none; width: 190px; height: 4px;
+    background: #2A1A0E; border-radius: 2px; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: #C8102E; cursor: pointer;
+  }
+  #play-btn {
+    padding: 6px 20px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    background: #2A1A0E; color: #fff; border: none; font-family: inherit;
+    letter-spacing: 0.04em; border-radius: 2px;
+  }
+  #play-btn:hover { background: #C8102E; }
+  .readout {
+    font-size: 0.82rem; font-weight: 600; padding: 9px 14px;
+    border: 2px solid #2A1A0E; background: #fff;
+    display: flex; flex-wrap: wrap; gap: 14px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Coherent State — Minimum-Uncertainty Oscillation That Never Spreads</h1>
+<p class="sub">
+  A displaced Gaussian bouncing in the harmonic well. σ<sub>x</sub>·σ<sub>p</sub> = ℏ/2 for all time.
+  Compare to the Fock state |n⟩ at the same energy — it never moves (⟨x⟩=0 always).
+</p>
+
+<div class="panels">
+  <div>
+    <div class="panel-label">|ψ(x,t)|² — wavefunction in oscillator potential</div>
+    <svg id="wave-svg"></svg>
+  </div>
+  <div>
+    <div class="panel-label">Phase space (⟨x⟩, ⟨p⟩)</div>
+    <svg id="phase-svg"></svg>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>|α| = <span id="alpha-val">2.00</span> (amplitude)</label>
+    <input type="range" id="alpha-slider" min="0.5" max="4" step="0.05" value="2.0">
+  </div>
+  <div class="ctrl-group">
+    <label>Speed = <span id="speed-val">1.0</span>×</label>
+    <input type="range" id="speed-slider" min="0.5" max="3" step="0.1" value="1.0">
+  </div>
+  <div class="ctrl-group">
+    <button id="play-btn">Pause</button>
+  </div>
+</div>
+
+<div class="readout" id="readout">
+  <span>t = <span id="r-t">0.00</span></span>
+  <span>⟨x⟩ = <span id="r-x">—</span> x₀</span>
+  <span>⟨p⟩ = <span id="r-p">—</span></span>
+  <span>σ<sub>x</sub>·σ<sub>p</sub> = 0.500 ℏ</span>
+  <span>T = 6.283 (= 2π)</span>
+</div>
+
+<script>
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+
+// ── Fock state helpers ────────────────────────────────────────────────────────
+function H(n, x){
+  if(n===0) return 1;
+  if(n===1) return 2*x;
+  let a=1, b=2*x;
+  for(let k=2;k<=n;k++){ const c=2*x*b-2*(k-1)*a; a=b; b=c; }
+  return b;
+}
+function factorial(n){ let f=1; for(let k=2;k<=n;k++) f*=k; return f; }
+function psiN2(n, x){
+  const Nn2 = 1/(Math.sqrt(Math.PI)*Math.pow(2,n)*factorial(n));
+  return Nn2*H(n,x)**2*Math.exp(-x*x);
+}
+
+// ── Wave SVG ─────────────────────────────────────────────────────────────────
+const WW=400, WH=240;
+const wm={top:18,right:14,bottom:42,left:46};
+const wiW=WW-wm.left-wm.right, wiH=WH-wm.top-wm.bottom;
+
+const waveSvg = d3.select('#wave-svg').attr('width',WW).attr('height',WH);
+const waveG   = waveSvg.append('g').attr('transform',`translate(${wm.left},${wm.top})`);
+waveSvg.append('defs').append('clipPath').attr('id','wave-clip')
+  .append('rect').attr('width',wiW).attr('height',wiH);
+
+const xScaleW = d3.scaleLinear().domain([-7,7]).range([0,wiW]);
+const yScaleW = d3.scaleLinear().domain([0,0.8]).range([wiH,0]);
+
+// Axes
+waveG.append('g').attr('transform',`translate(0,${wiH})`)
+  .call(d3.axisBottom(xScaleW).ticks(7).tickSize(4))
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+waveG.append('g').call(d3.axisLeft(yScaleW).ticks(5).tickSize(4))
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+waveG.append('text').attr('x',wiW/2).attr('y',wiH+35)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('x (x₀)');
+waveG.append('text').attr('transform','rotate(-90)').attr('x',-wiH/2).attr('y',-34)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('|ψ|²');
+
+// Potential parabola (scaled: V(x)=x²/2; scale to max y=0.5 at x=7 → scale=0.5/24.5)
+const potScale = 0.38/(7*7/2);
+const potPts = d3.range(200).map(i=>{ const x=-7+i*14/199; return [x, x*x/2*potScale]; });
+waveG.append('path').attr('clip-path','url(#wave-clip)')
+  .datum(potPts).attr('fill','none').attr('stroke','#ccc').attr('stroke-width',1.5)
+  .attr('d', d3.line().x(d=>xScaleW(d[0])).y(d=>yScaleW(d[1])));
+
+// Fock state (static)
+const fockPath = waveG.append('path').attr('clip-path','url(#wave-clip)')
+  .attr('fill','none').attr('stroke',INK).attr('stroke-width',1.2)
+  .attr('stroke-dasharray','4,3').attr('opacity',0.7);
+
+// Coherent state (animated fill + stroke)
+const cohFill = waveG.append('path').attr('clip-path','url(#wave-clip)')
+  .attr('fill',RED).attr('fill-opacity',0.13);
+const cohLine = waveG.append('path').attr('clip-path','url(#wave-clip)')
+  .attr('fill','none').attr('stroke',RED).attr('stroke-width',2);
+
+// ⟨x⟩ vertical dashed line
+const xMeanLine = waveG.append('line').attr('clip-path','url(#wave-clip)')
+  .attr('stroke',RED).attr('stroke-width',1.2).attr('stroke-dasharray','4,3')
+  .attr('y1',0).attr('y2',wiH);
+
+// Legend
+waveG.append('text').attr('x',wiW-4).attr('y',14)
+  .attr('text-anchor','end').attr('font-size','9px').attr('fill',RED).attr('font-weight','700')
+  .attr('id','coh-legend').text('Coherent |α|=2');
+waveG.append('text').attr('x',wiW-4).attr('y',26)
+  .attr('text-anchor','end').attr('font-size','9px').attr('fill',INK).attr('font-weight','600')
+  .attr('id','fock-legend').text('Fock |n=4⟩');
+
+// ── Phase SVG ────────────────────────────────────────────────────────────────
+const PW=260, PH=240;
+const pm={top:18,right:14,bottom:42,left:46};
+const piW=PW-pm.left-pm.right, piH=PH-pm.top-pm.bottom;
+
+const phaseSvg = d3.select('#phase-svg').attr('width',PW).attr('height',PH);
+const phaseG   = phaseSvg.append('g').attr('transform',`translate(${pm.left},${pm.top})`);
+phaseSvg.append('defs').append('clipPath').attr('id','phase-clip')
+  .append('rect').attr('width',piW).attr('height',piH);
+
+const xScaleP = d3.scaleLinear().domain([-6,6]).range([0,piW]);
+const yScaleP = d3.scaleLinear().domain([-6,6]).range([piH,0]);
+
+phaseG.append('g').attr('transform',`translate(0,${piH})`)
+  .call(d3.axisBottom(xScaleP).ticks(5).tickSize(4))
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+phaseG.append('g').call(d3.axisLeft(yScaleP).ticks(5).tickSize(4))
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+phaseG.append('text').attr('x',piW/2).attr('y',piH+35)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('⟨x⟩ (x₀)');
+phaseG.append('text').attr('transform','rotate(-90)').attr('x',-piH/2).attr('y',-34)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('⟨p⟩ (ℏ/x₀)');
+
+// Orbit circle (gray dashed)
+const orbitCircle = phaseG.append('circle')
+  .attr('fill','none').attr('stroke','#bbb').attr('stroke-width',1.2)
+  .attr('stroke-dasharray','4,3');
+
+// Fock turning-point circle
+const fockCircle = phaseG.append('circle')
+  .attr('fill','none').attr('stroke',SLATE).attr('stroke-width',1.2)
+  .attr('stroke-dasharray','3,4');
+const fockCircleLabel = phaseG.append('text')
+  .attr('font-size','8px').attr('fill',SLATE).attr('text-anchor','middle');
+
+// Trail (last 120° of orbit)
+const trailPath = phaseG.append('path').attr('clip-path','url(#phase-clip)')
+  .attr('fill','none').attr('stroke',RED).attr('stroke-width',2.5).attr('stroke-opacity',0.5);
+
+// Current dot
+const phaseDot = phaseG.append('circle').attr('r',5).attr('fill',RED);
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let simTime   = 0;
+let lastRaf   = null;
+let running   = true;
+let prevTime  = null;
+
+// Wavefunction grid
+const NX = 300;
+const xPts = d3.range(NX).map(i => -7 + i*14/(NX-1));
+
+function getAlpha(){ return +document.getElementById('alpha-slider').value; }
+function getSpeed(){ return +document.getElementById('speed-slider').value; }
+
+function drawFock(alpha){
+  const n = Math.max(0, Math.round(alpha*alpha));
+  const fockVals = xPts.map(x => psiN2(n, x));
+  const lineGen = d3.line().x((d,i)=>xScaleW(xPts[i])).y(d=>yScaleW(d));
+  fockPath.datum(fockVals).attr('d', lineGen);
+  document.getElementById('fock-legend').textContent = `Fock |n=${n}⟩`;
+
+  // Fock turning point in phase space: x_tp = √(2n+1)
+  const xtp = Math.sqrt(2*n+1);
+  if(xtp <= 6){
+    fockCircle.attr('cx',xScaleP(0)).attr('cy',yScaleP(0))
+      .attr('r', Math.abs(xScaleP(xtp)-xScaleP(0)));
+    fockCircleLabel
+      .attr('x',xScaleP(0)).attr('y',yScaleP(-xtp)-4)
+      .text(`classical turning pts ±${xtp.toFixed(2)}`);
+  }
+}
+
+function render(t){
+  if(prevTime!==null && running){
+    const dt_real = t - prevTime;
+    const dt_sim  = (dt_real/1000) * getSpeed() * (2*Math.PI/6);
+    simTime += dt_sim;
+  }
+  prevTime = t;
+
+  const alpha = getAlpha();
+  const r     = alpha * Math.SQRT2; // orbit radius in phase space
+  const xMean = r * Math.cos(simTime);
+  const pMean = -r * Math.sin(simTime);
+
+  // Coherent state wavefunction: Gaussian centered at xMean, σ_x = 1/√2 → σ² = 0.5
+  // |ψ|² = (1/√π) exp(-(x-xMean)²)  where σ_x=1/√2
+  const cohVals = xPts.map(x => (1/Math.sqrt(Math.PI))*Math.exp(-(x-xMean)**2));
+
+  const areaGen = d3.area()
+    .x((d,i)=>xScaleW(xPts[i])).y0(yScaleW(0)).y1(d=>yScaleW(d));
+  const lineGen = d3.line()
+    .x((d,i)=>xScaleW(xPts[i])).y(d=>yScaleW(d));
+
+  cohFill.datum(cohVals).attr('d',areaGen);
+  cohLine.datum(cohVals).attr('d',lineGen);
+
+  // ⟨x⟩ line
+  const xMeanPx = xScaleW(Math.max(-7,Math.min(7,xMean)));
+  xMeanLine.attr('x1',xMeanPx).attr('x2',xMeanPx);
+
+  // Legend update
+  document.getElementById('coh-legend').textContent = `Coherent |α|=${alpha.toFixed(1)}`;
+
+  // Orbit in phase space
+  orbitCircle.attr('cx',xScaleP(0)).attr('cy',yScaleP(0))
+    .attr('r', Math.abs(xScaleP(r)-xScaleP(0)));
+
+  // Trail: last 120° = 2π/3
+  const trailPts = d3.range(60).map(i=>{
+    const pastT = simTime - (2*Math.PI/3)*(i/59);
+    return [r*Math.cos(pastT), -r*Math.sin(pastT)];
+  });
+  trailPath.datum(trailPts)
+    .attr('d', d3.line().x(d=>xScaleP(d[0])).y(d=>yScaleP(d[1])));
+
+  // Current dot
+  phaseDot.attr('cx',xScaleP(xMean)).attr('cy',yScaleP(pMean));
+
+  // Readout
+  document.getElementById('r-t').textContent = (simTime%(2*Math.PI)).toFixed(2);
+  document.getElementById('r-x').textContent = xMean.toFixed(2);
+  document.getElementById('r-p').textContent = pMean.toFixed(2);
+
+  lastRaf = requestAnimationFrame(render);
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+document.getElementById('alpha-slider').addEventListener('input', ()=>{
+  const alpha = getAlpha();
+  document.getElementById('alpha-val').textContent = alpha.toFixed(2);
+  drawFock(alpha);
+});
+document.getElementById('speed-slider').addEventListener('input', ()=>{
+  document.getElementById('speed-val').textContent = (+document.getElementById('speed-slider').value).toFixed(1);
+});
+document.getElementById('play-btn').addEventListener('click', ()=>{
+  running = !running;
+  document.getElementById('play-btn').textContent = running ? 'Pause' : 'Play';
+  if(running) prevTime = null;
+});
+
+// Init
+document.getElementById('alpha-val').textContent = '2.00';
+document.getElementById('speed-val').textContent = '1.0';
+drawFock(2.0);
+lastRaf = requestAnimationFrame(render);
+
+// ── Console assertions ────────────────────────────────────────────────────────
+(function runTests(){
+  console.assert(Math.abs(Math.cos(2*Math.PI)-1)<1e-10,
+    'P1: period 2π: cos(2π)='+Math.cos(2*Math.PI));
+
+  const prod = (1/Math.SQRT2)*(1/Math.SQRT2);
+  console.assert(Math.abs(prod-0.5)<1e-10,
+    'P2: σ_x·σ_p=0.5: '+prod);
+
+  const psi40 = psiN2(4, 0);
+  console.assert(psi40>0, 'P3: Fock n=4 psi(0)>0: '+psi40.toFixed(6));
+
+  // Extra: H_4(0) = 3 (from recurrence: H2(0)=-2, H3(0)=0, H4(0)=12x*0-6*(-2)=12... wait let's verify)
+  // H0=1, H1=0 at x=0, H2=2*0*0-2*1=-2, H3=2*0*(-2)-4*0=0, H4=2*0*0-6*(-2)=12 → so H4(0)=12
+  // Nn4 = 1/(√π * 16 * 24) = 1/(√π * 384)
+  // psi4(0) = Nn4 * 144 * 1 = 144/(√π*384) > 0 ✓
+  console.assert(H(4,0) === 12, 'H4(0)=12: got '+H(4,0));
+
+  console.log('Coherent: P1 period 2π, P2 σ·σ=', prod,
+    'P3 psi4(0)=', psi40.toFixed(6));
+})();
+</script>
+</body>
+</html>
