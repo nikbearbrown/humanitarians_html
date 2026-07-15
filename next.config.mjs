@@ -1,3 +1,8 @@
+import { fileURLToPath } from 'node:url'
+import { dirname } from 'node:path'
+
+const projectDir = dirname(fileURLToPath(import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -9,12 +14,16 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // This repo lives inside a folder with many sibling Next projects, so Next
+  // otherwise infers a parent tracing root and (a) walks into siblings and
+  // (b) makes exclude globs miss. Pin the root to THIS project.
+  outputFileTracingRoot: projectDir,
   // The deck library (1.2GB+) is served statically by the CDN and is never read
   // inside a serverless function (lecture routes use lib/lectures-manifest.json).
-  // Exclude it from function tracing so functions that touch public/ (tools,
-  // simulations, visualizations) don't bundle it and blow the 250MB limit.
+  // Exclude it from every function bundle so functions that touch public/ don't
+  // trace it in and blow the 250MB limit.
   outputFileTracingExcludes: {
-    '*': ['public/ai1/lectures/**'],
+    '*': ['public/ai1/lectures/**', '**/public/ai1/lectures/**'],
   },
   async redirects() {
     const rootFilesMovedToArtifacts = [
