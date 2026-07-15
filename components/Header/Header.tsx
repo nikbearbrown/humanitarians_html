@@ -32,11 +32,9 @@ export default function Header() {
   }, [isMenuOpen])
 
   const navigation = [
-    { name: "Blog", href: "/blog" },
-    { name: "Courses", href: "/courses" },
+    { name: "AI+1", href: "/ai1" },
     { name: "Fellows", href: "/fellows" },
     { name: "Projects", href: "/projects" },
-    { name: "AI+1", href: "/ai1" },
     { name: "Videos", href: "/videos" },
   ]
 

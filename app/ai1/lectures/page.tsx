@@ -1,17 +1,13 @@
-import { join } from 'path'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { scanLectures } from '@/lib/ai1'
-
-export const dynamic = 'force-dynamic'
+import groups from '@/lib/lectures-manifest.json'
 
 export const metadata: Metadata = {
   title: 'Lectures - AI+1 - Humanitarians AI',
-  description: 'Narrated lecture decks, chapter by chapter, across the book library.',
+  description: 'Narrated lecture decks, chapter by chapter, across the library.',
 }
 
 export default function LecturesPage() {
-  const groups = scanLectures(join(process.cwd(), 'public', 'ai1', 'lectures'))
   const total = groups.reduce((n, g) => n + g.docs.length, 0)
 
   return (
