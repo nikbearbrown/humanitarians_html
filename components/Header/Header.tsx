@@ -68,16 +68,6 @@ export default function Header() {
                 Youtube
               </button>
             </Link>
-            <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer">
-              <button className={cn(baseButtonStyles, headerButtonStyles)}>
-                Substack
-              </button>
-            </Link>
-            <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV">
-              <button className={cn(baseButtonStyles, headerButtonStyles)}>
-                Spotify
-              </button>
-            </Link>
             <Link href="/donate">
               <button className={cn(baseButtonStyles, headerButtonStyles)}>
                 Donate
@@ -120,12 +110,6 @@ export default function Header() {
               <div className="flex flex-col gap-4 mt-4">
                 <Link href="https://www.youtube.com/@humanitariansai" className="text-base font-medium">
                   YouTube
-                </Link>
-                <Link href="https://humanitariansai.substack.com/" target="_blank" rel="noopener noreferrer" className="text-base font-medium">
-                  Substack
-                </Link>
-                <Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-base font-medium">
-                  Spotify
                 </Link>
                 <Link href="/donate" className="mt-2">
                   <button className={cn(baseButtonStyles, headerButtonStyles, "w-full")}>
