@@ -35,3 +35,5 @@ next-env.d.ts
 # OS generated files
 Thumbs.db
 ehthumbs.db 
+# Local scratch/trash (VM cannot delete files; deletions land here)
+_to_delete/
