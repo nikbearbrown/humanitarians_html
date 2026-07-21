@@ -655,7 +655,7 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/cognitive-development" className="text-primary hover:underline">Cognitive Development</a>
+                        <a href="/brain-cognitive-development" className="text-primary hover:underline">Cognitive Development</a>
                       </h4>
                       <p className="text-sm">YouTube videos and Spotify songs designed to "exercise the brain"</p>
                     </div>
@@ -674,13 +674,13 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/graduate-ai-fluency" className="text-primary hover:underline">Graduate AI Fluency</a>
+                        <a href="/ai-fluency" className="text-primary hover:underline">Graduate AI Fluency</a>
                       </h4>
                       <p className="text-sm">For recent graduates learning AI communication skills</p>
                     </div>
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="https://www.humanitarians.ai/professional-ai-fluency" className="text-primary hover:underline">Professional AI Fluency</a>
+                        <a href="/ai-fluency" className="text-primary hover:underline">Professional AI Fluency</a>
                       </h4>
                       <p className="text-sm">For mid-career professionals enhancing AI communication</p>
                     </div>

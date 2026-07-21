@@ -22,7 +22,7 @@ export default function OzSongs() {
             This is very much a work in progress with me sharing my experience doing, mistakes included. One learns by doing, if one doesn't make mistakes it means one is not experimenting with new things.
           </p>
           <p className="text-xl text-muted-foreground mb-8">
-            Oz Songs is useful for the Lyrical Literacy project for those making music and music art and videos for education and their loved ones. I will also be putting the lessons on <a href="https://www.youtube.com/@humanitariansai" className="text-primary hover:underline">YouTube</a>, <a href="https://github.com/nikbearbrown/Oz_Songs" className="text-primary hover:underline">Github</a>, <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline">humanitarians.ai/oz-songs</a>, <a href="https://oz.humanitarians.ai/" className="text-primary hover:underline font-bold">Oz Songs YouTube</a>, and <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline font-bold">Oz Songs WWW</a>.
+            Oz Songs is useful for the Lyrical Literacy project for those making music and music art and videos for education and their loved ones. I will also be putting the lessons on <a href="https://www.youtube.com/@humanitariansai" className="text-primary hover:underline">YouTube</a>, <a href="https://github.com/Humanitariansai/Lyrical-Literacy" className="text-primary hover:underline">Github</a>, <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline">humanitarians.ai/oz-songs</a>, <a href="https://oz.humanitarians.ai/" className="text-primary hover:underline font-bold">Oz Songs YouTube</a>, and <a href="https://www.humanitarians.ai/oz-songs" className="text-primary hover:underline font-bold">Oz Songs WWW</a>.
           </p>
           
           {/* Added prominent buttons for the new links */}
@@ -38,7 +38,7 @@ export default function OzSongs() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/r3ht32NR_Ig?si=dJcO3LV6nzAUFlyc?enablejsapi=1"
+              src="https://www.youtube.com/embed/r3ht32NR_Ig?si=dJcO3LV6nzAUFlyc&enablejsapi=1"
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -209,7 +209,7 @@ export default function OzSongs() {
               <SecondaryButton href="https://www.musinique.com/oz-songs">
                 Project Documentation
               </SecondaryButton>
-              <SecondaryButton href="https://github.com/nikbearbrown/Oz_Songs">
+              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
                 Code & Assets on GitHub
               </SecondaryButton>
               <SecondaryButton href="https://www.youtube.com/@humanitariansai">

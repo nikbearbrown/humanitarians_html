@@ -22,7 +22,7 @@ export default function PopperPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/v0CVQJ1T7Iw?si=RNzWLRzWFS4ioV5a?enablejsapi=1"
+              src="https://www.youtube.com/embed/v0CVQJ1T7Iw?si=RNzWLRzWFS4ioV5a&enablejsapi=1"
               title="YouTube video player"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

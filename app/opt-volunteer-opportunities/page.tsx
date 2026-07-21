@@ -91,7 +91,7 @@ export default function OPTVolunteers() {
               <SecondaryButton href="/programs/fellows/fellows-details">
                 Program Details
               </SecondaryButton>
-              <SecondaryButton href="/programs/fellows/explore">
+              <SecondaryButton href="/projects">
                 View Active Projects
               </SecondaryButton>
             </div>

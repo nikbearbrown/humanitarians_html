@@ -228,7 +228,7 @@ export default function ConsultingPage() {
                 <li>• Professional development and networking opportunities</li>
               </ul>
               <div className="mt-6">
-                <PrimaryButton href="/fellows-program">
+                <PrimaryButton href="/fellows">
                   Learn More About Our Fellowship Program
                 </PrimaryButton>
               </div>

@@ -460,7 +460,7 @@ export default function OpenAIPage() {
     <p className="text-muted-foreground">
       Our students and Fellows write books and research articles on a wide range of topics in AI and machine learning. These publications explore cutting-edge concepts, methodologies, and applications across various domains, contributing to the advancement of AI knowledge and practice.
     </p>
-    <a href="https://www.humanitarians.ai/publications" className="text-primary hover:underline">View Publications →</a>
+    <a href="/books" className="text-primary hover:underline">View Publications →</a>
   </div>
   
   <div className="mt-6">
