@@ -27,10 +27,21 @@ function titleCase(slug: string): string {
     .join(' ')
 }
 
+// Legacy artifact files kept on disk only so the /:file(*-tool.html) and
+// rootFilesMovedToArtifacts redirects in next.config.mjs still resolve.
+// They're superseded by a "-tool.html" counterpart and shouldn't show up
+// as separate entries in the Tools directory.
+const SUPERSEDED_ARTIFACT_FILES = new Set([
+  'gru.html', 'gru-reference.html', 'critiq-reference.html',
+  'tictoc-reference-v2.html', 'cajal-reference.html',
+])
+
 export function scanHtmlDir(dir: string): HtmlDocMeta[] {
   let files: string[]
   try {
-    files = readdirSync(dir).filter(f => f.endsWith('.html')).sort()
+    files = readdirSync(dir)
+      .filter(f => f.endsWith('.html') && !SUPERSEDED_ARTIFACT_FILES.has(f))
+      .sort()
   } catch {
     return []
   }
