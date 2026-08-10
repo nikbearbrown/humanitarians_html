@@ -138,14 +138,14 @@ export default function Footer() {
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
                <li><Link href="/80-days" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
                <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
-               <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li>
+               <li><Link href="https://dayhoff.humanitarians.ai" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</Link></li>
                <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
                <li><a href="https://www.irreducibly.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Irreducibly Human</a></li>
                <li><a href="https://www.lyricalliteracy.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</a></li>
                <li><Link href="/madison" className="text-muted-foreground hover:text-foreground transition-colors">Madison</Link></li>
-               <li><a href="https://www.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Medhavy</a></li>
+               <li><Link href="https://medhavy.humanitarians.ai" className="text-muted-foreground hover:text-foreground transition-colors">Medhavy</Link></li>
                <li><a href="https://www.musinique.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</a></li>
-               <li><a href="https://www.mycroft.biz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</a></li>
+               <li><Link href="https://mycroft.humanitarians.ai" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</Link></li>
                <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
                <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li>
                <li><a href="https://www.zebonastic.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</a></li>

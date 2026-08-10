@@ -184,7 +184,7 @@ export default function OpenAIPage() {
       A modular, agent-based framework that applies AI to biological and health sciences. Named after Margaret Belle Dayhoff, this system helps researchers unlock patterns in bioinformatics, epidemiology, and public health. Includes The RAMAN Effect project, which combines AI with Surface-Enhanced Raman Spectroscopy to detect pathogens and pollutants in wastewater with high precision.
     </p>
     <a href="https://github.com/Humanitariansai/Dayhoff" className="text-primary hover:underline">GitHub Repository →</a>
-    <a href="https://www.humanitarians.ai/dayhoff" className="text-primary hover:underline ml-4">Project Page →</a>
+    <a href="https://dayhoff.humanitarians.ai" className="text-primary hover:underline ml-4">Project Page →</a>
   </div>
   
   <div className="mt-6">
@@ -202,7 +202,7 @@ export default function OpenAIPage() {
       AI tools and innovations that promote economic access, financial literacy, and data-driven decision-making. Part of Humanitarians AI's mission to make financial systems more inclusive.
     </p>
     <a href="https://github.com/Humanitariansai/Mycroft" className="text-primary hover:underline">GitHub Repository →</a>
-    <a href="https://www.humanitarians.ai/mycroft" className="text-primary hover:underline ml-4">Project Page →</a>
+    <a href="https://mycroft.humanitarians.ai" className="text-primary hover:underline ml-4">Project Page →</a>
   </div>
   
   <div className="mt-6">
