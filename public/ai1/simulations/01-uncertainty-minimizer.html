@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uncertainty Minimizer — σₓ · σₚ ≥ ħ/2</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 18px 28px 14px;
+    border-bottom: 2px solid #2A1A0E;
+  }
+  header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  header p {
+    font-size: 12px;
+    color: #545454;
+    margin-top: 3px;
+  }
+
+  .main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+  }
+
+  /* ─── LEFT PANEL ─── */
+  .left-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 20px 20px 16px 24px;
+    border-right: 1px solid #d8d0c8;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .shape-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .shape-btn {
+    padding: 5px 13px;
+    border: 1.5px solid #2A1A0E;
+    background: #fff;
+    color: #2A1A0E;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 3px;
+    transition: background 0.12s, color 0.12s;
+  }
+  .shape-btn.active {
+    background: #2A1A0E;
+    color: #fff;
+  }
+  .shape-btn:hover:not(.active) {
+    background: #f0ece6;
+  }
+
+  .slider-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .slider-group label {
+    font-size: 13px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  input[type=range] {
+    width: 140px;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .slider-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 32px;
+  }
+
+  .chart-area {
+    flex: 1;
+    min-height: 260px;
+  }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    padding-left: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #545454;
+  }
+  .legend-line {
+    width: 26px;
+    height: 3px;
+  }
+
+  /* ─── GAUGE STRIP ─── */
+  .gauge-strip {
+    padding: 14px 0 0;
+    border-top: 1px solid #d8d0c8;
+  }
+  .gauge-label {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ─── RIGHT PANEL ─── */
+  .right-panel {
+    width: 260px;
+    flex-shrink: 0;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #545454;
+    margin-bottom: 2px;
+  }
+
+  .stat-card {
+    border: 1.5px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 10px 14px 9px;
+    background: #fafaf8;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 3px;
+  }
+  .stat-card .stat-value {
+    font-size: 19px;
+    font-weight: 700;
+    color: #2A1A0E;
+    letter-spacing: -0.5px;
+  }
+  .stat-card .stat-unit {
+    font-size: 11px;
+    color: #545454;
+    margin-top: 1px;
+  }
+
+  .ratio-card {
+    border: 2px solid #2A1A0E;
+    border-radius: 4px;
+    padding: 12px 14px 10px;
+    background: #fafaf8;
+    text-align: center;
+  }
+  .ratio-card .ratio-label {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 4px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .ratio-card .ratio-val {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .ratio-card .ratio-interp {
+    font-size: 11px;
+    margin-top: 5px;
+    font-weight: 600;
+  }
+
+  .separator {
+    border: none;
+    border-top: 1px solid #d8d0c8;
+    margin: 2px 0;
+  }
+
+  .note-box {
+    padding: 8px 10px;
+    background: #f5f2ee;
+    border-left: 3px solid #545454;
+    font-size: 11px;
+    color: #545454;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Uncertainty Minimizer — σ<sub>x</sub> · σ<sub>p</sub> ≥ ħ/2</h1>
+  <p>Only the Gaussian saturates the Heisenberg bound (ratio = 1.000 exactly) — all other shapes give ratio &gt; 1</p>
+</header>
+
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="controls-row">
+      <div class="shape-group" id="shapeButtons">
+        <button class="shape-btn active" data-shape="gaussian">Gaussian</button>
+        <button class="shape-btn" data-shape="square">Square</button>
+        <button class="shape-btn" data-shape="triangle">Triangle</button>
+        <button class="shape-btn" data-shape="cosine2">Cosine²</button>
+      </div>
+      <div class="slider-group">
+        <label for="sigmaSlider">σ =</label>
+        <input type="range" id="sigmaSlider" min="0.5" max="3" step="0.05" value="1.2">
+        <span class="slider-val" id="sigmaVal">1.20</span>
+        <span style="font-size:12px;color:#545454;">(ħ=1)</span>
+      </div>
+    </div>
+
+    <div class="chart-area" id="chartArea"></div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:#C8102E;"></div>
+        <span>ψ(x) real part</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:#545454; border-top: 2px dashed #545454; height:0;"></div>
+        <span>|φ(k)|² (scaled)</span>
+      </div>
+    </div>
+
+    <div class="gauge-strip">
+      <div class="gauge-label">Uncertainty Gauge — ratio × (ħ/2)</div>
+      <div id="gaugeArea"></div>
+      <div style="font-size:11px;color:#545454;margin-top:4px;">Dashed line = minimum ħ/2 (Gaussian only)</div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="panel-title">Quantum Statistics</div>
+
+    <div class="stat-card">
+      <div class="stat-label">Position spread σ<sub>x</sub></div>
+      <div class="stat-value" id="statSigX">—</div>
+      <div class="stat-unit">ħ=1 units</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Momentum spread σ<sub>p</sub></div>
+      <div class="stat-value" id="statSigP">—</div>
+      <div class="stat-unit">ħ=1 units</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Product σ<sub>x</sub> · σ<sub>p</sub></div>
+      <div class="stat-value" id="statProduct">—</div>
+      <div class="stat-unit">in units of ħ/2</div>
+    </div>
+
+    <hr class="separator">
+
+    <div class="ratio-card">
+      <div class="ratio-label">Ratio = (σ<sub>x</sub>·σ<sub>p</sub>) / (ħ/2)</div>
+      <div class="ratio-val" id="ratioVal">—</div>
+      <div class="ratio-interp" id="ratioInterp">—</div>
+    </div>
+
+    <div class="note-box">
+      <strong>Heisenberg bound:</strong> σ<sub>x</sub> · σ<sub>p</sub> ≥ ħ/2<br>
+      Minimum-uncertainty state: <em>Gaussian only</em>.<br>
+      Ratio ≡ 1.000 ← saturated.<br>
+      Any other shape → ratio &gt; 1.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONSTANTS & GRID
+// ─────────────────────────────────────────────
+const N = 256;
+const HBAR = 1.0; // dimensionless
+
+// ─────────────────────────────────────────────
+// WAVE FUNCTION SHAPES (amplitude, un-normalized)
+// Returns Float64Array of length N (real amplitudes, k0=0)
+// ─────────────────────────────────────────────
+function makeGrid(sigma) {
+  const xs = new Float64Array(N);
+  const span = 8 * sigma;
+  for (let i = 0; i < N; i++) xs[i] = -span + i * (2 * span) / (N - 1);
+  return xs;
+}
+
+function shapeAmplitude(shape, sigma, xs) {
+  const psi = new Float64Array(N);
+  switch (shape) {
+    case 'gaussian': {
+      for (let i = 0; i < N; i++) psi[i] = Math.exp(-xs[i] * xs[i] / (4 * sigma * sigma));
+      break;
+    }
+    case 'square': {
+      // Width chosen so σ_x ≈ σ: uniform on |x| < σ√3
+      const half = sigma * Math.sqrt(3);
+      for (let i = 0; i < N; i++) psi[i] = Math.abs(xs[i]) < half ? 1.0 : 0.0;
+      break;
+    }
+    case 'triangle': {
+      // Width = 2σ√6 → σ_x ≈ σ for triangular
+      const half = sigma * Math.sqrt(6);
+      for (let i = 0; i < N; i++) {
+        const ax = Math.abs(xs[i]);
+        psi[i] = ax < half ? (1 - ax / half) : 0.0;
+      }
+      break;
+    }
+    case 'cosine2': {
+      // cos²(πx/L) on |x|<L/2, L = 4σ (σ_x ≈ σ for this choice)
+      const L = 4 * sigma;
+      const half = L / 2;
+      for (let i = 0; i < N; i++) {
+        const ax = Math.abs(xs[i]);
+        if (ax < half) {
+          const c = Math.cos(Math.PI * xs[i] / L);
+          psi[i] = c * c;
+        } else {
+          psi[i] = 0.0;
+        }
+      }
+      break;
+    }
+  }
+  return psi;
+}
+
+// ─────────────────────────────────────────────
+// NORMALIZE: ∫|ψ|² dx = 1
+// ─────────────────────────────────────────────
+function normalize(psi, dx) {
+  let norm2 = 0;
+  for (let i = 0; i < N; i++) norm2 += psi[i] * psi[i] * dx;
+  const norm = Math.sqrt(norm2);
+  const out = new Float64Array(N);
+  for (let i = 0; i < N; i++) out[i] = psi[i] / norm;
+  return out;
+}
+
+// ─────────────────────────────────────────────
+// σ_x from position space
+// ─────────────────────────────────────────────
+function computeSigmaX(psi, xs, dx) {
+  let mean = 0, mean2 = 0;
+  for (let i = 0; i < N; i++) {
+    const p = psi[i] * psi[i] * dx;
+    mean += xs[i] * p;
+    mean2 += xs[i] * xs[i] * p;
+  }
+  return Math.sqrt(Math.max(0, mean2 - mean * mean));
+}
+
+// ─────────────────────────────────────────────
+// O(N²) DFT — returns |φ_k|² array and k-grid
+// phi_k[m] = sum_n psi[n] * exp(-2πi*m*n/N) * dx
+// We work with real psi so φ is also real-even (for symmetric psi)
+// but we compute full complex sum for correctness.
+// ─────────────────────────────────────────────
+function computeDFT(psi, dx) {
+  // phi_k[m] complex: re/im
+  const re = new Float64Array(N);
+  const im = new Float64Array(N);
+  for (let m = 0; m < N; m++) {
+    let r = 0, ii = 0;
+    for (let n = 0; n < N; n++) {
+      const angle = -2 * Math.PI * m * n / N;
+      r += psi[n] * Math.cos(angle);
+      ii += psi[n] * Math.sin(angle);
+    }
+    re[m] = r * dx;
+    im[m] = ii * dx;
+  }
+  // |phi|^2
+  const power = new Float64Array(N);
+  for (let m = 0; m < N; m++) power[m] = re[m] * re[m] + im[m] * im[m];
+  return power;
+}
+
+// k-values for DFT output (FFT-shifted): m=0..N/2 → positive k; m=N/2+1..N-1 → negative k
+function kGrid(dx) {
+  const dk = 2 * Math.PI / (N * dx);
+  const ks = new Float64Array(N);
+  for (let m = 0; m < N; m++) {
+    ks[m] = m <= N / 2 ? m * dk : (m - N) * dk;
+  }
+  return ks;
+}
+
+// σ_p from DFT
+function computeSigmaP(power, ks) {
+  let norm = 0, meanK = 0, meanK2 = 0;
+  for (let m = 0; m < N; m++) {
+    norm += power[m];
+    meanK += ks[m] * power[m];
+    meanK2 += ks[m] * ks[m] * power[m];
+  }
+  meanK /= norm;
+  meanK2 /= norm;
+  return Math.sqrt(Math.max(0, meanK2 - meanK * meanK));
+}
+
+// ─────────────────────────────────────────────
+// PHYSICS CHECKS (run once at load)
+// ─────────────────────────────────────────────
+function runPhysicsChecks() {
+  console.group('%c[Physics Checks] Uncertainty Minimizer', 'font-weight:bold;color:#C8102E');
+
+  // P1: Gaussian of any width → ratio = 1.000 ± 0.001
+  for (const sigma of [0.5, 1.0, 1.5, 2.0, 3.0]) {
+    const xs = makeGrid(sigma);
+    const dx = xs[1] - xs[0];
+    const rawPsi = shapeAmplitude('gaussian', sigma, xs);
+    const psi = normalize(rawPsi, dx);
+    const sx = computeSigmaX(psi, xs, dx);
+    const power = computeDFT(psi, dx);
+    const ks = kGrid(dx);
+    const sp = computeSigmaP(power, ks);
+    const ratio = (sx * sp) / (HBAR / 2);
+    const pass = Math.abs(ratio - 1.0) < 0.01;
+    console.log(`P1 Gaussian σ=${sigma}: σx=${sx.toFixed(4)} σp=${sp.toFixed(4)} ratio=${ratio.toFixed(4)} ${pass ? '✓ PASS' : '✗ FAIL'}`);
+  }
+
+  // P2: Halving σ → σ_p doubles (product constant)
+  const sigma1 = 1.0, sigma2 = 0.5;
+  for (const sigma of [sigma1, sigma2]) {
+    const xs = makeGrid(sigma);
+    const dx = xs[1] - xs[0];
+    const psi = normalize(shapeAmplitude('gaussian', sigma, xs), dx);
+    const sx = computeSigmaX(psi, xs, dx);
+    const sp = computeSigmaP(computeDFT(psi, dx), kGrid(dx));
+    console.log(`P2 Gaussian σ=${sigma}: σx=${sx.toFixed(4)}, σp=${sp.toFixed(4)}, product=${(sx*sp).toFixed(4)}`);
+  }
+  console.log('P2: Halving σ should double σ_p — products above should match');
+
+  // P3: Other shapes give ratio > 1
+  for (const shape of ['square', 'triangle', 'cosine2']) {
+    const sigma = 1.0;
+    const xs = makeGrid(sigma);
+    const dx = xs[1] - xs[0];
+    const psi = normalize(shapeAmplitude(shape, sigma, xs), dx);
+    const sx = computeSigmaX(psi, xs, dx);
+    const sp = computeSigmaP(computeDFT(psi, dx), kGrid(dx));
+    const ratio = (sx * sp) / (HBAR / 2);
+    console.log(`P3 ${shape} σ=${sigma}: ratio=${ratio.toFixed(4)} > 1.000 ${ratio > 1.0 ? '✓ PASS' : '✗ FAIL'}`);
+  }
+
+  console.groupEnd();
+}
+
+// ─────────────────────────────────────────────
+// D3 CHART SETUP
+// ─────────────────────────────────────────────
+const chartDiv = document.getElementById('chartArea');
+const W = () => chartDiv.getBoundingClientRect().width || 600;
+const H = 270;
+const margin = { top: 18, right: 22, bottom: 38, left: 48 };
+
+const svg = d3.select('#chartArea')
+  .append('svg')
+  .attr('width', '100%')
+  .attr('height', H)
+  .style('display', 'block');
+
+const plotW = () => W() - margin.left - margin.right;
+const plotH = H - margin.top - margin.bottom;
+
+const g = svg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+// Axes groups
+const xAxisG = g.append('g').attr('transform', `translate(0,${plotH})`);
+const yAxisG = g.append('g');
+
+// Zero line
+g.append('line').attr('class', 'zero-line')
+  .attr('stroke', '#d8d0c8').attr('stroke-width', 1);
+
+// Paths
+const psiPath = g.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.5);
+
+const phiPath = g.append('path')
+  .attr('fill', 'none')
+  .attr('stroke', '#545454')
+  .attr('stroke-width', 1.8)
+  .attr('stroke-dasharray', '5,4');
+
+// Axis labels
+g.append('text')
+  .attr('x', plotW() / 2)
+  .attr('y', plotH + 32)
+  .attr('text-anchor', 'middle')
+  .attr('fill', '#545454')
+  .attr('font-size', 12)
+  .attr('class', 'x-label')
+  .text('x (arbitrary units)');
+
+g.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -plotH / 2)
+  .attr('y', -36)
+  .attr('text-anchor', 'middle')
+  .attr('fill', '#545454')
+  .attr('font-size', 12)
+  .text('Amplitude');
+
+// ─────────────────────────────────────────────
+// GAUGE
+// ─────────────────────────────────────────────
+const gaugeW = () => (document.getElementById('gaugeArea').getBoundingClientRect().width || 500);
+const gaugeH = 38;
+const gaugeSvg = d3.select('#gaugeArea')
+  .append('svg')
+  .attr('width', '100%')
+  .attr('height', gaugeH);
+
+const gm = { left: 14, right: 14, top: 8, bottom: 0 };
+const gaugeG = gaugeSvg.append('g').attr('transform', `translate(${gm.left},${gm.top})`);
+
+const maxRatio = 3.0;
+const gaugeScale = d3.scaleLinear().domain([0, maxRatio]).range([0, gaugeW() - gm.left - gm.right]);
+
+// Track bar
+gaugeG.append('rect')
+  .attr('class', 'gauge-track')
+  .attr('y', 0).attr('height', 14)
+  .attr('rx', 3)
+  .attr('fill', '#f0ece6')
+  .attr('stroke', '#d8d0c8').attr('stroke-width', 1);
+
+// Minimum dashed line at ratio=1
+gaugeG.append('line')
+  .attr('class', 'gauge-min-line')
+  .attr('y1', -4).attr('y2', 18)
+  .attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '3,2');
+
+gaugeG.append('text')
+  .attr('class', 'gauge-min-label')
+  .attr('y', -6)
+  .attr('text-anchor', 'middle')
+  .attr('fill', '#2A1A0E')
+  .attr('font-size', 10)
+  .text('ħ/2');
+
+// Red dot (ratio position)
+gaugeG.append('circle')
+  .attr('class', 'gauge-dot')
+  .attr('cy', 7)
+  .attr('r', 7)
+  .attr('fill', '#C8102E');
+
+gaugeG.append('text')
+  .attr('class', 'gauge-val-label')
+  .attr('y', 30)
+  .attr('font-size', 10)
+  .attr('fill', '#C8102E')
+  .attr('text-anchor', 'middle');
+
+// Tick labels 0,1,2,3
+[0, 1, 2, 3].forEach(v => {
+  gaugeG.append('text')
+    .attr('class', `gauge-tick-${v}`)
+    .attr('y', 28)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454')
+    .attr('font-size', 10);
+});
+
+// ─────────────────────────────────────────────
+// MAIN UPDATE FUNCTION
+// ─────────────────────────────────────────────
+function update() {
+  const shape = document.querySelector('.shape-btn.active').dataset.shape;
+  const sigma = +document.getElementById('sigmaSlider').value;
+  document.getElementById('sigmaVal').textContent = sigma.toFixed(2);
+
+  const xs = makeGrid(sigma);
+  const dx = xs[1] - xs[0];
+  const rawPsi = shapeAmplitude(shape, sigma, xs);
+  const psi = normalize(rawPsi, dx);
+
+  const sx = computeSigmaX(psi, xs, dx);
+  const power = computeDFT(psi, dx);
+  const ks = kGrid(dx);
+  const sp = computeSigmaP(power, ks);
+  const product = sx * sp;
+  const ratio = product / (HBAR / 2);
+
+  // ── Update stats ──
+  document.getElementById('statSigX').textContent = sx.toFixed(4);
+  document.getElementById('statSigP').textContent = sp.toFixed(4);
+  document.getElementById('statProduct').textContent = product.toFixed(4);
+
+  const ratioEl = document.getElementById('ratioVal');
+  const interpEl = document.getElementById('ratioInterp');
+  ratioEl.textContent = ratio.toFixed(4);
+  if (Math.abs(ratio - 1.0) < 0.005) {
+    ratioEl.style.color = '#1a7a3c'; // green
+    interpEl.textContent = 'Minimum uncertainty — bound saturated!';
+    interpEl.style.color = '#1a7a3c';
+  } else {
+    ratioEl.style.color = '#C8102E';
+    interpEl.textContent = `Exceeds bound by ×${ratio.toFixed(3)}`;
+    interpEl.style.color = '#C8102E';
+  }
+
+  // ── Update chart ──
+  const cW = W() - margin.left - margin.right;
+  const xScale = d3.scaleLinear().domain([xs[0], xs[N - 1]]).range([0, cW]);
+
+  // For y: use ψ range
+  const psiMax = d3.max(psi, d => Math.abs(d));
+  const yScale = d3.scaleLinear().domain([-psiMax * 1.15, psiMax * 1.15]).range([plotH, 0]);
+
+  // k-space: reorder for plotting (shift so k=0 is center)
+  const kMin = -Math.PI / dx, kMax = Math.PI / dx;
+
+  // Reorder power array: negative k first, then positive k (FFT shift)
+  const powerShifted = new Float64Array(N);
+  const ksShifted = new Float64Array(N);
+  for (let m = 0; m < N; m++) {
+    const idx = (m + N / 2) % N;
+    powerShifted[m] = power[idx];
+    ksShifted[m] = ks[idx];
+  }
+
+  // Scale |φ(k)|² to same height as ψ for visual overlay
+  // Map k-range to x-range (same plot domain)
+  const phiMax = d3.max(powerShifted);
+  const phiScale = psiMax / phiMax;
+
+  // ψ line
+  const psiBound = psi.map((v, i) => [xs[i], v]);
+  const lineX = d3.scaleLinear().domain([xs[0], xs[N - 1]]).range([0, cW]);
+
+  psiPath.attr('d', d3.line()
+    .x((_, i) => lineX(xs[i]))
+    .y(d => yScale(d))
+    .curve(d3.curveBasis)(psi));
+
+  // φ(k) line — map k-values to same x-axis range
+  const kxScale = d3.scaleLinear().domain([ksShifted[0], ksShifted[N - 1]]).range([0, cW]);
+  phiPath.attr('d', d3.line()
+    .x((_, i) => kxScale(ksShifted[i]))
+    .y(d => yScale(d * phiScale))
+    .curve(d3.curveBasis)(powerShifted));
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).ticks(6).tickFormat(d3.format('.1f'));
+  const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('.2f'));
+  xAxisG.call(xAxis).call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#545454'))
+    .call(a => a.selectAll('line,path').attr('stroke', '#d8d0c8'));
+  yAxisG.call(yAxis).call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#545454'))
+    .call(a => a.selectAll('line,path').attr('stroke', '#d8d0c8'));
+
+  g.select('.zero-line')
+    .attr('x1', 0).attr('x2', cW)
+    .attr('y1', yScale(0)).attr('y2', yScale(0));
+
+  // ── Update gauge ──
+  const gw = gaugeW() - gm.left - gm.right;
+  gaugeScale.range([0, gw]);
+
+  gaugeG.select('.gauge-track').attr('width', gw);
+
+  const minX = gaugeScale(1.0);
+  gaugeG.select('.gauge-min-line').attr('x1', minX).attr('x2', minX);
+  gaugeG.select('.gauge-min-label').attr('x', minX);
+
+  const dotX = Math.min(gaugeScale(ratio), gw);
+  gaugeG.select('.gauge-dot').attr('cx', dotX);
+  gaugeG.select('.gauge-val-label').attr('x', dotX).text(`${ratio.toFixed(3)}×`);
+
+  [0, 1, 2, 3].forEach(v => {
+    gaugeG.select(`.gauge-tick-${v}`).attr('x', gaugeScale(v)).text(v === 1 ? 'ħ/2' : `${v}`);
+  });
+}
+
+// ─────────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────────
+document.querySelectorAll('.shape-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    update();
+  });
+});
+
+document.getElementById('sigmaSlider').addEventListener('input', update);
+
+window.addEventListener('resize', update);
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+runPhysicsChecks();
+update();
+</script>
+</body>
+</html>

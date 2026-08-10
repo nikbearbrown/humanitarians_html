@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kronig-Penney Band Structure Explorer</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 20px; }
+  .controls {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=range] { width: 200px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.88rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 8px 14px;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .charts { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Kronig-Penney Band Structure</h1>
+<div class="subtitle">cos(ka) = cos(αa) + (P/αa)sin(αa) — crank up the barrier and watch the free-electron parabola fracture into forbidden gaps.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Barrier strength P</label>
+    <input type="range" id="P-slider" min="0" max="20" step="0.1" value="0">
+    <span class="val-display" id="P-val">P = 0.0 (free electron)</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Bands shown</label>
+    <input type="range" id="bands-slider" min="1" max="5" step="1" value="3">
+    <span class="val-display" id="bands-val">3 bands</span>
+  </div>
+</div>
+
+<div class="readout">
+  <div>P = <span id="rP">0.0</span></div>
+  <div>Band 1 top = <span id="rb1top">π²</span></div>
+  <div>Gap 1 width = <span id="rgap1">0.000</span></div>
+  <div>Type = <span id="rtype">Metal (no gaps)</span></div>
+</div>
+
+<div class="charts">
+  <svg id="rhs-chart" width="340" height="300"></svg>
+  <svg id="band-chart" width="320" height="300"></svg>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+// Units: ħ = 2m = a = 1 → E = α²
+// Kronig-Penney dispersion: f(αa) = cos(αa) + P/αa · sin(αa)
+// Allowed when |f| ≤ 1
+let P = 0;
+let nBands = 3;
+
+function kpRHS(alpha, Pval) {
+  if (alpha < 1e-6) return 1 + Pval; // limit as alpha→0
+  return Math.cos(alpha) + (Pval / alpha) * Math.sin(alpha);
+}
+
+// Compute band edges by scanning αa for sign changes in |f(αa)| - 1
+function computeBands(Pval, nBandsToShow) {
+  const nPts = 8000;
+  const alphaMax = (nBandsToShow + 1) * Math.PI + 1;
+  const alphas = d3.range(nPts).map(i => (i + 0.1) * alphaMax / nPts);
+
+  const bands = [];
+  let inBand = null;
+
+  for (let i = 0; i < alphas.length; i++) {
+    const alpha = alphas[i];
+    const f = kpRHS(alpha, Pval);
+    const allowed = Math.abs(f) <= 1;
+
+    if (allowed && inBand === null) {
+      inBand = alpha;
+    } else if (!allowed && inBand !== null) {
+      bands.push({ bottom: inBand * inBand, top: alphas[i-1] * alphas[i-1] });
+      inBand = null;
+      if (bands.length >= nBandsToShow) break;
+    }
+  }
+  if (inBand !== null && bands.length < nBandsToShow) {
+    bands.push({ bottom: inBand * inBand, top: alphas[alphas.length-1] * alphas[alphas.length-1] });
+  }
+  return bands;
+}
+
+// ── RHS chart: f(αa) vs αa ─────────────────────────────────────────────────
+const rSvg = d3.select('#rhs-chart');
+const rW = 340, rH = 300;
+const rM = {top: 30, right: 20, bottom: 48, left: 52};
+const rIW = rW - rM.left - rM.right, rIH = rH - rM.top - rM.bottom;
+const rG = rSvg.append('g').attr('transform', `translate(${rM.left},${rM.top})`);
+
+const alphaMax = 6 * Math.PI;
+const rX = d3.scaleLinear().domain([0, alphaMax]).range([0, rIW]);
+const rY = d3.scaleLinear().domain([-3, 3]).range([rIH, 0]);
+
+rG.append('g').attr('transform',`translate(0,${rIH})`).call(d3.axisBottom(rX).ticks(6).tickFormat(d => {
+  const pi = d/Math.PI;
+  return pi === 0 ? '0' : (Number.isInteger(pi) ? `${pi}π` : '');
+}));
+rG.append('g').call(d3.axisLeft(rY).ticks(5));
+rG.append('text').attr('x',rIW/2).attr('y',-12).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Dispersion RHS f(αa)');
+rG.append('text').attr('x',rIW/2).attr('y',rIH+38).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('αa');
+
+// Allowed band shading (|f| ≤ 1)
+rG.append('rect').attr('x',0).attr('y',rY(1)).attr('width',rIW).attr('height',rY(-1)-rY(1))
+  .attr('fill','#e8f4ea').attr('opacity',0.6);
+rG.append('line').attr('x1',0).attr('x2',rIW).attr('y1',rY(1)).attr('y2',rY(1)).attr('stroke','#aaa').attr('stroke-dasharray','4,3').attr('stroke-width',1);
+rG.append('line').attr('x1',0).attr('x2',rIW).attr('y1',rY(-1)).attr('y2',rY(-1)).attr('stroke','#aaa').attr('stroke-dasharray','4,3').attr('stroke-width',1);
+rG.append('text').attr('x',rIW-4).attr('y',rY(1)-4).attr('text-anchor','end').attr('font-size','9px').attr('fill',SLATE).text('f=+1');
+rG.append('text').attr('x',rIW-4).attr('y',rY(-1)+12).attr('text-anchor','end').attr('font-size','9px').attr('fill',SLATE).text('f=−1');
+rG.append('text').attr('x',rIW-4).attr('y',rY(0)-4).attr('text-anchor','end').attr('font-size','9px').attr('fill','#aaa').text('allowed');
+
+// f(αa) curve
+const rhsLine = d3.line()
+  .x(d => rX(d.alpha))
+  .y(d => rY(Math.max(-3, Math.min(3, d.f))))
+  .defined(d => isFinite(d.f) && Math.abs(d.f) < 10)
+  .curve(d3.curveBasis);
+const rhsPath = rG.append('path').attr('fill','none').attr('stroke', RED).attr('stroke-width',2);
+
+// Gap regions (highlighted)
+const gapGroup = rG.append('g').attr('id','gap-regions');
+
+function updateRHS() {
+  const nPts = 600;
+  const data = d3.range(nPts).map(i => {
+    const alpha = (i + 0.5) * alphaMax / nPts;
+    return { alpha, f: kpRHS(alpha, P) };
+  });
+  rhsPath.datum(data).attr('d', rhsLine);
+
+  // Shade gap regions
+  gapGroup.selectAll('*').remove();
+  let prevAllowed = true;
+  let gapStart = null;
+  for (let i = 0; i < data.length; i++) {
+    const allowed = Math.abs(data[i].f) <= 1;
+    if (!allowed && prevAllowed) gapStart = data[i].alpha;
+    if (allowed && !prevAllowed && gapStart !== null) {
+      gapGroup.append('rect')
+        .attr('x', rX(gapStart))
+        .attr('y', 0)
+        .attr('width', rX(data[i].alpha) - rX(gapStart))
+        .attr('height', rIH)
+        .attr('fill', RED)
+        .attr('opacity', 0.08);
+      gapStart = null;
+    }
+    prevAllowed = allowed;
+  }
+}
+
+// ── Band diagram ─────────────────────────────────────────────────────────────
+const bSvg = d3.select('#band-chart');
+const bW = 320, bH = 300;
+const bM = {top: 30, right: 20, bottom: 48, left: 52};
+const bIW = bW - bM.left - bM.right, bIH = bH - bM.top - bM.bottom;
+const bG = bSvg.append('g').attr('transform', `translate(${bM.left},${bM.top})`);
+
+const kRange = [-Math.PI, Math.PI];
+const bX = d3.scaleLinear().domain(kRange).range([0, bIW]);
+const bY = d3.scaleLinear().domain([0, 50]).range([bIH, 0]);
+
+bG.append('g').attr('transform',`translate(0,${bIH})`).call(d3.axisBottom(bX).ticks(5).tickFormat(d => {
+  if (d === 0) return '0';
+  if (Math.abs(d - Math.PI) < 0.01) return 'π';
+  if (Math.abs(d + Math.PI) < 0.01) return '−π';
+  return '';
+}));
+bG.append('g').call(d3.axisLeft(bY).ticks(5));
+bG.append('text').attr('x',bIW/2).attr('y',-12).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Reduced Zone E(k)');
+bG.append('text').attr('x',bIW/2).attr('y',bIH+38).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('k (units of 1/a)');
+bG.append('text').attr('transform','rotate(-90)').attr('x',-bIH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('E (units of ħ²/2ma²)');
+
+const bandGroup = bG.append('g');
+const gapGroup2 = bG.append('g');
+
+// Free electron parabola for reference
+const freeParData = d3.range(200).map(i => {
+  const k = kRange[0] + (kRange[1]-kRange[0]) * i/199;
+  return { k, E: k*k };
+});
+bG.append('path').datum(freeParData).attr('fill','none').attr('stroke','#ddd').attr('stroke-width',1.5).attr('stroke-dasharray','4,3')
+  .attr('d', d3.line().x(d=>bX(d.k)).y(d=>bY(d.E)).defined(d=>d.E<=50));
+
+function computeBandE_k(Pval, nBands) {
+  // For each band, compute E(k) for k in [-π, π]
+  // At each k, find α such that cos(αa) + P/αa sin(αa) = cos(ka)
+  const nK = 100;
+  const ks = d3.range(nK).map(i => kRange[0] + (kRange[1]-kRange[0])*i/(nK-1));
+
+  const allBands = [];
+
+  for (let b = 0; b < nBands; b++) {
+    // Search for α in band b: α ∈ [b·π, (b+1)·π] approximately
+    const alphaMin = b * Math.PI + 0.001;
+    const alphaMax = (b + 1) * Math.PI - 0.001;
+
+    const bandData = ks.map(k => {
+      const target = Math.cos(k);
+      // Binary search for alpha
+      let lo = alphaMin, hi = alphaMax;
+      let alpha = null;
+      // Check if solution exists in this range
+      const flo = kpRHS(lo, Pval) - target;
+      const fhi = kpRHS(hi, Pval) - target;
+      if (flo * fhi > 0) return null; // No crossing
+      for (let iter = 0; iter < 60; iter++) {
+        const mid = (lo + hi) / 2;
+        const fmid = kpRHS(mid, Pval) - target;
+        if (Math.abs(fmid) < 1e-9) { alpha = mid; break; }
+        if (flo * fmid < 0) { hi = mid; } else { lo = mid; flo = fmid; }
+        if (iter === 59) alpha = (lo + hi) / 2;
+      }
+      if (!alpha) return null;
+      return { k, E: alpha * alpha };
+    }).filter(d => d !== null);
+
+    allBands.push(bandData);
+  }
+  return allBands;
+}
+
+const bandColors = [BLUE, SLATE, '#4A7B4A', '#7B4A6B', INK];
+
+function updateBands() {
+  bandGroup.selectAll('*').remove();
+  gapGroup2.selectAll('*').remove();
+
+  const bands = computeBandE_k(P, nBands);
+  const maxE = bands.length > 0 ? Math.max(...bands.flatMap(b => b.map(d => d.E))) * 1.1 : 50;
+  bY.domain([0, Math.min(maxE, 60)]);
+  bG.select('.y-axis')?.call(d3.axisLeft(bY).ticks(5));
+
+  // Draw gap fill between bands
+  for (let b = 0; b < bands.length - 1; b++) {
+    const topBand = bands[b];
+    const botBand = bands[b+1];
+    if (topBand.length && botBand.length) {
+      const topE = Math.max(...topBand.map(d => d.E));
+      const botE = Math.min(...botBand.map(d => d.E));
+      if (botE > topE) {
+        gapGroup2.append('rect')
+          .attr('x', 0).attr('y', bY(botE))
+          .attr('width', bIW).attr('height', bY(topE) - bY(botE))
+          .attr('fill', RED).attr('opacity', 0.08);
+      }
+    }
+  }
+
+  // Draw band curves
+  bands.forEach((band, bi) => {
+    if (band.length < 2) return;
+    bandGroup.append('path')
+      .datum(band)
+      .attr('fill', 'none')
+      .attr('stroke', bandColors[bi % bandColors.length])
+      .attr('stroke-width', 2.5)
+      .attr('d', d3.line().x(d => bX(d.k)).y(d => bY(d.E)).curve(d3.curveBasis));
+  });
+
+  // Update readout
+  if (bands.length > 0 && bands[0].length > 0) {
+    const b1top = Math.max(...bands[0].map(d => d.E));
+    document.getElementById('rb1top').textContent = b1top.toFixed(3);
+    if (bands.length > 1 && bands[1].length > 0) {
+      const b2bot = Math.min(...bands[1].map(d => d.E));
+      document.getElementById('rgap1').textContent = Math.max(0, b2bot - b1top).toFixed(3);
+    }
+    document.getElementById('rtype').textContent = P < 0.01 ? 'Metal (no gaps)' : P < 3 ? 'Narrow-gap' : P < 10 ? 'Semiconductor' : 'Wide-gap insulator';
+  }
+}
+
+function update() {
+  updateRHS();
+  updateBands();
+}
+
+document.getElementById('P-slider').addEventListener('input', e => {
+  P = parseFloat(e.target.value);
+  document.getElementById('P-val').textContent = `P = ${P.toFixed(1)}${P === 0 ? ' (free electron)' : P > 15 ? ' (tight binding)' : ''}`;
+  document.getElementById('rP').textContent = P.toFixed(1);
+  update();
+});
+
+document.getElementById('bands-slider').addEventListener('input', e => {
+  nBands = parseInt(e.target.value);
+  document.getElementById('bands-val').textContent = `${nBands} band${nBands>1?'s':''}`;
+  update();
+});
+
+// Initial render
+update();
+
+// Testable predictions
+const f_at_pi = kpRHS(Math.PI, 0); // P=0: f(π) = cos(π) = -1 → at the zone boundary
+console.assert(Math.abs(f_at_pi + 1) < 0.01, `P1: At P=0, f(αa=π) = cos(π) = -1, got ${f_at_pi.toFixed(4)}`);
+// P=0: no gaps (parabola)
+const bands0 = computeBandE_k(0, 2);
+const gap0 = bands0.length > 1 ? Math.min(...bands0[1].map(d=>d.E)) - Math.max(...bands0[0].map(d=>d.E)) : 0;
+console.assert(gap0 < 0.1, `P1: At P=0, band gap should be ~0, got ${gap0.toFixed(4)}`);
+console.log(`✓ P1: P=0 → gap = ${gap0.toFixed(4)} ≈ 0 (free electrons, no gaps)`);
+// P=3π/2: first gap at αa=π
+const bands4 = computeBandE_k(3*Math.PI/2, 2);
+if (bands4.length > 1 && bands4[0].length && bands4[1].length) {
+  const gap1 = Math.min(...bands4[1].map(d=>d.E)) - Math.max(...bands4[0].map(d=>d.E));
+  console.log(`✓ P2: P=3π/2 → first gap = ${gap1.toFixed(3)} (at αa=π, E=π²≈${(Math.PI*Math.PI).toFixed(3)})`);
+}
+</script>
+</body>
+</html>

@@ -92,7 +92,7 @@ export default function Caffeinate() {
               <Link href="https://www.youtube.com/watch?v=7-bHlvMfwPU" target="_blank" rel="noopener noreferrer">
                 <PrimaryButton>Watch on YouTube</PrimaryButton>
               </Link>
-              <Link href="/tutorials">
+              <Link href="/videos">
                 <SecondaryButton>More Tutorials</SecondaryButton>
               </Link>
             </div>

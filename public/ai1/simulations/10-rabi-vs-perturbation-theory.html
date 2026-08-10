@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rabi Oscillations vs Perturbation Theory</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 20px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+  }
+  .panel-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  .main-panel svg { display: block; }
+  .controls {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .controls label {
+    font-size: 13px;
+    color: #2A1A0E;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .controls input[type=range] {
+    flex: 1;
+    accent-color: #C8102E;
+  }
+  .controls .val-display {
+    font-size: 13px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 38px;
+    text-align: right;
+  }
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .info-box {
+    border: 1.5px solid #2A1A0E;
+    padding: 16px;
+    background: #FFFFFF;
+  }
+  .info-box h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+    color: #2A1A0E;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .info-key { font-size: 12px; color: #545454; }
+  .info-val { font-size: 13px; font-weight: 700; color: #2A1A0E; }
+  .warning-box {
+    background: #C8102E;
+    color: #FFFFFF;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.04em;
+    display: none;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .legend-line {
+    width: 28px;
+    height: 2px;
+    display: inline-block;
+  }
+  .legend-line.solid { background: #C8102E; }
+  .legend-line.dashed {
+    background: transparent;
+    border-top: 2px dashed #545454;
+  }
+  .legend-label { font-size: 12px; color: #2A1A0E; }
+  .axis text { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 11px; }
+  .axis path, .axis line { stroke: #2A1A0E; }
+  .tick line { stroke: #2A1A0E; }
+  .axis-label { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 12px; font-weight: 600; }
+  .chart-title { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 12px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<h1>Rabi Oscillations vs Perturbation Theory</h1>
+<p class="subtitle">
+  Exact Rabi formula (RED) versus first-order perturbation theory (SLATE dashed).
+  At resonance (δ/Ω = 0), PT diverges — it predicts probability &gt; 100%.
+</p>
+
+<div class="layout">
+  <div>
+    <div class="panel-label">Transition Probability P vs Dimensionless Time x = Ωt</div>
+    <div class="main-panel">
+      <svg id="main-svg"></svg>
+    </div>
+    <div class="controls">
+      <label>δ/Ω =</label>
+      <input type="range" id="detuning-slider" min="0" max="3" step="0.05" value="0">
+      <span class="val-display" id="detuning-val">0.00</span>
+    </div>
+    <div style="margin-top: 14px;">
+      <div class="legend-row">
+        <span class="legend-line solid"></span>
+        <span class="legend-label">Exact Rabi: P = (1/(1+(δ/Ω)²)) · sin²(√(1+(δ/Ω)²) · x/2)</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-line dashed"></span>
+        <span class="legend-label">Perturbation Theory: P<sub>PT</sub> (first order)</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 28px;">
+      <div class="panel-label">P at x = π vs Detuning (0 to 5 δ/Ω)</div>
+      <svg id="detuning-svg"></svg>
+      <div style="margin-top: 8px; display: flex; gap: 18px; flex-wrap: wrap;">
+        <div class="legend-row">
+          <span class="legend-line solid"></span>
+          <span class="legend-label">Exact Rabi P(x=π)</span>
+        </div>
+        <div class="legend-row">
+          <span class="legend-line dashed"></span>
+          <span class="legend-label">PT P(x=π)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="info-box">
+      <h3>Current State</h3>
+      <div class="info-row">
+        <span class="info-key">δ/Ω (detuning ratio)</span>
+        <span class="info-val" id="info-detuning">0.000</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Generalized Rabi freq √(1+(δ/Ω)²)</span>
+        <span class="info-val" id="info-omega-gen">1.000 Ω</span>
+      </div>
+      <div style="margin: 10px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">P_exact max over [0, 4π]</span>
+        <span class="info-val" id="info-exact-max">1.000</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">P_PT max over [0, 4π]</span>
+        <span class="info-val" id="info-pt-max">9.870</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">P_PT at x = π</span>
+        <span class="info-val" id="info-pt-at-pi">2.467</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">P_exact at x = π</span>
+        <span class="info-val" id="info-exact-at-pi">1.000</span>
+      </div>
+      <div style="margin: 10px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">P_exact at x = 2π</span>
+        <span class="info-val" id="info-exact-2pi">0.000</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">P_PT at x = 2π (expect π²≈9.87 at δ=0)</span>
+        <span class="info-val" id="info-pt-2pi">9.870</span>
+      </div>
+    </div>
+
+    <div class="warning-box" id="warning-box">
+      ⚠ PT PREDICTS P &gt; 1 — UNPHYSICAL<br>
+      Perturbation theory has broken down
+    </div>
+
+    <div class="info-box">
+      <h3>Physics Notes</h3>
+      <p style="font-size:12px; color:#545454; line-height:1.6; margin-bottom:8px;">
+        <strong>At resonance (δ=0):</strong> Exact Rabi cycles between 0 and 1. PT gives P = (Ωt)²/4 — grows without bound. At x = 2π (one full Rabi cycle), exact P = 0, but PT predicts π² ≈ 9.87 (987%!).
+      </p>
+      <p style="font-size:12px; color:#545454; line-height:1.6; margin-bottom:8px;">
+        <strong>Off-resonance (large δ/Ω):</strong> Both methods agree when δ/Ω ≫ 1 (weak-coupling / short-time limit). At δ/Ω = 3, curves converge.
+      </p>
+      <p style="font-size:12px; color:#545454; line-height:1.6;">
+        <strong>PT validity:</strong> First-order PT requires Ωt ≪ 1 at resonance. The "perturbation is small" assumption fails when the coupling drives significant population transfer.
+      </p>
+    </div>
+
+    <div class="info-box">
+      <h3>Formulas</h3>
+      <div style="font-size:12px; color:#2A1A0E; line-height:1.8; font-family: monospace;">
+        <div>Ω_gen = √(Ω² + δ²)</div>
+        <div>P_exact = (Ω/Ω_gen)² sin²(Ω_gen t/2)</div>
+        <div style="margin-top:6px;">δ=0: P_PT = (Ωt)²/4 = x²/4</div>
+        <div>δ≠0: P_PT = sin²(δt/2)/(δt/2)² · (Ωt)²/4</div>
+        <div style="margin-top:6px; font-style:italic; color:#545454;">x = Ωt (dimensionless)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── dimensions ───────────────────────────────────────────────────
+const W = 620, H = 320;
+const margin = { top: 28, right: 24, bottom: 50, left: 58 };
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top - margin.bottom;
+
+const W2 = 620, H2 = 200;
+const margin2 = { top: 20, right: 24, bottom: 44, left: 58 };
+const innerW2 = W2 - margin2.left - margin2.right;
+const innerH2 = H2 - margin2.top - margin2.bottom;
+
+// ─── physics functions ────────────────────────────────────────────
+function pExact(x, ratio) {
+  // ratio = δ/Ω
+  const omegaGen = Math.sqrt(1 + ratio * ratio);
+  return Math.pow(1 / omegaGen, 2) * Math.pow(Math.sin(omegaGen * x / 2), 2);
+}
+
+function pPT(x, ratio) {
+  if (ratio < 1e-9) {
+    // resonance: P_PT = x²/4
+    return (x * x) / 4;
+  } else {
+    // off-resonance: P_PT = sin²(ratio*x/2) / ratio²
+    return Math.pow(Math.sin(ratio * x / 2), 2) / (ratio * ratio);
+  }
+}
+
+// ─── build main SVG ───────────────────────────────────────────────
+const mainSvg = d3.select("#main-svg")
+  .attr("width", W)
+  .attr("height", H);
+
+const g = mainSvg.append("g")
+  .attr("transform", `translate(${margin.left},${margin.top})`);
+
+// physical range band [0,1]
+const physBand = g.append("rect")
+  .attr("x", 0)
+  .attr("width", innerW)
+  .attr("fill", "#f5f0eb")
+  .attr("opacity", 0.7);
+
+// Scales
+const xScale = d3.scaleLinear().domain([0, 4 * Math.PI]).range([0, innerW]);
+const yScale = d3.scaleLinear().domain([-0.5, 11]).range([innerH, 0]);
+
+// update phys band
+physBand.attr("y", yScale(1)).attr("height", yScale(0) - yScale(1));
+
+// grid lines
+const gridY = [0, 1, 2, 4, 6, 8, 10];
+gridY.forEach(v => {
+  g.append("line")
+    .attr("x1", 0).attr("x2", innerW)
+    .attr("y1", yScale(v)).attr("y2", yScale(v))
+    .attr("stroke", v === 1 ? "#2A1A0E" : "#e0d8d0")
+    .attr("stroke-width", v === 1 ? 1.5 : 0.8)
+    .attr("stroke-dasharray", v === 1 ? "4,3" : null);
+});
+
+// Axes
+const xAxis = d3.axisBottom(xScale)
+  .tickValues([0, Math.PI, 2 * Math.PI, 3 * Math.PI, 4 * Math.PI])
+  .tickFormat(v => {
+    const map = { 0: "0", [Math.PI]: "π", [2 * Math.PI]: "2π", [3 * Math.PI]: "3π", [4 * Math.PI]: "4π" };
+    return map[v] || d3.format(".2g")(v);
+  });
+
+const yAxis = d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".1f"));
+
+g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`).call(xAxis);
+g.append("g").attr("class", "axis").call(yAxis);
+
+g.append("text").attr("class", "axis-label")
+  .attr("x", innerW / 2).attr("y", innerH + 40)
+  .attr("text-anchor", "middle").text("x = Ωt (dimensionless time)");
+
+g.append("text").attr("class", "axis-label")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -innerH / 2).attr("y", -46)
+  .attr("text-anchor", "middle").text("Transition Probability P");
+
+// P=1 label
+g.append("text")
+  .attr("x", innerW + 4).attr("y", yScale(1) - 3)
+  .attr("font-size", 10).attr("fill", "#2A1A0E")
+  .attr("text-anchor", "start").text("P=1");
+
+// lines
+const lineExact = d3.line().x(d => xScale(d.x)).y(d => yScale(d.y)).curve(d3.curveBasis);
+const linePT = d3.line().x(d => xScale(d.x)).y(d => Math.max(yScale(Math.min(d.y, 11)), -5)).curve(d3.curveBasis);
+
+const pathExact = g.append("path")
+  .attr("fill", "none")
+  .attr("stroke", "#C8102E")
+  .attr("stroke-width", 2.5);
+
+const pathPT = g.append("path")
+  .attr("fill", "none")
+  .attr("stroke", "#545454")
+  .attr("stroke-width", 2)
+  .attr("stroke-dasharray", "6,4");
+
+// vertical marker at x=π
+g.append("line")
+  .attr("x1", xScale(Math.PI)).attr("x2", xScale(Math.PI))
+  .attr("y1", 0).attr("y2", innerH)
+  .attr("stroke", "#2A1A0E").attr("stroke-width", 1)
+  .attr("stroke-dasharray", "3,3").attr("opacity", 0.5);
+
+g.append("text")
+  .attr("x", xScale(Math.PI) + 4).attr("y", 12)
+  .attr("font-size", 10).attr("fill", "#545454")
+  .text("x=π");
+
+g.append("line")
+  .attr("x1", xScale(2 * Math.PI)).attr("x2", xScale(2 * Math.PI))
+  .attr("y1", 0).attr("y2", innerH)
+  .attr("stroke", "#2A1A0E").attr("stroke-width", 1)
+  .attr("stroke-dasharray", "3,3").attr("opacity", 0.5);
+
+g.append("text")
+  .attr("x", xScale(2 * Math.PI) + 4).attr("y", 12)
+  .attr("font-size", 10).attr("fill", "#545454")
+  .text("x=2π");
+
+// ─── build detuning panel ─────────────────────────────────────────
+const detSvg = d3.select("#detuning-svg")
+  .attr("width", W2)
+  .attr("height", H2);
+
+const g2 = detSvg.append("g")
+  .attr("transform", `translate(${margin2.left},${margin2.top})`);
+
+const xScale2 = d3.scaleLinear().domain([0, 5]).range([0, innerW2]);
+const yScale2 = d3.scaleLinear().domain([0, 1.4]).range([innerH2, 0]);
+
+g2.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH2})`).call(d3.axisBottom(xScale2).ticks(5));
+g2.append("g").attr("class", "axis").call(d3.axisLeft(yScale2).ticks(5).tickFormat(d3.format(".1f")));
+
+g2.append("text").attr("class", "axis-label")
+  .attr("x", innerW2 / 2).attr("y", innerH2 + 36)
+  .attr("text-anchor", "middle").text("δ/Ω (detuning ratio)");
+
+g2.append("text").attr("class", "axis-label")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -innerH2 / 2).attr("y", -46)
+  .attr("text-anchor", "middle").text("P at x = π");
+
+// P=1 line
+g2.append("line")
+  .attr("x1", 0).attr("x2", innerW2)
+  .attr("y1", yScale2(1)).attr("y2", yScale2(1))
+  .attr("stroke", "#e0d8d0").attr("stroke-width", 1).attr("stroke-dasharray", "4,3");
+
+// Compute detuning sweep data at x=π
+const detData = d3.range(0, 5.02, 0.05).map(ratio => {
+  const xVal = Math.PI;
+  const omegaGen = Math.sqrt(1 + ratio * ratio);
+  const pe = (1 / (1 + ratio * ratio)) * Math.pow(Math.sin(omegaGen * xVal / 2), 2);
+  let pp;
+  if (ratio < 1e-9) {
+    pp = (xVal * xVal) / 4; // = π²/4
+  } else {
+    pp = Math.pow(Math.sin(ratio * xVal / 2), 2) / (ratio * ratio);
+  }
+  return { ratio, pe, pp };
+});
+
+g2.append("path")
+  .datum(detData)
+  .attr("fill", "none")
+  .attr("stroke", "#C8102E")
+  .attr("stroke-width", 2.5)
+  .attr("d", d3.line()
+    .x(d => xScale2(d.ratio))
+    .y(d => yScale2(Math.min(d.pe, 1.4)))
+  );
+
+g2.append("path")
+  .datum(detData)
+  .attr("fill", "none")
+  .attr("stroke", "#545454")
+  .attr("stroke-width", 2)
+  .attr("stroke-dasharray", "6,4")
+  .attr("d", d3.line()
+    .x(d => xScale2(d.ratio))
+    .y(d => yScale2(Math.min(d.pp, 1.4)))
+    .defined(d => d.pp <= 1.4)
+  );
+
+// Indicator line for current detuning
+const detIndicator = g2.append("line")
+  .attr("y1", 0).attr("y2", innerH2)
+  .attr("stroke", "#C8102E").attr("stroke-width", 1.5)
+  .attr("stroke-dasharray", "4,3");
+
+// ─── update function ──────────────────────────────────────────────
+const N = 600;
+
+function update(ratio) {
+  const xData = d3.range(0, 4 * Math.PI + 0.01, (4 * Math.PI) / N);
+
+  const exactData = xData.map(x => ({ x, y: pExact(x, ratio) }));
+  const ptData = xData.map(x => ({ x, y: pPT(x, ratio) }));
+
+  pathExact.datum(exactData).attr("d", lineExact);
+  pathPT.datum(ptData).attr("d", linePT);
+
+  // info panel
+  const omegaGen = Math.sqrt(1 + ratio * ratio);
+  document.getElementById("info-detuning").textContent = ratio.toFixed(3);
+  document.getElementById("info-omega-gen").textContent = omegaGen.toFixed(4) + " Ω";
+
+  const exactMax = exactData.reduce((m, d) => Math.max(m, d.y), 0);
+  const ptMax = ptData.reduce((m, d) => Math.max(m, d.y), 0);
+
+  document.getElementById("info-exact-max").textContent = exactMax.toFixed(4);
+  document.getElementById("info-pt-max").textContent = ptMax > 99 ? ">100" : ptMax.toFixed(4);
+
+  const ptAtPi = pPT(Math.PI, ratio);
+  const exactAtPi = pExact(Math.PI, ratio);
+  document.getElementById("info-pt-at-pi").textContent = ptAtPi.toFixed(4);
+  document.getElementById("info-exact-at-pi").textContent = exactAtPi.toFixed(4);
+
+  const ptAt2pi = pPT(2 * Math.PI, ratio);
+  const exactAt2pi = pExact(2 * Math.PI, ratio);
+  document.getElementById("info-pt-2pi").textContent = ptAt2pi.toFixed(4);
+  document.getElementById("info-exact-2pi").textContent = exactAt2pi.toFixed(6);
+
+  // warning
+  const wb = document.getElementById("warning-box");
+  wb.style.display = ptMax > 1.0 ? "block" : "none";
+
+  // detuning indicator
+  const clampedRatio = Math.min(ratio, 5);
+  detIndicator
+    .attr("x1", xScale2(clampedRatio))
+    .attr("x2", xScale2(clampedRatio));
+}
+
+// ─── slider ───────────────────────────────────────────────────────
+const slider = document.getElementById("detuning-slider");
+const detValEl = document.getElementById("detuning-val");
+
+slider.addEventListener("input", function () {
+  const v = +this.value;
+  detValEl.textContent = v.toFixed(2);
+  document.getElementById("info-detuning").textContent = v.toFixed(3);
+  update(v);
+});
+
+update(0);
+</script>
+</body>
+</html>

@@ -47,7 +47,7 @@ export default function Podcast() {
           <div className="md:flex items-center mb-6">
             <h1 className="text-4xl md:text-5xl font-bold">Lyrical Literacy Podcast</h1>
             <PrimaryButton
-              href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP?enablejsapi=1"
+              href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP&enablejsapi=1"
               className="mt-3 md:mt-0 md:ml-6 whitespace-nowrap"
             >
               Lyrical Literacy Podcast YouTube

@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sturm-Liouville Orthogonality Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --ink: #2A1A0E;
+    --red: #C8102E;
+    --slate: #545454;
+    --border: #E0D8D0;
+    --light: #F7F4F0;
+    --font: 'Inter', Helvetica, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 20px 32px 16px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  header .subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    font-style: italic;
+  }
+
+  .red-accent {
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    gap: 0;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .tab-btn {
+    padding: 12px 22px;
+    border: none;
+    background: none;
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--ink); }
+
+  .tab-btn.active {
+    color: var(--ink);
+    border-bottom-color: var(--red);
+    font-weight: 700;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    padding: 24px 32px;
+    min-height: calc(100vh - 120px);
+  }
+
+  .panel {
+    padding: 0 16px 0 0;
+  }
+
+  .panel + .panel {
+    padding: 0 0 0 24px;
+    border-left: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  /* PLOT */
+  #plot-container svg {
+    display: block;
+  }
+
+  /* HEATMAP */
+  #heatmap-container {
+    margin-bottom: 20px;
+  }
+
+  .heatmap-cell {
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+
+  .heatmap-cell:hover {
+    opacity: 0.8;
+    stroke: var(--ink);
+    stroke-width: 1.5px;
+  }
+
+  .heatmap-cell.selected {
+    stroke: var(--ink);
+    stroke-width: 2px;
+  }
+
+  /* INTEGRAL DISPLAY */
+  #integral-display {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+    background: var(--light);
+    min-height: 90px;
+  }
+
+  .integral-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .integral-formula {
+    font-size: 15px;
+    font-family: 'Georgia', serif;
+    margin-bottom: 6px;
+  }
+
+  .integral-result {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .integral-result.zero { color: var(--slate); }
+  .integral-result.nonzero { color: var(--red); }
+
+  /* RUNNING INTEGRAL */
+  #running-integral-svg {
+    display: block;
+    margin-top: 10px;
+  }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .toggle-row label {
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .toggle-switch input { display: none; }
+
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .toggle-switch input:checked ~ .toggle-track { background: var(--red); }
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(16px); }
+
+  .toggle-caption {
+    font-size: 11px;
+    color: var(--red);
+    font-style: italic;
+    margin-top: 4px;
+    display: none;
+  }
+
+  .toggle-caption.visible { display: block; }
+
+  /* CONSOLE */
+  .physics-console {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .console-header {
+    background: var(--ink);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .console-body {
+    padding: 10px 12px;
+    background: var(--light);
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.8;
+  }
+
+  .check-pass { color: #1A7F37; font-weight: 600; }
+  .check-fail { color: var(--red); font-weight: 600; }
+
+  /* LEGEND */
+  .curve-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-bottom: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .legend-swatch {
+    width: 24px;
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .legend-item.dimmed { opacity: 0.35; }
+
+  /* AXIS LABELS */
+  .axis-label {
+    font-size: 11px;
+    fill: var(--slate);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Sturm-Liouville <span class="red-accent">Orthogonality</span> Gallery</h1>
+  <span class="subtitle">∫ yₘ(x) yₙ(x) w(x) dx = 0 for m ≠ n</span>
+</header>
+
+<div class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" data-family="legendre">Legendre</button>
+  <button class="tab-btn" data-family="hermite">Hermite</button>
+  <button class="tab-btn" data-family="laguerre">Laguerre</button>
+  <button class="tab-btn" data-family="chebyshev">Chebyshev</button>
+</div>
+
+<div class="main">
+  <!-- LEFT: Plot -->
+  <div class="panel" id="left-panel">
+    <div class="panel-title" id="poly-title">Legendre Polynomials P_n(x)</div>
+    <div class="curve-legend" id="curve-legend"></div>
+    <div id="plot-container"></div>
+    <div id="toggle-row-container"></div>
+  </div>
+
+  <!-- RIGHT: Heatmap + Integral -->
+  <div class="panel" id="right-panel">
+    <div class="panel-title">Orthogonality Matrix (5×5)</div>
+    <div class="section-title" id="matrix-subtitle">∫₋₁¹ Pₘ(x) Pₙ(x) dx</div>
+    <div id="heatmap-container"></div>
+
+    <div class="panel-title" style="margin-top:16px;">Selected Pair — Inner Product</div>
+    <div id="integral-display">
+      <div class="integral-title">Click a cell to select a pair</div>
+      <div class="integral-formula" id="int-formula">—</div>
+      <div class="integral-result" id="int-result"></div>
+    </div>
+    <div id="running-int-container" style="margin-top:8px;"></div>
+
+    <div class="physics-console">
+      <div class="console-header">Physics Checks</div>
+      <div class="console-body" id="console-body">Computing...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PALETTE
+// ============================================================
+const BG    = '#FFFFFF';
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+
+// Curve palette: n=0 → INK, n=4 → SLATE, interpolate
+const CURVE_COLORS = [
+  '#2A1A0E',  // n=0 INK
+  '#6B3A1F',  // n=1
+  '#C8102E',  // n=2 RED
+  '#8A7A6E',  // n=3
+  '#545454',  // n=4 SLATE
+];
+
+// ============================================================
+// POLYNOMIAL DEFINITIONS
+// ============================================================
+const FAMILIES = {
+  legendre: {
+    name: 'Legendre',
+    symbol: 'P',
+    domain: [-1, 1],
+    weight: x => 1,
+    plotDomain: [-1, 1],
+    integralDomain: [-1, 1],
+    integralN: 256,
+    subtitle: '∫₋₁¹ Pₘ(x) Pₙ(x) dx',
+    axisLabel: 'x ∈ [−1, 1]',
+    polys: [
+      x => 1,
+      x => x,
+      x => (3*x*x - 1)/2,
+      x => (5*x*x*x - 3*x)/2,
+      x => (35*x*x*x*x - 30*x*x + 3)/8,
+    ],
+    norm: n => 2/(2*n+1),
+    names: ['P₀', 'P₁', 'P₂', 'P₃', 'P₄'],
+    yRange: [-1.1, 1.1],
+    hasWrongWeight: false,
+  },
+  hermite: {
+    name: 'Hermite',
+    symbol: 'H',
+    domain: [-5, 5],
+    weight: x => Math.exp(-x*x),
+    weightWrong: x => 1,
+    plotDomain: [-4, 4],
+    integralDomain: [-5, 5],
+    integralN: 512,
+    subtitle: '∫ Hₘ(x) Hₙ(x) e^{−x²} dx',
+    subtitleWrong: '∫ Hₘ(x) Hₙ(x) dx  [WRONG WEIGHT]',
+    axisLabel: 'x ∈ (−∞, ∞)   [plotted: −4 to 4]',
+    polys: [
+      x => 1,
+      x => 2*x,
+      x => 4*x*x - 2,
+      x => 8*x*x*x - 12*x,
+      x => 16*x*x*x*x - 48*x*x + 12,
+    ],
+    norm: n => Math.sqrt(Math.PI) * Math.pow(2, n) * factorial(n),
+    names: ['H₀', 'H₁', 'H₂', 'H₃', 'H₄'],
+    yRange: [-30, 30],
+    hasWrongWeight: true,
+  },
+  laguerre: {
+    name: 'Laguerre',
+    symbol: 'L',
+    domain: [0, 20],
+    weight: x => Math.exp(-x),
+    plotDomain: [0, 10],
+    integralDomain: [0, 20],
+    integralN: 512,
+    subtitle: '∫₀^∞ Lₘ(x) Lₙ(x) e^{−x} dx',
+    axisLabel: 'x ∈ [0, ∞)   [plotted: 0 to 10]',
+    polys: [
+      x => 1,
+      x => 1 - x,
+      x => (x*x - 4*x + 2)/2,
+      x => (-x*x*x + 9*x*x - 18*x + 6)/6,
+      x => (x*x*x*x - 16*x*x*x + 72*x*x - 96*x + 24)/24,
+    ],
+    norm: n => 1,
+    names: ['L₀', 'L₁', 'L₂', 'L₃', 'L₄'],
+    yRange: [-3, 3],
+    hasWrongWeight: false,
+  },
+  chebyshev: {
+    name: 'Chebyshev',
+    symbol: 'T',
+    domain: [-1, 1],
+    weight: x => {
+      const d = 1 - x*x;
+      return d < 1e-10 ? 0 : 1/Math.sqrt(d);
+    },
+    plotDomain: [-1, 1],
+    integralDomain: [-0.9999, 0.9999],
+    integralN: 256,
+    useTheta: true,   // use x = cos(θ) substitution — exact for 1/√(1−x²) weight
+    subtitle: '∫₋₁¹ Tₘ(x) Tₙ(x) / √(1−x²) dx',
+    axisLabel: 'x ∈ [−1, 1]',
+    polys: [
+      x => 1,
+      x => x,
+      x => 2*x*x - 1,
+      x => 4*x*x*x - 3*x,
+      x => 8*x*x*x*x - 8*x*x + 1,
+    ],
+    norm: n => n === 0 ? Math.PI : Math.PI/2,
+    names: ['T₀', 'T₁', 'T₂', 'T₃', 'T₄'],
+    yRange: [-1.1, 1.1],
+    hasWrongWeight: false,
+  },
+};
+
+function factorial(n) {
+  if (n <= 1) return 1;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+// ============================================================
+// NUMERICAL INTEGRATION
+// ============================================================
+function integrate(f, a, b, n) {
+  const h = (b - a) / n;
+  let sum = 0;
+  for (let i = 0; i < n; i++) {
+    const x = a + (i + 0.5) * h;
+    sum += f(x);
+  }
+  return sum * h;
+}
+
+// Chebyshev-exact: ∫₋₁¹ f(x)/√(1−x²) dx = ∫₀^π f(cos θ) dθ
+function integrateCheby(fi, fj, n) {
+  let sum = 0;
+  for (let k = 0; k < n; k++) {
+    const theta = (k + 0.5) * Math.PI / n;
+    const x = Math.cos(theta);
+    sum += fi(x) * fj(x);
+  }
+  return sum * Math.PI / n;
+}
+
+function innerProduct(fam, i, j, useWrong) {
+  const pi = fam.polys[i];
+  const pj = fam.polys[j];
+
+  // Chebyshev: use theta substitution for exact 1/sqrt(1-x^2) quadrature
+  if (fam.useTheta && !useWrong) {
+    return integrateCheby(pi, pj, fam.integralN);
+  }
+
+  const w = (useWrong && fam.weightWrong) ? fam.weightWrong : fam.weight;
+  const [a, b] = [fam.integralDomain[0], fam.integralDomain[1]];
+  const n = fam.integralN;
+  return integrate(x => pi(x) * pj(x) * w(x), a, b, n);
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let currentFamily = 'legendre';
+let selectedCell = { i: 2, j: 2 };
+let useWrongWeight = false;
+let orthoMatrix = {};
+let animTimer = null;
+
+// ============================================================
+// COMPUTE ALL MATRICES UPFRONT
+// ============================================================
+function computeMatrix(famKey, wrong) {
+  const fam = FAMILIES[famKey];
+  const mat = [];
+  for (let i = 0; i < 5; i++) {
+    mat.push([]);
+    for (let j = 0; j < 5; j++) {
+      mat[i].push(innerProduct(fam, i, j, wrong));
+    }
+  }
+  return mat;
+}
+
+// Precompute for all families
+const matrices = {};
+function precompute() {
+  for (const k of Object.keys(FAMILIES)) {
+    matrices[k] = computeMatrix(k, false);
+  }
+  matrices['hermite_wrong'] = computeMatrix('hermite', true);
+}
+
+precompute();
+
+// ============================================================
+// PLOT (LEFT)
+// ============================================================
+const PLOT_W = 380, PLOT_H = 280;
+const PLOT_MARGIN = { top: 12, right: 18, bottom: 36, left: 44 };
+
+function buildPlot(famKey) {
+  const fam = FAMILIES[famKey];
+  const container = document.getElementById('plot-container');
+  container.innerHTML = '';
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', PLOT_W)
+    .attr('height', PLOT_H);
+
+  const W = PLOT_W - PLOT_MARGIN.left - PLOT_MARGIN.right;
+  const H = PLOT_H - PLOT_MARGIN.top - PLOT_MARGIN.bottom;
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${PLOT_MARGIN.left},${PLOT_MARGIN.top})`);
+
+  const [xa, xb] = fam.plotDomain;
+  const xScale = d3.scaleLinear().domain([xa, xb]).range([0, W]);
+  const yScale = d3.scaleLinear().domain(fam.yRange).range([H, 0]);
+
+  // Grid
+  g.append('g').attr('class', 'grid')
+    .call(d3.axisLeft(yScale).tickSize(-W).tickFormat(''))
+    .call(g => g.selectAll('line').style('stroke', '#EEE').style('stroke-width', '1'));
+  g.selectAll('.grid .domain').remove();
+
+  // Zero line
+  g.append('line')
+    .attr('x1', 0).attr('x2', W)
+    .attr('y1', yScale(0)).attr('y2', yScale(0))
+    .attr('stroke', INK).attr('stroke-width', 1).attr('stroke-dasharray', '4,3')
+    .attr('opacity', 0.4);
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${H})`)
+    .call(d3.axisBottom(xScale).ticks(6))
+    .call(g => g.selectAll('text').style('font-size', '11px').style('fill', SLATE));
+
+  g.append('g')
+    .call(d3.axisLeft(yScale).ticks(5))
+    .call(g => g.selectAll('text').style('font-size', '11px').style('fill', SLATE));
+
+  // Axis label
+  svg.append('text')
+    .attr('x', PLOT_MARGIN.left + W/2)
+    .attr('y', PLOT_H - 2)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '10px')
+    .attr('fill', SLATE)
+    .text(fam.axisLabel);
+
+  // Lines
+  const nPts = 300;
+  const xs = d3.range(nPts).map(i => xa + (i / (nPts - 1)) * (xb - xa));
+
+  const lineGen = d3.line()
+    .x(x => xScale(x))
+    .y(x => yScale(x))
+    .defined(x => isFinite(x));
+
+  const lines = [];
+  for (let n = 0; n < 5; n++) {
+    const path = g.append('path')
+      .datum(xs)
+      .attr('class', `curve-n${n}`)
+      .attr('d', lineGen.y(x => {
+        const v = fam.polys[n](x);
+        return yScale(Math.max(fam.yRange[0], Math.min(fam.yRange[1], v)));
+      }))
+      .attr('fill', 'none')
+      .attr('stroke', CURVE_COLORS[n])
+      .attr('stroke-width', n === 2 ? 2.5 : 1.8)
+      .attr('opacity', 1);
+    lines.push(path);
+  }
+
+  // Highlight selected pair
+  function highlightCurves(i, j) {
+    for (let n = 0; n < 5; n++) {
+      const isSelected = (n === i || n === j);
+      lines[n]
+        .attr('opacity', isSelected ? 1 : 0.18)
+        .attr('stroke-width', isSelected ? 2.8 : 1.5);
+    }
+  }
+
+  // Expose
+  window._highlightCurves = highlightCurves;
+
+  // Build legend
+  buildLegend(fam, highlightCurves);
+
+  return { svg, g, xScale, yScale, W, H, lines };
+}
+
+function buildLegend(fam, highlightFn) {
+  const legend = document.getElementById('curve-legend');
+  legend.innerHTML = '';
+  for (let n = 0; n < 5; n++) {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+      <div class="legend-swatch" style="background:${CURVE_COLORS[n]}"></div>
+      <span>${fam.names[n]}</span>
+    `;
+    item.addEventListener('mouseenter', () => highlightFn(n, n));
+    item.addEventListener('mouseleave', () => {
+      highlightFn(selectedCell.i, selectedCell.j);
+    });
+    legend.appendChild(item);
+  }
+}
+
+// ============================================================
+// HEATMAP (RIGHT TOP)
+// ============================================================
+const HM_SIZE = 280;
+const HM_MARGIN = { top: 32, right: 18, bottom: 16, left: 42 };
+
+function buildHeatmap(famKey, wrong) {
+  const fam = FAMILIES[famKey];
+  const matKey = (famKey === 'hermite' && wrong) ? 'hermite_wrong' : famKey;
+  const mat = matrices[matKey];
+
+  const container = document.getElementById('heatmap-container');
+  container.innerHTML = '';
+
+  const W = HM_SIZE;
+  const H = HM_SIZE;
+  const inner = H - HM_MARGIN.top - HM_MARGIN.bottom;
+  const innerW = W - HM_MARGIN.left - HM_MARGIN.right;
+  const cellSize = Math.min(innerW, inner) / 5;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', W)
+    .attr('height', H);
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${HM_MARGIN.left},${HM_MARGIN.top})`);
+
+  // Color scale
+  const diagMax = d3.max(mat.map((row, i) => Math.abs(row[i])));
+  const absMax = d3.max(mat.flat().map(Math.abs));
+  const colorScale = d3.scaleSequential()
+    .domain([0, diagMax > 0 ? diagMax : 1])
+    .interpolator(d3.interpolate(BG, RED));
+
+  // Off-diagonal: show near-zero with light gray tint
+  function cellColor(i, j, v) {
+    if (i === j) return colorScale(Math.abs(v));
+    const normalized = Math.abs(v) / (diagMax > 0 ? diagMax : 1);
+    if (normalized < 0.005) return '#F9F7F5';
+    return d3.interpolate('#F9F7F5', RED)(normalized * 8);
+  }
+
+  // Labels
+  const labels = fam.names;
+
+  // Column labels (top)
+  for (let j = 0; j < 5; j++) {
+    svg.append('text')
+      .attr('x', HM_MARGIN.left + j * cellSize + cellSize/2)
+      .attr('y', HM_MARGIN.top - 8)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '11px')
+      .attr('fill', SLATE)
+      .text(labels[j]);
+  }
+
+  // Row labels (left)
+  for (let i = 0; i < 5; i++) {
+    svg.append('text')
+      .attr('x', HM_MARGIN.left - 6)
+      .attr('y', HM_MARGIN.top + i * cellSize + cellSize/2 + 4)
+      .attr('text-anchor', 'end')
+      .attr('font-size', '11px')
+      .attr('fill', SLATE)
+      .text(labels[i]);
+  }
+
+  // Cells
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      const v = mat[i][j];
+      const cellG = g.append('g');
+
+      const rect = cellG.append('rect')
+        .attr('class', 'heatmap-cell')
+        .attr('x', j * cellSize)
+        .attr('y', i * cellSize)
+        .attr('width', cellSize - 1)
+        .attr('height', cellSize - 1)
+        .attr('rx', 2)
+        .attr('fill', cellColor(i, j, v))
+        .attr('stroke', (i === selectedCell.i && j === selectedCell.j) ? INK : 'none')
+        .attr('stroke-width', 2);
+
+      // Value text inside cell
+      const displayV = Math.abs(v) < 0.001 ? '0' : v.toFixed(2);
+      cellG.append('text')
+        .attr('x', j * cellSize + cellSize/2)
+        .attr('y', i * cellSize + cellSize/2 + 4)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '9px')
+        .attr('fill', Math.abs(v)/diagMax > 0.5 ? BG : INK)
+        .attr('pointer-events', 'none')
+        .text(displayV);
+
+      cellG.on('click', () => {
+        selectedCell = { i, j };
+        buildHeatmap(famKey, wrong);
+        updateIntegral(famKey, i, j, wrong);
+        if (window._highlightCurves) window._highlightCurves(i, j);
+      });
+    }
+  }
+
+  // Colorbar
+  const cbW = innerW * 0.7, cbH = 8;
+  const cbX = (innerW - cbW) / 2;
+  const cbY = 5 * cellSize + 8;
+
+  const defs = svg.append('defs');
+  const grad = defs.append('linearGradient').attr('id', 'cb-grad');
+  grad.append('stop').attr('offset', '0%').attr('stop-color', BG);
+  grad.append('stop').attr('offset', '100%').attr('stop-color', RED);
+
+  g.append('rect')
+    .attr('x', cbX).attr('y', cbY)
+    .attr('width', cbW).attr('height', cbH)
+    .attr('fill', 'url(#cb-grad)')
+    .attr('rx', 2);
+
+  g.append('text').attr('x', cbX).attr('y', cbY + cbH + 12)
+    .attr('font-size', '9px').attr('fill', SLATE).text('0');
+  g.append('text').attr('x', cbX + cbW).attr('y', cbY + cbH + 12)
+    .attr('text-anchor', 'end')
+    .attr('font-size', '9px').attr('fill', SLATE)
+    .text(diagMax.toFixed(3));
+
+  // Highlight selected cell border
+  g.append('rect')
+    .attr('x', selectedCell.j * cellSize)
+    .attr('y', selectedCell.i * cellSize)
+    .attr('width', cellSize - 1)
+    .attr('height', cellSize - 1)
+    .attr('rx', 2)
+    .attr('fill', 'none')
+    .attr('stroke', INK)
+    .attr('stroke-width', 2.5)
+    .attr('pointer-events', 'none');
+}
+
+// ============================================================
+// INTEGRAL DISPLAY
+// ============================================================
+function updateIntegral(famKey, i, j, wrong) {
+  const fam = FAMILIES[famKey];
+  const matKey = (famKey === 'hermite' && wrong) ? 'hermite_wrong' : famKey;
+  const val = matrices[matKey][i][j];
+
+  const formulaEl = document.getElementById('int-formula');
+  const resultEl = document.getElementById('int-result');
+
+  const wi = fam.names[i], wj = fam.names[j];
+  let integralStr = '';
+  if (famKey === 'legendre') {
+    integralStr = `∫₋₁¹ ${wi}(x) · ${wj}(x) dx`;
+  } else if (famKey === 'hermite') {
+    const wStr = wrong ? '1' : 'e^{−x²}';
+    integralStr = `∫ ${wi}(x) · ${wj}(x) · ${wStr} dx`;
+  } else if (famKey === 'laguerre') {
+    integralStr = `∫₀^∞ ${wi}(x) · ${wj}(x) · e^{−x} dx`;
+  } else if (famKey === 'chebyshev') {
+    integralStr = `∫₋₁¹ ${wi}(x) · ${wj}(x) / √(1−x²) dx`;
+  }
+
+  formulaEl.textContent = integralStr;
+
+  const isZero = Math.abs(val) < 1e-6;
+  if (i === j) {
+    const norm = fam.norm(i);
+    resultEl.textContent = `= ${val.toFixed(5)}  (exact: ${norm.toFixed(5)}) — normalization`;
+    resultEl.className = 'integral-result nonzero';
+  } else if (isZero) {
+    resultEl.textContent = `= ${val.toExponential(3)} ≈ 0  — orthogonal ✓`;
+    resultEl.className = 'integral-result zero';
+  } else {
+    resultEl.textContent = `= ${val.toFixed(5)}  — NOT orthogonal (wrong weight)`;
+    resultEl.className = 'integral-result nonzero';
+  }
+
+  // Animate running integral
+  animateRunningIntegral(famKey, i, j, wrong);
+}
+
+// ============================================================
+// RUNNING INTEGRAL ANIMATION
+// ============================================================
+const RI_W = 340, RI_H = 70;
+const RI_MARGIN = { top: 8, right: 16, bottom: 22, left: 44 };
+
+function animateRunningIntegral(famKey, i, j, wrong) {
+  if (animTimer) { animTimer.stop(); animTimer = null; }
+
+  const container = document.getElementById('running-int-container');
+  container.innerHTML = '';
+
+  const fam = FAMILIES[famKey];
+  const pi = fam.polys[i];
+  const pj = fam.polys[j];
+
+  const nPts = 100;
+  let xs, running;
+
+  if (fam.useTheta && !wrong) {
+    // Chebyshev: parametrize by θ ∈ [0,π], x = cos(θ)
+    // integral ∫₀^π f(cos θ) dθ animated in θ-space
+    const thetas = d3.range(nPts).map(k => (k + 0.5) * Math.PI / nPts);
+    xs = thetas; // plot in theta-space
+    const h = Math.PI / nPts;
+    running = [];
+    let acc = 0;
+    for (let k = 0; k < nPts; k++) {
+      const x = Math.cos(thetas[k]);
+      acc += pi(x) * pj(x) * h;
+      running.push(acc);
+    }
+  } else {
+    const w = (famKey === 'hermite' && wrong) ? fam.weightWrong : fam.weight;
+    const [xa, xb] = [fam.integralDomain[0], fam.integralDomain[1]];
+    xs = d3.range(nPts).map(k => xa + (k / (nPts - 1)) * (xb - xa));
+    const integrand = xs.map(x => pi(x) * pj(x) * w(x));
+    const h = (xb - xa) / nPts;
+    running = [];
+    let acc = 0;
+    for (let k = 0; k < nPts; k++) {
+      acc += integrand[k] * h;
+      running.push(acc);
+    }
+  }
+
+  const iMax = d3.max(running.map(Math.abs));
+  const yDom = iMax > 0 ? [-iMax * 1.2, iMax * 1.2] : [-1, 1];
+
+  const W = RI_W - RI_MARGIN.left - RI_MARGIN.right;
+  const H = RI_H - RI_MARGIN.top - RI_MARGIN.bottom;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', RI_W).attr('height', RI_H)
+    .attr('id', 'running-integral-svg');
+
+  const g = svg.append('g')
+    .attr('transform', `translate(${RI_MARGIN.left},${RI_MARGIN.top})`);
+
+  const xLabel = (fam.useTheta && !wrong) ? 'Running integral (θ ∈ [0,π]):' : 'Running integral:';
+  svg.append('text')
+    .attr('x', RI_MARGIN.left).attr('y', RI_MARGIN.top - 2)
+    .attr('font-size', '9px').attr('fill', SLATE)
+    .text(xLabel);
+
+  const xMin = xs[0], xMax = xs[xs.length - 1];
+  const xScale = d3.scaleLinear().domain([xMin, xMax]).range([0, W]);
+  const yScale = d3.scaleLinear().domain(yDom).range([H, 0]);
+
+  g.append('g').attr('transform', `translate(0,${H})`)
+    .call(d3.axisBottom(xScale).ticks(4))
+    .call(g => g.selectAll('text').style('font-size', '9px').style('fill', SLATE));
+
+  g.append('g')
+    .call(d3.axisLeft(yScale).ticks(3))
+    .call(g => g.selectAll('text').style('font-size', '9px').style('fill', SLATE));
+
+  // Zero line
+  g.append('line')
+    .attr('x1', 0).attr('x2', W)
+    .attr('y1', yScale(0)).attr('y2', yScale(0))
+    .attr('stroke', SLATE).attr('stroke-width', 0.8).attr('stroke-dasharray', '3,2').attr('opacity', 0.5);
+
+  const lineGen = d3.line()
+    .x((d, k) => xScale(xs[k]))
+    .y(d => yScale(d));
+
+  const path = g.append('path')
+    .attr('fill', 'none')
+    .attr('stroke', RED)
+    .attr('stroke-width', 2);
+
+  // Final value dot
+  const dot = g.append('circle')
+    .attr('r', 3)
+    .attr('fill', INK)
+    .attr('opacity', 0);
+
+  let frame = 0;
+  const totalFrames = nPts;
+
+  animTimer = d3.interval(() => {
+    frame = Math.min(frame + 2, totalFrames - 1);
+    const slice = running.slice(0, frame + 1);
+    path.datum(slice).attr('d', lineGen);
+
+    dot.attr('cx', xScale(xs[frame]))
+      .attr('cy', yScale(running[frame]))
+      .attr('opacity', 1);
+
+    if (frame >= totalFrames - 1) {
+      animTimer.stop();
+      animTimer = null;
+    }
+  }, 18);
+}
+
+// ============================================================
+// PHYSICS CONSOLE
+// ============================================================
+function updateConsole() {
+  const body = document.getElementById('console-body');
+
+  // P1: Legendre P2 P3 orthogonal
+  const p2p3 = matrices['legendre'][2][3];
+  const p1ok = Math.abs(p2p3) < 1e-5;
+
+  // P2: Legendre norm P2 = 2/5
+  const p2norm = matrices['legendre'][2][2];
+  const expected2 = 2/5;
+  const p2ok = Math.abs(p2norm - expected2) < 0.002;
+
+  // P3: Hermite H0 H2 orthogonal with e^{-x^2}
+  const h0h2 = matrices['hermite'][0][2];
+  const p3ok = Math.abs(h0h2) < 0.05;
+
+  body.innerHTML = `
+<span class="${p1ok ? 'check-pass' : 'check-fail'}">P1</span> ∫₋₁¹ P₂·P₃ dx = ${p2p3.toExponential(3)} ${p1ok ? '≈ 0 ✓' : '— FAIL'}<br>
+<span class="${p2ok ? 'check-pass' : 'check-fail'}">P2</span> ∫₋₁¹ P₂² dx = ${p2norm.toFixed(4)} (exact 0.4000) ${p2ok ? '✓' : '— FAIL'}<br>
+<span class="${p3ok ? 'check-pass' : 'check-fail'}">P3</span> ∫ H₀·H₂·e^{−x²} dx = ${h0h2.toExponential(3)} ${p3ok ? '≈ 0 ✓' : '— FAIL'}
+  `.trim();
+}
+
+// ============================================================
+// WRONG WEIGHT TOGGLE
+// ============================================================
+function buildToggle() {
+  const container = document.getElementById('toggle-row-container');
+  container.innerHTML = '';
+
+  const fam = FAMILIES[currentFamily];
+  if (!fam.hasWrongWeight) return;
+
+  const row = document.createElement('div');
+  row.className = 'toggle-row';
+
+  const label = document.createElement('label');
+  label.className = 'toggle-switch';
+  const input = document.createElement('input');
+  input.type = 'checkbox';
+  input.checked = useWrongWeight;
+  const track = document.createElement('div');
+  track.className = 'toggle-track';
+  const thumb = document.createElement('div');
+  thumb.className = 'toggle-thumb';
+  label.appendChild(input);
+  label.appendChild(track);
+  label.appendChild(thumb);
+
+  const lbl = document.createElement('label');
+  lbl.textContent = '"Wrong weight" (use w = 1 instead of w = e^{−x²})';
+  lbl.style.fontSize = '12px';
+  lbl.style.cursor = 'pointer';
+
+  row.appendChild(label);
+  row.appendChild(lbl);
+
+  const caption = document.createElement('div');
+  caption.className = 'toggle-caption' + (useWrongWeight ? ' visible' : '');
+  caption.textContent = 'Without the correct weight function, orthogonality fails';
+
+  container.appendChild(row);
+  container.appendChild(caption);
+
+  input.addEventListener('change', () => {
+    useWrongWeight = input.checked;
+    caption.className = 'toggle-caption' + (useWrongWeight ? ' visible' : '');
+
+    const subtitleEl = document.getElementById('matrix-subtitle');
+    if (useWrongWeight) {
+      subtitleEl.textContent = fam.subtitleWrong || fam.subtitle;
+      subtitleEl.style.color = RED;
+    } else {
+      subtitleEl.textContent = fam.subtitle;
+      subtitleEl.style.color = '';
+    }
+
+    buildHeatmap(currentFamily, useWrongWeight);
+    updateIntegral(currentFamily, selectedCell.i, selectedCell.j, useWrongWeight);
+  });
+
+  lbl.addEventListener('click', () => {
+    input.checked = !input.checked;
+    input.dispatchEvent(new Event('change'));
+  });
+}
+
+// ============================================================
+// RENDER FAMILY
+// ============================================================
+function renderFamily(famKey) {
+  currentFamily = famKey;
+  useWrongWeight = false;
+
+  const fam = FAMILIES[famKey];
+  document.getElementById('poly-title').textContent =
+    `${fam.name} Polynomials ${fam.symbol}_n(x)`;
+
+  const subtitleEl = document.getElementById('matrix-subtitle');
+  subtitleEl.textContent = fam.subtitle;
+  subtitleEl.style.color = '';
+
+  buildPlot(famKey);
+  buildHeatmap(famKey, false);
+  buildToggle();
+  updateIntegral(famKey, selectedCell.i, selectedCell.j, false);
+  if (window._highlightCurves) window._highlightCurves(selectedCell.i, selectedCell.j);
+  updateConsole();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+document.getElementById('tab-bar').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedCell = { i: 2, j: 2 };
+  renderFamily(btn.dataset.family);
+});
+
+// ============================================================
+// INIT
+// ============================================================
+renderFamily('legendre');
+updateConsole();
+</script>
+</body>
+</html>

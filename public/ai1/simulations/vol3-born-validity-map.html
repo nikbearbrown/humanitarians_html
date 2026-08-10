@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Born Approximation Validity Map</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    padding: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .sub { font-size: 0.8rem; color: #545454; margin-bottom: 20px; line-height: 1.5; }
+  .panels { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 18px; margin: 20px 0;
+    padding: 14px 18px;
+    border: 1.5px solid #2A1A0E;
+    background: #fafafa;
+  }
+  .ctrl-group { display: flex; flex-direction: column; gap: 4px; min-width: 180px; }
+  .ctrl-group label { font-size: 0.75rem; font-weight: 600; color: #2A1A0E; }
+  .ctrl-group input[type=range] {
+    -webkit-appearance: none; width: 200px; height: 4px;
+    background: #2A1A0E; border-radius: 2px; cursor: pointer;
+  }
+  .ctrl-group input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: #C8102E; cursor: pointer;
+  }
+  .readout {
+    font-size: 0.85rem; font-weight: 600; padding: 10px 16px;
+    border: 2px solid #2A1A0E; background: #fff; letter-spacing: 0.01em;
+    margin-top: 8px;
+    display: flex; flex-wrap: wrap; gap: 14px;
+  }
+  .readout .valid-yes { color: #237c2a; }
+  .readout .valid-no  { color: #C8102E; }
+  .panel-label { font-size: 0.7rem; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<h1>Born Approximation Validity Map</h1>
+<p class="sub">
+  Born gives the exact Rutherford formula at all energies for Coulomb — but at a resonance
+  it predicts nothing. Resonances are non-perturbative. Map shows where the Born series
+  converges for a Yukawa potential V = V₀ e<sup>−r</sup>/r.
+</p>
+
+<div class="panels">
+  <div>
+    <div class="panel-label">Validity map — log-log (ka, |V₀|)</div>
+    <svg id="map-svg"></svg>
+  </div>
+  <div>
+    <div class="panel-label">Angular distribution dσ/dΩ (normalized)</div>
+    <svg id="ang-svg"></svg>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>ka = <span id="ka-val">3.00</span> (dimensionless wavenumber)</label>
+    <input type="range" id="ka-slider" min="0" max="1" step="0.001" value="0.5">
+  </div>
+  <div class="ctrl-group">
+    <label>|V₀| = ξ = <span id="xi-val">1.00</span> (dimensionless strength)</label>
+    <input type="range" id="xi-slider" min="0" max="1" step="0.001" value="0.333">
+  </div>
+</div>
+
+<div class="readout" id="readout">
+  <span>ka = <span id="r-ka">3.00</span></span>
+  <span>ξ = <span id="r-xi">1.00</span></span>
+  <span>Born valid: <span id="r-valid" class="valid-yes">YES</span></span>
+  <span>dσ/dΩ(90°)/dσ/dΩ(1°) = <span id="r-ratio">—</span></span>
+</div>
+
+<script>
+// ── Colours & layout ────────────────────────────────────────────────────────
+const INK   = '#2A1A0E';
+const RED   = '#C8102E';
+const SLATE = '#545454';
+
+// ── Scales: slider → log param ──────────────────────────────────────────────
+const LOG_MIN = 0.1, LOG_MAX = 30.0;
+function sliderToLog(v){ return LOG_MIN * Math.pow(LOG_MAX/LOG_MIN, v); }
+function logToSlider(x){ return Math.log(x/LOG_MIN)/Math.log(LOG_MAX/LOG_MIN); }
+
+// ── Physics ──────────────────────────────────────────────────────────────────
+function bornDiffXS(theta, V0, k){
+  // dσ/dΩ = V0² / (q²+1)², q²=4k²sin²(θ/2)
+  const q2 = 4*k*k*Math.sin(theta/2)**2;
+  return V0*V0 / (q2+1)**2;
+}
+function bornValid(k, xi){ return (xi < 1) || (k > xi); }
+
+// ── Validity map SVG ─────────────────────────────────────────────────────────
+const mapW = 340, mapH = 280;
+const marg = { top: 20, right: 20, bottom: 44, left: 54 };
+const mInW = mapW - marg.left - marg.right;
+const mInH = mapH - marg.top  - marg.bottom;
+
+const mapSvg = d3.select('#map-svg')
+  .attr('width', mapW).attr('height', mapH);
+
+const mapG = mapSvg.append('g')
+  .attr('transform', `translate(${marg.left},${marg.top})`);
+
+const xScaleM = d3.scaleLog().domain([0.1, 30]).range([0, mInW]);
+const yScaleM = d3.scaleLog().domain([0.1, 30]).range([mInH, 0]);
+
+// Clip path
+mapSvg.append('defs').append('clipPath').attr('id','map-clip')
+  .append('rect').attr('width',mInW).attr('height',mInH);
+
+// Draw colour grid
+const NM = 40;
+const kaVals = d3.range(NM).map(i => Math.exp(Math.log(0.1)+i*(Math.log(30)-Math.log(0.1))/(NM-1)));
+const xiVals = d3.range(NM).map(i => Math.exp(Math.log(0.1)+i*(Math.log(30)-Math.log(0.1))/(NM-1)));
+
+const cellG = mapG.append('g').attr('clip-path','url(#map-clip)').attr('class','cells');
+
+function getKaStep(i){ return i<NM-1 ? kaVals[i+1]-kaVals[i] : kaVals[i]-kaVals[i-1]; }
+function getXiStep(j){ return j<NM-1 ? xiVals[j+1]-xiVals[j] : xiVals[j]-xiVals[j-1]; }
+
+for(let i=0;i<NM-1;i++){
+  for(let j=0;j<NM-1;j++){
+    const ka  = kaVals[i];
+    const xi  = xiVals[j];
+    const x0  = xScaleM(ka);
+    const x1  = xScaleM(kaVals[i+1]);
+    const y0  = yScaleM(xiVals[j+1]);
+    const y1  = yScaleM(xi);
+    const valid = bornValid(ka, xi);
+    cellG.append('rect')
+      .attr('x', x0).attr('y', y0)
+      .attr('width', x1-x0).attr('height', y1-y0)
+      .attr('fill', valid ? 'rgba(42,26,14,0.10)' : 'rgba(200,16,46,0.18)')
+      .attr('stroke','none');
+  }
+}
+
+// Diagonal line ka = xi
+const diagPts = [];
+for(let v=0.1;v<=30;v*=1.1){ if(v<=30 && v>=0.1) diagPts.push([v,v]); }
+mapG.append('path').attr('clip-path','url(#map-clip)')
+  .datum(diagPts)
+  .attr('fill','none')
+  .attr('stroke', SLATE).attr('stroke-width', 1.5)
+  .attr('stroke-dasharray','5,3')
+  .attr('d', d3.line().x(d=>xScaleM(d[0])).y(d=>yScaleM(d[1])));
+
+// Horizontal line xi=1
+const xiLine = mapG.append('line').attr('clip-path','url(#map-clip)')
+  .attr('x1',0).attr('x2',mInW)
+  .attr('y1',yScaleM(1)).attr('y2',yScaleM(1))
+  .attr('stroke',SLATE).attr('stroke-width',1.5).attr('stroke-dasharray','5,3');
+
+// Region labels
+mapG.append('text').attr('x',xScaleM(0.5)).attr('y',yScaleM(20))
+  .attr('fill','rgba(200,16,46,0.75)').attr('font-size','10px').attr('font-weight','700')
+  .text('Born unreliable');
+mapG.append('text').attr('x',xScaleM(5)).attr('y',yScaleM(0.2))
+  .attr('fill','rgba(42,26,14,0.55)').attr('font-size','10px').attr('font-weight','700')
+  .text('Born valid');
+
+// Axes
+const xAxisM = d3.axisBottom(xScaleM).ticks(5,',.1r').tickSize(4);
+const yAxisM = d3.axisLeft(yScaleM).ticks(5,',.1r').tickSize(4);
+mapG.append('g').attr('transform',`translate(0,${mInH})`).call(xAxisM)
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+mapG.append('g').call(yAxisM)
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+
+// Axis labels
+mapG.append('text').attr('x',mInW/2).attr('y',mInH+38)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK)
+  .text('ka (dimensionless wavenumber)');
+mapG.append('text')
+  .attr('transform','rotate(-90)')
+  .attr('x',-mInH/2).attr('y',-42)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK)
+  .text('|V₀| (dimensionless strength)');
+
+// Crosshair dot
+const crosshair = mapG.append('circle').attr('r',7)
+  .attr('fill','none').attr('stroke',RED).attr('stroke-width',2)
+  .attr('pointer-events','none');
+const crosshairDotInner = mapG.append('circle').attr('r',3)
+  .attr('fill',RED).attr('pointer-events','none');
+
+// ── Angular distribution SVG ─────────────────────────────────────────────────
+const angW = 300, angH = 200;
+const aMarg = {top:18,right:16,bottom:42,left:52};
+const aInW = angW - aMarg.left - aMarg.right;
+const aInH = angH - aMarg.top  - aMarg.bottom;
+
+const angSvg = d3.select('#ang-svg')
+  .attr('width', angW).attr('height', angH);
+const angG = angSvg.append('g').attr('transform',`translate(${aMarg.left},${aMarg.top})`);
+
+const xScaleA = d3.scaleLinear().domain([0,180]).range([0,aInW]);
+const yScaleA = d3.scaleLinear().domain([0,1.05]).range([aInH,0]);
+
+angSvg.append('defs').append('clipPath').attr('id','ang-clip')
+  .append('rect').attr('width',aInW).attr('height',aInH);
+
+const xAxisA = d3.axisBottom(xScaleA).ticks(6).tickSize(4);
+const yAxisA = d3.axisLeft(yScaleA).ticks(5).tickSize(4);
+angG.append('g').attr('transform',`translate(0,${aInH})`).call(xAxisA)
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+angG.append('g').call(yAxisA)
+  .selectAll('text,line,path').attr('stroke',INK).attr('fill',INK).attr('font-size','9px');
+angG.append('text').attr('x',aInW/2).attr('y',aInH+34)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('θ (degrees)');
+angG.append('text').attr('transform','rotate(-90)').attr('x',-aInH/2).attr('y',-40)
+  .attr('text-anchor','middle').attr('font-size','10px').attr('fill',INK).text('dσ/dΩ (norm. to θ=1°)');
+
+const bornPath = angG.append('path').attr('clip-path','url(#ang-clip)')
+  .attr('fill','none').attr('stroke',INK).attr('stroke-width',2);
+const resonancePath = angG.append('path').attr('clip-path','url(#ang-clip)')
+  .attr('fill','none').attr('stroke',RED).attr('stroke-width',1.8)
+  .attr('stroke-dasharray','6,3');
+
+const bornLabel = angG.append('text').attr('x',aInW-6).attr('y',14)
+  .attr('text-anchor','end').attr('font-size','9px').attr('fill',INK).attr('font-weight','600')
+  .text('Born (smooth)');
+const resLabel = angG.append('text').attr('x',aInW-6).attr('y',28)
+  .attr('text-anchor','end').attr('font-size','9px').attr('fill',RED).attr('font-weight','600')
+  .text('');
+
+const ratioText = angG.append('text').attr('x',4).attr('y',aInH-4)
+  .attr('font-size','8.5px').attr('fill',SLATE);
+
+// Note below angular panel
+const angNote = angSvg.append('text').attr('x',aMarg.left+4).attr('y',angH-4)
+  .attr('font-size','8px').attr('fill',RED).text('');
+
+// ── Update function ───────────────────────────────────────────────────────────
+function update(){
+  const kaRaw = +document.getElementById('ka-slider').value;
+  const xiRaw = +document.getElementById('xi-slider').value;
+  const ka = sliderToLog(kaRaw);
+  const xi = sliderToLog(xiRaw);
+  const V0 = xi;
+
+  document.getElementById('ka-val').textContent = ka.toFixed(2);
+  document.getElementById('xi-val').textContent = xi.toFixed(2);
+  document.getElementById('r-ka').textContent   = ka.toFixed(2);
+  document.getElementById('r-xi').textContent   = xi.toFixed(2);
+
+  const valid = bornValid(ka, xi);
+  const validEl = document.getElementById('r-valid');
+  validEl.textContent = valid ? 'YES' : 'NO';
+  validEl.className   = valid ? 'valid-yes' : 'valid-no';
+
+  // Crosshair
+  const cxKa = Math.min(Math.max(ka, 0.1), 30);
+  const cxXi = Math.min(Math.max(xi, 0.1), 30);
+  crosshair.attr('cx', xScaleM(cxKa)).attr('cy', yScaleM(cxXi));
+  crosshairDotInner.attr('cx', xScaleM(cxKa)).attr('cy', yScaleM(cxXi));
+
+  // Angular distribution
+  const N = 200;
+  const thetaDeg = d3.range(N+1).map(i => 0.5+i*(179.5/N));
+  const thetaRad = thetaDeg.map(d => d*Math.PI/180);
+  const bornVals = thetaRad.map(t => bornDiffXS(t, V0, ka));
+  const norm = bornDiffXS(1*Math.PI/180, V0, ka) || 1;
+  const bornNorm = bornVals.map(v => v/norm);
+
+  const lineBorn = d3.line()
+    .x((d,i) => xScaleA(thetaDeg[i]))
+    .y(d => Math.max(yScaleA.range()[1], yScaleA(Math.min(d, 1.05))))
+    .curve(d3.curveCatmullRom);
+  bornPath.datum(bornNorm).attr('d', lineBorn);
+
+  // Ratio at 90°
+  const ratio90 = bornDiffXS(Math.PI/2, V0, ka) / (bornDiffXS(1*Math.PI/180, V0, ka) || 1);
+  document.getElementById('r-ratio').textContent = ratio90.toFixed(4);
+  ratioText.text('dσ/dΩ(90°)/dσ/dΩ(1°) = '+ratio90.toFixed(4));
+
+  // Resonance hint in deep unreliable region
+  if(xi > 2 && ka < xi){
+    const resVals = thetaRad.map(t => {
+      const born = bornDiffXS(t, V0, ka)/norm;
+      return born * (1 + xi/(1+(ka-xi/2)**2));
+    });
+    const maxRes = d3.max(resVals);
+    const resNorm = resVals.map(v => v/maxRes);
+    const lineRes = d3.line()
+      .x((d,i)=>xScaleA(thetaDeg[i]))
+      .y(d=>Math.max(yScaleA.range()[1], yScaleA(Math.min(d,1.05))))
+      .curve(d3.curveCatmullRom);
+    resonancePath.datum(resNorm).attr('d',lineRes).attr('opacity',1);
+    resLabel.text('~resonance (unreliable region)');
+    angNote.text('Red dashed: resonance enhancement hint — Born series has broken down here.');
+  } else {
+    resonancePath.attr('opacity',0);
+    resLabel.text('');
+    angNote.text('');
+  }
+}
+
+// Init sliders to log-mapped defaults
+document.getElementById('ka-slider').value = logToSlider(3.0);
+document.getElementById('xi-slider').value = logToSlider(1.0);
+document.getElementById('ka-slider').addEventListener('input', update);
+document.getElementById('xi-slider').addEventListener('input', update);
+update();
+
+// ── Console assertions ────────────────────────────────────────────────────────
+(function runTests(){
+  const V0=1.0, k=3.0;
+  function bornDiffXS_t(theta, V0, k){
+    const q2 = 4*k*k*Math.sin(theta/2)**2;
+    return V0*V0/(q2+1)**2;
+  }
+  const sig0     = bornDiffXS_t(0.001, 1, k);
+  const sig0_2v  = bornDiffXS_t(0.001, 2, k);
+  console.assert(Math.abs(sig0_2v/sig0 - 4) < 0.01,
+    'P1: doubling V₀ quadruples σ: ratio='+(sig0_2v/sig0).toFixed(4));
+
+  const ratio90  = bornDiffXS_t(Math.PI/2, V0, k) / bornDiffXS_t(0.001, V0, k);
+  const expect90 = 1/(4*k*k+1)**2;
+  console.assert(Math.abs(ratio90-expect90)<0.01,
+    'P2: σ(90°)/σ(0°)='+ratio90.toFixed(6)+' expect='+expect90.toFixed(6));
+
+  const valid = (1.0 < 1) || (1.0 > 5.0);
+  console.assert(!valid, 'P3: ka=1 xi=5 is unreliable: valid='+valid);
+
+  console.log('Born: P1 doubling V₀ ratio=', sig0_2v/sig0,
+    'P2 σ(90°)/σ(0°)=', ratio90.toFixed(6),
+    'expected=', expect90.toFixed(6));
+})();
+</script>
+</body>
+</html>

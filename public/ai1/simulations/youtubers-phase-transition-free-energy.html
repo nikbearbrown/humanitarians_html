@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<!-- SIM 5 — Phase Transition & Free Energy
+     F = E - T·S. Two phases: solid (gentle slope) and gas (steep slope).
+     Crossover at T* = ΔE/ΔS.
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phase Transition — Free Energy</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: var(--slate); margin: 0 0 20px; }
+  #main-row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+  #chart-area { flex: 0 0 520px; }
+  #right-panel { flex: 1; min-width: 260px; }
+  .slider-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  label { font-size: 13px; color: var(--slate); min-width: 100px; }
+  input[type=range] { accent-color: var(--red); width: 180px; cursor: pointer; }
+  .slider-val {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px; font-weight: 600; min-width: 40px;
+  }
+  #tstar-box {
+    border: 2px solid var(--red); border-radius: 4px;
+    padding: 14px 18px; margin-bottom: 20px;
+    text-align: center;
+  }
+  .tstar-label { font-size: 12px; color: var(--slate); text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 600; }
+  #tstar-val {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 40px; font-weight: 700; color: var(--red); line-height: 1.1;
+  }
+  .tstar-sub { font-size: 12px; color: var(--slate); margin-top: 4px; }
+  .phase-status {
+    display: flex; gap: 16px; margin-bottom: 20px;
+  }
+  .phase-box {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 10px 14px; text-align: center;
+  }
+  .phase-box.stable { border-color: var(--ink); background: #F5F5F5; }
+  .phase-name { font-size: 13px; font-weight: 700; }
+  .phase-stable { font-size: 11px; margin-top: 2px; color: var(--slate); }
+  .phase-stable.active { color: var(--red); font-weight: 700; font-size: 13px; }
+  #mol-canvas { display: block; border: 1px solid var(--border); margin-top: 16px; }
+  #mol-label { font-size: 11px; color: var(--slate); margin-top: 4px; }
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 24px; padding-top: 14px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 32px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); }
+  .info-box {
+    background: #FAFAFA; border: 1px solid var(--border);
+    border-radius: 3px; padding: 10px 14px;
+    font-size: 12px; color: var(--slate); line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .info-box code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; color: var(--ink);
+  }
+  /* T indicator slider on chart */
+  #t-slider-row {
+    display: flex; align-items: center; gap: 12px; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Phase Transition — Free Energy</h1>
+  <p class="sub">
+    The stable phase minimizes free energy F = E − T·S.
+    Two phases cross at T* = ΔE/ΔS — the phase transition temperature.
+  </p>
+
+  <div id="main-row">
+    <div id="chart-area">
+      <svg id="chart-svg" width="520" height="360"></svg>
+      <div id="t-slider-row">
+        <label for="t-slider" style="min-width:80px">Temperature T =</label>
+        <input id="t-slider" type="range" min="0" max="6" step="0.01" value="2">
+        <span id="t-val" class="slider-val">2.00</span>
+      </div>
+    </div>
+
+    <div id="right-panel">
+      <div class="info-box">
+        <code>F_solid(T) = E_solid − T·S_solid</code><br>
+        <code>F_gas(T) = E_gas − T·S_gas</code><br>
+        <code>T* = ΔE / ΔS = (E_gas − E_solid) / (S_gas − S_solid)</code>
+      </div>
+
+      <div class="slider-row">
+        <label for="de-slider">ΔE (binding energy)</label>
+        <input id="de-slider" type="range" min="0.5" max="5" step="0.1" value="2">
+        <span id="de-val" class="slider-val">2.0</span>
+      </div>
+      <div class="slider-row">
+        <label for="ds-slider">ΔS (entropy gap)</label>
+        <input id="ds-slider" type="range" min="0.1" max="2" step="0.05" value="1">
+        <span id="ds-val" class="slider-val">1.00</span>
+      </div>
+
+      <div id="tstar-box">
+        <div class="tstar-label">Transition Temperature T*</div>
+        <div id="tstar-val">2.00</div>
+        <div class="tstar-sub">= ΔE / ΔS = 2.0 / 1.0</div>
+      </div>
+
+      <div class="phase-status">
+        <div class="phase-box" id="solid-box">
+          <div class="phase-name" style="color:var(--ink)">Solid/Liquid</div>
+          <div class="phase-stable" id="solid-status">—</div>
+        </div>
+        <div class="phase-box" id="gas-box">
+          <div class="phase-name" style="color:var(--red)">Gas</div>
+          <div class="phase-stable" id="gas-status">—</div>
+        </div>
+      </div>
+
+      <canvas id="mol-canvas" width="260" height="140"></canvas>
+      <div id="mol-label">Molecular animation — dots spread at T &gt; T*</div>
+    </div>
+  </div>
+
+  <div id="predictions">
+    <div class="pred">
+      <strong>P1:</strong> T &lt; T* → F_solid &lt; F_gas → Solid/Liquid STABLE.
+      Default: T*=2.0, ΔE=2, ΔS=1.
+    </div>
+    <div class="pred">
+      <strong>P2:</strong> T &gt; T* → F_gas &lt; F_solid → Gas STABLE.
+      Exact crossover at T* = ΔE/ΔS.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+
+// Parameters
+let deltaE = 2.0;   // E_gas - E_solid
+let deltaS = 1.0;   // S_gas - S_solid
+let currentT = 2.0;
+const T_MIN = 0, T_MAX = 6;
+
+// Absolute energies (set so lines look good)
+// E_solid = 1, S_solid = 0.3 → F_solid = 1 - 0.3T
+// E_gas = 1 + ΔE, S_gas = 0.3 + ΔS → F_gas = (1+ΔE) - (0.3+ΔS)T
+const E_SOLID_BASE = 1.0;
+const S_SOLID_BASE = 0.3;
+
+// Chart setup
+const margin = { top: 30, right: 30, bottom: 50, left: 60 };
+const W = 520 - margin.left - margin.right;
+const H = 360 - margin.top - margin.bottom;
+
+const svg = d3.select('#chart-svg')
+  .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().domain([T_MIN, T_MAX]).range([0, W]);
+const F_RANGE = [-8, 4];
+const yScale = d3.scaleLinear().domain(F_RANGE).range([H, 0]);
+
+// Axes
+svg.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${H})`)
+  .call(d3.axisBottom(xScale).ticks(6).tickSize(4))
+  .call(g => g.select('.domain').attr('stroke', BORDER))
+  .call(g => g.selectAll('line').attr('stroke', BORDER))
+  .call(g => g.selectAll('text').attr('fill', SLATE).attr('font-size', 11));
+svg.append('g').attr('class', 'y-axis')
+  .call(d3.axisLeft(yScale).ticks(6).tickSize(4))
+  .call(g => g.select('.domain').attr('stroke', BORDER))
+  .call(g => g.selectAll('line').attr('stroke', BORDER))
+  .call(g => g.selectAll('text').attr('fill', SLATE).attr('font-size', 11));
+
+// Axis labels
+svg.append('text').attr('x', W / 2).attr('y', H + 42)
+  .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', SLATE)
+  .attr('font-family', 'Inter,sans-serif').text('Temperature T');
+svg.append('text').attr('transform', 'rotate(-90)')
+  .attr('x', -H/2).attr('y', -46)
+  .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', SLATE)
+  .attr('font-family', 'Inter,sans-serif').text('Free Energy F');
+
+// Grid lines
+svg.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yScale).ticks(6).tickSize(-W).tickFormat(''))
+  .call(g => g.select('.domain').remove())
+  .call(g => g.selectAll('line').attr('stroke', BORDER).attr('stroke-dasharray', '3 3').attr('opacity', 0.5));
+
+// Phase lines
+const linePath = d3.line().x(d => xScale(d[0])).y(d => yScale(d[1]));
+
+const solidLine = svg.append('path')
+  .attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 2.5);
+const gasLine = svg.append('path')
+  .attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 2.5);
+
+// Stable segment overlays (bold)
+const solidStable = svg.append('path')
+  .attr('fill', 'none').attr('stroke', INK).attr('stroke-width', 5).attr('opacity', 0.3);
+const gasStable = svg.append('path')
+  .attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 5).attr('opacity', 0.3);
+
+// Phase labels
+const solidLabel = svg.append('text')
+  .attr('font-size', 12).attr('font-weight', 600).attr('fill', INK)
+  .attr('font-family', 'Inter,sans-serif').text('solid/liquid');
+const gasLabel = svg.append('text')
+  .attr('font-size', 12).attr('font-weight', 600).attr('fill', RED)
+  .attr('font-family', 'Inter,sans-serif').text('gas');
+
+// Intersection marker
+const crossG = svg.append('g').attr('id', 'cross');
+crossG.append('line').attr('id', 'cross-v')
+  .attr('stroke', SLATE).attr('stroke-width', 1).attr('stroke-dasharray', '5 3');
+crossG.append('circle').attr('id', 'cross-dot')
+  .attr('r', 6).attr('fill', RED).attr('stroke', '#fff').attr('stroke-width', 1.5);
+const crossLabel = crossG.append('text')
+  .attr('font-size', 11).attr('fill', INK).attr('font-family', 'Inter,sans-serif');
+
+// Current T indicator
+const tIndicator = svg.append('g').attr('id', 't-indicator');
+tIndicator.append('line').attr('id', 't-line')
+  .attr('stroke', SLATE).attr('stroke-width', 1.5).attr('stroke-dasharray', '4 3')
+  .attr('y1', 0).attr('y2', H);
+const tDotSolid = tIndicator.append('circle').attr('r', 4).attr('fill', INK);
+const tDotGas = tIndicator.append('circle').attr('r', 4).attr('fill', RED);
+
+function fSolid(T) {
+  return E_SOLID_BASE - S_SOLID_BASE * T;
+}
+function fGas(T) {
+  return (E_SOLID_BASE + deltaE) - (S_SOLID_BASE + deltaS) * T;
+}
+
+function updateChart() {
+  const tStar = deltaE / deltaS;
+
+  // Line data
+  const Ts = d3.range(T_MIN, T_MAX + 0.05, 0.05);
+  solidLine.attr('d', linePath(Ts.map(t => [t, fSolid(t)])));
+  gasLine.attr('d', linePath(Ts.map(t => [t, fGas(t)])));
+
+  // Stable segments
+  const tsSolidStable = d3.range(T_MIN, Math.min(tStar + 0.05, T_MAX), 0.05);
+  const tsGasStable = d3.range(Math.max(tStar, T_MIN), T_MAX + 0.05, 0.05);
+  solidStable.attr('d', linePath(tsSolidStable.map(t => [t, fSolid(t)])));
+  gasStable.attr('d', linePath(tsGasStable.map(t => [t, fGas(t)])));
+
+  // Labels at T=5
+  const labelT = Math.min(5.5, T_MAX - 0.3);
+  solidLabel.attr('x', xScale(labelT) - 70).attr('y', yScale(fSolid(labelT)) - 8);
+  gasLabel.attr('x', xScale(labelT) - 30).attr('y', yScale(fGas(labelT)) - 8);
+
+  // Intersection
+  const tStarClamped = Math.max(T_MIN + 0.01, Math.min(T_MAX - 0.01, tStar));
+  const fx = xScale(tStarClamped);
+  const fy = yScale(fSolid(tStarClamped));
+  d3.select('#cross-v').attr('x1', fx).attr('x2', fx).attr('y1', H).attr('y2', fy);
+  d3.select('#cross-dot').attr('cx', fx).attr('cy', fy);
+  crossLabel.attr('x', fx + 8).attr('y', fy - 8)
+    .text(`T* = ${tStar.toFixed(2)}`);
+
+  // T indicator
+  const tx = xScale(currentT);
+  d3.select('#t-line').attr('x1', tx).attr('x2', tx);
+  tDotSolid.attr('cx', tx).attr('cy', yScale(fSolid(currentT)));
+  tDotGas.attr('cx', tx).attr('cy', yScale(fGas(currentT)));
+
+  // T* display
+  document.getElementById('tstar-val').textContent = tStar.toFixed(2);
+  document.querySelector('#tstar-box .tstar-sub').textContent =
+    `= ΔE / ΔS = ${deltaE.toFixed(1)} / ${deltaS.toFixed(2)}`;
+
+  // Phase status
+  const solidStab = document.getElementById('solid-status');
+  const gasStab = document.getElementById('gas-status');
+  const solidBox = document.getElementById('solid-box');
+  const gasBox = document.getElementById('gas-box');
+  if (currentT < tStar) {
+    solidStab.textContent = 'STABLE';
+    solidStab.className = 'phase-stable active';
+    solidBox.className = 'phase-box stable';
+    gasStab.textContent = 'unstable';
+    gasStab.className = 'phase-stable';
+    gasBox.className = 'phase-box';
+  } else {
+    solidStab.textContent = 'unstable';
+    solidStab.className = 'phase-stable';
+    solidBox.className = 'phase-box';
+    gasStab.textContent = 'STABLE';
+    gasStab.className = 'phase-stable active';
+    gasBox.className = 'phase-box stable';
+  }
+
+  drawMolecules(tStar);
+}
+
+// Molecular animation
+const molCanvas = document.getElementById('mol-canvas');
+const mctx = molCanvas.getContext('2d');
+const MW = 260, MH = 140;
+let molAnimId = null;
+let molDots = [];
+
+function initMolecules() {
+  molDots = [];
+  for (let i = 0; i < 30; i++) {
+    molDots.push({
+      x: 20 + Math.random() * (MW - 40),
+      y: 20 + Math.random() * (MH - 40),
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+    });
+  }
+}
+
+function drawMolecules(tStar) {
+  const ratio = Math.max(0, Math.min(1, currentT / (tStar * 2)));
+  // Speed proportional to T
+  const speed = 0.5 + ratio * 3;
+  // Separation: at low T cluster, at high T spread
+  const spread = 0.2 + ratio * 0.8;
+
+  mctx.clearRect(0, 0, MW, MH);
+  mctx.fillStyle = '#FAFAFA';
+  mctx.fillRect(0, 0, MW, MH);
+
+  // T* vertical line
+  const tLineX = MW * Math.min(1, tStar / (T_MAX));
+  mctx.strokeStyle = RED;
+  mctx.lineWidth = 1.5;
+  mctx.setLineDash([4, 3]);
+  mctx.beginPath();
+  mctx.moveTo(tLineX, 0);
+  mctx.lineTo(tLineX, MH);
+  mctx.stroke();
+  mctx.setLineDash([]);
+
+  // T indicator
+  const tLineXCur = MW * Math.min(1, currentT / T_MAX);
+  mctx.strokeStyle = SLATE;
+  mctx.lineWidth = 1;
+  mctx.setLineDash([3, 3]);
+  mctx.beginPath();
+  mctx.moveTo(tLineXCur, 0);
+  mctx.lineTo(tLineXCur, MH);
+  mctx.stroke();
+  mctx.setLineDash([]);
+
+  // Labels
+  mctx.fillStyle = RED;
+  mctx.font = '10px Inter,sans-serif';
+  mctx.fillText('T*', tLineX + 3, 12);
+  mctx.fillStyle = SLATE;
+  mctx.fillText('T', tLineXCur + 3, 24);
+
+  // Dots
+  molDots.forEach(d => {
+    // Attraction to center at low T, repulsion at high T
+    const cx = MW / 2, cy = MH / 2;
+    const dx = cx - d.x, dy = cy - d.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) + 1;
+    const attract = (1 - spread) * 0.02;
+    d.vx += attract * dx / dist + (Math.random() - 0.5) * speed * 0.04;
+    d.vy += attract * dy / dist + (Math.random() - 0.5) * speed * 0.04;
+    // Damping
+    d.vx *= 0.97;
+    d.vy *= 0.97;
+    d.x += d.vx;
+    d.y += d.vy;
+    // Bounce
+    if (d.x < 8) { d.x = 8; d.vx = Math.abs(d.vx); }
+    if (d.x > MW - 8) { d.x = MW - 8; d.vx = -Math.abs(d.vx); }
+    if (d.y < 8) { d.y = 8; d.vy = Math.abs(d.vy); }
+    if (d.y > MH - 8) { d.y = MH - 8; d.vy = -Math.abs(d.vy); }
+
+    mctx.beginPath();
+    mctx.arc(d.x, d.y, 3.5, 0, Math.PI * 2);
+    mctx.fillStyle = currentT < tStar ? INK : RED;
+    mctx.globalAlpha = 0.8;
+    mctx.fill();
+    mctx.globalAlpha = 1;
+  });
+}
+
+function animateMolecules() {
+  const tStar = deltaE / deltaS;
+  drawMolecules(tStar);
+  molAnimId = requestAnimationFrame(animateMolecules);
+}
+
+// Controls
+document.getElementById('de-slider').addEventListener('input', function() {
+  deltaE = +this.value;
+  document.getElementById('de-val').textContent = deltaE.toFixed(1);
+  updateChart();
+});
+document.getElementById('ds-slider').addEventListener('input', function() {
+  deltaS = +this.value;
+  document.getElementById('ds-val').textContent = deltaS.toFixed(2);
+  updateChart();
+});
+document.getElementById('t-slider').addEventListener('input', function() {
+  currentT = +this.value;
+  document.getElementById('t-val').textContent = currentT.toFixed(2);
+  updateChart();
+});
+
+// Init
+initMolecules();
+updateChart();
+animateMolecules();
+</script>
+</body>
+</html>

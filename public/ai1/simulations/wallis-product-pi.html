@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wallis Product: Two Diverging Halves Converge to π/2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  :root {
+    --bg:   #FFFFFF;
+    --ink:  #2A1A0E;
+    --red:  #C8102E;
+    --slate:#545454;
+    --hair: #D4D4D4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 28px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 14px;
+    max-width: 880px;
+    line-height: 1.4;
+  }
+
+  .canvas-wrap { width: 900px; max-width: 100%; }
+
+  svg { display: block; overflow: visible; }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 32px;
+    align-items: flex-end;
+    margin-top: 16px;
+    width: 900px;
+    max-width: 100%;
+  }
+
+  .ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input[type="range"] {
+    width: 260px;
+    accent-color: var(--red);
+    cursor: pointer;
+  }
+
+  .val-display { font-size: 13px; font-weight: 700; color: var(--ink); }
+
+  .formula-strip {
+    margin-top: 16px;
+    width: 900px;
+    max-width: 100%;
+    background: #F8F8F8;
+    border: 1px solid var(--hair);
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  .formula-strip strong { color: var(--ink); font-weight: 700; }
+
+  .note-strip {
+    margin-top: 10px;
+    width: 900px;
+    max-width: 100%;
+    font-size: 11px;
+    color: var(--slate);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<h1>Wallis Product: Two Diverging Halves Converge to π/2</h1>
+
+<div class="canvas-wrap">
+  <svg id="chart" width="900" height="500"></svg>
+</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>N (terms in product)</label>
+    <input type="range" id="n-slider" min="1" max="500" step="1" value="100" />
+    <span class="val-display">N = <span id="n-val">100</span></span>
+  </div>
+</div>
+
+<div class="formula-strip">
+  <strong>Wallis Product (interleaved):</strong>
+  &nbsp;&nbsp;∏<sub>n=1</sub><sup>N</sup> [2n/(2n−1) · 2n/(2n+1)] → π/2
+  &nbsp;&nbsp;&nbsp;
+  <strong>Top-heavy only:</strong> ∏(2n/(2n−1)) → ∞
+  &nbsp;&nbsp;&nbsp;
+  <strong>Bottom-heavy only:</strong> ∏(2n/(2n+1)) → 0
+</div>
+
+<div class="note-strip">
+  Note: top-heavy series exceeds 4 at N &gt; 30 and is clamped in the chart below y=4.
+  A "↑off chart" label indicates the true value when clamped.
+</div>
+
+<script>
+(function () {
+  const BG    = "#FFFFFF";
+  const INK   = "#2A1A0E";
+  const RED   = "#C8102E";
+  const SLATE = "#545454";
+  const HAIR  = "#D4D4D4";
+  const PI2   = Math.PI / 2;
+
+  const MAX_N  = 500;
+  const Y_MAX  = 4.0;   // clamp upper panel
+  const Y_MIN  = 0.0;
+
+  /* ── Precompute all series up to MAX_N ── */
+  function buildSeries(N) {
+    const top     = []; // ∏ 2n/(2n-1)
+    const bottom  = []; // ∏ 2n/(2n+1)
+    const wallis  = []; // interleaved
+
+    let pTop = 1, pBot = 1, pWal = 1;
+    for (let n = 1; n <= N; n++) {
+      pTop *= (2 * n) / (2 * n - 1);
+      pBot *= (2 * n) / (2 * n + 1);
+      pWal *= ((2 * n) / (2 * n - 1)) * ((2 * n) / (2 * n + 1));
+      top.push({ n, v: pTop });
+      bottom.push({ n, v: pBot });
+      wallis.push({ n, v: pWal });
+    }
+    return { top, bottom, wallis };
+  }
+
+  const allSeries = buildSeries(MAX_N);
+
+  /* ── SVG ── */
+  const W = 900, H = 500;
+  const margin = { top: 50, right: 40, bottom: 62, left: 60 };
+  const iW = W - margin.left - margin.right;
+  const iH = H - margin.top - margin.bottom;
+
+  const svg = d3.select("#chart");
+
+  svg.append("defs").append("clipPath").attr("id", "wclip")
+    .append("rect").attr("width", iW).attr("height", iH);
+
+  const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+  const plotArea = g.append("g").attr("clip-path", "url(#wclip)");
+
+  /* ── Scales ── */
+  const xScale = d3.scaleLinear().domain([1, MAX_N]).range([0, iW]);
+  const yScale = d3.scaleLinear().domain([Y_MIN, Y_MAX]).range([iH, 0]);
+
+  /* ── Axes ── */
+  const xAxisG = g.append("g").attr("transform", `translate(0,${iH})`);
+  const yAxisG = g.append("g");
+
+  function renderAxes(N) {
+    xAxisG.call(
+      d3.axisBottom(xScale.copy().domain([1, N]))
+        .ticks(10).tickSizeOuter(0)
+    ).call(axStyle);
+    yAxisG.call(
+      d3.axisLeft(yScale).ticks(8).tickFormat(d3.format(".1f")).tickSizeOuter(0)
+    ).call(axStyle);
+  }
+
+  function axStyle(sel) {
+    sel.selectAll("path, line").attr("stroke", HAIR);
+    sel.selectAll("text").attr("fill", SLATE)
+      .style("font-family", "Montserrat").style("font-size", "11px");
+  }
+
+  /* ── Grid ── */
+  const gridG = plotArea.append("g");
+  function renderGrid() {
+    gridG.selectAll("*").remove();
+    [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0].forEach(yv => {
+      gridG.append("line")
+        .attr("x1", 0).attr("x2", iW)
+        .attr("y1", yScale(yv)).attr("y2", yScale(yv))
+        .attr("stroke", HAIR).attr("stroke-width", 0.8);
+    });
+  }
+
+  /* ── Axis labels ── */
+  g.append("text")
+    .attr("x", iW / 2).attr("y", iH + 46)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "600")
+    .attr("fill", INK).text("N (number of terms)");
+
+  g.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -iH / 2).attr("y", -46)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "600")
+    .attr("fill", INK).text("Running product value");
+
+  /* ── Chart title (SVG) ── */
+  g.append("text")
+    .attr("x", iW / 2).attr("y", -28)
+    .attr("text-anchor", "middle")
+    .style("font-family", "Montserrat").style("font-size", "13px").style("font-weight", "600")
+    .attr("fill", INK).text("Running product vs. N  (y clamped to [0, 4])");
+
+  /* ── π/2 reference line ── */
+  const pi2Line = plotArea.append("line")
+    .attr("x1", 0).attr("x2", iW)
+    .attr("y1", yScale(PI2)).attr("y2", yScale(PI2))
+    .attr("stroke", RED).attr("stroke-width", 1.5)
+    .attr("stroke-dasharray", "7 4");
+
+  plotArea.append("text")
+    .attr("x", 6).attr("y", yScale(PI2) - 6)
+    .style("font-family", "Montserrat").style("font-size", "11px").style("font-weight", "600")
+    .attr("fill", RED).text("π/2 ≈ 1.5708");
+
+  /* ── Series paths ── */
+  const topPath    = plotArea.append("path").attr("fill", "none")
+    .attr("stroke", SLATE).attr("stroke-width", 1.8).attr("stroke-dasharray", "7 4");
+  const bottomPath = plotArea.append("path").attr("fill", "none")
+    .attr("stroke", INK).attr("stroke-width", 1.8).attr("stroke-dasharray", "4 4");
+  const wallisPath = plotArea.append("path").attr("fill", "none")
+    .attr("stroke", RED).attr("stroke-width", 2.5);
+
+  /* ── Annotation group ── */
+  const annotG = plotArea.append("g");
+
+  /* ── Legend ── */
+  const legData = [
+    { label: "Top-heavy ∏(2n/(2n−1))  →∞", color: SLATE, dash: "7 4" },
+    { label: "Bottom-heavy ∏(2n/(2n+1))  →0", color: INK, dash: "4 4" },
+    { label: "Wallis (interleaved) → π/2", color: RED, dash: null },
+  ];
+
+  const legG = g.append("g").attr("transform", `translate(${iW - 310}, 6)`);
+  legData.forEach((item, i) => {
+    const row = legG.append("g").attr("transform", `translate(0, ${i * 20})`);
+    row.append("line")
+      .attr("x1", 0).attr("x2", 26).attr("y1", 7).attr("y2", 7)
+      .attr("stroke", item.color).attr("stroke-width", 2.5)
+      .attr("stroke-dasharray", item.dash || "none");
+    row.append("text")
+      .attr("x", 32).attr("y", 11)
+      .style("font-family", "Montserrat").style("font-size", "11px")
+      .attr("fill", INK).text(item.label);
+  });
+
+  /* ── Render ── */
+  function render(N) {
+    const slice = {
+      top:    allSeries.top.slice(0, N),
+      bottom: allSeries.bottom.slice(0, N),
+      wallis: allSeries.wallis.slice(0, N),
+    };
+
+    const xS = xScale.copy().domain([1, Math.max(N, 2)]);
+
+    function makeLine(clampMax) {
+      return d3.line()
+        .x(d => xS(d.n))
+        .y(d => yScale(clampMax ? Math.min(d.v, Y_MAX) : Math.max(d.v, Y_MIN)))
+        .defined(d => isFinite(d.v) && d.v >= 0);
+    }
+
+    topPath.datum(slice.top).attr("d", makeLine(true));
+    bottomPath.datum(slice.bottom).attr("d", makeLine(false));
+    wallisPath.datum(slice.wallis).attr("d", makeLine(false));
+
+    // Annotation at N (if >= 10)
+    annotG.selectAll("*").remove();
+    if (N >= 10) {
+      const wallisVal = slice.wallis[slice.wallis.length - 1].v;
+      const topVal    = slice.top[slice.top.length - 1].v;
+      const botVal    = slice.bottom[slice.bottom.length - 1].v;
+      const err = Math.abs(wallisVal - PI2) / PI2 * 100;
+
+      const annotX = xS(N) - 6;
+      const wallY  = yScale(Math.min(wallisVal, Y_MAX));
+
+      annotG.append("text")
+        .attr("x", annotX).attr("y", wallY - 8)
+        .attr("text-anchor", "end")
+        .style("font-family", "Montserrat").style("font-size", "10.5px").style("font-weight", "600")
+        .attr("fill", RED)
+        .text(`N=${N}: Interleaved ${wallisVal.toFixed(4)} (within ${err.toFixed(2)}% of π/2)`);
+
+      // Top-heavy off-chart label
+      if (topVal > Y_MAX) {
+        annotG.append("text")
+          .attr("x", xS(Math.min(N, MAX_N))).attr("y", yScale(Y_MAX) + 14)
+          .attr("text-anchor", "end")
+          .style("font-family", "Montserrat").style("font-size", "10px").style("font-weight", "600")
+          .attr("fill", SLATE)
+          .text(`↑off chart (top-heavy = ${topVal.toFixed(1)})`);
+      }
+    }
+
+    renderAxes(N);
+  }
+
+  renderGrid();
+  render(100);
+
+  /* ── Slider ── */
+  d3.select("#n-slider").on("input", function () {
+    const N = +this.value;
+    d3.select("#n-val").text(N);
+    render(N);
+  });
+})();
+</script>
+</body>
+</html>

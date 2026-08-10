@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binomial → Normal: The Central Limit Theorem in Action</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    width: 900px;
+    height: 500px;
+    overflow: hidden;
+  }
+  #app {
+    width: 900px;
+    height: 500px;
+    background: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 18px 8px 18px;
+  }
+  h1 {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2A1A0E;
+    border-bottom: 2px solid #C8102E;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+  .body-row {
+    display: flex;
+    gap: 14px;
+    flex: 1;
+    min-height: 0;
+  }
+  .chart-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .right-panel {
+    width: 200px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-left: 1px solid #D4D4D4;
+    padding-left: 14px;
+  }
+  .panel-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .slider-group { margin-bottom: 4px; }
+  .slider-group label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #545454;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .slider-group .val {
+    font-size: 16px;
+    font-weight: 900;
+    color: #2A1A0E;
+    margin-bottom: 3px;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .stat-block {
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    border-radius: 2px;
+    padding: 8px 10px;
+  }
+  .stat-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #545454;
+    margin-bottom: 3px;
+  }
+  .stat-val {
+    font-size: 14px;
+    font-weight: 900;
+    color: #2A1A0E;
+    line-height: 1.4;
+  }
+  .validity-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 2px;
+    border: 1px solid #D4D4D4;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .validity-box.valid { background: #edfaf0; border-color: #2d9a4e; color: #2d9a4e; }
+  .validity-box.invalid { background: #fff0f0; border-color: #C8102E; color: #C8102E; }
+  .validity-icon { font-size: 16px; }
+  .legend-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 8.5px;
+    font-weight: 600;
+    color: #545454;
+  }
+  .legend-bar { width: 16px; height: 12px; border-radius: 1px; }
+  .legend-line { width: 22px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    background: #2A1A0E;
+    color: #FFFFFF;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    max-width: 160px;
+    line-height: 1.6;
+    z-index: 10;
+  }
+  .bottom-annot {
+    font-size: 8.5px;
+    color: #545454;
+    text-align: center;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>Binomial → Normal: The Central Limit Theorem in Action</h1>
+  <div class="body-row">
+    <div class="chart-area">
+      <svg id="main-svg" width="670" height="380"></svg>
+      <div id="tooltip"></div>
+      <div class="bottom-annot" id="bottom-annot">n=10, p=0.5: converging to bell</div>
+    </div>
+    <div class="right-panel">
+      <div class="panel-label">Parameters</div>
+      <div class="slider-group">
+        <label>n (trials)</label>
+        <div class="val" id="n-val">10</div>
+        <input type="range" id="n-slider" min="2" max="200" step="1" value="10">
+      </div>
+      <div class="slider-group">
+        <label>p (probability)</label>
+        <div class="val" id="p-val">0.50</div>
+        <input type="range" id="p-slider" min="0.05" max="0.95" step="0.01" value="0.50">
+      </div>
+
+      <div class="stat-block">
+        <div class="stat-label">Distribution Stats</div>
+        <div class="stat-val" id="stats-val">
+          μ = 5.0<br>σ = 1.58<br>σ² = 2.50
+        </div>
+      </div>
+
+      <div class="validity-box valid" id="validity-box">
+        <span class="validity-icon" id="validity-icon">✓</span>
+        <span id="validity-text">Normal approx valid<br>np=5 ≥ 10 ✗</span>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-bar" style="background:#545454; opacity:0.75;"></div>
+          Bin(n,p) histogram
+        </div>
+        <div class="legend-item">
+          <div class="legend-line" style="background:#C8102E;"></div>
+          Normal PDF overlay
+        </div>
+      </div>
+
+      <div style="font-size:8.5px; color:#545454; line-height:1.6; border-top:1px solid #D4D4D4; padding-top:6px; margin-top:2px;">
+        <strong style="color:#2A1A0E;">Click any bar</strong> to see exact P(X=k).<br>
+        Rule: np≥10 AND n(1-p)≥10 for normal approximation.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Math helpers ─────────────────────────────────────────
+function logFactorial(n) {
+  if (n <= 1) return 0;
+  let s = 0;
+  for (let i = 2; i <= n; i++) s += Math.log(i);
+  return s;
+}
+
+function logBinom(n, k) {
+  return logFactorial(n) - logFactorial(k) - logFactorial(n - k);
+}
+
+function binomialPMF(n, k, p) {
+  if (k < 0 || k > n) return 0;
+  if (p === 0) return k === 0 ? 1 : 0;
+  if (p === 1) return k === n ? 1 : 0;
+  return Math.exp(logBinom(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+}
+
+function normalPDF(x, mu, sigma) {
+  return Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2)) / (sigma * Math.sqrt(2 * Math.PI));
+}
+
+// ─── SVG setup ────────────────────────────────────────────
+const W = 670, H = 380;
+const mar = { top: 16, right: 18, bottom: 44, left: 48 };
+const inW = W - mar.left - mar.right;
+const inH = H - mar.top - mar.bottom;
+
+const svg = d3.select('#main-svg');
+const g = svg.append('g').attr('transform', `translate(${mar.left},${mar.top})`);
+
+// Axes (will be rebuilt on update)
+const xAxisG = g.append('g').attr('transform', `translate(0,${inH})`);
+const yAxisG = g.append('g');
+
+const xAxisLabel = g.append('text')
+  .attr('x', inW / 2).attr('y', inH + 36)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 9)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em')
+  .text('NUMBER OF SUCCESSES k');
+
+const yAxisLabel = g.append('text')
+  .attr('transform', 'rotate(-90)').attr('x', -inH / 2).attr('y', -36)
+  .attr('text-anchor', 'middle').attr('font-family', 'Montserrat').attr('font-size', 9)
+  .attr('fill', '#545454').attr('font-weight', '700').attr('letter-spacing', '0.05em')
+  .text('PROBABILITY P(X = k)');
+
+// Bars group
+const barsG = g.append('g');
+// Normal curve
+const curvePath = g.append('path').attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2.5);
+// Grid
+const gridG = g.insert('g', ':first-child');
+
+// Tooltip
+const tooltip = document.getElementById('tooltip');
+const chartArea = document.querySelector('.chart-area');
+
+let selectedBar = null;
+
+function update() {
+  const n = +document.getElementById('n-slider').value;
+  const p = +document.getElementById('p-slider').value;
+
+  document.getElementById('n-val').textContent = n;
+  document.getElementById('p-val').textContent = p.toFixed(2);
+
+  const mu = n * p;
+  const sigma2 = n * p * (1 - p);
+  const sigma = Math.sqrt(sigma2);
+
+  document.getElementById('stats-val').innerHTML =
+    `μ = ${mu.toFixed(1)}<br>σ = ${sigma.toFixed(3)}<br>σ² = ${sigma2.toFixed(3)}`;
+
+  // Validity
+  const np = n * p;
+  const nq = n * (1 - p);
+  const valid = np >= 10 && nq >= 10;
+  const vBox = document.getElementById('validity-box');
+  vBox.className = 'validity-box ' + (valid ? 'valid' : 'invalid');
+  document.getElementById('validity-icon').textContent = valid ? '✓' : '✗';
+  document.getElementById('validity-text').innerHTML = valid
+    ? `Normal approx valid<br>np=${np.toFixed(1)} ≥ 10 ✓`
+    : `Approx not reliable<br>np=${np.toFixed(1)}, nq=${nq.toFixed(1)}`;
+
+  // Bottom annotation
+  const annot = document.getElementById('bottom-annot');
+  if (n <= 20) annot.textContent = `n=${n}, p=${p.toFixed(2)}: ${valid ? 'converging to bell' : 'not yet bell-shaped'}`;
+  else if (n >= 100) annot.textContent = `n=${n}, p=${p.toFixed(2)}: histogram nearly indistinguishable from Normal`;
+  else annot.textContent = `n=${n}, p=${p.toFixed(2)}: μ=${mu.toFixed(1)}, σ=${sigma.toFixed(2)}`;
+
+  // Compute probabilities
+  // Show only k values with non-negligible probability
+  // Window: mu ± 4*sigma, clipped to [0,n]
+  const kMin = Math.max(0, Math.floor(mu - 4.5 * sigma));
+  const kMax = Math.min(n, Math.ceil(mu + 4.5 * sigma));
+  const ks = d3.range(kMin, kMax + 1);
+  const probs = ks.map(k => ({ k, p: binomialPMF(n, k, p) }));
+
+  const maxProb = d3.max(probs, d => d.p) || 0.01;
+
+  // Scales
+  const xScale = d3.scaleLinear().domain([kMin - 0.5, kMax + 0.5]).range([0, inW]);
+  const yScale = d3.scaleLinear().domain([0, maxProb * 1.12]).range([inH, 0]);
+
+  // Bar width: aim for reasonable width even at large n
+  const barW = Math.max(1.5, (xScale(kMin + 1) - xScale(kMin)) * 0.9);
+
+  // Grid
+  gridG.selectAll('*').remove();
+  gridG.selectAll('.hgrid').data(yScale.ticks(5)).join('line')
+    .attr('class', 'hgrid')
+    .attr('x1', 0).attr('x2', inW)
+    .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
+    .attr('stroke', '#D4D4D4').attr('stroke-width', 0.5);
+
+  // Axes
+  const tickCount = Math.min(15, ks.length);
+  xAxisG.call(
+    d3.axisBottom(xScale).tickValues(
+      ks.filter((_, i) => i % Math.ceil(ks.length / tickCount) === 0)
+    ).tickSize(3)
+  )
+  .call(gg => gg.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+  yAxisG.call(
+    d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('.3f')).tickSize(3)
+  )
+  .call(gg => gg.select('.domain').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick line').attr('stroke', '#D4D4D4'))
+  .call(gg => gg.selectAll('.tick text').attr('font-family', 'Montserrat').attr('font-size', 8).attr('fill', '#545454'));
+
+  // Bars
+  barsG.selectAll('rect').data(probs, d => d.k).join(
+    enter => enter.append('rect')
+      .attr('x', d => xScale(d.k) - barW / 2)
+      .attr('y', d => yScale(d.p))
+      .attr('width', barW)
+      .attr('height', d => inH - yScale(d.p))
+      .attr('fill', '#545454').attr('opacity', 0.75)
+      .attr('cursor', 'pointer')
+      .on('click', function(event, d) {
+        tooltip.style.opacity = '1';
+        const rect = chartArea.getBoundingClientRect();
+        const svgRect = document.getElementById('main-svg').getBoundingClientRect();
+        tooltip.style.left = (svgRect.left - rect.left + xScale(d.k) + mar.left + 8) + 'px';
+        tooltip.style.top = (svgRect.top - rect.top + yScale(d.p) + mar.top - 10) + 'px';
+        tooltip.innerHTML =
+          `k = ${d.k}<br>` +
+          `P(X=${d.k}) = ${d.p.toExponential(4)}<br>` +
+          `≈ ${(d.p * 100).toFixed(4)}%<br>` +
+          `C(${n},${d.k})·p^k·(1-p)^(n-k)`;
+      })
+      .on('mouseleave', () => { tooltip.style.opacity = '0'; }),
+    update => update.transition().duration(200)
+      .attr('x', d => xScale(d.k) - barW / 2)
+      .attr('y', d => yScale(d.p))
+      .attr('width', barW)
+      .attr('height', d => inH - yScale(d.p)),
+    exit => exit.remove()
+  );
+
+  // Normal PDF overlay
+  const nPoints = 300;
+  const xMin = xScale.domain()[0];
+  const xMax = xScale.domain()[1];
+  const step = (xMax - xMin) / nPoints;
+  const curveData = d3.range(nPoints + 1).map(i => {
+    const x = xMin + i * step;
+    return [xScale(x), yScale(normalPDF(x, mu, sigma))];
+  }).filter(d => d[1] >= 0 && d[1] <= inH);
+
+  const lineGen = d3.line().x(d => d[0]).y(d => d[1]).curve(d3.curveCatmullRom);
+  curvePath.datum(curveData).attr('d', lineGen);
+}
+
+document.getElementById('n-slider').addEventListener('input', update);
+document.getElementById('p-slider').addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>

@@ -196,7 +196,7 @@ export default function BotspeakPage() {
               <PrimaryButton href="/programs/botspeak/botspeak-details">
                 Learn More
               </PrimaryButton>
-              <SecondaryButton href="/programs/botspeak/explore">
+              <SecondaryButton href="/projects">
                 Explore Project
               </SecondaryButton>
             </div>

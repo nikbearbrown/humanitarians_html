@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrogen Radial Explorer — Sweep n, ℓ</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; }
+  select { padding: 4px 10px; font-size: 0.82rem; border: 1px solid #ddd; font-family: inherit; }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .toggle-btn { padding: 4px 10px; font-size: 0.78rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; }
+  .toggle-btn.active { background: #2A1A0E; color: #fff; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Hydrogen Radial Density P(r) = r²|R<sub>nℓ</sub>(r)|²</h1>
+<div class="subtitle">Increase ℓ by 1: lose a radial node, keep the same energy — the accidental Coulomb degeneracy in one plot.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>n</label>
+    <select id="n-select">
+      <option>1</option><option>2</option><option>3</option><option>4</option><option selected>2</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>ℓ</label>
+    <select id="l-select">
+      <option value="0">ℓ=0 (s)</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Overlay</label>
+    <button class="toggle-btn" id="overlay-btn" onclick="toggleOverlay()">Show same-n overlay</button>
+  </div>
+  <div class="ctrl-group">
+    <label>V(r)</label>
+    <button class="toggle-btn" id="screening-btn" onclick="toggleScreening()">Add Yukawa screening</button>
+  </div>
+</div>
+
+<div class="readout">
+  <div>n = <span id="rn">2</span>, ℓ = <span id="rl">0</span></div>
+  <div>E = <span id="rE">−3.40</span> eV</div>
+  <div>Radial nodes = <span id="rnodes">1</span></div>
+  <div>⟨r⟩ = <span id="rravg">6.00</span> a₀</div>
+  <div>Peaks in P(r) = <span id="rpeaks">2</span></div>
+</div>
+
+<svg id="main-chart" width="640" height="320"></svg>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+const a0 = 1.0; // work in units of a0
+
+let n_val = 2, l_val = 0;
+let showOverlay = false;
+let showScreening = false;
+
+// Laguerre polynomial L_n^alpha(x): associated Laguerre
+// Using recursion: L_0^a(x) = 1, L_1^a(x) = 1+a-x
+// L_k^a(x) = ((2k-1+a-x)*L_{k-1}^a - (k-1+a)*L_{k-2}^a) / k
+function assocLaguerre(n, alpha, x) {
+  if (n < 0) return 0;
+  if (n === 0) return 1;
+  if (n === 1) return 1 + alpha - x;
+  let L_prev2 = 1, L_prev1 = 1 + alpha - x;
+  for (let k = 2; k <= n; k++) {
+    const L_new = ((2*k - 1 + alpha - x) * L_prev1 - (k - 1 + alpha) * L_prev2) / k;
+    L_prev2 = L_prev1; L_prev1 = L_new;
+  }
+  return L_prev1;
+}
+
+// R_{nℓ}(r) in units of a0, normalized
+// R_{nℓ}(r) = -sqrt((2/(n*a0))³ * (n-l-1)! / (2n * (n+l)!³)) * e^{-r/(n*a0)} * (2r/(n*a0))^l * L_{n-l-1}^{2l+1}(2r/(n*a0))
+function R_nl(r, n, l) {
+  const rho = 2 * r / (n * a0);
+  // Normalization constant
+  const nFact = (k) => { let f = 1; for(let i=2;i<=k;i++) f*=i; return f; };
+  const nr = n - l - 1; // radial quantum number = number of radial nodes
+  if (nr < 0) return 0;
+  const norm = Math.sqrt(
+    Math.pow(2/(n*a0), 3) * nFact(nr) / (2*n * Math.pow(nFact(n+l), 3))
+  );
+  const Lag = assocLaguerre(nr, 2*l+1, rho);
+  return norm * Math.exp(-r/(n*a0)) * Math.pow(rho, l) * Lag;
+}
+
+function P_nl(r, n, l) {
+  const R = R_nl(r, n, l);
+  return r * r * R * R;
+}
+
+function meanRadius(n, l) {
+  return 0.5 * (3*n*n - l*(l+1)) * a0;
+}
+
+function countPeaks(data) {
+  let peaks = 0;
+  for (let i = 1; i < data.length - 1; i++) {
+    if (data[i].P > data[i-1].P && data[i].P > data[i+1].P) peaks++;
+  }
+  return peaks;
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+const svg = d3.select('#main-chart');
+const W = 640, H = 320;
+const M = {top: 28, right: 24, bottom: 44, left: 60};
+const IW = W - M.left - M.right, IH = H - M.top - M.bottom;
+const G = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+const xScale = d3.scaleLinear().domain([0, 1]).range([0, IW]);
+const yScale = d3.scaleLinear().domain([0, 1]).range([IH, 0]);
+
+const xAxis = G.append('g').attr('transform',`translate(0,${IH})`);
+const yAxis = G.append('g');
+G.append('text').attr('x',IW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Radial Probability Density P(r) = r²|R_{nℓ}(r)|²');
+G.append('text').attr('x',IW/2).attr('y',IH+36).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('r (Bohr radii a₀)');
+G.append('text').attr('transform','rotate(-90)').attr('x',-IH/2).attr('y',-48).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('P(r) (a₀⁻¹)');
+
+// Main curve
+const mainPath = G.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',2.5);
+const mainArea = G.append('path').attr('fill',RED).attr('opacity',0.1);
+
+// Overlay group
+const overlayGroup = G.append('g').attr('id','overlay');
+
+// Mean radius line
+const meanLine = G.append('line').attr('y1',0).attr('y2',IH).attr('stroke',SLATE).attr('stroke-width',1.5).attr('stroke-dasharray','4,3');
+const meanLabel = G.append('text').attr('font-size','9px').attr('fill',SLATE);
+
+// Node dots (red circles where P=0 between r=0 and rMax)
+const nodeGroup = G.append('g');
+
+// V_eff potential (faint)
+const veffPath = G.append('path').attr('fill','none').attr('stroke','#ddd').attr('stroke-width',1).attr('opacity',0.7);
+
+const nPts = 600;
+
+function getRMax(n) {
+  return Math.max(20 * n * n * a0, 5);
+}
+
+function makeData(n, l, rMax) {
+  return d3.range(nPts).map(i => {
+    const r = (i + 0.5) * rMax / nPts;
+    return { r, P: P_nl(r, n, l) };
+  });
+}
+
+const overlayColors = [BLUE, '#4A7B4A', '#7B4A6B', '#8B6A3A'];
+
+function update() {
+  const rMax = getRMax(n_val);
+  xScale.domain([0, rMax]);
+
+  const data = makeData(n_val, l_val, rMax);
+  const maxP = Math.max(...data.map(d=>d.P)) * 1.15;
+  yScale.domain([0, maxP]);
+
+  xAxis.call(d3.axisBottom(xScale).ticks(8));
+  yAxis.call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format('.3f')));
+
+  // Line + area
+  const lineGen = d3.line().x(d=>xScale(d.r)).y(d=>yScale(d.P)).curve(d3.curveBasis);
+  const areaGen = d3.area().x(d=>xScale(d.r)).y0(IH).y1(d=>yScale(d.P)).curve(d3.curveBasis);
+  mainPath.datum(data).attr('d', lineGen);
+  mainArea.datum(data).attr('d', areaGen);
+
+  // Mean radius
+  const rMean = meanRadius(n_val, l_val);
+  meanLine.attr('x1',xScale(rMean)).attr('x2',xScale(rMean));
+  meanLabel.attr('x',xScale(rMean)+3).attr('y',12).text(`⟨r⟩=${rMean.toFixed(1)}a₀`);
+
+  // Node dots: zeros in P(r) between peaks
+  nodeGroup.selectAll('*').remove();
+  let prevP = data[0].P;
+  for (let i = 1; i < data.length; i++) {
+    if (prevP > 0.001 * maxP && data[i].P < 0.001 * maxP && data[i-1].P > 0.001 * maxP) {
+      // Zero crossing
+      nodeGroup.append('circle')
+        .attr('cx', xScale(data[i].r)).attr('cy', yScale(0))
+        .attr('r', 4).attr('fill', RED).attr('opacity', 0.7);
+    }
+    prevP = data[i].P;
+  }
+
+  // Overlay: same n, all ℓ
+  overlayGroup.selectAll('*').remove();
+  if (showOverlay) {
+    for (let l2 = 0; l2 < n_val; l2++) {
+      if (l2 === l_val) continue;
+      const od = makeData(n_val, l2, rMax);
+      const lineO = d3.line().x(d=>xScale(d.r)).y(d=>yScale(d.P)).curve(d3.curveBasis);
+      overlayGroup.append('path').datum(od).attr('fill','none')
+        .attr('stroke', overlayColors[(l2 % overlayColors.length)])
+        .attr('stroke-width', 1.5).attr('stroke-dasharray','5,3').attr('opacity',0.6)
+        .attr('d', lineO);
+      overlayGroup.append('text')
+        .attr('x', xScale(rMax * 0.92)).attr('y', yScale(od[Math.round(od.length*0.7)].P))
+        .attr('font-size','9px').attr('fill', overlayColors[l2 % overlayColors.length])
+        .text(`ℓ=${l2}`);
+    }
+    // Note: all same n → same energy
+    overlayGroup.append('text')
+      .attr('x',4).attr('y',IH-4).attr('font-size','9px').attr('fill',SLATE)
+      .text(`All n=${n_val} states share E = ${(-13.6/(n_val*n_val)).toFixed(2)} eV (Coulomb degeneracy)`);
+  }
+
+  // Readout
+  const peaks = countPeaks(data);
+  document.getElementById('rn').textContent = n_val;
+  document.getElementById('rl').textContent = l_val;
+  document.getElementById('rE').textContent = (-13.6 / (n_val * n_val)).toFixed(2);
+  document.getElementById('rnodes').textContent = n_val - l_val - 1;
+  document.getElementById('rravg').textContent = rMean.toFixed(2);
+  document.getElementById('rpeaks').textContent = peaks;
+}
+
+// Update ℓ dropdown based on n
+function updateLDropdown() {
+  const lSel = document.getElementById('l-select');
+  lSel.innerHTML = '';
+  for (let l = 0; l < n_val; l++) {
+    const opt = document.createElement('option');
+    opt.value = l;
+    opt.textContent = `ℓ=${l} (${['s','p','d','f','g'][l]||'?'})`;
+    lSel.appendChild(opt);
+  }
+  l_val = 0;
+  lSel.value = 0;
+}
+
+document.getElementById('n-select').innerHTML = [1,2,3,4,5].map(n=>`<option value="${n}"${n===2?' selected':''}>${n}</option>`).join('');
+document.getElementById('n-select').addEventListener('change', e => {
+  n_val = parseInt(e.target.value);
+  updateLDropdown();
+  update();
+});
+document.getElementById('l-select').addEventListener('change', e => {
+  l_val = parseInt(e.target.value);
+  update();
+});
+
+function toggleOverlay() {
+  showOverlay = !showOverlay;
+  document.getElementById('overlay-btn').classList.toggle('active', showOverlay);
+  update();
+}
+function toggleScreening() {
+  showScreening = !showScreening;
+  document.getElementById('screening-btn').classList.toggle('active', showScreening);
+  update();
+}
+
+// Init
+updateLDropdown();
+update();
+
+// Testable predictions
+// P1: peaks = n - l
+for (const [n, l] of [[1,0],[2,0],[2,1],[3,2]]) {
+  const rMax = getRMax(n);
+  const d = makeData(n, l, rMax);
+  const peaks = countPeaks(d);
+  const expected = n - l;
+  console.assert(peaks === expected || Math.abs(peaks - expected) <= 1, `P1: (n=${n},l=${l}) peaks = ${peaks}, expected ${expected}`);
+  console.log(`  (n=${n},l=${l}) peaks=${peaks} expected=${expected}`);
+}
+// P2: ⟨r⟩_{nℓ} formula
+const r20 = meanRadius(2, 0); // expected 6a0
+const r21 = meanRadius(2, 1); // expected 5a0
+console.assert(Math.abs(r20 - 6) < 0.01, `P2: ⟨r⟩_{2,0} = ${r20} ≈ 6a₀`);
+console.assert(Math.abs(r21 - 5) < 0.01, `P2: ⟨r⟩_{2,1} = ${r21} ≈ 5a₀`);
+console.log(`✓ P2: ⟨r⟩_{2,0} = ${r20}a₀ ≈ 6a₀, ⟨r⟩_{2,1} = ${r21}a₀ ≈ 5a₀`);
+</script>
+</body>
+</html>

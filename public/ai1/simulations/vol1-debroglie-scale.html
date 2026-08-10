@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>de Broglie Wavelength Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --ink: #2A1A0E;
+    --red: #C8102E;
+    --slate: #545454;
+    --ink-faint: rgba(42,26,14,0.06);
+    --ink-dim: rgba(42,26,14,0.30);
+    --red-faint: rgba(200,16,46,0.10);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  header {
+    padding: 14px 24px 11px;
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+  header .subtitle { font-size: 12px; color: var(--slate); }
+
+  /* ---- RULER PANEL ---- */
+  .ruler-panel {
+    padding: 18px 24px 8px;
+    border-bottom: 1.5px solid var(--ink);
+    flex-shrink: 0;
+  }
+  #ruler-svg { width: 100%; display: block; }
+
+  /* ---- MIDDLE ROW: controls | info ---- */
+  .middle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1.5px solid var(--ink);
+    flex-shrink: 0;
+  }
+
+  .ctrl-panel {
+    padding: 16px 22px;
+    border-right: 1.5px solid var(--ink);
+  }
+  .ctrl-panel h2 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--slate); margin-bottom: 14px;
+  }
+
+  .ctrl-row {
+    display: flex; align-items: center; gap: 9px; margin-bottom: 11px;
+  }
+  .ctrl-label {
+    font-size: 12px; font-weight: 500; min-width: 56px; color: var(--ink);
+  }
+  input[type=range] {
+    -webkit-appearance: none; flex: 1; height: 3px;
+    background: var(--ink-faint); border-radius: 2px; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--red); border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1.5px var(--red); cursor: pointer;
+  }
+  .ctrl-val {
+    font-size: 11px; font-weight: 600; min-width: 70px; text-align: right;
+    color: var(--ink);
+  }
+
+  /* Mode toggle */
+  .toggle-row {
+    display: flex; gap: 0; margin-bottom: 12px; border: 1.5px solid var(--ink); border-radius: 3px;
+    overflow: hidden;
+  }
+  .toggle-btn {
+    flex: 1; padding: 6px 8px; font-size: 11px; font-weight: 600;
+    font-family: inherit; cursor: pointer; border: none; background: transparent;
+    color: var(--ink); text-align: center; transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .toggle-btn.active { background: var(--ink); color: var(--bg); }
+  .toggle-btn:not(:last-child) { border-right: 1px solid var(--ink); }
+
+  /* Presets */
+  .preset-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--slate); margin-bottom: 7px;
+  }
+  .preset-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset-btn {
+    padding: 4px 10px; border: 1.5px solid var(--ink); border-radius: 2px;
+    font-size: 11px; font-weight: 600; font-family: inherit;
+    cursor: pointer; background: transparent; color: var(--ink);
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { background: var(--ink); color: var(--bg); }
+
+  /* Info panel */
+  .info-panel {
+    padding: 16px 22px;
+  }
+  .info-panel h2 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--slate); margin-bottom: 14px;
+  }
+
+  .lambda-display {
+    font-size: 28px; font-weight: 700; color: var(--red); letter-spacing: -1px;
+    margin-bottom: 4px; line-height: 1;
+  }
+  .lambda-label { font-size: 12px; color: var(--slate); margin-bottom: 14px; }
+
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .info-box {
+    background: var(--ink-faint); border-radius: 3px; padding: 8px 10px;
+  }
+  .info-box .ib-label { font-size: 10px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px; }
+  .info-box .ib-val { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .info-box .ib-val.diffractable { color: #1a6e1a; }
+  .info-box .ib-val.borderline { color: var(--slate); }
+  .info-box .ib-val.classical { color: var(--ink); opacity: 0.5; }
+
+  .diffraction-flag {
+    margin-top: 10px; padding: 8px 12px; border-radius: 3px; font-size: 12px; font-weight: 600;
+  }
+  .diffraction-flag.yes { background: rgba(26,110,26,0.1); color: #1a6e1a; border-left: 3px solid #1a6e1a; }
+  .diffraction-flag.borderline { background: rgba(84,84,84,0.08); color: var(--slate); border-left: 3px solid var(--slate); }
+  .diffraction-flag.no { background: var(--red-faint); color: var(--red); border-left: 3px solid var(--red); }
+
+  /* Log-log panel */
+  .loglog-panel {
+    flex: 1;
+    padding: 14px 24px 12px;
+    border-bottom: 1.5px solid var(--ink);
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+  }
+  .loglog-panel h2 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--slate); margin-bottom: 8px;
+  }
+  #loglog-svg { flex: 1; width: 100%; }
+
+  /* status bar */
+  .status-bar {
+    padding: 6px 20px;
+    display: flex; gap: 22px; align-items: center; flex-shrink: 0;
+  }
+  .check { font-size: 11px; color: var(--slate); display: flex; align-items: center; gap: 5px; }
+  .check-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--slate); display: inline-block; }
+  .check-dot.pass { background: #2a7a2a; }
+  .check-dot.fail { background: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>de Broglie Wavelength Scale</h1>
+  <span class="subtitle">λ = h/p = h/√(2mK) — where does matter wave diffraction begin?</span>
+</header>
+
+<!-- RULER -->
+<div class="ruler-panel">
+  <svg id="ruler-svg" height="130"></svg>
+</div>
+
+<!-- MIDDLE ROW -->
+<div class="middle-row">
+
+  <div class="ctrl-panel">
+    <h2>Controls</h2>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="btnEnergy" onclick="setMode('energy')">Fixed Energy</button>
+      <button class="toggle-btn" id="btnThermal" onclick="setMode('thermal')">Thermal (³⁄₂kT)</button>
+    </div>
+
+    <div class="ctrl-row" id="rowMass">
+      <span class="ctrl-label">Mass</span>
+      <input type="range" id="sliderMass" min="0" max="1" step="0.001" value="0">
+      <span class="ctrl-val" id="valMass">mₑ</span>
+    </div>
+
+    <div class="ctrl-row" id="rowEnergy">
+      <span class="ctrl-label">Energy</span>
+      <input type="range" id="sliderEnergy" min="-3" max="4" step="0.01" value="1.732">
+      <span class="ctrl-val" id="valEnergy">54 eV</span>
+    </div>
+
+    <div class="ctrl-row" id="rowTemp" style="display:none">
+      <span class="ctrl-label">Temp</span>
+      <input type="range" id="sliderTemp" min="1" max="3" step="0.01" value="2.467">
+      <span class="ctrl-val" id="valTemp">293 K</span>
+    </div>
+
+    <div class="ctrl-row" id="rowVelocity" style="display:none">
+      <span class="ctrl-label">Velocity</span>
+      <input type="range" id="sliderVel" min="-3" max="3" step="0.01" value="0">
+      <span class="ctrl-val" id="valVelocity">1.0 m/s</span>
+    </div>
+
+    <div class="preset-label" style="margin-top:4px">Presets</div>
+    <div class="preset-row">
+      <button class="preset-btn" onclick="applyPreset('e54')">e⁻ 54 eV</button>
+      <button class="preset-btn" onclick="applyPreset('n293')">Thermal n 293K</button>
+      <button class="preset-btn" onclick="applyPreset('c60')">C₆₀ 900K</button>
+      <button class="preset-btn" onclick="applyPreset('human')">70 kg 1m/s</button>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <h2>Current Result</h2>
+    <div class="lambda-display" id="lambdaDisplay">—</div>
+    <div class="lambda-label" id="lambdaLabel">de Broglie wavelength</div>
+    <div class="info-grid">
+      <div class="info-box">
+        <div class="ib-label">Mass</div>
+        <div class="ib-val" id="infoMass">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">Kinetic energy</div>
+        <div class="ib-val" id="infoEnergy">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">λ / d_Si (0.31 nm)</div>
+        <div class="ib-val" id="infoRatio">—</div>
+      </div>
+      <div class="info-box">
+        <div class="ib-label">λ in SI</div>
+        <div class="ib-val" id="infoSI">—</div>
+      </div>
+    </div>
+    <div class="diffraction-flag" id="diffractionFlag">—</div>
+  </div>
+
+</div>
+
+<!-- LOG-LOG PANEL -->
+<div class="loglog-panel">
+  <h2>λ vs Energy (log-log) — fixed current mass</h2>
+  <svg id="loglog-svg"></svg>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span class="check"><span class="check-dot" id="p1dot"></span><span id="p1text">P1: e⁻ 54eV → 0.167 nm</span></span>
+  <span class="check"><span class="check-dot" id="p2dot"></span><span id="p2text">P2: C₆₀ 900K wavelength</span></span>
+  <span class="check"><span class="check-dot" id="p3dot"></span><span id="p3text">P3: log-log slope = −0.5</span></span>
+</div>
+
+<script>
+// =====================================================================
+// CONSTANTS
+// =====================================================================
+const H    = 6.626e-34;
+const ME   = 9.109e-31;
+const KB   = 1.381e-23;
+const EV   = 1.602e-19;
+const D_SI = 0.31e-9;  // Si crystal plane spacing
+
+// Particle masses (kg) and display names
+const PARTICLES = [
+  { name: 'Electron',  m: 9.109e-31,  label: 'mₑ' },
+  { name: 'Proton',    m: 1.673e-27,  label: 'mₚ' },
+  { name: 'Neutron',   m: 1.675e-27,  label: 'mₙ' },
+  { name: 'C₆₀',       m: 1.196e-24,  label: 'C₆₀' },
+  { name: 'Marble',   m: 1e-3,        label: '1 g' },
+  { name: 'Human',    m: 70,          label: '70 kg' },
+];
+
+// Slider maps: mass index [0..1] → mass log scale
+const MASS_LOG_MIN = Math.log10(9e-31);
+const MASS_LOG_MAX = Math.log10(70);
+
+function sliderToMass(t) {
+  return Math.pow(10, MASS_LOG_MIN + t * (MASS_LOG_MAX - MASS_LOG_MIN));
+}
+function massToSlider(m) {
+  return (Math.log10(m) - MASS_LOG_MIN) / (MASS_LOG_MAX - MASS_LOG_MIN);
+}
+
+// =====================================================================
+// STATE
+// =====================================================================
+let mode = 'energy';   // 'energy' | 'thermal'
+let curMass = ME;
+let curEnergy_J = 54 * EV;  // only used in energy mode
+let curTemp = 293;           // only used in thermal mode
+let curVelocity = 1.0;       // only used in velocity mode (human preset)
+
+function getKineticEnergy() {
+  if (mode === 'thermal') return 1.5 * KB * curTemp;
+  if (mode === 'velocity') return 0.5 * curMass * curVelocity * curVelocity;
+  return curEnergy_J;
+}
+
+function getLambda(mass, K_J) {
+  if (K_J <= 0 || mass <= 0) return Infinity;
+  return H / Math.sqrt(2 * mass * K_J);
+}
+
+// =====================================================================
+// DISPLAY HELPERS
+// =====================================================================
+function formatLambda(lam_m) {
+  if (!isFinite(lam_m) || lam_m <= 0) return '—';
+  if (lam_m >= 1e-3)   return (lam_m * 1e3).toFixed(3) + ' mm';
+  if (lam_m >= 1e-6)   return (lam_m * 1e6).toFixed(3) + ' μm';
+  if (lam_m >= 1e-9)   return (lam_m * 1e9).toFixed(4) + ' nm';
+  if (lam_m >= 1e-12)  return (lam_m * 1e12).toFixed(3) + ' pm';
+  if (lam_m >= 1e-15)  return (lam_m * 1e15).toFixed(3) + ' fm';
+  return lam_m.toExponential(3) + ' m';
+}
+
+function formatEnergy(K_J) {
+  const eV_val = K_J / EV;
+  if (eV_val < 1e-3) return (eV_val * 1e6).toFixed(3) + ' μeV';
+  if (eV_val < 1)    return (eV_val * 1e3).toFixed(3) + ' meV';
+  if (eV_val < 1e3)  return eV_val.toFixed(3) + ' eV';
+  if (eV_val < 1e6)  return (eV_val / 1e3).toFixed(3) + ' keV';
+  return (eV_val / 1e6).toFixed(3) + ' MeV';
+}
+
+function formatMass(m) {
+  if (m < 1e-26) {
+    const nearest = PARTICLES.find(p => Math.abs(Math.log10(p.m) - Math.log10(m)) < 0.1);
+    if (nearest) return nearest.label;
+    return m.toExponential(3) + ' kg';
+  }
+  if (m < 1e-20) return m.toExponential(3) + ' kg';
+  if (m < 1)     return m.toExponential(3) + ' kg';
+  return m.toFixed(1) + ' kg';
+}
+
+function nearCanonicalMass(m) {
+  for (const p of PARTICLES) {
+    if (Math.abs(Math.log10(m) - Math.log10(p.m)) < 0.05) return p.name;
+  }
+  return null;
+}
+
+// =====================================================================
+// RULER SVG
+// =====================================================================
+const rulerSVG = d3.select('#ruler-svg');
+
+// Log scale: 10⁻³⁶ to 10⁻⁶ m
+const RULER_LOG_MIN = -36;
+const RULER_LOG_MAX = -6;
+
+const rulerMargin = { left: 55, right: 30, top: 14, bottom: 0 };
+
+function getRulerWidth() {
+  return document.getElementById('ruler-svg').getBoundingClientRect().width;
+}
+
+function drawRuler(lambda_m) {
+  rulerSVG.selectAll('*').remove();
+  const W = getRulerWidth();
+  const H_svg = 130;
+  if (W < 10) return;
+
+  const iW = W - rulerMargin.left - rulerMargin.right;
+  const g = rulerSVG.append('g').attr('transform', `translate(${rulerMargin.left},${rulerMargin.top})`);
+
+  const xScale = d3.scaleLinear([RULER_LOG_MIN, RULER_LOG_MAX], [0, iW]);
+
+  const RULER_H = 32;
+  const RULER_Y = 30;  // y of top of ruler bar
+
+  // ---- Color zones ----
+  // diffractable: 0.05nm–1nm → -11.3 to -9
+  // borderline: 0.001nm–0.05nm → -12.3 to -11.3
+  // otherwise: classical
+  const zones = [
+    { lo: -12.3, hi: -11.3, fill: 'rgba(84,84,84,0.14)', label: 'borderline' },
+    { lo: -11.3, hi: -9.0,  fill: 'rgba(200,16,46,0.13)', label: 'diffractable' },
+  ];
+  zones.forEach(z => {
+    const x1 = Math.max(0, xScale(z.lo));
+    const x2 = Math.min(iW, xScale(z.hi));
+    if (x2 > x1) {
+      g.append('rect').attr('x', x1).attr('y', RULER_Y)
+        .attr('width', x2 - x1).attr('height', RULER_H)
+        .attr('fill', z.fill).attr('rx', 0);
+    }
+  });
+
+  // Visible light band: 400–700 nm → log10 = -9.40 to -9.15
+  const vlX1 = xScale(Math.log10(400e-9));
+  const vlX2 = xScale(Math.log10(700e-9));
+  g.append('rect').attr('x', vlX1).attr('y', RULER_Y)
+    .attr('width', vlX2 - vlX1).attr('height', RULER_H)
+    .attr('fill', 'rgba(180,120,0,0.18)');
+  g.append('text').attr('x', (vlX1 + vlX2) / 2).attr('y', RULER_Y - 3)
+    .attr('text-anchor', 'middle').attr('font-size', 9).attr('fill', 'rgba(180,120,0,0.8)')
+    .text('visible');
+
+  // Ruler bar outline
+  g.append('rect').attr('x', 0).attr('y', RULER_Y)
+    .attr('width', iW).attr('height', RULER_H)
+    .attr('fill', 'none').attr('stroke', '#2A1A0E').attr('stroke-width', 1.2).attr('rx', 2);
+
+  // Tick marks: every decade
+  for (let exp = RULER_LOG_MIN; exp <= RULER_LOG_MAX; exp++) {
+    const x = xScale(exp);
+    g.append('line').attr('x1', x).attr('x2', x)
+      .attr('y1', RULER_Y + RULER_H).attr('y2', RULER_Y + RULER_H + 5)
+      .attr('stroke', '#2A1A0E').attr('stroke-width', 0.8);
+    if (exp % 3 === 0) {
+      g.append('text').attr('x', x).attr('y', RULER_Y + RULER_H + 16)
+        .attr('text-anchor', 'middle').attr('font-size', 9.5).attr('fill', '#2A1A0E')
+        .text(`10${superscript(exp)}`);
+    }
+  }
+
+  // Reference markers
+  const refs = [
+    { val: 8.7e-16, label: 'rₚ', color: '#545454' },
+    { val: 1e-10,   label: '0.1nm X-ray', color: '#545454' },
+    { val: 3.1e-10, label: 'd_Si', color: '#2A1A0E' },
+  ];
+  refs.forEach(r => {
+    const logV = Math.log10(r.val);
+    if (logV < RULER_LOG_MIN || logV > RULER_LOG_MAX) return;
+    const x = xScale(logV);
+    g.append('line').attr('x1', x).attr('x2', x)
+      .attr('y1', RULER_Y - 8).attr('y2', RULER_Y)
+      .attr('stroke', r.color).attr('stroke-width', 1.2);
+    g.append('text').attr('x', x).attr('y', RULER_Y - 11)
+      .attr('text-anchor', 'middle').attr('font-size', 8.5).attr('fill', r.color)
+      .text(r.label);
+  });
+
+  // Zone labels inside bar
+  g.append('text').attr('x', xScale(-12.8)).attr('y', RULER_Y + RULER_H / 2 + 4)
+    .attr('text-anchor', 'middle').attr('font-size', 9).attr('fill', '#2A1A0E').attr('opacity', 0.5)
+    .text('classical');
+  g.append('text').attr('x', xScale(-11.8)).attr('y', RULER_Y + RULER_H / 2 + 4)
+    .attr('text-anchor', 'middle').attr('font-size', 9).attr('fill', '#545454').attr('font-weight', 600)
+    .text('border');
+  g.append('text').attr('x', xScale(-10.2)).attr('y', RULER_Y + RULER_H / 2 + 4)
+    .attr('text-anchor', 'middle').attr('font-size', 9.5).attr('fill', '#C8102E').attr('font-weight', 700)
+    .text('DIFFRACTABLE');
+
+  // X-axis label
+  g.append('text').attr('x', iW / 2).attr('y', RULER_Y + RULER_H + 30)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('Wavelength (m)');
+
+  // ---- POINTER TRIANGLE ----
+  if (isFinite(lambda_m) && lambda_m > 0) {
+    const logLam = Math.log10(lambda_m);
+    const clampedLog = Math.max(RULER_LOG_MIN, Math.min(RULER_LOG_MAX, logLam));
+    const px = xScale(clampedLog);
+    const isClipped = logLam < RULER_LOG_MIN || logLam > RULER_LOG_MAX;
+
+    // Triangle pointing down
+    const ty = RULER_Y - 2;
+    const tri = [[px, ty], [px - 7, ty - 12], [px + 7, ty - 12]];
+    g.append('polygon')
+      .attr('points', tri.map(p => p.join(',')).join(' '))
+      .attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1)
+      .attr('opacity', isClipped ? 0.4 : 1);
+
+    // Label above triangle
+    const labelText = formatLambda(lambda_m);
+    g.append('text').attr('x', px).attr('y', ty - 15)
+      .attr('text-anchor', 'middle').attr('font-size', 10.5).attr('font-weight', 700)
+      .attr('fill', '#C8102E')
+      .text(isClipped ? `← ${labelText}` : labelText);
+
+    // Vertical line through ruler bar
+    if (!isClipped) {
+      g.append('line').attr('x1', px).attr('x2', px)
+        .attr('y1', RULER_Y).attr('y2', RULER_Y + RULER_H)
+        .attr('stroke', '#C8102E').attr('stroke-width', 1.5).attr('opacity', 0.6);
+    }
+  }
+}
+
+function superscript(n) {
+  const map = {'-': '⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  return String(n).split('').map(c => map[c] || c).join('');
+}
+
+// =====================================================================
+// INFO PANEL UPDATE
+// =====================================================================
+function updateInfo(lambda_m, K_J) {
+  // Lambda display
+  document.getElementById('lambdaDisplay').textContent = formatLambda(lambda_m);
+  document.getElementById('infoMass').textContent = formatMass(curMass);
+  document.getElementById('infoEnergy').textContent = formatEnergy(K_J);
+
+  // Ratio to Si
+  const ratio = lambda_m / D_SI;
+  const ratioEl = document.getElementById('infoRatio');
+  if (!isFinite(ratio) || ratio <= 0) {
+    ratioEl.textContent = '—';
+    ratioEl.className = 'ib-val';
+  } else if (ratio < 0.001) {
+    ratioEl.textContent = ratio.toExponential(2);
+    ratioEl.className = 'ib-val classical';
+  } else {
+    ratioEl.textContent = ratio.toFixed(4);
+    ratioEl.className = ratio < 10 ? 'ib-val diffractable' : 'ib-val borderline';
+  }
+
+  document.getElementById('infoSI').textContent = lambda_m.toExponential(4) + ' m';
+
+  // Diffraction flag
+  const flag = document.getElementById('diffractionFlag');
+  const logL = Math.log10(lambda_m);
+  if (!isFinite(logL)) {
+    flag.textContent = '—'; flag.className = 'diffraction-flag borderline';
+  } else if (logL >= -11.3 && logL <= -9.0) {
+    flag.textContent = 'Diffraction possible — λ ≈ crystal lattice spacings';
+    flag.className = 'diffraction-flag yes';
+  } else if (logL >= -12.3 && logL < -11.3) {
+    flag.textContent = 'Borderline — λ < typical lattice, hard X-ray / γ regime';
+    flag.className = 'diffraction-flag borderline';
+  } else if (logL > -9.0) {
+    flag.textContent = 'λ > crystal spacings — no crystal diffraction (optical regime)';
+    flag.className = 'diffraction-flag borderline';
+  } else {
+    flag.textContent = 'Classically negligible — λ ≪ any quantum structure';
+    flag.className = 'diffraction-flag no';
+  }
+
+  // Near canonical mass label
+  const name = nearCanonicalMass(curMass);
+  document.getElementById('lambdaLabel').textContent =
+    name ? `de Broglie wavelength — ${name}` : 'de Broglie wavelength';
+}
+
+// =====================================================================
+// LOG-LOG PANEL
+// =====================================================================
+const loglogSVG = d3.select('#loglog-svg');
+
+function drawLogLog(lambda_m, K_J) {
+  loglogSVG.selectAll('*').remove();
+  const rect = document.getElementById('loglog-svg').getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  if (W < 10 || H < 10) return;
+
+  const margin = { top: 8, right: 22, bottom: 38, left: 52 };
+  const iW = W - margin.left - margin.right;
+  const iH = H - margin.top - margin.bottom;
+
+  const g = loglogSVG.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // K range: 10^-3 to 10^4 eV
+  const kMin_eV = 0.001, kMax_eV = 1e4;
+  const xScale = d3.scaleLog([kMin_eV, kMax_eV], [0, iW]);
+
+  // λ range for this mass
+  const lamAtMin = getLambda(curMass, kMin_eV * EV);
+  const lamAtMax = getLambda(curMass, kMax_eV * EV);
+  const yMin = Math.pow(10, Math.floor(Math.log10(lamAtMax)) - 1);
+  const yMax = Math.pow(10, Math.ceil(Math.log10(lamAtMin)) + 1);
+  const yScale = d3.scaleLog([yMin, yMax], [iH, 0]);
+
+  // Grid
+  [kMin_eV, 0.01, 0.1, 1, 10, 100, 1000, kMax_eV].forEach(k => {
+    if (k < kMin_eV || k > kMax_eV) return;
+    g.append('line').attr('x1', xScale(k)).attr('x2', xScale(k))
+      .attr('y1', 0).attr('y2', iH)
+      .attr('stroke', 'rgba(42,26,14,0.06)').attr('stroke-width', 0.5);
+  });
+
+  // λ(K) curve
+  const pts = d3.range(0, 1.001, 0.002).map(t => {
+    const logK = Math.log10(kMin_eV) + t * (Math.log10(kMax_eV) - Math.log10(kMin_eV));
+    const K = Math.pow(10, logK);
+    const lam = getLambda(curMass, K * EV);
+    return { K, lam };
+  }).filter(d => d.lam >= yMin && d.lam <= yMax);
+
+  g.append('path')
+    .datum(pts)
+    .attr('d', d3.line().x(d => xScale(d.K)).y(d => yScale(d.lam)))
+    .attr('fill', 'none').attr('stroke', '#2A1A0E').attr('stroke-width', 2);
+
+  // Reference lines: d_Si
+  const dSi_nm = 0.31e-9;
+  if (dSi_nm >= yMin && dSi_nm <= yMax) {
+    g.append('line').attr('x1', 0).attr('x2', iW)
+      .attr('y1', yScale(dSi_nm)).attr('y2', yScale(dSi_nm))
+      .attr('stroke', '#545454').attr('stroke-width', 1).attr('stroke-dasharray', '5,4').attr('opacity', 0.5);
+    g.append('text').attr('x', iW - 2).attr('y', yScale(dSi_nm) - 4)
+      .attr('text-anchor', 'end').attr('font-size', 9.5).attr('fill', '#545454').attr('opacity', 0.7)
+      .text('d_Si = 0.31 nm');
+  }
+
+  // Current point marker
+  const K_eV = K_J / EV;
+  if (K_eV >= kMin_eV && K_eV <= kMax_eV && isFinite(lambda_m) && lambda_m >= yMin && lambda_m <= yMax) {
+    g.append('circle')
+      .attr('cx', xScale(K_eV)).attr('cy', yScale(lambda_m))
+      .attr('r', 6).attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1.5);
+  }
+
+  // Slope annotation: -0.5 on log-log
+  // draw a small reference segment with annotation
+  const refK1 = Math.pow(10, Math.log10(kMin_eV * kMax_eV) / 2 - 0.3);
+  const refK2 = refK1 * 10;
+  const refL1 = getLambda(curMass, refK1 * EV);
+  const refL2 = getLambda(curMass, refK2 * EV);
+  if (refL1 >= yMin && refL2 >= yMin && refL1 <= yMax && refL2 <= yMax) {
+    g.append('line')
+      .attr('x1', xScale(refK1)).attr('x2', xScale(refK2))
+      .attr('y1', yScale(refL1)).attr('y2', yScale(refL2))
+      .attr('stroke', '#C8102E').attr('stroke-width', 1.2).attr('stroke-dasharray', '4,3').attr('opacity', 0.6);
+    const mx = (xScale(refK1) + xScale(refK2)) / 2;
+    const my = (yScale(refL1) + yScale(refL2)) / 2;
+    g.append('text').attr('x', mx + 8).attr('y', my)
+      .attr('font-size', 10).attr('fill', '#C8102E').attr('opacity', 0.8)
+      .text('slope = −½');
+  }
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).tickValues([0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000])
+    .tickFormat(d => {
+      const exp = Math.round(Math.log10(d));
+      if (d === 1) return '1';
+      return `10${superscript(exp)}`;
+    }).tickSize(4);
+  const yAxis = d3.axisLeft(yScale).ticks(5, '~e').tickSize(4);
+
+  g.append('g').attr('transform', `translate(0,${iH})`).call(xAxis)
+    .call(a => a.select('.domain').attr('stroke', '#2A1A0E'))
+    .call(a => a.selectAll('text').attr('font-size', 10).attr('fill', '#2A1A0E'));
+  g.append('g').call(yAxis)
+    .call(a => a.select('.domain').attr('stroke', '#2A1A0E'))
+    .call(a => a.selectAll('text').attr('font-size', 10).attr('fill', '#2A1A0E'));
+
+  g.append('text').attr('x', iW / 2).attr('y', iH + 32)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('Kinetic energy (eV)');
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -iH / 2).attr('y', -40)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('λ (m)');
+}
+
+// =====================================================================
+// PHYSICS CHECKS
+// =====================================================================
+function runChecks(lambda_m) {
+  // P1: e⁻ at 54 eV → λ = 1.226/√54 = 0.1669 nm
+  const lam_e54 = getLambda(ME, 54 * EV);
+  const lam_e54_nm = lam_e54 * 1e9;
+  const p1pass = Math.abs(lam_e54_nm - 0.1669) < 0.001;
+  document.getElementById('p1dot').className = 'check-dot ' + (p1pass ? 'pass' : 'fail');
+  document.getElementById('p1text').textContent =
+    `P1: e⁻ 54eV → ${lam_e54_nm.toFixed(4)} nm (exp 0.1669 nm) — ${p1pass ? '✓' : 'FAIL'}`;
+
+  // P2: C₆₀ at 900K thermal
+  const M_C60 = 1.196e-24;
+  const K_c60 = 1.5 * KB * 900;
+  const lam_c60 = getLambda(M_C60, K_c60);
+  const lam_c60_pm = lam_c60 * 1e12;
+  // Expected ~2.5 pm
+  const p2pass = lam_c60_pm > 1.5 && lam_c60_pm < 4.0;
+  document.getElementById('p2dot').className = 'check-dot ' + (p2pass ? 'pass' : 'fail');
+  document.getElementById('p2text').textContent =
+    `P2: C₆₀ 900K → ${lam_c60_pm.toFixed(2)} pm (exp ~2.5 pm) — ${p2pass ? '✓' : 'FAIL'}`;
+
+  // P3: log-log slope = -0.5 for fixed mass
+  // λ = H/sqrt(2mK) → log λ = const - 0.5*log K
+  const K1 = 1 * EV, K2 = 100 * EV;
+  const l1 = getLambda(ME, K1), l2 = getLambda(ME, K2);
+  const slope = (Math.log10(l2) - Math.log10(l1)) / (Math.log10(K2 / EV) - Math.log10(K1 / EV));
+  const p3pass = Math.abs(slope + 0.5) < 0.001;
+  document.getElementById('p3dot').className = 'check-dot ' + (p3pass ? 'pass' : 'fail');
+  document.getElementById('p3text').textContent =
+    `P3: log-log slope = ${slope.toFixed(3)} (exp −0.500) — ${p3pass ? '✓' : 'FAIL'}`;
+}
+
+// =====================================================================
+// MAIN UPDATE
+// =====================================================================
+function updateAll() {
+  const K_J = getKineticEnergy();
+  const lambda_m = (mode === 'velocity')
+    ? H / (curMass * curVelocity)
+    : getLambda(curMass, K_J);
+
+  drawRuler(lambda_m);
+  updateInfo(lambda_m, K_J);
+  drawLogLog(lambda_m, K_J);
+  runChecks(lambda_m);
+}
+
+// =====================================================================
+// MODE TOGGLE
+// =====================================================================
+function setMode(m) {
+  mode = m;
+  document.getElementById('btnEnergy').classList.toggle('active', m === 'energy');
+  document.getElementById('btnThermal').classList.toggle('active', m === 'thermal');
+  document.getElementById('rowEnergy').style.display  = m === 'energy'  ? '' : 'none';
+  document.getElementById('rowTemp').style.display    = m === 'thermal' ? '' : 'none';
+  document.getElementById('rowVelocity').style.display = m === 'velocity' ? '' : 'none';
+  updateAll();
+}
+
+// =====================================================================
+// PRESETS
+// =====================================================================
+function applyPreset(id) {
+  if (id === 'e54') {
+    curMass = ME;
+    curEnergy_J = 54 * EV;
+    mode = 'energy';
+    syncSliders();
+    setMode('energy');
+  } else if (id === 'n293') {
+    curMass = 1.675e-27;
+    curTemp = 293;
+    mode = 'thermal';
+    syncSliders();
+    setMode('thermal');
+  } else if (id === 'c60') {
+    curMass = 1.196e-24;
+    curTemp = 900;
+    mode = 'thermal';
+    syncSliders();
+    setMode('thermal');
+  } else if (id === 'human') {
+    curMass = 70;
+    curVelocity = 1.0;
+    mode = 'velocity';
+    syncSliders();
+    setMode('velocity');
+    // show velocity row
+    document.getElementById('rowVelocity').style.display = '';
+  }
+}
+
+function syncSliders() {
+  document.getElementById('sliderMass').value = massToSlider(curMass).toFixed(4);
+  document.getElementById('sliderEnergy').value = Math.log10(curEnergy_J / EV).toFixed(4);
+  document.getElementById('sliderTemp').value = Math.log10(curTemp).toFixed(4);
+  document.getElementById('sliderVel').value = Math.log10(Math.max(0.001, curVelocity)).toFixed(4);
+  updateSliderLabels();
+}
+
+function updateSliderLabels() {
+  // Mass
+  const mLabel = formatMass(curMass);
+  document.getElementById('valMass').textContent = mLabel;
+
+  // Energy
+  const eV_val = curEnergy_J / EV;
+  document.getElementById('valEnergy').textContent =
+    eV_val < 1 ? eV_val.toFixed(4) + ' eV' : eV_val < 1000 ? eV_val.toFixed(2) + ' eV' : (eV_val / 1000).toFixed(2) + ' keV';
+
+  // Temp
+  document.getElementById('valTemp').textContent = curTemp.toFixed(1) + ' K';
+
+  // Velocity
+  document.getElementById('valVelocity').textContent =
+    curVelocity < 1000 ? curVelocity.toFixed(3) + ' m/s' : (curVelocity / 1000).toFixed(2) + ' km/s';
+}
+
+// =====================================================================
+// EVENT HANDLERS
+// =====================================================================
+document.getElementById('sliderMass').addEventListener('input', function() {
+  curMass = sliderToMass(parseFloat(this.value));
+  updateSliderLabels();
+  updateAll();
+});
+
+document.getElementById('sliderEnergy').addEventListener('input', function() {
+  curEnergy_J = Math.pow(10, parseFloat(this.value)) * EV;
+  updateSliderLabels();
+  updateAll();
+});
+
+document.getElementById('sliderTemp').addEventListener('input', function() {
+  curTemp = Math.pow(10, parseFloat(this.value));
+  updateSliderLabels();
+  updateAll();
+});
+
+document.getElementById('sliderVel').addEventListener('input', function() {
+  curVelocity = Math.pow(10, parseFloat(this.value));
+  updateSliderLabels();
+  updateAll();
+});
+
+// =====================================================================
+// INIT + RESIZE
+// =====================================================================
+function init() {
+  // Initial state: electron at 54 eV
+  curMass = ME;
+  curEnergy_J = 54 * EV;
+  syncSliders();
+  updateAll();
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { drawRuler(getLambda(curMass, getKineticEnergy())); drawLogLog(getLambda(curMass, getKineticEnergy()), getKineticEnergy()); }, 80);
+});
+
+if (document.readyState === 'complete') {
+  setTimeout(init, 30);
+} else {
+  window.addEventListener('load', () => setTimeout(init, 30));
+}
+</script>
+</body>
+</html>

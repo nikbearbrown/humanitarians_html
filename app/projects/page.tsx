@@ -14,7 +14,6 @@ const projects = [
     slug: "madison",
     description: "Open-source agentic marketing and branding framework for data-driven advertising intelligence.",
     tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
-    substackUrl: "https://madisonproject.substack.com/",
   },
   {
     name: "Mycroft",
@@ -35,7 +34,6 @@ const projects = [
     slug: "lyrical-literacy",
     description: "AI-generated songs and videos that activate the embodied and social mechanisms of language acquisition.",
     tiers: ["Tier 2 — Embodied", "Tier 3 — Social & Ethical"],
-    substackUrl: "https://lyricalliteracyproject.substack.com/",
   },
   {
     name: "Dayhoff",
@@ -70,7 +68,6 @@ const projects = [
     slug: "80-days-to-stay",
     description: "Job tools and agentic AI for OPT job search transparency and efficiency.",
     tiers: ["Tier 4 — Judgment"],
-    substackUrl: "https://80daystostay.substack.com/",
   },
   {
     name: "Musinique",

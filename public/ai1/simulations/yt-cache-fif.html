@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cache Replacement: FIF vs LRU vs FIFO</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #2A1A0E;
+    --red: #C8102E;
+    --slate: #545454;
+    --gold: #F5C518;
+    --hit-green: #1a7a1a;
+    --miss-red: #C8102E;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Georgia', serif;
+    padding: 18px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 16px;
+  }
+
+  /* Controls row */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+  }
+  .controls label { font-size: 13px; color: var(--slate); }
+  .controls input[type=range] { cursor: pointer; }
+  button {
+    padding: 6px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  button:hover { background: #eee; }
+  button.primary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  button.primary:hover { background: #4a3a2e; }
+  select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1.5px solid var(--slate);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* Request tape */
+  .tape-section {
+    margin-bottom: 16px;
+  }
+  .tape-section h3 {
+    font-size: 14px;
+    color: var(--slate);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  #tape-svg { display: block; }
+
+  /* Cache panels */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 16px;
+  }
+  .panel {
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 14px;
+    background: var(--bg);
+  }
+  .panel-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .panel-subtitle {
+    font-size: 11px;
+    color: var(--slate);
+    margin-bottom: 10px;
+    min-height: 28px;
+    line-height: 1.4;
+  }
+  .miss-counter {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .hit-miss-indicator {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    height: 24px;
+    margin-bottom: 10px;
+  }
+  .evict-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--slate);
+    height: 18px;
+    margin-bottom: 8px;
+  }
+  #fif-panel .panel-title { color: var(--red); }
+  #lru-panel .panel-title { color: var(--slate); }
+  #fifo-panel .panel-title { color: #2255aa; }
+
+  /* Step-info row */
+  .step-info {
+    font-size: 13px;
+    color: var(--slate);
+    margin-bottom: 14px;
+    min-height: 20px;
+  }
+
+  /* Theorem box */
+  .theorem {
+    background: #fff8f0;
+    border-left: 4px solid var(--red);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .theorem strong { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>Cache Replacement: FIF vs LRU vs FIFO</h1>
+<p class="subtitle">Bélády's algorithm (FIF = Furthest-In-Future) is optimal. LRU tracks it well with temporal locality. FIFO can be much worse.</p>
+
+<div class="controls">
+  <button class="primary" id="btn-step">Step →</button>
+  <button id="btn-auto">Auto ▶</button>
+  <button id="btn-reset">Reset</button>
+  <label>Cache size (k):
+    <input type="range" id="k-slider" min="2" max="8" value="4" style="width:90px;">
+    <span id="k-val">4</span>
+  </label>
+  <label>Stream:
+    <select id="stream-select">
+      <option value="friendly">Friendly (temporal locality)</option>
+      <option value="adversarial_lru">Adversarial for LRU (cycle k+1)</option>
+      <option value="random">Random</option>
+      <option value="p1_verify">P1 Verify: [a,b,c,d]+[c,d,e,f,a,b]</option>
+    </select>
+  </label>
+</div>
+
+<div class="step-info" id="step-info">Press "Step" or "Auto" to begin simulation.</div>
+
+<!-- Request tape -->
+<div class="tape-section">
+  <h3>Request Stream</h3>
+  <svg id="tape-svg" width="1140" height="46"></svg>
+</div>
+
+<!-- Cache panels -->
+<div class="panels">
+  <div class="panel" id="fif-panel">
+    <div class="panel-title">FIF</div>
+    <div class="panel-subtitle">Furthest-In-Future: evict item whose next use is furthest away (Bélády's optimal)</div>
+    <div class="hit-miss-indicator" id="fif-hm">—</div>
+    <div class="evict-label" id="fif-evict"></div>
+    <div class="miss-counter" id="fif-misses" style="color:var(--red)">0 misses</div>
+    <svg id="fif-svg" width="260" height="240"></svg>
+  </div>
+  <div class="panel" id="lru-panel">
+    <div class="panel-title">LRU</div>
+    <div class="panel-subtitle">Least Recently Used: evict item that was used longest ago</div>
+    <div class="hit-miss-indicator" id="lru-hm">—</div>
+    <div class="evict-label" id="lru-evict"></div>
+    <div class="miss-counter" id="lru-misses" style="color:var(--slate)">0 misses</div>
+    <svg id="lru-svg" width="260" height="240"></svg>
+  </div>
+  <div class="panel" id="fifo-panel">
+    <div class="panel-title">FIFO</div>
+    <div class="panel-subtitle">First-In-First-Out: evict item that has been cached the longest</div>
+    <div class="hit-miss-indicator" id="fifo-hm">—</div>
+    <div class="evict-label" id="fifo-evict"></div>
+    <div class="miss-counter" id="fifo-misses" style="color:#2255aa">0 misses</div>
+    <svg id="fifo-svg" width="260" height="240"></svg>
+  </div>
+</div>
+
+<div class="theorem">
+  <strong>P1 Verify:</strong> Stream [c,d,e,f,a,b] with initial cache [a,b,c,d], k=4 → <strong>FIF: 2 misses</strong>, <strong>FIFO: 4 misses</strong> (use preset "P1 Verify").<br>
+  <strong>P2 Adversarial:</strong> Cycle of k+1 items → LRU misses every request; FIF achieves minimum (use "Adversarial for LRU").
+</div>
+
+<script>
+// ────────────────────────────────────────────────────
+// STREAM PRESETS
+// ────────────────────────────────────────────────────
+const ITEM_COLORS = {
+  a: '#e05', b: '#e80', c: '#0a0', d: '#07e',
+  e: '#a0a', f: '#c40', g: '#048', h: '#888', i: '#c08'
+};
+function itemColor(item) {
+  return ITEM_COLORS[item] || '#555';
+}
+
+function getStream(name, k) {
+  if (name === 'friendly') {
+    return ['a','b','c','d','c','d','e','f','a','b','c','d','c','b','a','c','d','e','f','e','d','c','b','a'];
+  }
+  if (name === 'adversarial_lru') {
+    // cycle k+1 items: abcde...  for k=4, cycle [a,b,c,d,e]
+    const items = 'abcdefghi'.slice(0, k+1).split('');
+    const result = [];
+    for (let i = 0; i < 24; i++) result.push(items[i % items.length]);
+    return result;
+  }
+  if (name === 'random') {
+    const items = 'abcdefgh'.split('');
+    const result = [];
+    const rng = mulberry32(42);
+    for (let i = 0; i < 24; i++) result.push(items[Math.floor(rng() * 6)]);
+    return result;
+  }
+  if (name === 'p1_verify') {
+    return ['a','b','c','d',  'c','d','e','f','a','b'];
+  }
+  return ['a','b','c','d','c','d','e','f','a','b','c','d'];
+}
+
+function getInitialCache(name, k) {
+  if (name === 'p1_verify') return ['a','b','c','d'].slice(0, k);
+  if (name === 'adversarial_lru') {
+    return 'abcdefghi'.slice(0, k).split('');
+  }
+  return 'abcdefgh'.slice(0, k).split('');
+}
+
+function mulberry32(a) {
+  return function() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ────────────────────────────────────────────────────
+// CACHE POLICY SIMULATORS
+// ────────────────────────────────────────────────────
+
+// FIF: Furthest-In-Future (Bélády)
+class FIFCache {
+  constructor(k, initial) {
+    this.k = k;
+    this.cache = [...initial.slice(0, k)];
+    this.misses = 0;
+    this.lastHitMiss = null;
+    this.lastEvicted = null;
+  }
+  step(item, futureStream) {
+    if (this.cache.includes(item)) {
+      this.lastHitMiss = 'HIT';
+      this.lastEvicted = null;
+      return;
+    }
+    this.misses++;
+    this.lastHitMiss = 'MISS';
+    if (this.cache.length < this.k) {
+      this.cache.push(item);
+      this.lastEvicted = null;
+    } else {
+      // Find next use of each cached item in futureStream
+      const nextUse = this.cache.map(ci => {
+        const idx = futureStream.indexOf(ci);
+        return idx === -1 ? Infinity : idx;
+      });
+      const evictIdx = nextUse.indexOf(Math.max(...nextUse));
+      this.lastEvicted = this.cache[evictIdx];
+      this.cache[evictIdx] = item;
+    }
+  }
+  nextUses(futureStream) {
+    return this.cache.map(ci => {
+      const idx = futureStream.indexOf(ci);
+      return idx === -1 ? '∞' : idx + 1;
+    });
+  }
+}
+
+// LRU
+class LRUCache {
+  constructor(k, initial) {
+    this.k = k;
+    // order: most recent at end
+    this.cache = [...initial.slice(0, k)];
+    this.misses = 0;
+    this.lastHitMiss = null;
+    this.lastEvicted = null;
+  }
+  step(item) {
+    const idx = this.cache.indexOf(item);
+    if (idx !== -1) {
+      this.lastHitMiss = 'HIT';
+      this.lastEvicted = null;
+      // Move to end (most recently used)
+      this.cache.splice(idx, 1);
+      this.cache.push(item);
+      return;
+    }
+    this.misses++;
+    this.lastHitMiss = 'MISS';
+    if (this.cache.length < this.k) {
+      this.cache.push(item);
+      this.lastEvicted = null;
+    } else {
+      this.lastEvicted = this.cache[0]; // least recently used
+      this.cache.shift();
+      this.cache.push(item);
+    }
+  }
+}
+
+// FIFO
+class FIFOCache {
+  constructor(k, initial) {
+    this.k = k;
+    this.cache = [...initial.slice(0, k)];
+    this.misses = 0;
+    this.lastHitMiss = null;
+    this.lastEvicted = null;
+  }
+  step(item) {
+    if (this.cache.includes(item)) {
+      this.lastHitMiss = 'HIT';
+      this.lastEvicted = null;
+      return;
+    }
+    this.misses++;
+    this.lastHitMiss = 'MISS';
+    if (this.cache.length < this.k) {
+      this.cache.push(item);
+      this.lastEvicted = null;
+    } else {
+      this.lastEvicted = this.cache[0]; // first-in
+      this.cache.shift();
+      this.cache.push(item);
+    }
+  }
+}
+
+// ────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────
+let k = 4;
+let streamName = 'friendly';
+let stream = [];
+let initialCache = [];
+let stepIndex = 0;
+let fifCache, lruCache, fifoCache;
+let autoTimer = null;
+
+function buildStream() {
+  stream = getStream(streamName, k);
+  initialCache = getInitialCache(streamName, k);
+}
+
+function resetSim() {
+  buildStream();
+  stepIndex = 0;
+  fifCache = new FIFCache(k, initialCache);
+  lruCache = new LRUCache(k, initialCache);
+  fifoCache = new FIFOCache(k, initialCache);
+  renderAll();
+  d3.select('#step-info').text('Press "Step" or "Auto" to begin. Stream length: ' + stream.length);
+}
+
+// ────────────────────────────────────────────────────
+// TAPE RENDER
+// ────────────────────────────────────────────────────
+function renderTape() {
+  const svg = d3.select('#tape-svg');
+  svg.selectAll('*').remove();
+  const cellW = 40, cellH = 36, gap = 2;
+  const maxVisible = Math.min(stream.length, 26);
+  svg.attr('width', maxVisible * (cellW + gap) + 10);
+
+  stream.slice(0, maxVisible).forEach((item, i) => {
+    const x = 5 + i * (cellW + gap);
+    const isCurrent = i === stepIndex;
+    const isPast = i < stepIndex;
+    svg.append('rect')
+      .attr('x', x).attr('y', 5)
+      .attr('width', cellW).attr('height', cellH)
+      .attr('rx', 4)
+      .attr('fill', isCurrent ? itemColor(item) : (isPast ? '#eee' : '#f5f5f5'))
+      .attr('stroke', isCurrent ? '#111' : '#ccc')
+      .attr('stroke-width', isCurrent ? 2.5 : 1);
+    svg.append('text')
+      .attr('x', x + cellW/2).attr('y', 27)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 16).attr('font-weight', isCurrent ? 'bold' : 'normal')
+      .attr('fill', isPast ? '#bbb' : (isCurrent ? '#fff' : '#2A1A0E'))
+      .text(item);
+  });
+}
+
+// ────────────────────────────────────────────────────
+// CACHE PANEL RENDER
+// ────────────────────────────────────────────────────
+function renderCachePanel(svgId, cache, policy, futureStream) {
+  const svg = d3.select(`#${svgId}`);
+  svg.selectAll('*').remove();
+  const slotH = 44, slotW = 200, marginX = 28, marginY = 4;
+  svg.attr('height', k * (slotH + 6) + 10);
+
+  const items = cache.cache;
+
+  items.forEach((item, i) => {
+    const y = marginY + i * (slotH + 6);
+    const g = svg.append('g');
+
+    // Slot rectangle
+    g.append('rect')
+      .attr('x', marginX).attr('y', y)
+      .attr('width', slotW).attr('height', slotH)
+      .attr('rx', 6)
+      .attr('fill', itemColor(item))
+      .attr('opacity', 0.88)
+      .attr('stroke', '#222')
+      .attr('stroke-width', 1.2);
+
+    // Item label
+    g.append('text')
+      .attr('x', marginX + 20).attr('y', y + 27)
+      .attr('font-size', 20).attr('font-weight', 'bold')
+      .attr('fill', '#fff')
+      .text(item);
+
+    // For FIF: show next-use distance
+    if (policy === 'fif' && futureStream) {
+      const nextUses = cache.nextUses(futureStream);
+      const nu = nextUses[i];
+      g.append('text')
+        .attr('x', marginX + slotW - 10).attr('y', y + 18)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 11).attr('fill', '#fff')
+        .attr('opacity', 0.85)
+        .text('next: ' + nu);
+    }
+    // For LRU: show recency rank (1=most recent)
+    if (policy === 'lru') {
+      const rank = items.length - i; // last = most recent = rank 1
+      g.append('text')
+        .attr('x', marginX + slotW - 10).attr('y', y + 18)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 11).attr('fill', '#fff')
+        .attr('opacity', 0.85)
+        .text(rank === 1 ? 'MRU' : `age:${items.length - 1 - (items.length - 1 - i)}`);
+    }
+    // For FIFO: show slot number (slot 0 = evict next)
+    if (policy === 'fifo') {
+      g.append('text')
+        .attr('x', marginX + slotW - 10).attr('y', y + 18)
+        .attr('text-anchor', 'end')
+        .attr('font-size', 11).attr('fill', '#fff')
+        .attr('opacity', 0.85)
+        .text(i === 0 ? '← evict next' : '');
+    }
+  });
+
+  // Empty slots
+  for (let i = items.length; i < k; i++) {
+    const y = marginY + i * (slotH + 6);
+    svg.append('rect')
+      .attr('x', marginX).attr('y', y)
+      .attr('width', slotW).attr('height', slotH)
+      .attr('rx', 6)
+      .attr('fill', '#f0f0f0')
+      .attr('stroke', '#ccc')
+      .attr('stroke-width', 1);
+    svg.append('text')
+      .attr('x', marginX + slotW/2).attr('y', y + 27)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', 13).attr('fill', '#aaa')
+      .text('[ empty ]');
+  }
+}
+
+function renderAll() {
+  renderTape();
+  // Future stream = everything after current stepIndex
+  const futureStream = stream.slice(stepIndex);
+
+  renderCachePanel('fif-svg', fifCache, 'fif', futureStream);
+  renderCachePanel('lru-svg', lruCache, 'lru', null);
+  renderCachePanel('fifo-svg', fifoCache, 'fifo', null);
+
+  // Counters
+  d3.select('#fif-misses').text(fifCache.misses + (fifCache.misses === 1 ? ' miss' : ' misses'));
+  d3.select('#lru-misses').text(lruCache.misses + (lruCache.misses === 1 ? ' miss' : ' misses'));
+  d3.select('#fifo-misses').text(fifoCache.misses + (fifoCache.misses === 1 ? ' miss' : ' misses'));
+
+  // HIT/MISS indicators (only after first step)
+  if (stepIndex > 0) {
+    const setHM = (id, val) => {
+      d3.select(id)
+        .text(val)
+        .style('color', val === 'HIT' ? 'var(--hit-green)' : 'var(--miss-red)');
+    };
+    setHM('#fif-hm', fifCache.lastHitMiss);
+    setHM('#lru-hm', lruCache.lastHitMiss);
+    setHM('#fifo-hm', fifoCache.lastHitMiss);
+
+    const evictText = ev => ev ? `Evicted: ${ev}` : '';
+    d3.select('#fif-evict').text(evictText(fifCache.lastEvicted));
+    d3.select('#lru-evict').text(evictText(lruCache.lastEvicted));
+    d3.select('#fifo-evict').text(evictText(fifoCache.lastEvicted));
+  }
+}
+
+// ────────────────────────────────────────────────────
+// STEPPING
+// ────────────────────────────────────────────────────
+function doStep() {
+  if (stepIndex >= stream.length) {
+    stopAuto();
+    d3.select('#step-info').text('Stream complete. Press Reset to restart.');
+    return;
+  }
+  const item = stream[stepIndex];
+  const futureAfterThis = stream.slice(stepIndex + 1);
+
+  fifCache.step(item, futureAfterThis);
+  lruCache.step(item);
+  fifoCache.step(item);
+
+  stepIndex++;
+  renderAll();
+
+  d3.select('#step-info').text(
+    `Step ${stepIndex}/${stream.length} — Requesting: "${item}"  |  ` +
+    `FIF: ${fifCache.misses} miss  LRU: ${lruCache.misses} miss  FIFO: ${fifoCache.misses} miss`
+  );
+
+  if (stepIndex >= stream.length) {
+    stopAuto();
+    d3.select('#step-info').text(
+      `Done! FIF: ${fifCache.misses} misses  LRU: ${lruCache.misses} misses  FIFO: ${fifoCache.misses} misses`
+    );
+  }
+}
+
+function startAuto() {
+  if (autoTimer) return;
+  d3.select('#btn-auto').text('Pause ⏸');
+  autoTimer = setInterval(doStep, 500);
+}
+
+function stopAuto() {
+  if (autoTimer) {
+    clearInterval(autoTimer);
+    autoTimer = null;
+    d3.select('#btn-auto').text('Auto ▶');
+  }
+}
+
+// ────────────────────────────────────────────────────
+// EVENT LISTENERS
+// ────────────────────────────────────────────────────
+d3.select('#btn-step').on('click', () => {
+  stopAuto();
+  doStep();
+});
+
+d3.select('#btn-auto').on('click', () => {
+  if (autoTimer) stopAuto();
+  else startAuto();
+});
+
+d3.select('#btn-reset').on('click', () => {
+  stopAuto();
+  resetSim();
+});
+
+d3.select('#k-slider').on('input', function() {
+  k = +this.value;
+  d3.select('#k-val').text(k);
+  stopAuto();
+  resetSim();
+});
+
+d3.select('#stream-select').on('change', function() {
+  streamName = this.value;
+  stopAuto();
+  resetSim();
+});
+
+// ────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────
+resetSim();
+</script>
+</body>
+</html>

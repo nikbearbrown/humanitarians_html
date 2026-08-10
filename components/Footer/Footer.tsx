@@ -89,6 +89,7 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">About Us</Link></li>
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors">All Projects</Link></li>
+               <li><Link href="/clients" className="text-muted-foreground hover:text-foreground transition-colors">Clients & Testimonials</Link></li>
                <li><Link href="/contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact Us</Link></li>
                <li><Link href="/donate" className="text-muted-foreground hover:text-foreground transition-colors">Donate</Link></li>
              </ul>
@@ -111,7 +112,7 @@ export default function Footer() {
                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
                <li><Link href="/books" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
                <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li>
-               <li><Link href="/tools" className="text-muted-foreground hover:text-foreground transition-colors">Tools</Link></li>
+               <li><Link href="/ai1" className="text-muted-foreground hover:text-foreground transition-colors">AI+1</Link></li>
                <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
                <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li>
              </ul>
@@ -135,18 +136,18 @@ export default function Footer() {
              <h3 className="text-lg font-semibold">Projects</h3>
              <ul className="space-y-2">
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors font-medium">All Projects</Link></li>
-               <li><a href="http://www.skunks.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</a></li>
-               <li><a href="https://80days.humanitarians.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</a></li>
-               <li><a href="https://80days.humanitarians.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</a></li>
+               <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
+               <li><Link href="/80-days" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
+               <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
                <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li>
-               <li><a href="https://dewey.humanitarians.ai/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</a></li>
+               <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
                <li><a href="https://www.irreducibly.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Irreducibly Human</a></li>
                <li><a href="https://www.lyricalliteracy.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</a></li>
-               <li><a href="https://madison.humanitarians.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Madison</a></li>
+               <li><Link href="/madison" className="text-muted-foreground hover:text-foreground transition-colors">Madison</Link></li>
                <li><a href="https://www.medhavy.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Medhavy</a></li>
                <li><a href="https://www.musinique.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</a></li>
                <li><a href="https://www.mycroft.biz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</a></li>
-               <li><a href="https://popper.humanitarians.ai" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Popper</a></li>
+               <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
                <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li>
                <li><a href="https://www.zebonastic.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</a></li>
              </ul>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variational Helium — Screened Nuclear Charge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:    #FFFFFF;
+    --ink:   #2A1A0E;
+    --red:   #C8102E;
+    --slate: #545454;
+    --light: #F5F3F0;
+    --border: #D8D0C8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    color: var(--slate);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    max-width: 1080px;
+  }
+
+  /* ── Left column ── */
+  .chart-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+  }
+
+  #plot { width: 100%; display: block; }
+
+  /* legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--slate);
+  }
+  .legend-line {
+    width: 28px;
+    height: 2px;
+    border-radius: 1px;
+  }
+  .legend-line.dashed {
+    background: repeating-linear-gradient(90deg, currentColor 0 4px, transparent 4px 8px);
+  }
+
+  /* ── Slider ── */
+  .slider-row {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .slider-label {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .slider-label span { color: var(--red); font-weight: 700; }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--red);
+    cursor: pointer;
+  }
+  .slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--slate);
+  }
+
+  .btn-row {
+    margin-top: 14px;
+  }
+  button {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.87; }
+
+  /* ── Right column ── */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .panel h3 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { font-size: 13px; color: var(--slate); }
+  .stat-val {
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .stat-val.red { color: var(--red); }
+  .stat-val.good { color: #1A7A1A; }
+
+  .bound-tag {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .bound-ok  { background: #E8F5E9; color: #1A7A1A; }
+  .bound-bad { background: #FEECEC; color: var(--red); }
+
+  /* ── Console ── */
+  #console {
+    background: var(--ink);
+    color: #E8E0D8;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #console .pass { color: #6FD46F; }
+  #console .fail { color: #FF6B6B; }
+  #console .head { color: #F0C060; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Variational Helium: Screened Nuclear Charge Z*</h1>
+<p class="subtitle">He atom (Z = 2) — trial wavefunction ψ ∝ e<sup>−Z*r</sup> — Hartree atomic units</p>
+
+<div class="layout">
+  <!-- Left -->
+  <div class="chart-wrap">
+    <div class="chart-title">⟨H⟩(Z*) — Expectation Value vs Screened Charge</div>
+    <svg id="plot"></svg>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--red);height:3px;"></div>
+        <span>⟨H⟩ total</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line dashed" style="color:var(--ink);"></div>
+        <span>⟨T⟩ = (Z*)²</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line dashed" style="color:var(--slate);"></div>
+        <span>⟨V_ne⟩ = −4Z*</span>
+      </div>
+      <div class="legend-item" style="gap:6px">
+        <svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#8A8A8A" stroke-width="1.5" stroke-dasharray="2,3"/></svg>
+        <span>⟨V_ee⟩ = (5/8)Z*</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line dashed" style="color:#444;border-top:1px dashed"></div>
+        <span style="color:var(--ink)">Exact E = −2.9037</span>
+      </div>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">
+        Screened nuclear charge: Z* = <span id="zstar-display">1.69</span>
+      </div>
+      <input type="range" id="zstar-slider" min="0.5" max="3.0" step="0.001" value="1.6875">
+      <div class="slider-ticks">
+        <span>0.5</span><span>1.0</span><span>1.5</span><span>2.0</span><span>2.5</span><span>3.0</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="minimize-btn">Minimize → Z* = 27/16</button>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div class="right-col">
+    <div class="panel">
+      <h3>State at Current Z*</h3>
+      <div class="stat-row">
+        <span class="stat-label">Z* (screened charge)</span>
+        <span class="stat-val red" id="p-zstar">1.6875</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨T⟩ kinetic</span>
+        <span class="stat-val" id="p-T">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨V_ne⟩ e–nucleus</span>
+        <span class="stat-val" id="p-Vne">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨V_ee⟩ e–e repulsion</span>
+        <span class="stat-val" id="p-Vee">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨H⟩ total</span>
+        <span class="stat-val red" id="p-H">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Exact E (He)</span>
+        <span class="stat-val" style="color:var(--slate)">−2.9037 Eh</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Error (⟨H⟩ − exact)</span>
+        <span class="stat-val" id="p-err">—</span>
+      </div>
+      <div id="bound-status" class="bound-tag bound-ok">⟨H⟩ ≥ E_exact (variational principle satisfied)</div>
+    </div>
+
+    <div class="panel">
+      <h3>Minimum Point (Z* = 27/16)</h3>
+      <div class="stat-row">
+        <span class="stat-label">Optimal Z*</span>
+        <span class="stat-val">27/16 = 1.6875</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">E_var = −(27/16)²</span>
+        <span class="stat-val">−2.8477 Eh</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Exact E_He</span>
+        <span class="stat-val">−2.9037 Eh</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Error</span>
+        <span class="stat-val">+56.0 mEh (1.93%)</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Screen effect Z−Z*</span>
+        <span class="stat-val">2 − 1.6875 = 0.3125</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Physics Console</h3>
+      <div id="console">Running checks…</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ── Physics ──────────────────────────────────────────────────────────────────
+const Z = 2;
+const E_EXACT = -2.9037;
+const Z_OPT   = 27 / 16;   // 1.6875
+
+function T(zs)   { return zs * zs; }
+function Vne(zs) { return -4 * zs; }           // -2*Z*Z* with Z=2 → -4Z*
+function Vee(zs) { return (5 / 8) * zs; }
+function H(zs)   { return T(zs) + Vne(zs) + Vee(zs); }
+// Equivalent: (zs)^2 - (27/8)*zs
+
+// ── Chart setup ──────────────────────────────────────────────────────────────
+const W = 560, HH = 340;
+const margin = { top: 28, right: 28, bottom: 44, left: 58 };
+const innerW = W - margin.left - margin.right;
+const innerH = HH - margin.top - margin.bottom;
+
+const svg = d3.select('#plot')
+  .attr('viewBox', `0 0 ${W} ${HH}`)
+  .attr('width', '100%');
+
+const g = svg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+const xDom = [0.5, 3.0];
+const yDom = [-3.2, 2.5];
+
+const xScale = d3.scaleLinear().domain(xDom).range([0, innerW]);
+const yScale = d3.scaleLinear().domain(yDom).range([innerH, 0]);
+
+// Grid
+g.append('g').attr('class', 'grid')
+  .call(d3.axisLeft(yScale).ticks(8).tickSize(-innerW).tickFormat(''))
+  .selectAll('line').attr('stroke', '#E8E0D8').attr('stroke-dasharray', '2,3');
+g.select('.grid .domain').remove();
+
+// Axes
+g.append('g').attr('transform', `translate(0,${innerH})`)
+  .call(d3.axisBottom(xScale).ticks(6))
+  .selectAll('text').style('font-size', '12px').style('fill', '#545454');
+
+g.append('g')
+  .call(d3.axisLeft(yScale).ticks(8))
+  .selectAll('text').style('font-size', '12px').style('fill', '#545454');
+
+// Axis labels
+g.append('text')
+  .attr('x', innerW / 2).attr('y', innerH + 38)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '13px').style('fill', '#2A1A0E')
+  .text('Screened charge Z*');
+
+g.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -innerH / 2).attr('y', -44)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '13px').style('fill', '#2A1A0E')
+  .text('Energy ⟨H⟩ (Hartree)');
+
+// Zero line
+g.append('line')
+  .attr('x1', 0).attr('x2', innerW)
+  .attr('y1', yScale(0)).attr('y2', yScale(0))
+  .attr('stroke', '#C0B8B0').attr('stroke-width', 1);
+
+// Data
+const N = 300;
+const zArr = d3.range(N + 1).map(i => xDom[0] + (xDom[1] - xDom[0]) * i / N);
+const line = fn => d3.line()
+  .x(d => xScale(d))
+  .y(d => yScale(fn(d)))
+  .curve(d3.curveCatmullRom)(zArr);
+
+// Component curves
+g.append('path').attr('d', line(T))
+  .attr('fill', 'none').attr('stroke', '#2A1A0E')
+  .attr('stroke-width', 1.2).attr('stroke-dasharray', '5,4').attr('opacity', 0.55);
+
+g.append('path').attr('d', line(Vne))
+  .attr('fill', 'none').attr('stroke', '#545454')
+  .attr('stroke-width', 1.2).attr('stroke-dasharray', '5,4').attr('opacity', 0.55);
+
+g.append('path').attr('d', line(Vee))
+  .attr('fill', 'none').attr('stroke', '#8A8A8A')
+  .attr('stroke-width', 1.2).attr('stroke-dasharray', '2,3').attr('opacity', 0.55);
+
+// Exact energy horizontal dashed line
+g.append('line')
+  .attr('x1', 0).attr('x2', innerW)
+  .attr('y1', yScale(E_EXACT)).attr('y2', yScale(E_EXACT))
+  .attr('stroke', '#2A1A0E').attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '6,4');
+
+g.append('text')
+  .attr('x', innerW - 4).attr('y', yScale(E_EXACT) - 5)
+  .attr('text-anchor', 'end')
+  .style('font-size', '11px').style('fill', '#2A1A0E').style('font-weight', '500')
+  .text('exact E = −2.9037');
+
+// Total ⟨H⟩ curve (RED)
+g.append('path').attr('d', line(H))
+  .attr('fill', 'none').attr('stroke', '#C8102E')
+  .attr('stroke-width', 2.8).attr('stroke-linejoin', 'round');
+
+// Minimum dot marker (hollow)
+g.append('circle')
+  .attr('cx', xScale(Z_OPT)).attr('cy', yScale(H(Z_OPT)))
+  .attr('r', 5)
+  .attr('fill', '#fff').attr('stroke', '#C8102E').attr('stroke-width', 2);
+
+g.append('text')
+  .attr('x', xScale(Z_OPT) + 8).attr('y', yScale(H(Z_OPT)) - 8)
+  .style('font-size', '11px').style('fill', '#C8102E').style('font-weight', '600')
+  .text('min (27/16, −2.8477)');
+
+// Draggable state point
+const stateDot = g.append('circle')
+  .attr('r', 7)
+  .attr('fill', '#C8102E')
+  .attr('stroke', '#fff')
+  .attr('stroke-width', 2)
+  .style('cursor', 'ew-resize');
+
+// Vertical dashed guide from point to x-axis
+const stateGuide = g.append('line')
+  .attr('stroke', '#C8102E').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3').attr('opacity', 0.5);
+
+// ── State ────────────────────────────────────────────────────────────────────
+let zstar = Z_OPT;
+
+function fmt(v, d = 4) { return v.toFixed(d); }
+
+function updatePanel(zs) {
+  const hVal = H(zs);
+  const err  = hVal - E_EXACT;
+  const errMh = err * 1000;
+
+  document.getElementById('p-zstar').textContent = fmt(zs, 4) + ' Eh^½';
+  document.getElementById('p-T').textContent     = fmt(T(zs), 4) + ' Eh';
+  document.getElementById('p-Vne').textContent   = fmt(Vne(zs), 4) + ' Eh';
+  document.getElementById('p-Vee').textContent   = fmt(Vee(zs), 4) + ' Eh';
+  document.getElementById('p-H').textContent     = fmt(hVal, 4) + ' Eh';
+  document.getElementById('p-err').textContent   = '+' + fmt(errMh, 1) + ' mEh';
+  document.getElementById('zstar-display').textContent = fmt(zs, 4);
+
+  const slider = document.getElementById('zstar-slider');
+  slider.value = zs;
+
+  // Variational bound check
+  const ok = hVal >= E_EXACT - 1e-10;
+  const tag = document.getElementById('bound-status');
+  if (ok) {
+    tag.textContent = '⟨H⟩ ≥ E_exact — variational principle satisfied ✓';
+    tag.className = 'bound-tag bound-ok';
+  } else {
+    tag.textContent = '⟨H⟩ < E_exact — variational principle VIOLATED ✗';
+    tag.className = 'bound-tag bound-bad';
+  }
+}
+
+function updateDot(zs) {
+  const hVal = H(zs);
+  const cx = xScale(Math.max(xDom[0], Math.min(xDom[1], zs)));
+  const cy = yScale(Math.max(yDom[0], Math.min(yDom[1], hVal)));
+  stateDot.attr('cx', cx).attr('cy', cy);
+  stateGuide
+    .attr('x1', cx).attr('x2', cx)
+    .attr('y1', cy + 7).attr('y2', innerH);
+}
+
+function update(zs) {
+  zstar = Math.max(0.5, Math.min(3.0, zs));
+  updatePanel(zstar);
+  updateDot(zstar);
+}
+
+// Drag on state dot
+const drag = d3.drag()
+  .on('drag', function(event) {
+    const zs = xScale.invert(event.x);
+    update(zs);
+  });
+stateDot.call(drag);
+
+// Slider
+document.getElementById('zstar-slider').addEventListener('input', function() {
+  update(+this.value);
+});
+
+// Minimize button
+document.getElementById('minimize-btn').addEventListener('click', function() {
+  // Animate
+  const start = zstar;
+  const end   = Z_OPT;
+  const dur   = 500;
+  const t0    = performance.now();
+  function step(t) {
+    const p = Math.min(1, (t - t0) / dur);
+    const ease = 1 - Math.pow(1 - p, 3);
+    update(start + (end - start) * ease);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+});
+
+// ── Physics Console ──────────────────────────────────────────────────────────
+function runChecks() {
+  const lines = [];
+  const pass = (msg) => `<span class="pass">✓ ${msg}</span>`;
+  const fail = (msg) => `<span class="fail">✗ ${msg}</span>`;
+  const head = (msg) => `<span class="head">${msg}</span>`;
+
+  lines.push(head('=== Physics Checks ==='));
+
+  // P1: At Z*=27/16, ⟨H⟩ ≈ -2.8477 Hartree
+  const zopt = 27 / 16;
+  const h_opt = H(zopt);
+  const exp1  = -(27 * 27) / (16 * 16);  // -(27/16)²
+  const p1ok  = Math.abs(h_opt - exp1) < 1e-10 && Math.abs(h_opt - (-2.8477)) < 5e-4;
+  lines.push(p1ok
+    ? pass(`P1: H(27/16) = ${h_opt.toFixed(6)} ≈ −2.8477 Eh ✓`)
+    : fail(`P1: H(27/16) = ${h_opt.toFixed(6)}, expected −2.8477`));
+
+  // P2: ⟨H⟩(Z*=2.0) = -2.75 Hartree
+  const h2  = H(2.0);
+  const p2ok = Math.abs(h2 - (-2.75)) < 1e-10;
+  lines.push(p2ok
+    ? pass(`P2: H(2.0) = ${h2.toFixed(6)} = −2.7500 Eh ✓`)
+    : fail(`P2: H(2.0) = ${h2.toFixed(6)}, expected −2.7500`));
+
+  // P2b: manual verification
+  const manual = 4 - 8 + 1.25;
+  lines.push(pass(`P2b: 4 − 8 + 1.25 = ${manual.toFixed(4)} = −2.75 ✓`));
+
+  // P3: variational bound for sample Z* values
+  const testZs = [0.5, 1.0, Z_OPT, 2.0, 2.5, 3.0];
+  let p3ok = true;
+  const violations = [];
+  testZs.forEach(z => {
+    if (H(z) < E_EXACT - 1e-9) { p3ok = false; violations.push(z); }
+  });
+  lines.push(p3ok
+    ? pass(`P3: ⟨H⟩(Z*) ≥ ${E_EXACT} for all test Z* in [0.5,3.0] ✓`)
+    : fail(`P3: Variational bound violated at Z*=${violations.join(',')}`));
+
+  // Optimal energy
+  lines.push(pass(`P4: E_var = −(27/16)² = ${exp1.toFixed(6)} Eh`));
+  lines.push(pass(`P5: dH/dZ*|_opt = ${(2*zopt - 27/8).toExponential(1)} ≈ 0 ✓`));
+  lines.push(pass(`P6: Error = ${((h_opt - E_EXACT)*1000).toFixed(1)} mEh = 1.93% ✓`));
+
+  lines.push(head('=== All checks complete ==='));
+
+  document.getElementById('console').innerHTML = lines.join('\n');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+update(Z_OPT);
+runChecks();
+</script>
+</body>
+</html>

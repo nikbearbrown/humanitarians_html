@@ -279,7 +279,7 @@ export default function FellowsDetailsPage() {
                   Back to Overview
                 </SecondaryButton>
               </Link>
-              <PrimaryButton href="https://github.com/humanitarians-ai">
+              <PrimaryButton href="https://github.com/Humanitariansai">
                 View GitHub Projects
               </PrimaryButton>
             </div>

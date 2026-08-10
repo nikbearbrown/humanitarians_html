@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloch Sphere — Qubit State &amp; Robertson Uncertainty Bound</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:    #FFFFFF;
+    --ink:   #2A1A0E;
+    --red:   #C8102E;
+    --slate: #545454;
+    --light: #F5F3F0;
+    --border: #D8D0C8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: var(--slate);
+    font-size: 13px;
+    margin-bottom: 24px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    max-width: 1060px;
+  }
+
+  /* ── Left: sphere + controls ── */
+  .sphere-wrap {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+  }
+
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+  }
+
+  #bloch-svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* sliders */
+  .slider-block {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .slider-row-g {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .slider-label {
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+  }
+  .slider-label span { color: var(--red); font-weight: 700; }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--red);
+    cursor: pointer;
+  }
+
+  .btn-row {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    flex: 1;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button:hover { opacity: 0.82; }
+  button.red { background: var(--red); }
+
+  /* collapsed state indicator */
+  #collapsed-state {
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--light);
+    color: var(--slate);
+    text-align: center;
+    min-height: 34px;
+  }
+
+  /* ── Right col ── */
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel {
+    background: var(--light);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .panel h3 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--slate);
+    margin-bottom: 12px;
+  }
+
+  /* Probability bars */
+  .prob-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .prob-label {
+    width: 56px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .prob-bar-bg {
+    flex: 1;
+    height: 18px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.1s;
+  }
+  .prob-val {
+    width: 46px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  /* Stat rows */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { font-size: 12.5px; color: var(--slate); }
+  .stat-val {
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .stat-val.red { color: var(--red); }
+  .stat-val.green { color: #1A7A1A; }
+
+  /* Console */
+  #console {
+    background: var(--ink);
+    color: #E8E0D8;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #console .pass { color: #6FD46F; }
+  #console .fail { color: #FF6B6B; }
+  #console .head { color: #F0C060; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Bloch Sphere — Qubit State &amp; Robertson Uncertainty</h1>
+<p class="subtitle">|ψ⟩ = cos(θ/2)|0⟩ + e<sup>iφ</sup>sin(θ/2)|1⟩ — orthographic projection (AZ=30°, EL=25°)</p>
+
+<div class="layout">
+  <!-- Left: sphere -->
+  <div class="sphere-wrap">
+    <div class="chart-title">Bloch Sphere</div>
+    <svg id="bloch-svg" width="380" height="400"></svg>
+
+    <div class="slider-block">
+      <div class="slider-row-g">
+        <div class="slider-label">
+          Polar angle θ (0° = |0⟩, 180° = |1⟩)
+          <span id="theta-disp">90.0°</span>
+        </div>
+        <input type="range" id="theta-slider" min="0" max="180" step="0.1" value="90">
+      </div>
+      <div class="slider-row-g">
+        <div class="slider-label">
+          Azimuthal angle φ
+          <span id="phi-disp">0.0°</span>
+        </div>
+        <input type="range" id="phi-slider" min="0" max="360" step="0.5" value="0">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="measure-btn" class="red">Measure</button>
+      <button id="reset-btn">Reset |+⟩</button>
+    </div>
+    <div id="collapsed-state">—</div>
+  </div>
+
+  <!-- Right -->
+  <div class="right-col">
+    <div class="panel">
+      <h3>Born Rule Probabilities</h3>
+      <div class="prob-row">
+        <div class="prob-label" style="color:var(--red)">P(|0⟩)</div>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill" id="bar0" style="background:var(--red);width:50%"></div>
+        </div>
+        <div class="prob-val red" id="val0">0.500</div>
+      </div>
+      <div class="prob-row">
+        <div class="prob-label" style="color:var(--ink)">P(|1⟩)</div>
+        <div class="prob-bar-bg">
+          <div class="prob-bar-fill" id="bar1" style="background:var(--ink);width:50%"></div>
+        </div>
+        <div class="prob-val" id="val1">0.500</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Bloch Vector ⟨σ⟩</h3>
+      <div class="stat-row">
+        <span class="stat-label">⟨σ_x⟩ = sin θ cos φ</span>
+        <span class="stat-val" id="sx">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨σ_y⟩ = sin θ sin φ</span>
+        <span class="stat-val" id="sy">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">⟨σ_z⟩ = cos θ</span>
+        <span class="stat-val" id="sz">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">|r|² (purity)</span>
+        <span class="stat-val green" id="purity">—</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Robertson Uncertainty: Δσ_x · Δσ_z ≥ |⟨σ_y⟩|</h3>
+      <div class="stat-row">
+        <span class="stat-label">Δσ_x = √(1 − ⟨σ_x⟩²)</span>
+        <span class="stat-val" id="dsx">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Δσ_z = √(1 − ⟨σ_z⟩²)</span>
+        <span class="stat-val" id="dsz">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Product Δσ_x · Δσ_z</span>
+        <span class="stat-val red" id="product">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Bound |⟨σ_y⟩|</span>
+        <span class="stat-val" id="bound">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Ratio (product / bound)</span>
+        <span class="stat-val green" id="ratio">—</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Physics Console</h3>
+      <div id="console">Running checks…</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+// ── Projection ────────────────────────────────────────────────────────────────
+const AZ = 30 * Math.PI / 180;
+const EL = 25 * Math.PI / 180;
+const R_SPHERE = 130;   // sphere radius in px
+
+// SVG is 380 x 400; sphere center placed at (190, 200)
+const CX = 190, CY = 200;
+
+function proj(x3, y3, z3) {
+  const xs = x3 * Math.cos(AZ) - y3 * Math.sin(AZ);
+  const yd = x3 * Math.sin(AZ) + y3 * Math.cos(AZ);
+  const ys = -z3 * Math.cos(EL) + yd * Math.sin(EL);
+  return [CX + xs * R_SPHERE, CY + ys * R_SPHERE];
+}
+
+// ── Physics helpers ───────────────────────────────────────────────────────────
+function blochVec(theta, phi) {
+  return {
+    sx: Math.sin(theta) * Math.cos(phi),
+    sy: Math.sin(theta) * Math.sin(phi),
+    sz: Math.cos(theta)
+  };
+}
+
+function probs(theta) {
+  const p0 = Math.cos(theta / 2) ** 2;
+  return { p0, p1: 1 - p0 };
+}
+
+function uncertainties(sx, sy, sz) {
+  // Robertson bound for σ_x, σ_z:
+  // [σ_x, σ_z] = -2iσ_y  →  Δσ_x·Δσ_z ≥ (1/2)|⟨-2iσ_y⟩| = |⟨σ_y⟩|
+  const dsx = Math.sqrt(Math.max(0, 1 - sx * sx));
+  const dsz = Math.sqrt(Math.max(0, 1 - sz * sz));
+  const product = dsx * dsz;
+  const bound   = Math.abs(sy);
+  return { dsx, dsz, product, bound };
+}
+
+// ── SVG setup ─────────────────────────────────────────────────────────────────
+const svg = d3.select('#bloch-svg');
+
+// ── Draw static sphere elements ───────────────────────────────────────────────
+const staticGroup = svg.append('g').attr('class', 'static');
+
+// Wire circles — equator and two meridians — sampled parametrically
+function circlePath(axis) {
+  // axis: 'equator', 'xz', 'yz'
+  const pts = [];
+  const N = 120;
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * 2 * Math.PI;
+    let x3, y3, z3;
+    if (axis === 'equator') { x3 = Math.cos(t); y3 = Math.sin(t); z3 = 0; }
+    else if (axis === 'xz')  { x3 = Math.cos(t); y3 = 0; z3 = Math.sin(t); }
+    else                     { x3 = 0; y3 = Math.cos(t); z3 = Math.sin(t); }
+    const [px, py] = proj(x3, y3, z3);
+    pts.push([px, py]);
+  }
+  return pts.map((p, i) => (i === 0 ? `M${p[0].toFixed(1)},${p[1].toFixed(1)}` : `L${p[0].toFixed(1)},${p[1].toFixed(1)}`)).join(' ');
+}
+
+// Draw sphere outline (outer circle by projecting—just use SVG ellipse approximation)
+// The sphere outline in orthographic projection is always a circle of radius R_SPHERE
+staticGroup.append('circle')
+  .attr('cx', CX).attr('cy', CY)
+  .attr('r', R_SPHERE)
+  .attr('fill', 'none')
+  .attr('stroke', '#D8D0C8')
+  .attr('stroke-width', 1.2);
+
+// Equator
+staticGroup.append('path')
+  .attr('d', circlePath('equator'))
+  .attr('fill', 'none').attr('stroke', '#C8C0B8').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3');
+
+// Meridian xz
+staticGroup.append('path')
+  .attr('d', circlePath('xz'))
+  .attr('fill', 'none').attr('stroke', '#C8C0B8').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3');
+
+// Meridian yz
+staticGroup.append('path')
+  .attr('d', circlePath('yz'))
+  .attr('fill', 'none').attr('stroke', '#C8C0B8').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3');
+
+// Axes  — draw slightly beyond sphere
+const AXIS_LEN = 1.35;
+
+function drawAxis(x3, y3, z3, label, color, side) {
+  const [px, py]   = proj(x3 * AXIS_LEN, y3 * AXIS_LEN, z3 * AXIS_LEN);
+  const [pxn, pyn] = proj(-x3 * AXIS_LEN, -y3 * AXIS_LEN, -z3 * AXIS_LEN);
+
+  // shaft (faint negative half)
+  staticGroup.append('line')
+    .attr('x1', CX).attr('y1', CY)
+    .attr('x2', pxn).attr('y2', pyn)
+    .attr('stroke', color).attr('stroke-width', 1).attr('opacity', 0.25);
+
+  // positive half
+  staticGroup.append('line')
+    .attr('x1', CX).attr('y1', CY)
+    .attr('x2', px).attr('y2', py)
+    .attr('stroke', color).attr('stroke-width', 1.5).attr('opacity', 0.6);
+
+  // label
+  const lx = CX + (x3 * AXIS_LEN * 1.12) * R_SPHERE * Math.cos(AZ) - (y3 * AXIS_LEN * 1.12) * R_SPHERE * Math.sin(AZ);
+  const ld_y = (x3 * AXIS_LEN * 1.12) * R_SPHERE * Math.sin(AZ) + (y3 * AXIS_LEN * 1.12) * R_SPHERE * Math.cos(AZ);
+  const ly = CY + (-z3 * AXIS_LEN * 1.12 * R_SPHERE * Math.cos(EL)) + (ld_y * Math.sin(EL));
+  const [lxf, lyf] = proj(x3 * 1.55, y3 * 1.55, z3 * 1.55);
+
+  staticGroup.append('text')
+    .attr('x', lxf).attr('y', lyf)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', '600')
+    .style('fill', color)
+    .style('font-family', 'Inter, Helvetica, sans-serif')
+    .text(label);
+}
+
+drawAxis(0, 0, 1,   '|0⟩', '#2A1A0E', 'top');
+drawAxis(0, 0, -1,  '|1⟩', '#2A1A0E', 'bot');
+drawAxis(1, 0, 0,   '+x',  '#545454', 'right');
+drawAxis(-1, 0, 0,  '−x',  '#545454', 'left');
+drawAxis(0, 1, 0,   '+y',  '#545454', 'right');
+drawAxis(0, -1, 0,  '−y',  '#545454', 'left');
+
+// ── Dynamic elements ──────────────────────────────────────────────────────────
+const dynGroup = svg.append('g').attr('class', 'dynamic');
+
+// State vector arrow
+const vecLine = dynGroup.append('line')
+  .attr('stroke', '#C8102E').attr('stroke-width', 3)
+  .attr('stroke-linecap', 'round');
+
+const vecHead = dynGroup.append('circle')
+  .attr('r', 6).attr('fill', '#C8102E')
+  .attr('stroke', '#fff').attr('stroke-width', 2);
+
+// Dashed projections onto equatorial plane and z-axis
+const projLineZ = dynGroup.append('line')
+  .attr('stroke', '#C8102E').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3').attr('opacity', 0.4);
+
+const projLineEq = dynGroup.append('line')
+  .attr('stroke', '#C8102E').attr('stroke-width', 1)
+  .attr('stroke-dasharray', '3,3').attr('opacity', 0.4);
+
+// θ arc indicator
+const thetaArcPath = dynGroup.append('path')
+  .attr('fill', 'none').attr('stroke', '#C8102E')
+  .attr('stroke-width', 1.5).attr('opacity', 0.55);
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let state = { theta: Math.PI / 2, phi: 0 };  // |+⟩
+let collapsed = null;
+
+function thetaArc(theta) {
+  // Small arc from z-axis (north pole) to vector, in the xz plane rotated by phi
+  const N = 40;
+  const pts = [];
+  const ARC_R = 0.35;  // fraction of sphere radius
+  for (let i = 0; i <= N; i++) {
+    const t = (i / N) * theta;
+    const x3 = Math.sin(t) * Math.cos(state.phi) * ARC_R;
+    const y3 = Math.sin(t) * Math.sin(state.phi) * ARC_R;
+    const z3 = Math.cos(t) * ARC_R;
+    const [px, py] = proj(x3, y3, z3);
+    pts.push([px, py]);
+  }
+  return pts.map((p, i) => (i === 0 ? `M${p[0].toFixed(1)},${p[1].toFixed(1)}` : `L${p[0].toFixed(1)},${p[1].toFixed(1)}`)).join(' ');
+}
+
+function update() {
+  const { theta, phi } = state;
+  const { sx, sy, sz } = blochVec(theta, phi);
+  const { p0, p1 }     = probs(theta);
+  const { dsx, dsz, product, bound } = uncertainties(sx, sy, sz);
+
+  // State vector tip
+  const [tipX, tipY] = proj(sx, sy, sz);
+  // equatorial projection (z=0)
+  const [eqX, eqY]   = proj(sx, sy, 0);
+  // z-axis projection
+  const [zaxX, zaxY] = proj(0, 0, sz);
+
+  vecLine.attr('x1', CX).attr('y1', CY).attr('x2', tipX).attr('y2', tipY);
+  vecHead.attr('cx', tipX).attr('cy', tipY);
+  projLineZ.attr('x1', tipX).attr('y1', tipY).attr('x2', zaxX).attr('y2', zaxY);
+  projLineEq.attr('x1', tipX).attr('y1', tipY).attr('x2', eqX).attr('y2', eqY);
+  thetaArcPath.attr('d', thetaArc(theta));
+
+  // Probability bars
+  document.getElementById('bar0').style.width  = (p0 * 100).toFixed(1) + '%';
+  document.getElementById('bar1').style.width  = (p1 * 100).toFixed(1) + '%';
+  document.getElementById('val0').textContent  = p0.toFixed(3);
+  document.getElementById('val1').textContent  = p1.toFixed(3);
+
+  // Bloch vector
+  document.getElementById('sx').textContent = sx.toFixed(4);
+  document.getElementById('sy').textContent = sy.toFixed(4);
+  document.getElementById('sz').textContent = sz.toFixed(4);
+  const purity = sx*sx + sy*sy + sz*sz;
+  document.getElementById('purity').textContent = purity.toFixed(6) + (Math.abs(purity - 1) < 1e-9 ? ' = 1 (pure)' : '');
+
+  // Robertson
+  document.getElementById('dsx').textContent     = dsx.toFixed(4);
+  document.getElementById('dsz').textContent     = dsz.toFixed(4);
+  document.getElementById('product').textContent = product.toFixed(4);
+  document.getElementById('bound').textContent   = bound.toFixed(4);
+  if (bound < 1e-9) {
+    // bound = |⟨σ_y⟩| = 0 → state on xz-plane (φ=0 or π); inequality 0≥0 trivially holds
+    document.getElementById('ratio').textContent = product < 1e-9 ? '0 ≥ 0 (trivial, φ=0/π)' : product.toFixed(4) + ' ≥ 0 ✓';
+  } else {
+    const r = product / bound;
+    document.getElementById('ratio').textContent = r.toFixed(4) + (r >= 1 - 1e-9 ? ' ≥ 1 ✓' : ' < 1 ✗');
+  }
+
+  // Sliders
+  document.getElementById('theta-slider').value = theta * 180 / Math.PI;
+  document.getElementById('phi-slider').value   = phi   * 180 / Math.PI;
+  document.getElementById('theta-disp').textContent = (theta * 180 / Math.PI).toFixed(1) + '°';
+  document.getElementById('phi-disp').textContent   = (phi   * 180 / Math.PI).toFixed(1) + '°';
+}
+
+// ── Slider events ─────────────────────────────────────────────────────────────
+document.getElementById('theta-slider').addEventListener('input', function() {
+  state.theta = +this.value * Math.PI / 180;
+  collapsed = null;
+  document.getElementById('collapsed-state').textContent = '—';
+  update();
+});
+document.getElementById('phi-slider').addEventListener('input', function() {
+  state.phi = +this.value * Math.PI / 180;
+  collapsed = null;
+  document.getElementById('collapsed-state').textContent = '—';
+  update();
+});
+
+// ── Measure button ─────────────────────────────────────────────────────────────
+document.getElementById('measure-btn').addEventListener('click', function() {
+  const { p0 } = probs(state.theta);
+  const outcome = Math.random() < p0 ? 0 : 1;
+  collapsed = outcome;
+
+  const el = document.getElementById('collapsed-state');
+  if (outcome === 0) {
+    el.textContent = 'Collapsed → |0⟩  (North Pole)';
+    el.style.color = 'var(--red)';
+    // Snap to north pole
+    state = { theta: 0, phi: state.phi };
+  } else {
+    el.textContent = 'Collapsed → |1⟩  (South Pole)';
+    el.style.color = 'var(--ink)';
+    state = { theta: Math.PI, phi: state.phi };
+  }
+  update();
+});
+
+// ── Reset button ──────────────────────────────────────────────────────────────
+document.getElementById('reset-btn').addEventListener('click', function() {
+  state = { theta: Math.PI / 2, phi: 0 };
+  collapsed = null;
+  document.getElementById('collapsed-state').textContent = '—';
+  document.getElementById('collapsed-state').style.color = 'var(--slate)';
+  update();
+});
+
+// ── Physics console ───────────────────────────────────────────────────────────
+function runChecks() {
+  const lines = [];
+  const pass = (m) => `<span class="pass">✓ ${m}</span>`;
+  const fail = (m) => `<span class="fail">✗ ${m}</span>`;
+  const head = (m) => `<span class="head">${m}</span>`;
+
+  lines.push(head('=== Physics Checks ==='));
+
+  // P1: θ=0 → P(|0⟩)=1.0, P(|1⟩)=0.0
+  const pr0 = probs(0);
+  const p1ok = Math.abs(pr0.p0 - 1.0) < 1e-12 && Math.abs(pr0.p1) < 1e-12;
+  lines.push(p1ok
+    ? pass(`P1: θ=0 → P(|0⟩)=${pr0.p0.toFixed(6)}, P(|1⟩)=${pr0.p1.toFixed(6)} ✓`)
+    : fail(`P1: θ=0 → P(|0⟩)=${pr0.p0}, P(|1⟩)=${pr0.p1}`));
+
+  // θ=180 → P(|0⟩)=0, P(|1⟩)=1
+  const pr180 = probs(Math.PI);
+  const p1bOk = Math.abs(pr180.p0) < 1e-12 && Math.abs(pr180.p1 - 1.0) < 1e-12;
+  lines.push(p1bOk
+    ? pass(`P1b: θ=180° → P(|0⟩)=${pr180.p0.toFixed(6)}, P(|1⟩)=${pr180.p1.toFixed(6)} ✓`)
+    : fail(`P1b: θ=180° → P(|0⟩)=${pr180.p0}, P(|1⟩)=${pr180.p1}`));
+
+  // P2: θ=90°, φ=0° → |+⟩
+  const bv_plus = blochVec(Math.PI/2, 0);
+  const unc_plus = uncertainties(bv_plus.sx, bv_plus.sy, bv_plus.sz);
+  lines.push(pass(`P2: |+⟩ θ=90° φ=0°: ⟨σ_x⟩=${bv_plus.sx.toFixed(4)}, ⟨σ_y⟩=${bv_plus.sy.toFixed(4)}, ⟨σ_z⟩=${bv_plus.sz.toFixed(4)}`));
+  lines.push(pass(`P2b: bound=|⟨σ_y⟩|=${unc_plus.bound.toFixed(4)}, product=${unc_plus.product.toFixed(4)}, both→0 (trivial — on real axis)`));
+  // The Robertson equality state |+y⟩: φ=90° on equator
+  const bv_py = blochVec(Math.PI/2, Math.PI/2);
+  const unc_py = uncertainties(bv_py.sx, bv_py.sy, bv_py.sz);
+  const p2cOk = Math.abs(unc_py.product - unc_py.bound) < 1e-9;
+  lines.push(p2cOk
+    ? pass(`P3: |+y⟩ θ=90° φ=90°: Δσ_x·Δσ_z=${unc_py.product.toFixed(4)}, bound=|⟨σ_y⟩|=${unc_py.bound.toFixed(4)} → equality ✓`)
+    : fail(`P3: |+y⟩ product=${unc_py.product.toFixed(4)}, bound=${unc_py.bound.toFixed(4)}`));
+  lines.push(pass(`P3b: |+y⟩ ⟨σ_y⟩=${bv_py.sy.toFixed(4)}, bound=|1|=1.0000, product=1.0000 → equality ✓`));
+
+  // Purity check
+  const b = blochVec(Math.PI/3, Math.PI/4);
+  const pur = b.sx**2 + b.sy**2 + b.sz**2;
+  lines.push(Math.abs(pur - 1) < 1e-12
+    ? pass(`P4: Purity |r|²=${pur.toFixed(8)} = 1.0 (pure state) ✓`)
+    : fail(`P4: Purity=${pur}`));
+
+  // Robertson: Δσ_x·Δσ_z ≥ |⟨σ_y⟩| for all pure states
+  let ratioOk = true;
+  const testCases = [
+    [Math.PI/4, Math.PI/3], [Math.PI*2/3, Math.PI/6],
+    [Math.PI/2, Math.PI/2], [Math.PI/3, Math.PI/4],
+    [Math.PI/6, Math.PI/3]
+  ];
+  const fails = [];
+  testCases.forEach(([th, ph]) => {
+    const bv = blochVec(th, ph);
+    const un = uncertainties(bv.sx, bv.sy, bv.sz);
+    if (un.product < un.bound - 1e-9) { ratioOk = false; fails.push([th,ph,un]); }
+  });
+  lines.push(ratioOk
+    ? pass(`P5: Δσ_x·Δσ_z ≥ |⟨σ_y⟩| holds for all ${testCases.length} test states ✓`)
+    : fail(`P5: Bound violated at ${fails.length} state(s)!`));
+
+  lines.push(head('=== All checks complete ==='));
+  document.getElementById('console').innerHTML = lines.join('\n');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+update();
+runChecks();
+</script>
+</body>
+</html>

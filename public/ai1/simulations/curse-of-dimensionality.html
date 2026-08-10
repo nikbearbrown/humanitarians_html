@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curse of Dimensionality: Local Becomes Global</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  .subtitle {
+    font-size: 0.78rem;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 20px;
+    max-width: 720px;
+  }
+  .layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  svg text { font-family: 'Montserrat, sans-serif'; }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    background: #f9f9f9;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .ctrl-group { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; }
+  label { font-weight: 600; }
+  input[type=range] { width: 160px; accent-color: #C8102E; }
+  .val-disp { font-weight: 700; color: #C8102E; min-width: 32px; }
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 220px;
+  }
+  table {
+    border-collapse: collapse;
+    font-size: 0.72rem;
+    width: 100%;
+  }
+  th, td {
+    border: 1px solid #D4D4D4;
+    padding: 5px 9px;
+    text-align: right;
+  }
+  th {
+    background: #f5f5f5;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+  }
+  td:first-child { text-align: center; }
+  .highlight-row td { color: #C8102E; font-weight: 700; }
+  .inset-panel {
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    padding: 12px;
+    background: #fff;
+  }
+  .inset-panel h3 { font-size: 0.78rem; font-weight: 700; margin-bottom: 8px; }
+  canvas#squareCanvas { display: block; border: 1px solid #D4D4D4; border-radius: 3px; }
+  .formula-box {
+    background: #f5f5f5;
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    line-height: 1.8;
+    margin-top: 6px;
+  }
+  .formula-box b { color: #C8102E; }
+</style>
+</head>
+<body>
+<h1>Curse of Dimensionality: Local Becomes Global</h1>
+<p class="subtitle">To capture a fixed fraction f of data in p dimensions, you need r = f<sup>1/p</sup> of each axis. In 10D, capturing 10% of data requires reaching 79% of each axis.</p>
+
+<div class="layout">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <svg id="chart" width="600" height="420"></svg>
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Fraction to capture f =</label>
+        <input type="range" id="fSlider" min="0.01" max="0.5" step="0.01" value="0.10">
+        <span class="val-disp" id="fVal">0.10</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="inset-panel">
+      <h3>2D Square Analogy</h3>
+      <canvas id="squareCanvas" width="200" height="200"></canvas>
+      <div style="font-size:0.68rem; color:#545454; margin-top:6px; line-height:1.5;">
+        Circle radius = r(p) at selected f.<br>
+        As p grows, "local" fills the square.
+      </div>
+    </div>
+
+    <div class="inset-panel">
+      <h3>Table: r(p) at f = <span id="tableF">0.10</span></h3>
+      <table>
+        <thead>
+          <tr><th>p</th><th>r = f^(1/p)</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="formula-box">
+      <b>Formula:</b> r = f<sup>1/p</sup><br>
+      f = fraction of data<br>
+      p = dimension<br>
+      r = side-length of hypercube<br>
+      &nbsp;&nbsp;&nbsp;needed (range 0–1)<br><br>
+      <b>At p=10, f=0.1:</b><br>
+      r = 0.1<sup>1/10</sup> = <b>0.794</b>
+    </div>
+  </div>
+</div>
+
+<script>
+const DIMS = d3.range(1, 21); // p=1..20
+const margin = { top: 36, right: 30, bottom: 58, left: 64 };
+const W = 600 - margin.left - margin.right;
+const H = 420 - margin.top - margin.bottom;
+
+const svg = d3.select('#chart')
+  .append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleBand().domain(DIMS).range([0, W]).padding(0.18);
+const yScale = d3.scaleLinear().domain([0, 1.05]).range([H, 0]);
+
+svg.append('g').attr('transform', `translate(0,${H})`).call(d3.axisBottom(xScale).tickFormat(d => d))
+  .selectAll('text').style('font-size', '11px').style('font-family', 'Montserrat, sans-serif');
+svg.append('g').call(d3.axisLeft(yScale).ticks(8).tickFormat(d3.format('.1f')))
+  .selectAll('text').style('font-size', '11px').style('font-family', 'Montserrat, sans-serif');
+
+// Axis labels
+svg.append('text').attr('x', W/2).attr('y', H + 46)
+  .attr('text-anchor', 'middle').style('font-size', '12px').style('font-weight', '600')
+  .text('Dimension p');
+svg.append('text').attr('transform', 'rotate(-90)').attr('x', -H/2).attr('y', -52)
+  .attr('text-anchor', 'middle').style('font-size', '12px').style('font-weight', '600')
+  .text('r = f^(1/p) (axis fraction needed)');
+
+// Half-range reference line
+svg.append('line')
+  .attr('x1', 0).attr('x2', W)
+  .attr('y1', yScale(0.5)).attr('y2', yScale(0.5))
+  .attr('stroke', '#C8102E')
+  .attr('stroke-width', 1.5)
+  .attr('stroke-dasharray', '5,4');
+svg.append('text')
+  .attr('x', W - 4).attr('y', yScale(0.5) - 5)
+  .attr('text-anchor', 'end')
+  .style('font-size', '10px').style('fill', '#C8102E').style('font-weight', '700')
+  .text('r = 0.5 (half axis)');
+
+// Bars
+const bars = svg.selectAll('.bar')
+  .data(DIMS)
+  .enter().append('rect')
+  .attr('class', 'bar')
+  .attr('x', d => xScale(d))
+  .attr('width', xScale.bandwidth())
+  .attr('rx', 2);
+
+// Highlight label for p=10
+const highlightLabel = svg.append('text')
+  .attr('text-anchor', 'middle')
+  .style('font-size', '10px').style('font-weight', '700');
+
+const p10Bar = svg.append('rect')
+  .attr('x', xScale(10)).attr('width', xScale.bandwidth())
+  .attr('rx', 2).attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2);
+
+function update(f) {
+  function r(p) { return Math.pow(f, 1/p); }
+
+  bars.attr('y', d => yScale(r(d)))
+      .attr('height', d => H - yScale(r(d)))
+      .attr('fill', d => {
+        if (d === 10) return '#C8102E';
+        const rval = r(d);
+        if (rval > 0.5) return '#545454';
+        return '#9ab3d4';
+      });
+
+  const r10 = r(10);
+  p10Bar.attr('y', yScale(r10)).attr('height', H - yScale(r10));
+  highlightLabel
+    .attr('x', xScale(10) + xScale.bandwidth() / 2)
+    .attr('y', yScale(r10) - 6)
+    .style('fill', '#C8102E')
+    .text((r10 * 100).toFixed(1) + '%');
+
+  // Update table
+  const tableDims = [1, 2, 4, 10, 20];
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = tableDims.map(p => {
+    const rv = r(p).toFixed(3);
+    const isHl = p === 10;
+    return `<tr${isHl ? ' class="highlight-row"' : ''}><td>${p}</td><td>${rv}</td></tr>`;
+  }).join('');
+  document.getElementById('tableF').textContent = f.toFixed(2);
+
+  // Update square canvas
+  drawSquare(r10);
+}
+
+// Square canvas inset
+const sqCanvas = document.getElementById('squareCanvas');
+const sqCtx = sqCanvas.getContext('2d');
+const SQ = 200;
+
+function drawSquare(r) {
+  sqCtx.clearRect(0, 0, SQ, SQ);
+  // Background square
+  sqCtx.fillStyle = '#f5f5f5';
+  sqCtx.fillRect(0, 0, SQ, SQ);
+  sqCtx.strokeStyle = '#D4D4D4';
+  sqCtx.lineWidth = 1;
+  sqCtx.strokeRect(0, 0, SQ, SQ);
+
+  // Circle centered at origin (mapped to center of square)
+  const cx = SQ / 2, cy = SQ / 2;
+  const radius = r * (SQ / 2);
+
+  sqCtx.beginPath();
+  sqCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  sqCtx.fillStyle = 'rgba(200, 16, 46, 0.20)';
+  sqCtx.fill();
+  sqCtx.strokeStyle = '#C8102E';
+  sqCtx.lineWidth = 2;
+  sqCtx.stroke();
+
+  // Center dot
+  sqCtx.beginPath();
+  sqCtx.arc(cx, cy, 3, 0, Math.PI * 2);
+  sqCtx.fillStyle = '#2A1A0E';
+  sqCtx.fill();
+
+  // Label
+  sqCtx.font = '700 11px Montserrat, sans-serif';
+  sqCtx.fillStyle = '#C8102E';
+  sqCtx.textAlign = 'center';
+  sqCtx.fillText(`r = ${(r).toFixed(3)}`, cx, cy + radius + 16 < SQ - 5 ? cy + radius + 16 : SQ - 8);
+}
+
+document.getElementById('fSlider').addEventListener('input', function() {
+  const f = parseFloat(this.value);
+  document.getElementById('fVal').textContent = f.toFixed(2);
+  update(f);
+});
+
+update(0.10);
+</script>
+</body>
+</html>

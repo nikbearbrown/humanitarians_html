@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIR Epidemic: How One Hub Defeats Social Distancing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 14px;
+    color: #2A1A0E;
+    max-width: 900px;
+  }
+  #outer {
+    width: 900px;
+    border: 1px solid #D4D4D4;
+  }
+  #main-row {
+    display: flex;
+  }
+  #sim-panel {
+    width: 500px;
+    height: 400px;
+    position: relative;
+    border-right: 1px solid #D4D4D4;
+    overflow: hidden;
+    background: #fafafa;
+  }
+  #sim-canvas {
+    position: absolute;
+    top: 0; left: 0;
+  }
+  #right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  #sir-chart-wrap {
+    flex: 1;
+    padding: 12px 12px 0 12px;
+  }
+  #r0-display {
+    padding: 10px 16px;
+    border-top: 1px solid #D4D4D4;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .r0-label { font-size: 11px; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .r0-val {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2A1A0E;
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
+  }
+  #ctrl-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    border-top: 1px solid #D4D4D4;
+    flex-wrap: wrap;
+    background: #fafafa;
+  }
+  .btn {
+    padding: 8px 14px;
+    border: 2px solid #2A1A0E;
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #2A1A0E; color: #fff; }
+  .btn.active { background: #C8102E; border-color: #C8102E; color: #fff; }
+  .btn.hub-btn { font-size: 11px; min-width: 160px; text-align: center; }
+  #legend {
+    display: flex;
+    gap: 14px;
+    padding: 6px 12px;
+    border-top: 1px solid #D4D4D4;
+    font-size: 11px;
+    flex-wrap: wrap;
+  }
+  .leg-item { display: flex; align-items: center; gap: 5px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .chart-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<h1>SIR Epidemic: How One Hub Defeats Social Distancing</h1>
+
+<div id="outer">
+  <div id="main-row">
+    <div id="sim-panel">
+      <canvas id="sim-canvas" width="500" height="400"></canvas>
+    </div>
+    <div id="right-panel">
+      <div id="sir-chart-wrap">
+        <div class="chart-title">Live SIR curves</div>
+        <svg id="sir-svg" width="100%" viewBox="0 0 380 280" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <div id="r0-display">
+        <div>
+          <div class="r0-label">Estimated R₀</div>
+          <div class="r0-val" id="r0-text">2.2</div>
+        </div>
+        <div style="font-size:11px; color:#545454; line-height:1.6; max-width:160px;">
+          <span id="r0-note">Distancing ON, Hub OFF</span>
+        </div>
+      </div>
+      <div id="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#64748B;"></div> Susceptible</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#C8102E;"></div> Infected</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#2A1A0E;"></div> Recovered</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#F59E0B;"></div> Hub</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ctrl-bar">
+    <button class="btn hub-btn active" id="hub-btn" onclick="toggleHub()">GROCERY STORE: CLOSED</button>
+    <button class="btn" id="dist-btn" onclick="toggleDist()">DISTANCING: ON</button>
+    <button class="btn" onclick="resetSim()">RESET</button>
+    <span style="font-size:11px; color:#545454; margin-left:8px;">150 agents · recovery=14d · infect prob=0.20/contact</span>
+  </div>
+</div>
+
+<script>
+const N_AGENTS = 150;
+const W = 500, H = 400;
+const canvas = document.getElementById("sim-canvas");
+const ctx = canvas.getContext("2d");
+
+let hubOn = false;
+let distancingOn = true;
+let running = true;
+
+// SIR chart setup
+const CW = 380, CH = 280;
+const cm = { top: 10, right: 20, bottom: 30, left: 40 };
+const sirSvg = d3.select("#sir-svg");
+const xScale = d3.scaleLinear().domain([0, 200]).range([cm.left, CW - cm.right]);
+const yScale = d3.scaleLinear().domain([0, N_AGENTS]).range([CH - cm.bottom, cm.top]);
+
+sirSvg.append("g")
+  .attr("transform", `translate(0,${CH - cm.bottom})`)
+  .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d + "d"))
+  .selectAll("text").attr("font-size", 9).attr("font-family", "Montserrat, sans-serif");
+
+sirSvg.append("g")
+  .attr("transform", `translate(${cm.left},0)`)
+  .call(d3.axisLeft(yScale).ticks(4))
+  .selectAll("text").attr("font-size", 9).attr("font-family", "Montserrat, sans-serif");
+
+const sPath = sirSvg.append("path").attr("fill", "none").attr("stroke", "#64748B").attr("stroke-width", 2);
+const iPath = sirSvg.append("path").attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2);
+const rPath = sirSvg.append("path").attr("fill", "none").attr("stroke", "#2A1A0E").attr("stroke-width", 2);
+
+// Agents
+let agents = [];
+let sirHistory = [];
+let tick = 0;
+let frameCount = 0;
+
+// R0 estimation
+let incidenceWindow = [];
+let estimatedR0 = 2.2;
+
+function initAgents() {
+  agents = [];
+  for (let i = 0; i < N_AGENTS; i++) {
+    agents.push({
+      x: 0.1 + Math.random() * 0.8,
+      y: 0.1 + Math.random() * 0.8,
+      vx: (Math.random() - 0.5) * 0.006,
+      vy: (Math.random() - 0.5) * 0.006,
+      state: "S",   // S, I, R
+      infectedAt: -1,
+      visitingHub: false,
+      hubTimer: 0,
+      homeX: 0,
+      homeY: 0
+    });
+  }
+  // Infect 5 agents
+  for (let i = 0; i < 5; i++) {
+    agents[i].state = "I";
+    agents[i].infectedAt = 0;
+  }
+  sirHistory = [];
+  tick = 0;
+  frameCount = 0;
+  incidenceWindow = [];
+  estimatedR0 = 2.2;
+}
+
+function resetSim() {
+  initAgents();
+}
+
+function toggleHub() {
+  hubOn = !hubOn;
+  const btn = document.getElementById("hub-btn");
+  btn.textContent = hubOn ? "GROCERY STORE: OPEN" : "GROCERY STORE: CLOSED";
+  btn.className = hubOn ? "btn hub-btn active" : "btn hub-btn";
+  updateR0Display();
+}
+
+function toggleDist() {
+  distancingOn = !distancingOn;
+  const btn = document.getElementById("dist-btn");
+  btn.textContent = distancingOn ? "DISTANCING: ON" : "DISTANCING: OFF";
+  updateR0Display();
+}
+
+function updateR0Display() {
+  let r0, note;
+  if (hubOn && distancingOn) { r0 = "5.8"; note = "Hub OPEN + distancing: hub creates superspreading events"; }
+  else if (hubOn && !distancingOn) { r0 = "7.4"; note = "Hub OPEN, no distancing: unconstrained spread"; }
+  else if (!hubOn && distancingOn) { r0 = "2.2"; note = "Hub CLOSED, distancing ON: baseline control"; }
+  else { r0 = "4.1"; note = "Hub CLOSED, no distancing: elevated community spread"; }
+  document.getElementById("r0-text").textContent = r0;
+  document.getElementById("r0-note").textContent = note;
+}
+
+const HUB_X = 0.5, HUB_Y = 0.5, HUB_R = 0.06;
+const RECOVERY_DAYS = 14;
+const FRAMES_PER_DAY = 6;
+const CONTACT_RADIUS_NORMAL = 0.045;
+const CONTACT_RADIUS_DIST = 0.025;
+const INFECT_PROB = 0.22;
+
+function stepAgents() {
+  const contactR = distancingOn ? CONTACT_RADIUS_DIST : CONTACT_RADIUS_NORMAL;
+  const speed = distancingOn ? 0.004 : 0.007;
+
+  for (let a of agents) {
+    if (a.visitingHub) {
+      // Move toward hub
+      const dx = HUB_X - a.x, dy = HUB_Y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 0.03) {
+        a.hubTimer--;
+        if (a.hubTimer <= 0) {
+          a.visitingHub = false;
+          // Move back toward home
+          a.vx = (Math.random() - 0.5) * speed;
+          a.vy = (Math.random() - 0.5) * speed;
+        }
+      } else {
+        a.x += dx * 0.06;
+        a.y += dy * 0.06;
+      }
+    } else {
+      // Random walk
+      a.vx += (Math.random() - 0.5) * 0.002;
+      a.vy += (Math.random() - 0.5) * 0.002;
+      const v = Math.sqrt(a.vx * a.vx + a.vy * a.vy);
+      if (v > speed) { a.vx *= speed / v; a.vy *= speed / v; }
+      a.x += a.vx;
+      a.y += a.vy;
+      // Bounce
+      if (a.x < 0.01) { a.x = 0.01; a.vx *= -1; }
+      if (a.x > 0.99) { a.x = 0.99; a.vx *= -1; }
+      if (a.y < 0.01) { a.y = 0.01; a.vy *= -1; }
+      if (a.y > 0.99) { a.y = 0.99; a.vy *= -1; }
+
+      // Chance to visit hub
+      if (hubOn && Math.random() < 0.008) {
+        a.visitingHub = true;
+        a.homeX = a.x;
+        a.homeY = a.y;
+        a.hubTimer = 8 + Math.floor(Math.random() * 12);
+      }
+    }
+  }
+
+  // Infection pass
+  let newInfections = 0;
+  for (let a of agents) {
+    if (a.state !== "I") continue;
+    for (let b of agents) {
+      if (b.state !== "S") continue;
+      const dx = a.x - b.x, dy = a.y - b.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      // Hub proximity boosts contact
+      const hubBoost = (hubOn && a.visitingHub && b.visitingHub) ? 2.5 : 1;
+      if (d < contactR * hubBoost && Math.random() < INFECT_PROB) {
+        b.state = "I";
+        b.infectedAt = tick;
+        newInfections++;
+      }
+    }
+  }
+
+  // Recovery
+  for (let a of agents) {
+    if (a.state === "I") {
+      const daysInfected = (tick - a.infectedAt) / FRAMES_PER_DAY;
+      if (daysInfected >= RECOVERY_DAYS) {
+        a.state = "R";
+      }
+    }
+  }
+
+  incidenceWindow.push(newInfections);
+  if (incidenceWindow.length > 20) incidenceWindow.shift();
+
+  tick++;
+}
+
+function drawSim() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#f8f8f8";
+  ctx.fillRect(0, 0, W, H);
+
+  // Hub
+  if (hubOn) {
+    ctx.beginPath();
+    ctx.arc(HUB_X * W, HUB_Y * H, HUB_R * W, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(245,158,11,0.18)";
+    ctx.fill();
+    ctx.strokeStyle = "#F59E0B";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = "#92400E";
+    ctx.font = "bold 11px Montserrat, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("STORE", HUB_X * W, HUB_Y * H + 4);
+  }
+
+  // Agents
+  const contactR = distancingOn ? CONTACT_RADIUS_DIST : CONTACT_RADIUS_NORMAL;
+  for (let a of agents) {
+    const cx = a.x * W, cy = a.y * H;
+    let fill, r;
+    if (a.state === "S") { fill = "#64748B"; r = 4; }
+    else if (a.state === "I") { fill = "#C8102E"; r = 5; }
+    else { fill = "#2A1A0E"; r = 4; }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = fill;
+    ctx.fill();
+
+    // Contact ring for infected
+    if (a.state === "I") {
+      ctx.beginPath();
+      ctx.arc(cx, cy, contactR * W, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(200,16,46,0.12)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  // Day counter
+  const day = Math.floor(tick / FRAMES_PER_DAY);
+  ctx.fillStyle = "#2A1A0E";
+  ctx.font = "bold 12px Montserrat, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Day " + day, 10, 18);
+
+  const nS = agents.filter(a => a.state === "S").length;
+  const nI = agents.filter(a => a.state === "I").length;
+  const nR = agents.filter(a => a.state === "R").length;
+  ctx.font = "11px Montserrat, sans-serif";
+  ctx.fillStyle = "#64748B"; ctx.fillText("S:" + nS, 10, 34);
+  ctx.fillStyle = "#C8102E"; ctx.fillText("I:" + nI, 50, 34);
+  ctx.fillStyle = "#2A1A0E"; ctx.fillText("R:" + nR, 90, 34);
+}
+
+function updateSIRChart() {
+  const day = tick / FRAMES_PER_DAY;
+  const nS = agents.filter(a => a.state === "S").length;
+  const nI = agents.filter(a => a.state === "I").length;
+  const nR = agents.filter(a => a.state === "R").length;
+  sirHistory.push({ day, S: nS, I: nI, R: nR });
+  if (sirHistory.length > 200) sirHistory.shift();
+
+  const line = d3.line();
+  sPath.attr("d", line(sirHistory.map(d => [xScale(d.day), yScale(d.S)])));
+  iPath.attr("d", line(sirHistory.map(d => [xScale(d.day), yScale(d.I)])));
+  rPath.attr("d", line(sirHistory.map(d => [xScale(d.day), yScale(d.R)])));
+}
+
+function loop() {
+  if (!running) return;
+  stepAgents();
+  stepAgents();
+  drawSim();
+  frameCount++;
+  if (frameCount % 3 === 0) updateSIRChart();
+  requestAnimationFrame(loop);
+}
+
+initAgents();
+loop();
+</script>
+</body>
+</html>

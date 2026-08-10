@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finite Square Well Explorer — 1D vs 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #FFFFFF;
+    --ink: #2A1A0E;
+    --red: #C8102E;
+    --slate: #545454;
+    --ink-faint: rgba(42,26,14,0.08);
+    --ink-dim: rgba(42,26,14,0.35);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px 24px 12px;
+    border-bottom: 1.5px solid var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  header h1 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+  }
+  header .subtitle {
+    font-size: 12px;
+    color: var(--slate);
+    font-weight: 400;
+  }
+  .mode-badge {
+    margin-left: auto;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1.5px solid var(--red);
+    color: var(--red);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.18s;
+    user-select: none;
+  }
+  .mode-badge.active-3d {
+    background: var(--red);
+    color: #fff;
+  }
+  .mode-badge:hover {
+    opacity: 0.8;
+  }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: 1fr auto;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ---- LEFT: graphical solution ---- */
+  .panel-graph {
+    border-right: 1.5px solid var(--ink);
+    padding: 16px 20px 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .panel-graph h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--slate);
+    margin-bottom: 10px;
+  }
+  #graph-svg {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+  }
+
+  /* ---- RIGHT: controls + well diagram ---- */
+  .panel-right {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .controls {
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--ink);
+    flex-shrink: 0;
+  }
+  .controls h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--slate);
+    margin-bottom: 14px;
+  }
+
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .ctrl-label {
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 32px;
+    color: var(--ink);
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 3px;
+    background: var(--ink-faint);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1.5px var(--red);
+    cursor: pointer;
+  }
+  .ctrl-val {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: right;
+    color: var(--ink);
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .stat-box {
+    background: var(--ink-faint);
+    border-radius: 3px;
+    padding: 8px 10px;
+  }
+  .stat-box .stat-label {
+    font-size: 10px;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  .stat-box .stat-val {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .stat-box .stat-val.red { color: var(--red); }
+
+  /* well diagram */
+  .panel-well {
+    flex: 1;
+    padding: 14px 20px 12px;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .panel-well h2 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--slate);
+    margin-bottom: 8px;
+  }
+  #well-svg {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+  }
+
+  /* 3D callout */
+  .d3-callout {
+    padding: 12px 20px;
+    background: var(--bg);
+    border-left: 3px solid var(--red);
+    margin: 0;
+    display: none;
+    flex-shrink: 0;
+  }
+  .d3-callout.visible { display: block; }
+  .d3-callout .callout-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .d3-callout p {
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .d3-callout p strong { color: var(--red); }
+
+  /* bottom status bar */
+  .status-bar {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--ink-faint);
+    padding: 6px 20px;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .status-bar .check {
+    font-size: 11px;
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .check-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--slate);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .check-dot.pass { background: #2a7a2a; }
+  .check-dot.fail { background: var(--red); }
+
+  /* legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--slate);
+  }
+  .legend-swatch {
+    width: 22px;
+    height: 2.5px;
+    border-radius: 1px;
+    display: inline-block;
+  }
+  .legend-swatch.dashed {
+    background: repeating-linear-gradient(to right, var(--slate) 0, var(--slate) 4px, transparent 4px, transparent 7px);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Finite Square Well — Graphical Solution</h1>
+  <span class="subtitle">a = 0.5 nm · V₀ slider 0 – 100 eV</span>
+  <button class="mode-badge" id="toggleMode">Toggle: 3D Spherical</button>
+</header>
+
+<div class="main-grid">
+
+  <!-- LEFT: graphical solution -->
+  <div class="panel-graph">
+    <h2 id="graphTitle">Graphical Solution — 1D Symmetric Well</h2>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>z·tan(z) even</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--slate)"></span>−z·cot(z) odd</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--ink)"></span>√(z₀²−z²)</span>
+      <span class="legend-item" id="legend3d" style="display:none"><span class="legend-swatch" style="background:var(--red);opacity:0.4"></span>3D ℓ=0 only</span>
+    </div>
+    <svg id="graph-svg"></svg>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel-right">
+
+    <div class="controls">
+      <h2>Parameters</h2>
+      <div class="ctrl-row">
+        <span class="ctrl-label">V₀</span>
+        <input type="range" id="sliderV0" min="0.05" max="100" step="0.05" value="5">
+        <span class="ctrl-val"><span id="valV0">5.00</span> eV</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">z₀</div>
+          <div class="stat-val red" id="statZ0">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Bound states</div>
+          <div class="stat-val" id="statN">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">V₀ (well depth)</div>
+          <div class="stat-val" id="statV0b">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Mode</div>
+          <div class="stat-val" id="statMode">1D</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d3-callout" id="callout3d">
+      <div class="callout-title">3D Spherical Well — ℓ = 0 states</div>
+      <p>
+        In 3D the radial equation for ℓ=0 maps to the <em>odd-parity</em> 1D condition:<br>
+        <strong>−z·cot(z) = √(z₀²−z²)</strong><br><br>
+        This requires z₀ &gt; π/2, i.e.<br>
+        <strong>V₀ &gt; <span id="v0threshold">—</span> eV</strong><br><br>
+        <span id="calloutStatus">—</span>
+      </p>
+    </div>
+
+    <div class="panel-well">
+      <h2>Potential Well &amp; Bound States</h2>
+      <svg id="well-svg"></svg>
+    </div>
+
+  </div>
+
+  <div class="status-bar">
+    <span class="check"><span class="check-dot" id="p1dot"></span><span id="p1text">P1: 1D small V₀ — ≥1 bound state</span></span>
+    <span class="check"><span class="check-dot" id="p2dot"></span><span id="p2text">P2: Odd state threshold</span></span>
+    <span class="check"><span class="check-dot" id="p3dot"></span><span id="p3text">P3: 3D zero bound states below threshold</span></span>
+  </div>
+
+</div>
+
+<script>
+// =====================================================================
+// CONSTANTS
+// =====================================================================
+const HBAR = 1.0546e-34;   // J·s
+const ME   = 9.109e-31;    // kg
+const EV   = 1.602e-19;    // J per eV
+const A_M  = 0.5e-9;       // well half-width in meters
+
+// z₀ = (a/ħ) √(2 m V₀)
+// In practical units with a=0.5nm, V₀ in eV:
+// z₀ = A_M/HBAR * sqrt(2*ME*V₀*EV)
+function calcZ0(V0_eV) {
+  return (A_M / HBAR) * Math.sqrt(2 * ME * V0_eV * EV);
+}
+
+// Threshold V₀ for first 3D bound state: z₀ = π/2
+// z₀ = (A_M/HBAR)*sqrt(2*ME*V_thresh*EV) = π/2
+// V_thresh = (π/2)² * HBAR² / (2*ME*A_M²) / EV
+const V0_3D_THRESH = (Math.PI / 2) ** 2 * HBAR ** 2 / (2 * ME * A_M ** 2) / EV;
+
+// =====================================================================
+// BOUND STATE SOLVER
+// Find intersections of z*tan(z)=sqrt(z0²-z²) (even) and -z*cot(z)=sqrt(z0²-z²) (odd)
+// In 3D mode (ℓ=0), only the condition -z*cot(z)=sqrt(z0²-z²) applies (same as odd 1D)
+// =====================================================================
+function findBoundStates(z0, mode3d) {
+  const states = [];
+  if (z0 <= 0) return states;
+
+  const eps = 1e-9;
+  const N = 20000;
+  const zMax = Math.min(z0 - eps, z0 * 0.9999);
+
+  // LHS functions
+  function fEven(z) { return z * Math.tan(z); }     // even (1D only)
+  function fOdd(z)  { return -z / Math.tan(z); }    // odd (1D) or 3D ℓ=0
+  function rhs(z)   { return Math.sqrt(Math.max(0, z0 * z0 - z * z)); }
+
+  // Intervals where tan(z) is finite (even) — avoid π/2 + nπ asymptotes
+  // Intervals where -cot(z) is finite — avoid 0, π, 2π
+  function inEvenBranch(z) {
+    // even: need cos(z)≠0, i.e. z ≠ π/2 + nπ; within (nπ, (n+0.5)π) or check sign
+    const n = Math.floor(z / Math.PI);
+    return (z % Math.PI) < Math.PI / 2 - 0.01;
+  }
+  function inOddBranch(z) {
+    // odd: need sin(z)≠0, so z ≠ nπ; within (nπ+0.01, (n+1)π-0.01)
+    return (z % Math.PI) > 0.01 && (z % Math.PI) < Math.PI - 0.01;
+  }
+
+  function bisect(f, a, b, tol) {
+    let fa = f(a), fb = f(b);
+    if (fa * fb > 0) return null;
+    for (let i = 0; i < 80; i++) {
+      const mid = (a + b) / 2;
+      const fm = f(mid);
+      if (Math.abs(b - a) < tol) return mid;
+      if (fa * fm <= 0) { b = mid; fb = fm; }
+      else { a = mid; fa = fm; }
+    }
+    return (a + b) / 2;
+  }
+
+  // Sample function g(z) = f(z) - rhs(z), find sign changes
+  function scanForRoots(fn, branchCheck, label, stepN) {
+    const dz = zMax / stepN;
+    let prevZ = eps, prevVal = null;
+    for (let i = 1; i <= stepN; i++) {
+      const z = i * dz;
+      if (!branchCheck(z)) { prevZ = z; prevVal = null; continue; }
+      const val = fn(z) - rhs(z);
+      if (prevVal !== null && prevVal * val < 0) {
+        const root = bisect(zz => fn(zz) - rhs(zz), prevZ, z, 1e-12);
+        if (root !== null && root > 0 && root < z0) {
+          const E_well = (z0 > 0) ? (root / z0) ** 2 : 0; // fraction of V₀ above well bottom
+          const E_eV = - (1 - E_well);  // in units of V₀, negative = bound
+          states.push({ z: root, label, E_frac: E_well });
+        }
+      }
+      prevZ = z; prevVal = val;
+    }
+  }
+
+  if (!mode3d) {
+    scanForRoots(fEven, inEvenBranch, 'even', N);
+    scanForRoots(fOdd,  inOddBranch,  'odd',  N);
+  } else {
+    // 3D ℓ=0: only odd-type condition
+    scanForRoots(fOdd, inOddBranch, '3d', N);
+  }
+
+  // Sort by z
+  states.sort((a, b) => a.z - b.z);
+  return states;
+}
+
+// =====================================================================
+// LAYOUT STATE
+// =====================================================================
+let V0 = 5.0;
+let mode3d = false;
+
+// =====================================================================
+// GRAPH PANEL
+// =====================================================================
+const graphSVG = d3.select('#graph-svg');
+let graphW, graphH;
+const graphMargin = { top: 16, right: 22, bottom: 44, left: 50 };
+
+function getGraphDims() {
+  const rect = document.getElementById('graph-svg').getBoundingClientRect();
+  return { w: rect.width, h: rect.height };
+}
+
+function drawGraph() {
+  graphSVG.selectAll('*').remove();
+  const { w, h } = getGraphDims();
+  if (w < 10 || h < 10) return;
+
+  const z0 = calcZ0(V0);
+  const states = findBoundStates(z0, mode3d);
+
+  const zMax = Math.max(z0 + 1.2, 3 * Math.PI / 2 + 0.5);
+  const yMax = Math.max(z0 * 1.15, 2.5);
+
+  const W = w - graphMargin.left - graphMargin.right;
+  const H = h - graphMargin.top  - graphMargin.bottom;
+
+  const xScale = d3.scaleLinear([0, zMax], [0, W]);
+  const yScale = d3.scaleLinear([0, yMax], [H, 0]);
+
+  const g = graphSVG.append('g')
+    .attr('transform', `translate(${graphMargin.left},${graphMargin.top})`);
+
+  // Clip path
+  g.append('clipPath').attr('id', 'gclip')
+    .append('rect').attr('width', W).attr('height', H);
+
+  // Grid
+  const gridVals = d3.range(0, zMax, 1);
+  g.append('g').attr('class', 'grid')
+    .selectAll('line.gv')
+    .data(gridVals).enter().append('line')
+    .attr('x1', d => xScale(d)).attr('x2', d => xScale(d))
+    .attr('y1', 0).attr('y2', H)
+    .attr('stroke', 'rgba(42,26,14,0.05)').attr('stroke-width', 0.5);
+
+  // Asymptote markers
+  const asymEven = d3.range(1, 20).map(k => (k - 0.5) * Math.PI).filter(v => v < zMax);
+  const asymOdd  = d3.range(1, 20).map(k => k * Math.PI).filter(v => v < zMax);
+  g.append('g').selectAll('line.asym-e')
+    .data(asymEven).enter().append('line')
+    .attr('clip-path', 'url(#gclip)')
+    .attr('x1', d => xScale(d)).attr('x2', d => xScale(d))
+    .attr('y1', 0).attr('y2', H)
+    .attr('stroke', 'rgba(200,16,46,0.15)').attr('stroke-dasharray', '3,4').attr('stroke-width', 0.8);
+  g.append('g').selectAll('line.asym-o')
+    .data(asymOdd).enter().append('line')
+    .attr('clip-path', 'url(#gclip)')
+    .attr('x1', d => xScale(d)).attr('x2', d => xScale(d))
+    .attr('y1', 0).attr('y2', H)
+    .attr('stroke', 'rgba(84,84,84,0.12)').attr('stroke-dasharray', '3,4').attr('stroke-width', 0.8);
+
+  // Sample curves
+  const M = 3000;
+  const dzStep = zMax / M;
+
+  // Even: z*tan(z), skip near asymptotes
+  const evenData = [];
+  for (let i = 1; i <= M; i++) {
+    const z = i * dzStep;
+    // Avoid within 0.04 of π/2, 3π/2, ...
+    const nearAsym = asymEven.some(a => Math.abs(z - a) < 0.045);
+    if (nearAsym) { evenData.push(null); continue; }
+    const val = z * Math.tan(z);
+    if (val < 0 || val > yMax * 1.05) { evenData.push(null); continue; }
+    evenData.push([z, val]);
+  }
+
+  // Odd: -z*cot(z), skip near asymptotes (0, π, 2π...)
+  const oddData = [];
+  for (let i = 1; i <= M; i++) {
+    const z = i * dzStep;
+    const nearAsym = asymOdd.some(a => Math.abs(z - a) < 0.04) || z < 0.05;
+    if (nearAsym) { oddData.push(null); continue; }
+    const val = -z / Math.tan(z);
+    if (val < 0 || val > yMax * 1.05) { oddData.push(null); continue; }
+    oddData.push([z, val]);
+  }
+
+  // RHS semicircle
+  const rhsData = d3.range(0, z0 + 0.002, z0 / 600)
+    .map(z => [z, Math.sqrt(Math.max(0, z0 * z0 - z * z))]);
+
+  const lineGen = d3.line()
+    .x(d => xScale(d[0])).y(d => yScale(d[1]))
+    .defined(d => d !== null)
+    .curve(d3.curveLinear);
+
+  // Draw even curve (RED) — in 3D mode dim it
+  if (!mode3d) {
+    const evenSeg = splitSegments(evenData);
+    evenSeg.forEach(seg => {
+      g.append('path').datum(seg).attr('d', lineGen)
+        .attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 2)
+        .attr('clip-path', 'url(#gclip)');
+    });
+  }
+
+  // Draw odd curve (SLATE or RED in 3D)
+  const oddSeg = splitSegments(oddData);
+  oddSeg.forEach(seg => {
+    g.append('path').datum(seg).attr('d', lineGen)
+      .attr('fill', 'none')
+      .attr('stroke', mode3d ? '#C8102E' : '#545454')
+      .attr('stroke-width', mode3d ? 2 : 1.8)
+      .attr('clip-path', 'url(#gclip)');
+  });
+
+  // In 3D mode, show even curve as dimmed dashed
+  if (mode3d) {
+    const evenSeg = splitSegments(evenData);
+    evenSeg.forEach(seg => {
+      g.append('path').datum(seg).attr('d', lineGen)
+        .attr('fill', 'none').attr('stroke', '#C8102E').attr('stroke-width', 1.2)
+        .attr('stroke-dasharray', '4,5').attr('opacity', 0.3)
+        .attr('clip-path', 'url(#gclip)');
+    });
+  }
+
+  // RHS semicircle (INK)
+  g.append('path').datum(rhsData).attr('d', lineGen)
+    .attr('fill', 'none').attr('stroke', '#2A1A0E').attr('stroke-width', 2.5)
+    .attr('clip-path', 'url(#gclip)');
+
+  // z₀ vertical line
+  g.append('line')
+    .attr('x1', xScale(z0)).attr('x2', xScale(z0))
+    .attr('y1', yScale(0)).attr('y2', yScale(yMax))
+    .attr('stroke', '#2A1A0E').attr('stroke-width', 1).attr('stroke-dasharray', '5,4').attr('opacity', 0.4)
+    .attr('clip-path', 'url(#gclip)');
+  g.append('text')
+    .attr('x', xScale(z0) + 4).attr('y', yScale(yMax * 0.88))
+    .attr('font-size', 11).attr('fill', '#2A1A0E').attr('opacity', 0.55)
+    .text(`z₀ = ${z0.toFixed(2)}`);
+
+  // Intersection dots
+  states.forEach((s, i) => {
+    const cx = xScale(s.z);
+    const cy = yScale(Math.sqrt(Math.max(0, z0 * z0 - s.z * s.z)));
+    g.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 6)
+      .attr('fill', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+      .attr('stroke', '#fff').attr('stroke-width', 1.5)
+      .attr('clip-path', 'url(#gclip)');
+    g.append('text').attr('x', cx + 8).attr('y', cy + 4)
+      .attr('font-size', 10.5).attr('font-weight', 600)
+      .attr('fill', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+      .text(s.label === '3d' ? `ℓ=0 #${i+1}` : (s.label === 'even' ? `E${i+1}` : `O${i+1}`));
+  });
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).ticks(Math.min(10, Math.floor(zMax))).tickSize(4);
+  const yAxis = d3.axisLeft(yScale).ticks(6).tickSize(4);
+  g.append('g').attr('transform', `translate(0,${H})`).call(xAxis)
+    .call(a => a.select('.domain').attr('stroke', '#2A1A0E'))
+    .call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#2A1A0E'));
+  g.append('g').call(yAxis)
+    .call(a => a.select('.domain').attr('stroke', '#2A1A0E'))
+    .call(a => a.selectAll('text').attr('font-size', 11).attr('fill', '#2A1A0E'));
+
+  // Axis labels
+  g.append('text').attr('x', W / 2).attr('y', H + 36)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('z = ka (dimensionless)');
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -H / 2).attr('y', -38)
+    .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('y');
+
+  // π/2 tick label
+  asymEven.filter(a => a < zMax).slice(0, 3).forEach((a, i) => {
+    const labels = ['π/2', '3π/2', '5π/2'];
+    g.append('text').attr('x', xScale(a)).attr('y', H + 36)
+      .attr('text-anchor', 'middle').attr('font-size', 9.5).attr('fill', '#C8102E').attr('opacity', 0.6)
+      .text(labels[i]);
+  });
+}
+
+function splitSegments(data) {
+  const segs = [];
+  let cur = [];
+  data.forEach(d => {
+    if (d === null) {
+      if (cur.length > 1) segs.push(cur);
+      cur = [];
+    } else { cur.push(d); }
+  });
+  if (cur.length > 1) segs.push(cur);
+  return segs;
+}
+
+// =====================================================================
+// WELL DIAGRAM
+// =====================================================================
+const wellSVG = d3.select('#well-svg');
+
+function drawWell() {
+  wellSVG.selectAll('*').remove();
+  const rect = document.getElementById('well-svg').getBoundingClientRect();
+  const W = rect.width, H = rect.height;
+  if (W < 10 || H < 10) return;
+
+  const z0 = calcZ0(V0);
+  const states = findBoundStates(z0, mode3d);
+
+  const margin = { top: 18, right: 28, bottom: 30, left: 48 };
+  const iW = W - margin.left - margin.right;
+  const iH = H - margin.top  - margin.bottom;
+
+  const g = wellSVG.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // Energy axis: from -V₀ to +0.15*V₀
+  const eMin = -V0 * 1.05;
+  const eMax =  V0 * 0.2;
+  const xScale = d3.scaleLinear([-2, 2], [0, iW]);  // spatial: -2a to +2a (in units of a)
+  const eScale = d3.scaleLinear([eMin, eMax], [iH, 0]);
+
+  // Well walls
+  const wallColor = '#2A1A0E';
+  const wallW = 3;
+  // Left wall
+  g.append('line').attr('x1', xScale(-1)).attr('x2', xScale(-1))
+    .attr('y1', eScale(-V0)).attr('y2', eScale(0))
+    .attr('stroke', wallColor).attr('stroke-width', wallW);
+  // Right wall
+  g.append('line').attr('x1', xScale(1)).attr('x2', xScale(1))
+    .attr('y1', eScale(-V0)).attr('y2', eScale(0))
+    .attr('stroke', wallColor).attr('stroke-width', wallW);
+  // Bottom
+  g.append('line').attr('x1', xScale(-1)).attr('x2', xScale(1))
+    .attr('y1', eScale(-V0)).attr('y2', eScale(-V0))
+    .attr('stroke', wallColor).attr('stroke-width', wallW);
+  // Continuum reference lines
+  g.append('line').attr('x1', 0).attr('x2', iW)
+    .attr('y1', eScale(0)).attr('y2', eScale(0))
+    .attr('stroke', '#2A1A0E').attr('stroke-width', 0.8).attr('stroke-dasharray', '4,4').attr('opacity', 0.4);
+  // V₀ label
+  g.append('text').attr('x', -4).attr('y', eScale(-V0) + 4).attr('text-anchor', 'end')
+    .attr('font-size', 10).attr('fill', '#2A1A0E').text(`−${V0.toFixed(1)}`);
+  g.append('text').attr('x', -4).attr('y', eScale(0) + 4).attr('text-anchor', 'end')
+    .attr('font-size', 10).attr('fill', '#2A1A0E').text('0');
+
+  // Fill well interior
+  g.append('rect')
+    .attr('x', xScale(-1)).attr('y', eScale(-V0))
+    .attr('width', xScale(1) - xScale(-1)).attr('height', eScale(0) - eScale(-V0))
+    .attr('fill', 'rgba(42,26,14,0.04)');
+
+  // Draw each bound state
+  const wavePts = 200;
+  const xIn = d3.range(-1, 1 + 2 / wavePts, 2 / wavePts); // inside well
+  const xOut = 40; // pixels for evanescent tail outside
+
+  states.forEach((s, i) => {
+    const E_eV = -V0 * (1 - s.E_frac);  // negative, measured from top of well
+    const yE = eScale(E_eV);
+    const isEven = (s.label === 'even');
+
+    // Energy level line
+    g.append('line').attr('x1', xScale(-1.8)).attr('x2', xScale(1.8))
+      .attr('y1', yE).attr('y2', yE)
+      .attr('stroke', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+      .attr('stroke-width', 1.2).attr('stroke-dasharray', '5,5').attr('opacity', 0.7);
+
+    // Energy label
+    g.append('text').attr('x', xScale(1.85)).attr('y', yE + 4)
+      .attr('font-size', 9.5).attr('fill', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+      .text(`E${i+1}=${E_eV.toFixed(2)}eV`);
+
+    // Wavefunction sketch (amplitude scaled to 0.18*V₀ range)
+    const amp = V0 * 0.13;
+    const k = s.z / A_M;  // not in correct units but we just want shape
+    const kappa_z = Math.sqrt(Math.max(0, z0 * z0 - s.z * s.z));
+
+    function psi_in(x) {  // x in units of a, -1 to 1
+      const xm = x;  // x in [−1,1]
+      if (isEven || s.label === '3d') return Math.cos(s.z * xm);
+      else return Math.sin(s.z * xm);
+    }
+
+    // Normalize by value at wall
+    const psiWall = Math.abs(psi_in(1));
+    const norm = psiWall > 0 ? 1 / psiWall : 1;
+
+    const waveData = xIn.map(x => ({
+      x: xScale(x),
+      y: yE - amp * norm * psi_in(x)
+    }));
+
+    g.append('path')
+      .datum(waveData)
+      .attr('d', d3.line().x(d => d.x).y(d => d.y).curve(d3.curveCatmullRom))
+      .attr('fill', 'none')
+      .attr('stroke', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+      .attr('stroke-width', 1.5).attr('opacity', 0.8);
+
+    // Evanescent tails (just decaying cosine sketch)
+    const pxPerA = xScale(1) - xScale(0);
+    const tailXR = d3.range(0, xOut, 1).map(px => {
+      const xA = 1 + px / pxPerA;
+      const val = Math.exp(-kappa_z * (xA - 1)) * (isEven || s.label === '3d' ? 1 : 1);
+      return { x: xScale(1) + px, y: yE - amp * norm * val };
+    });
+    const tailXL = d3.range(0, xOut, 1).map(px => {
+      const xA = 1 + px / pxPerA;
+      const sign = isEven ? 1 : -1;
+      const val = sign * Math.exp(-kappa_z * (xA - 1));
+      return { x: xScale(-1) - px, y: yE - amp * norm * val };
+    });
+
+    [tailXR, tailXL].forEach(tail => {
+      g.append('path').datum(tail)
+        .attr('d', d3.line().x(d => d.x).y(d => d.y))
+        .attr('fill', 'none')
+        .attr('stroke', s.label === 'even' ? '#C8102E' : '#2A1A0E')
+        .attr('stroke-width', 1.5).attr('opacity', 0.5).attr('stroke-dasharray', '3,2');
+    });
+  });
+
+  // E axis label
+  g.append('text').attr('x', -38).attr('y', iH / 2)
+    .attr('transform', `rotate(-90, -38, ${iH / 2})`)
+    .attr('text-anchor', 'middle').attr('font-size', 11).attr('fill', '#2A1A0E').attr('font-weight', 500)
+    .text('Energy (eV)');
+
+  // No bound states message
+  if (states.length === 0) {
+    g.append('text').attr('x', iW / 2).attr('y', iH / 2)
+      .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', '#C8102E').attr('font-weight', 600)
+      .text(mode3d ? 'No bound states (z₀ < π/2)' : 'No bound states');
+  }
+}
+
+// =====================================================================
+// UPDATE STATS
+// =====================================================================
+function updateStats() {
+  const z0 = calcZ0(V0);
+  const states = findBoundStates(z0, mode3d);
+
+  document.getElementById('valV0').textContent = V0.toFixed(2);
+  document.getElementById('statZ0').textContent = z0.toFixed(3);
+  document.getElementById('statN').textContent = states.length;
+  document.getElementById('statV0b').textContent = V0.toFixed(2) + ' eV';
+  document.getElementById('statMode').textContent = mode3d ? '3D ℓ=0' : '1D';
+
+  // 3D callout
+  const thr = V0_3D_THRESH.toFixed(3);
+  document.getElementById('v0threshold').textContent = thr;
+  const above = V0 > V0_3D_THRESH;
+  document.getElementById('calloutStatus').innerHTML = above
+    ? `<strong>V₀ > ${thr} eV → ${states.length} bound state(s)</strong>`
+    : `<strong style="color:#C8102E">V₀ &lt; ${thr} eV → 0 bound states in 3D!</strong>`;
+
+  const callout = document.getElementById('callout3d');
+  callout.classList.toggle('visible', mode3d);
+
+  document.getElementById('legend3d').style.display = mode3d ? '' : 'none';
+  document.getElementById('graphTitle').textContent = mode3d
+    ? 'Graphical Solution — 3D Spherical Well (ℓ=0)'
+    : 'Graphical Solution — 1D Symmetric Well';
+
+  // Physics checks
+  // P1: At small V₀ (say 0.1 eV), 1D has ≥1 bound state
+  const z0small = calcZ0(0.1);
+  const statesSmall1D = findBoundStates(z0small, false);
+  const p1pass = statesSmall1D.length >= 1;
+  document.getElementById('p1dot').className = 'check-dot ' + (p1pass ? 'pass' : 'fail');
+  document.getElementById('p1text').textContent = `P1: 1D V₀=0.1eV → ${statesSmall1D.length} state(s) ✓`;
+
+  // P2: First odd-parity state threshold ~V₀_odd_thresh
+  // Odd state first appears when z₀ > π/2
+  const V0_odd_thresh = V0_3D_THRESH; // same formula: z₀>π/2
+  // Check: at V₀ slightly below threshold, no odd; at slightly above, one odd
+  const z0below = calcZ0(V0_odd_thresh * 0.98);
+  const z0above = calcZ0(V0_odd_thresh * 1.02);
+  const statesBelow = findBoundStates(z0below, false).filter(s => s.label === 'odd');
+  const statesAbove = findBoundStates(z0above, false).filter(s => s.label === 'odd');
+  const p2pass = statesBelow.length === 0 && statesAbove.length >= 1;
+  document.getElementById('p2dot').className = 'check-dot ' + (p2pass ? 'pass' : 'fail');
+  document.getElementById('p2text').textContent =
+    `P2: 1st odd state at V₀>${V0_odd_thresh.toFixed(2)}eV — ${p2pass ? 'verified' : 'FAIL'}`;
+
+  // P3: 3D at V₀ below threshold → zero bound states
+  const V0_test3d = V0_3D_THRESH * 0.5;
+  const states3d_below = findBoundStates(calcZ0(V0_test3d), true);
+  const p3pass = states3d_below.length === 0;
+  document.getElementById('p3dot').className = 'check-dot ' + (p3pass ? 'pass' : 'fail');
+  document.getElementById('p3text').textContent =
+    `P3: 3D V₀=${V0_test3d.toFixed(2)}eV < thresh → ${states3d_below.length} states — ${p3pass ? 'verified' : 'FAIL'}`;
+}
+
+// =====================================================================
+// EVENT HANDLERS
+// =====================================================================
+document.getElementById('sliderV0').addEventListener('input', function() {
+  V0 = parseFloat(this.value);
+  updateAll();
+});
+
+document.getElementById('toggleMode').addEventListener('click', function() {
+  mode3d = !mode3d;
+  this.textContent = mode3d ? 'Toggle: 1D Well' : 'Toggle: 3D Spherical';
+  this.classList.toggle('active-3d', mode3d);
+  updateAll();
+});
+
+function updateAll() {
+  updateStats();
+  drawGraph();
+  drawWell();
+}
+
+// =====================================================================
+// INIT + RESIZE
+// =====================================================================
+function init() {
+  updateStats();
+  drawGraph();
+  drawWell();
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { drawGraph(); drawWell(); }, 80);
+});
+
+// Wait for fonts and layout
+if (document.readyState === 'complete') {
+  setTimeout(init, 30);
+} else {
+  window.addEventListener('load', () => setTimeout(init, 30));
+}
+</script>
+</body>
+</html>

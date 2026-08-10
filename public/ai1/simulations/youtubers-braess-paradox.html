@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<!-- SIM 2 — Braess's Paradox
+     4-node network: S→A, S→B, A→T, B→T (+ optional A→B connector)
+     100 cars. Congestion: t(x)=x×0.6. Constant: t=60.
+     Without connector: Nash=90 min. With connector: Nash=120 min.
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Braess's Paradox</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 32px auto; padding: 0 24px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 14px; color: var(--slate); margin: 0 0 20px; }
+  #controls {
+    display: flex; align-items: center; gap: 20px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  button {
+    padding: 6px 18px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: #F6D8DC; }
+  button.active { background: var(--red); color: #fff; border-color: var(--red); }
+  #main-row { display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; }
+  #graph-area { flex: 0 0 480px; }
+  #stats-area { flex: 1; min-width: 220px; }
+  .stat-box {
+    border: 1.5px solid var(--border); border-radius: 4px;
+    padding: 16px 20px; margin-bottom: 16px;
+  }
+  .stat-label { font-size: 12px; color: var(--slate); text-transform: uppercase;
+    letter-spacing: .06em; font-weight: 600; margin-bottom: 4px; }
+  .stat-value {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 36px; font-weight: 700; line-height: 1;
+  }
+  .stat-value.worse { color: var(--red); }
+  .stat-value.better { color: var(--ink); }
+  .stat-sub { font-size: 12px; color: var(--slate); margin-top: 4px; }
+  #slider-row {
+    margin-top: 12px; display: flex; align-items: center; gap: 12px;
+  }
+  label { font-size: 13px; color: var(--slate); }
+  input[type=range] { accent-color: var(--red); width: 160px; cursor: pointer; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 24px; padding-top: 14px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); font-weight: 700; }
+  .info-box {
+    background: #FAFAFA; border: 1px solid var(--border);
+    border-radius: 3px; padding: 10px 14px;
+    font-size: 12px; color: var(--slate);
+    margin-top: 16px; line-height: 1.6;
+  }
+  .info-box strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Braess's Paradox</h1>
+  <p class="sub">
+    Adding a road to a network can <em>increase</em> travel time for every driver.
+    100 cars. Congestion roads: t(x) = x × 0.6 min. Fixed roads: t = 60 min.
+  </p>
+
+  <div id="controls">
+    <button id="toggle-btn">Add Connector A→B</button>
+    <span style="font-size:13px;color:var(--slate);">Connector delay:</span>
+    <div id="slider-row">
+      <label for="delay-slider">0 min</label>
+      <input id="delay-slider" type="range" min="0" max="60" step="1" value="0">
+      <span id="delay-val" class="mono">0 min</span>
+    </div>
+  </div>
+
+  <div id="main-row">
+    <div id="graph-area">
+      <svg id="graph-svg" width="480" height="360"></svg>
+    </div>
+    <div id="stats-area">
+      <div class="stat-box">
+        <div class="stat-label">Nash Travel Time</div>
+        <div class="stat-value better" id="nash-time">90</div>
+        <div class="stat-sub" id="nash-sub">min per driver (no connector)</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Route Distribution</div>
+        <div id="route-dist" style="font-size:13px;line-height:1.8;"></div>
+      </div>
+      <div class="info-box" id="explanation"></div>
+    </div>
+  </div>
+
+  <div id="predictions">
+    <div class="pred">
+      <strong>P1:</strong> Without connector — Nash equilibrium = <strong>90 min</strong>.
+      Each route: 50×0.6 + 60 = 90 ✓
+    </div>
+    <div class="pred">
+      <strong>P2:</strong> With zero-delay connector — Nash = <strong>120 min</strong>.
+      All 100 use S→A→B→T: 100×0.6 + 0 + 100×0.6 = 120 ✓
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+const TOTAL_CARS = 100;
+const CONG_COEFF = 0.6;
+const FIXED_TIME = 60;
+
+let connectorOn = false;
+let connectorDelay = 0;
+let animFrame = null;
+
+// Node positions in SVG (diamond layout)
+// S=left, A=top, B=bottom, T=right
+const nodes = {
+  S: { x: 80,  y: 180, label: 'S' },
+  A: { x: 240, y: 60,  label: 'A' },
+  B: { x: 240, y: 300, label: 'B' },
+  T: { x: 400, y: 180, label: 'T' },
+};
+
+// Compute Nash equilibrium
+function computeNash(connOn, delay) {
+  if (!connOn || delay >= 30) {
+    // Without effective connector: 50-50 split S->A->T and S->B->T
+    const x = 50;
+    const t_SAT = x * CONG_COEFF + FIXED_TIME; // 50*0.6+60 = 90
+    const t_SBT = FIXED_TIME + x * CONG_COEFF; // 60+50*0.6 = 90
+    return {
+      cars_SA: x, cars_SB: x,
+      cars_AT: x, cars_BT: x,
+      cars_AB: 0,
+      nashTime: t_SAT,
+      route1: x, route2: x, route3: 0,
+    };
+  } else {
+    // With low-delay connector: find Nash
+    // Let α = cars on S->A->B->T, β = cars on S->A->T, γ = cars on S->B->T
+    // α + β + γ = 100
+    // Nash: all paths used must have equal cost; unused paths must cost >=
+    //
+    // Path SAT: (α+β)*0.6 + 60
+    // Path SBT: 60 + (α+γ)*0.6
+    // Path SABT: (α+β)*0.6 + delay + (α+γ)*0.6
+    //
+    // When delay is small enough, at pure Nash α=100, β=0, γ=0:
+    // SABT cost = 100*0.6 + delay + 100*0.6 = 120 + delay
+    // SAT cost = 100*0.6 + 60 = 120 (same when delay=0, SAT is same)
+    // SBT cost = 60 + 0*0.6 = 60 (BETTER — single deviator)
+    //
+    // Actually for the simulation: at Nash with connector (delay=0):
+    // All 100 on SABT → cost=120.
+    // If one driver switches to SBT: SBT=60+1*0.6≈60.6 (much better)
+    // So α=100, β=0, γ=0 is NOT stable.
+    //
+    // True Nash with connector: solve for mixed equilibrium.
+    // Let α on SABT, (100-α) on the two direct routes.
+    // For SABT = SAT: (α + β)*0.6 + delay + (α)*0.6 = (α+β)*0.6 + 60
+    //   => delay + α*0.6 = 60, => α = (60 - delay)/0.6 = 100 - delay/0.6
+    // Actually need full solution. Let's do numerically.
+    //
+    // Variables: a=SABT cars, b=SAT cars, c=SBT cars. a+b+c=100.
+    // SA flow = a+b, SB flow = a+c (wait: SB only from SBT),
+    // AT flow = a+b (no wait: A->T from SABT goes through A), actually:
+    //   SA carries: a+b (both SAT and SABT use SA)
+    //   SB carries: c (only SBT)
+    //   AT carries: b (only SAT — SABT uses AB then BT)
+    //   AB carries: a
+    //   BT carries: a+c
+    //
+    // Costs:
+    //   SAT:  (a+b)*0.6 + b*0.6 + 60  -- NO, SA=cong, AT=fixed
+    //   Wait, the edges:
+    //   SA: congestion t(x)=x*0.6
+    //   SB: fixed = 60
+    //   AT: fixed = 60
+    //   BT: congestion t(x)=x*0.6
+    //   AB: delay (0..60)
+    //
+    // SAT: SA(a+b) + AT = (a+b)*0.6 + 60
+    // SBT: SB + BT(a+c) = 60 + (a+c)*0.6
+    // SABT: SA(a+b) + AB + BT(a+c) = (a+b)*0.6 + delay + (a+c)*0.6
+    //
+    // Nash: if a>0, b>0, c>0: all three equal.
+    // SAT = SBT: (a+b)*0.6+60 = 60+(a+c)*0.6 => (a+b)=(a+c) => b=c
+    // SABT = SAT: (a+b)*0.6+delay+(a+c)*0.6 = (a+b)*0.6+60
+    //   => delay+(a+c)*0.6 = 60 => a+c = (60-delay)/0.6 = 100-delay/0.6
+    //   Also b=c, a+b+c=100 => a+2c=100, a+c=(60-delay)/0.6
+    //   => c = 100 - (60-delay)/0.6 = (100*0.6-60+delay)/0.6 = delay/0.6
+    //   => c = delay/0.6; b = delay/0.6
+    //   => a = 100 - 2*delay/0.6
+    //
+    // Valid when a>=0: delay <= 30. If delay>30, a<0 => corner solution (no SABT).
+
+    const a = Math.max(0, 100 - 2 * delay / CONG_COEFF);
+    const c = Math.min(100/2, delay / CONG_COEFF);
+    const b = c;
+    // If a=0 (delay>=30), use no-connector solution
+    if (a <= 0) {
+      return computeNash(false, 0);
+    }
+    const nashTime = (a + b) * CONG_COEFF + FIXED_TIME;
+    return {
+      cars_SA: a + b, cars_SB: c,
+      cars_AT: b, cars_BT: a + c,
+      cars_AB: a,
+      nashTime: nashTime,
+      route1: b, route2: c, route3: a,
+    };
+  }
+}
+
+// SVG setup
+const svg = d3.select('#graph-svg');
+const defs = svg.append('defs');
+// Arrow marker
+defs.append('marker')
+  .attr('id', 'arrow').attr('markerWidth', 8).attr('markerHeight', 8)
+  .attr('refX', 7).attr('refY', 3)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,0 L0,6 L8,3 z').attr('fill', INK);
+defs.append('marker')
+  .attr('id', 'arrow-red').attr('markerWidth', 8).attr('markerHeight', 8)
+  .attr('refX', 7).attr('refY', 3)
+  .attr('orient', 'auto')
+  .append('path').attr('d', 'M0,0 L0,6 L8,3 z').attr('fill', RED);
+
+const edgeGroup = svg.append('g').attr('id', 'edges');
+const carGroup = svg.append('g').attr('id', 'cars');
+const nodeGroup = svg.append('g').attr('id', 'nodes');
+const labelGroup = svg.append('g').attr('id', 'labels');
+
+// Edges: [from, to, type, id]
+// type: 'cong'=congestion, 'fixed'=constant, 'connector'=optional
+const edgeDefs = [
+  { id: 'SA', from: 'S', to: 'A', type: 'cong', label: 'SA' },
+  { id: 'SB', from: 'S', to: 'B', type: 'fixed', label: 'SB' },
+  { id: 'AT', from: 'A', to: 'T', type: 'fixed', label: 'AT' },
+  { id: 'BT', from: 'B', to: 'T', type: 'cong', label: 'BT' },
+  { id: 'AB', from: 'A', to: 'B', type: 'connector', label: 'A→B' },
+];
+
+function midpoint(from, to, offset=0) {
+  const f = nodes[from], t = nodes[to];
+  const mx = (f.x + t.x) / 2, my = (f.y + t.y) / 2;
+  // perpendicular offset
+  const dx = t.x - f.x, dy = t.y - f.y;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  return { x: mx + offset * (-dy/len), y: my + offset * (dx/len) };
+}
+
+function edgePath(from, to) {
+  const f = nodes[from], t = nodes[to];
+  // Shorten path to not overlap node circles
+  const dx = t.x - f.x, dy = t.y - f.y;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  const r = 22;
+  const x1 = f.x + dx/len*r, y1 = f.y + dy/len*r;
+  const x2 = t.x - dx/len*r, y2 = t.y - dy/len*r;
+  return `M${x1},${y1} L${x2},${y2}`;
+}
+
+// Draw edges
+edgeDefs.forEach(e => {
+  const isConn = e.type === 'connector';
+  const line = edgeGroup.append('path')
+    .attr('id', 'edge-' + e.id)
+    .attr('d', edgePath(e.from, e.to))
+    .attr('fill', 'none')
+    .attr('stroke', isConn ? RED : INK)
+    .attr('stroke-width', isConn ? 2.5 : 2)
+    .attr('stroke-dasharray', isConn ? '6 4' : 'none')
+    .attr('marker-end', isConn ? 'url(#arrow-red)' : 'url(#arrow)')
+    .attr('opacity', isConn ? 0 : 1);
+});
+
+// Edge time labels
+edgeDefs.forEach(e => {
+  const mid = midpoint(e.from, e.to, e.id === 'SA' ? -12 : (e.id === 'BT' ? 12 : -14));
+  labelGroup.append('text')
+    .attr('id', 'elabel-' + e.id)
+    .attr('x', mid.x).attr('y', mid.y)
+    .attr('text-anchor', 'middle').attr('font-size', 11)
+    .attr('font-family', 'JetBrains Mono, ui-monospace, monospace')
+    .attr('fill', e.type === 'connector' ? RED : SLATE)
+    .attr('opacity', e.id === 'AB' ? 0 : 1);
+});
+
+// Draw nodes
+Object.entries(nodes).forEach(([key, n]) => {
+  const g = nodeGroup.append('g');
+  g.append('circle')
+    .attr('cx', n.x).attr('cy', n.y).attr('r', 22)
+    .attr('fill', '#fff').attr('stroke', INK).attr('stroke-width', 2);
+  g.append('text')
+    .attr('x', n.x).attr('y', n.y + 6)
+    .attr('text-anchor', 'middle').attr('font-size', 18).attr('font-weight', 700)
+    .attr('fill', INK).attr('font-family', 'Inter,sans-serif').text(key);
+});
+
+// Animated cars (dots) along each edge
+const carDots = [];
+const CARS_PER_EDGE = 5;
+
+function initCars(nash) {
+  carGroup.selectAll('*').remove();
+  carDots.length = 0;
+
+  const edgeFlows = {
+    SA: nash.cars_SA,
+    SB: nash.cars_SB,
+    AT: nash.cars_AT,
+    BT: nash.cars_BT,
+    AB: nash.cars_AB,
+  };
+
+  edgeDefs.forEach(e => {
+    const flow = edgeFlows[e.id] || 0;
+    if (flow === 0) return;
+    const count = Math.max(1, Math.round(CARS_PER_EDGE * flow / TOTAL_CARS));
+    for (let i = 0; i < count; i++) {
+      const dot = carGroup.append('circle')
+        .attr('r', 4)
+        .attr('fill', e.type === 'connector' ? RED : INK)
+        .attr('opacity', 0.7);
+      carDots.push({
+        el: dot,
+        from: e.from, to: e.to,
+        t: i / count,
+        speed: 0.003 + Math.random() * 0.002,
+      });
+    }
+  });
+}
+
+function animateCars() {
+  carDots.forEach(car => {
+    car.t += car.speed;
+    if (car.t > 1) car.t -= 1;
+    const f = nodes[car.from], t = nodes[car.to];
+    const dx = t.x - f.x, dy = t.y - f.y;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const r = 22;
+    const x1 = f.x + dx/len*r, y1 = f.y + dy/len*r;
+    const x2 = t.x - dx/len*r, y2 = t.y - dy/len*r;
+    car.el
+      .attr('cx', x1 + (x2-x1)*car.t)
+      .attr('cy', y1 + (y2-y1)*car.t);
+  });
+  animFrame = requestAnimationFrame(animateCars);
+}
+
+function updateUI() {
+  const nash = computeNash(connectorOn, connectorDelay);
+
+  // Show/hide connector edge
+  d3.select('#edge-AB').attr('opacity', connectorOn ? 1 : 0);
+  d3.select('#elabel-AB').attr('opacity', connectorOn ? 1 : 0);
+
+  // Update edge labels
+  const flows = {
+    SA: nash.cars_SA, SB: nash.cars_SB,
+    AT: nash.cars_AT, BT: nash.cars_BT, AB: nash.cars_AB,
+  };
+  edgeDefs.forEach(e => {
+    const flow = flows[e.id] || 0;
+    let timeStr;
+    if (e.type === 'cong') {
+      timeStr = `t=${(flow*CONG_COEFF).toFixed(0)}m`;
+    } else if (e.type === 'fixed') {
+      timeStr = 't=60m';
+    } else {
+      timeStr = `t=${connectorDelay}m`;
+    }
+    if (e.type !== 'connector' || connectorOn) {
+      d3.select('#elabel-' + e.id).text(`${flow}cars, ${timeStr}`);
+    }
+  });
+
+  // Nash time
+  const nashEl = document.getElementById('nash-time');
+  const nashSub = document.getElementById('nash-sub');
+  nashEl.textContent = nash.nashTime.toFixed(0);
+  if (connectorOn && connectorDelay < 30) {
+    nashEl.className = 'stat-value worse';
+    nashSub.textContent = `min/driver — WORSE with connector (delay=${connectorDelay}m)`;
+  } else {
+    nashEl.className = 'stat-value better';
+    nashSub.textContent = `min/driver — ${connectorOn ? 'connector inactive (delay≥30m)' : 'no connector'}`;
+  }
+
+  // Route dist
+  const routeDiv = document.getElementById('route-dist');
+  if (!connectorOn || nash.route3 === 0) {
+    routeDiv.innerHTML = `
+      <div>S→A→T: <strong>${nash.route1}</strong> cars</div>
+      <div>S→B→T: <strong>${nash.route2}</strong> cars</div>
+    `;
+  } else {
+    routeDiv.innerHTML = `
+      <div>S→A→T: <strong>${nash.route1.toFixed(0)}</strong> cars</div>
+      <div>S→B→T: <strong>${nash.route2.toFixed(0)}</strong> cars</div>
+      <div style="color:var(--red)">S→A→B→T: <strong>${nash.route3.toFixed(0)}</strong> cars</div>
+    `;
+  }
+
+  // Explanation
+  const expl = document.getElementById('explanation');
+  if (!connectorOn) {
+    expl.innerHTML = `<strong>No connector:</strong> 50 cars on each path.<br>
+      Each driver: 50×0.6 + 60 = <strong>90 min</strong>.<br>
+      Neither group can improve by switching.`;
+  } else if (connectorDelay >= 30) {
+    expl.innerHTML = `<strong>Connector delay=${connectorDelay}m ≥ 30m:</strong><br>
+      Connector is too slow to be useful.<br>
+      Paradox eliminated — equilibrium unchanged at <strong>90 min</strong>.`;
+  } else {
+    expl.innerHTML = `<strong>Connector delay=${connectorDelay}m:</strong><br>
+      ${nash.route3.toFixed(0)} cars use A→B shortcut.<br>
+      Each driver: <strong>${nash.nashTime.toFixed(0)} min</strong>.<br>
+      Adding a road made everyone slower!`;
+  }
+
+  // Cars animation
+  initCars(nash);
+}
+
+// Toggle connector
+document.getElementById('toggle-btn').addEventListener('click', function() {
+  connectorOn = !connectorOn;
+  this.textContent = connectorOn ? 'Remove Connector' : 'Add Connector A→B';
+  this.classList.toggle('active', connectorOn);
+  updateUI();
+});
+
+// Delay slider
+document.getElementById('delay-slider').addEventListener('input', function() {
+  connectorDelay = +this.value;
+  document.getElementById('delay-val').textContent = connectorDelay + ' min';
+  document.getElementById('delay-slider').previousElementSibling.textContent = connectorDelay + ' min';
+  updateUI();
+});
+
+// Start animation
+if (animFrame) cancelAnimationFrame(animFrame);
+animateCars();
+updateUI();
+</script>
+</body>
+</html>

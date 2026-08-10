@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHSH Angle Explorer — Why 45° Wins</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .layout { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .panel { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  label { font-size: 0.76rem; color: #545454; font-weight: 600; text-transform: uppercase; }
+  input[type=range] { width: 160px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; font-weight: 700; }
+  .s-box {
+    width: 260px;
+    padding: 12px;
+    border: 2px solid #2A1A0E;
+    text-align: center;
+  }
+  .s-box.violated { border-color: #C8102E; background: #fff4f4; }
+  .s-num { font-size: 2.2rem; font-weight: 900; }
+  .s-region { font-size: 0.78rem; color: #545454; margin-top: 4px; }
+  .corr-table { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 260px; }
+  .corr-cell { border: 1px solid #ddd; padding: 5px 8px; font-size: 0.8rem; text-align: center; }
+  .corr-cell b { color: #C8102E; }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .btn { padding: 5px 12px; font-size: 0.78rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; }
+  .btn:hover { background: #f0f0f0; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>CHSH Angle Explorer</h1>
+<div class="subtitle">E(θ_a,θ_b) = cos(θ_a−θ_b) for |Φ+⟩. Drag four pointers on the polar dial — find why 45° spacing is the magic configuration.</div>
+
+<div class="layout">
+  <div class="panel">
+    <svg id="polar-dial" width="300" height="300"></svg>
+    <div class="presets">
+      <button class="btn" onclick="preset('optimal')">🎯 Optimal</button>
+      <button class="btn" onclick="preset('all-same')">All Same</button>
+      <button class="btn" onclick="preset('exercise3')">Exercise-3</button>
+      <button class="btn" onclick="preset('singlet')">|Ψ−⟩</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="s-box" id="s-box">
+      <div class="s-num" id="s-num">2.828</div>
+      <div class="s-region" id="s-region">QUANTUM VIOLATION — S > 2</div>
+    </div>
+
+    <div class="corr-table">
+      <div class="corr-cell">E(A₁,B₁) = <b id="e11">−0.707</b></div>
+      <div class="corr-cell">E(A₁,B₂) = <b id="e12">−0.707</b></div>
+      <div class="corr-cell">E(A₂,B₁) = <b id="e21">−0.707</b></div>
+      <div class="corr-cell">E(A₂,B₂) = <b id="e22">0.707</b></div>
+    </div>
+
+    <svg id="s-gauge" width="260" height="100"></svg>
+
+    <div style="width:260px">
+      <div style="font-size:0.75rem;color:#545454;margin-bottom:4px;">Angle sliders</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" id="slider-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+const TSI = 2 * Math.SQRT2;
+
+let state = 'triplet'; // E = cos(diff); for singlet E = -cos(diff)
+let angles = { A1: 0, A2: 90, B1: 45, B2: 315 }; // degrees
+
+const keyOrder = ['A1','A2','B1','B2'];
+const keyColors = { A1: RED, A2: '#FF7070', B1: BLUE, B2: '#5BA8D5' };
+
+function E_corr(a, b) {
+  const sgn = state === 'singlet' ? -1 : 1;
+  return sgn * Math.cos((a - b) * Math.PI / 180);
+}
+
+function computeS() {
+  const e11 = E_corr(angles.A1, angles.B1);
+  const e12 = E_corr(angles.A1, angles.B2);
+  const e21 = E_corr(angles.A2, angles.B1);
+  const e22 = E_corr(angles.A2, angles.B2);
+  return { S: e11 + e12 + e21 - e22, e11, e12, e21, e22 };
+}
+
+// ── Slider grid ───────────────────────────────────────────────────────────────
+const sliderGrid = document.getElementById('slider-grid');
+keyOrder.forEach(k => {
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <label style="font-size:0.72rem;color:${keyColors[k]};font-weight:700;">${k}</label>
+    <input type="range" id="sl-${k}" min="0" max="360" step="1" value="${angles[k]}" style="width:120px;accent-color:${keyColors[k]};">
+    <span id="slv-${k}" style="font-size:0.75rem;font-weight:700;">${angles[k]}°</span>
+  `;
+  sliderGrid.appendChild(div);
+  document.getElementById(`sl-${k}`).addEventListener('input', e => {
+    angles[k] = parseInt(e.target.value);
+    document.getElementById(`slv-${k}`).textContent = `${angles[k]}°`;
+    updateAll();
+  });
+});
+
+// ── Polar dial ────────────────────────────────────────────────────────────────
+const polSvg = d3.select('#polar-dial');
+const pW = 300, pH = 300;
+const cx = 150, cy = 155, r = 110;
+const pG = polSvg.append('g');
+
+pG.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill','#fafafa').attr('stroke','#eee').attr('stroke-width',2);
+pG.append('text').attr('x',cx).attr('y',22).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Measurement Angles');
+
+// Tick marks every 45°
+for (let a = 0; a < 360; a += 45) {
+  const rad = (a - 90) * Math.PI / 180;
+  pG.append('line').attr('x1',cx+(r-10)*Math.cos(rad)).attr('y1',cy+(r-10)*Math.sin(rad))
+    .attr('x2',cx+(r+5)*Math.cos(rad)).attr('y2',cy+(r+5)*Math.sin(rad)).attr('stroke','#ccc').attr('stroke-width',1.5);
+  pG.append('text').attr('x',cx+(r+22)*Math.cos(rad)).attr('y',cy+(r+22)*Math.sin(rad))
+    .attr('text-anchor','middle').attr('dominant-baseline','middle').attr('font-size','10px').attr('fill','#aaa').text(`${a}°`);
+}
+
+// Arrow group
+const arrowGroup = pG.append('g');
+
+// Make arrows draggable
+keyOrder.forEach((k, i) => {
+  const w = i < 2 ? 3 : 2;
+  const dash = (i % 2 === 1) ? '6,3' : 'none';
+  arrowGroup.append('line').attr('id', `arrow-${k}`)
+    .attr('stroke', keyColors[k]).attr('stroke-width', w).attr('stroke-dasharray', dash);
+  arrowGroup.append('circle').attr('id', `dot-${k}`).attr('r', 7).attr('fill', keyColors[k])
+    .attr('cursor', 'pointer');
+});
+
+// Legend
+pG.append('circle').attr('cx',16).attr('cy',pH-35).attr('r',5).attr('fill',RED);
+pG.append('text').attr('x',24).attr('y',pH-31).attr('font-size','10px').attr('fill',INK).text('A₁, A₂ (Alice)');
+pG.append('circle').attr('cx',16).attr('cy',pH-18).attr('r',5).attr('fill',BLUE);
+pG.append('text').attr('x',24).attr('y',pH-14).attr('font-size','10px').attr('fill',INK).text('B₁, B₂ (Bob)');
+
+function updateArrows() {
+  keyOrder.forEach(k => {
+    const rad = (angles[k] - 90) * Math.PI / 180;
+    const tx = cx + r * 0.82 * Math.cos(rad);
+    const ty = cy + r * 0.82 * Math.sin(rad);
+    const dx = cx + r * 0.96 * Math.cos(rad);
+    const dy = cy + r * 0.96 * Math.sin(rad);
+    d3.select(`#arrow-${k}`).attr('x1',cx).attr('y1',cy).attr('x2',tx).attr('y2',ty);
+    d3.select(`#dot-${k}`).attr('cx',dx).attr('cy',dy);
+  });
+}
+
+// Make dots draggable
+keyOrder.forEach(k => {
+  d3.select(`#dot-${k}`).call(
+    d3.drag().on('drag', function(event) {
+      const dx = event.x - cx, dy = event.y - cy;
+      let angle = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360);
+      angles[k] = angle;
+      document.getElementById(`sl-${k}`).value = angle;
+      document.getElementById(`slv-${k}`).textContent = `${angle}°`;
+      updateAll();
+    })
+  );
+});
+
+// ── S gauge ───────────────────────────────────────────────────────────────────
+const gSvg = d3.select('#s-gauge');
+const gG = gSvg.append('g').attr('transform','translate(0,10)');
+const gScale = d3.scaleLinear().domain([-TSI-0.1, TSI+0.1]).range([4, 256]);
+
+gG.append('rect').attr('x',4).attr('y',14).attr('width',252).attr('height',12).attr('fill','#f5f5f5').attr('rx',2);
+// Color zones: |S|>2 is red
+gG.append('rect').attr('x',gScale(-TSI)).attr('y',14).attr('width',gScale(-2)-gScale(-TSI)).attr('height',12).attr('fill',RED).attr('opacity',0.2).attr('rx',2);
+gG.append('rect').attr('x',gScale(2)).attr('y',14).attr('width',gScale(TSI)-gScale(2)).attr('height',12).attr('fill',RED).attr('opacity',0.2).attr('rx',2);
+// Lines
+[-2,2].forEach(v => {
+  gG.append('line').attr('x1',gScale(v)).attr('x2',gScale(v)).attr('y1',10).attr('y2',30).attr('stroke',RED).attr('stroke-width',1.5);
+  gG.append('text').attr('x',gScale(v)).attr('y',8).attr('text-anchor','middle').attr('font-size','9px').attr('fill',RED).text(v>0?'+2':'−2');
+});
+[-TSI,TSI].forEach(v => {
+  gG.append('line').attr('x1',gScale(v)).attr('x2',gScale(v)).attr('y1',10).attr('y2',30).attr('stroke',BLUE).attr('stroke-width',1.5).attr('stroke-dasharray','3,2');
+  gG.append('text').attr('x',gScale(v)).attr('y',8).attr('text-anchor','middle').attr('font-size','9px').attr('fill',BLUE).text(v>0?'2√2':'−2√2');
+});
+
+const needle = gG.append('rect').attr('y',12).attr('width',5).attr('height',16).attr('fill',RED).attr('rx',2.5);
+const sLabel = gG.append('text').attr('x',130).attr('y',50).attr('text-anchor','middle').attr('font-size','11px').attr('fill',INK);
+
+function updateGauge(S) {
+  const clamped = Math.max(-TSI, Math.min(TSI, S));
+  needle.attr('x', gScale(clamped)-2.5);
+  needle.attr('fill', Math.abs(S) > 2 ? RED : SLATE);
+  sLabel.text(`S = ${S.toFixed(4)} | LHV ≤ ±2 | Tsirelson ≤ ±2√2`);
+}
+
+function updateAll() {
+  const { S, e11, e12, e21, e22 } = computeS();
+  const absS = Math.abs(S);
+
+  document.getElementById('s-num').textContent = S.toFixed(4);
+  document.getElementById('e11').textContent = e11.toFixed(4);
+  document.getElementById('e12').textContent = e12.toFixed(4);
+  document.getElementById('e21').textContent = e21.toFixed(4);
+  document.getElementById('e22').textContent = e22.toFixed(4);
+
+  const sBox = document.getElementById('s-box');
+  const sReg = document.getElementById('s-region');
+  if (absS > 2) {
+    sBox.classList.add('violated');
+    sReg.textContent = `QUANTUM VIOLATION — |S| = ${absS.toFixed(4)} > 2`;
+    document.getElementById('s-num').style.color = RED;
+  } else if (absS === 2) {
+    sBox.classList.remove('violated');
+    sReg.textContent = 'CLASSICAL BOUNDARY — |S| = 2.000';
+    document.getElementById('s-num').style.color = INK;
+  } else {
+    sBox.classList.remove('violated');
+    sReg.textContent = `LOCAL REALIST REGIME — |S| = ${absS.toFixed(4)} ≤ 2`;
+    document.getElementById('s-num').style.color = INK;
+  }
+
+  updateGauge(S);
+  updateArrows();
+}
+
+function preset(p) {
+  if (p === 'optimal') {
+    state = 'triplet';
+    angles = { A1: 0, A2: 90, B1: 45, B2: 315 };
+  } else if (p === 'all-same') {
+    angles = { A1: 30, A2: 30, B1: 30, B2: 30 };
+  } else if (p === 'exercise3') {
+    angles = { A1: 0, A2: 30, B1: 30, B2: 90 }; // S = √3
+  } else if (p === 'singlet') {
+    state = 'singlet';
+    angles = { A1: 0, A2: 90, B1: 45, B2: 315 };
+  }
+  keyOrder.forEach(k => {
+    document.getElementById(`sl-${k}`).value = angles[k];
+    document.getElementById(`slv-${k}`).textContent = `${angles[k]}°`;
+  });
+  updateAll();
+}
+
+updateAll();
+
+// Testable predictions
+preset('optimal');
+const { S: S_opt } = computeS();
+console.assert(Math.abs(S_opt - TSI) < 0.001, `P1: optimal → S = ${S_opt.toFixed(4)}, expected ${TSI.toFixed(4)}`);
+preset('all-same');
+const { S: S_eq } = computeS();
+console.assert(Math.abs(S_eq) < 0.001, `P2: all-same → S = ${S_eq.toFixed(4)}, expected 0`);
+console.log(`✓ P1: optimal → S = ${S_opt.toFixed(5)} ≈ 2√2 = ${TSI.toFixed(5)}`);
+console.log(`✓ P2: all-same → S = ${S_eq.toFixed(5)} ≈ 0`);
+preset('optimal'); // restore
+</script>
+</body>
+</html>

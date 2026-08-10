@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrogen Radial Probability Density</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 14px;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; font-weight: 700; color: #2A1A0E; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #545454; margin-bottom: 20px; }
+  .layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  .panel-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #545454; margin-bottom: 8px; }
+  .controls { margin-top: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  select {
+    border: 1.5px solid #2A1A0E;
+    background: #FFFFFF;
+    color: #2A1A0E;
+    padding: 5px 10px;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+  }
+  select:focus { border-color: #C8102E; }
+  .ctrl-label { font-size: 13px; font-weight: 600; }
+  .toggle-btn {
+    border: 1.5px solid #545454;
+    background: #FFFFFF;
+    color: #545454;
+    padding: 5px 12px;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .toggle-btn.active { background: #545454; color: #FFFFFF; }
+  .info-box { border: 1.5px solid #2A1A0E; padding: 16px; background: #FFFFFF; }
+  .info-box h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px; color: #2A1A0E; }
+  .info-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+  .info-key { font-size: 12px; color: #545454; }
+  .info-val { font-size: 13px; font-weight: 700; color: #2A1A0E; }
+  .info-val.red { color: #C8102E; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .legend-line { width: 28px; height: 2px; display: inline-block; }
+  .legend-line.red-solid { background: #C8102E; }
+  .legend-line.ink-dashed { background: transparent; border-top: 2px dashed #2A1A0E; }
+  .legend-line.red-dashed { background: transparent; border-top: 2px dashed #C8102E; }
+  .legend-label { font-size: 12px; color: #2A1A0E; }
+  .axis text { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 11px; }
+  .axis path, .axis line { stroke: #2A1A0E; }
+  .axis-label { fill: #2A1A0E; font-family: Inter, Helvetica, sans-serif; font-size: 12px; font-weight: 600; }
+  .wf-notes { font-size: 12px; color: #545454; line-height: 1.6; }
+  .node-badge {
+    display: inline-block;
+    background: #2A1A0E;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<h1>Hydrogen Radial Probability Density</h1>
+<p class="subtitle">
+  Radial probability density P(r) = r²|R<sub>nl</sub>(r)|² for hydrogen eigenstates (units: Bohr radius a₀ = 1).
+</p>
+
+<div class="layout">
+  <div>
+    <div class="panel-label">Radial Probability Density vs r (in units of a₀)</div>
+    <svg id="main-svg"></svg>
+
+    <div class="controls">
+      <span class="ctrl-label">n =</span>
+      <select id="n-select">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      <span class="ctrl-label">ℓ =</span>
+      <select id="l-select">
+        <option value="0">0 (s)</option>
+      </select>
+      <button class="toggle-btn active" id="toggle-wf">Hide |R|²</button>
+    </div>
+
+    <div style="margin-top: 14px;">
+      <div class="legend-row">
+        <span class="legend-line red-solid"></span>
+        <span class="legend-label">P(r) = r²|R<sub>nl</sub>(r)|²  (radial probability density)</span>
+      </div>
+      <div class="legend-row" id="wf-legend">
+        <span class="legend-line ink-dashed"></span>
+        <span class="legend-label">|R<sub>nl</sub>(r)|² (wavefunction squared, no r² factor)</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-line red-dashed"></span>
+        <span class="legend-label">r<sub>mp</sub> — most probable radius (peak of P(r))</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-line" style="border-top: 2px dashed #545454; background: transparent;"></span>
+        <span class="legend-label">⟨r⟩ — mean radius</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px; border: 1.5px solid #e0d8d0; padding: 14px;">
+      <div class="panel-label" style="margin-bottom: 6px;">Running Integral: P(r &lt; x)</div>
+      <svg id="strip-svg"></svg>
+      <div style="margin-top: 6px; font-size: 12px; color: #545454;">
+        Drag over main plot or use slider to explore cumulative probability.
+      </div>
+      <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+        <label style="font-size:13px; font-weight:600; white-space:nowrap;">x =</label>
+        <input type="range" id="cum-slider" min="0" max="1" step="0.002" value="0.2" style="flex:1; accent-color: #C8102E;">
+        <span style="font-size:13px; font-weight:700; color:#C8102E; min-width:50px;" id="cum-x-val">—</span>
+      </div>
+      <div style="margin-top: 8px; font-size: 14px; font-weight: 700; color: #2A1A0E;" id="cum-label">
+        P(r &lt; — ) = —
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="info-box">
+      <h3>State Info</h3>
+      <div class="info-row">
+        <span class="info-key">Quantum numbers (n, ℓ)</span>
+        <span class="info-val red" id="info-nl">n=1, ℓ=0</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">Radial nodes (n−ℓ−1)</span>
+        <span class="info-val" id="info-nodes">0</span>
+      </div>
+      <div style="margin: 10px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">r<sub>mp</sub> (most probable)</span>
+        <span class="info-val red" id="info-rmp">1.000 a₀</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">⟨r⟩ (mean radius)</span>
+        <span class="info-val" id="info-rmean">1.500 a₀</span>
+      </div>
+      <div style="margin: 10px 0; border-top: 1px solid #e0d8d0;"></div>
+      <div class="info-row">
+        <span class="info-key">P(r &lt; a₀)</span>
+        <span class="info-val" id="info-p-a0">32.3%</span>
+      </div>
+      <div class="info-row">
+        <span class="info-key">∫₀^∞ P(r) dr</span>
+        <span class="info-val" id="info-norm">1.0000</span>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>Wavefunction R<sub>nl</sub>(r)</h3>
+      <div class="wf-notes" id="wf-formula">
+        R₁₀ = 2·e^(−r)
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h3>Physics Notes</h3>
+      <div class="wf-notes">
+        <p style="margin-bottom:8px;"><strong>P(r) ≠ |ψ|²:</strong> The radial probability density P(r) = r²|R<sub>nl</sub>|² includes the r² Jacobian factor from the spherical volume element dV = r² sin θ dr dθ dφ.</p>
+        <p style="margin-bottom:8px;"><strong>Most probable vs mean:</strong> For n=1, r<sub>mp</sub> = a₀ but ⟨r⟩ = 3a₀/2. Mean > most probable because P(r) is skewed rightward.</p>
+        <p><strong>Nodes:</strong> The number of radial nodes is n−ℓ−1. Nodes are r values (excluding r=0) where R<sub>nl</sub> = 0.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── wavefunctions (normalized, a₀=1) ────────────────────────────
+const states = {
+  "1,0": {
+    R: r => 2 * Math.exp(-r),
+    formula: "R₁₀(r) = 2·e^(−r)",
+    rmax: 12
+  },
+  "2,0": {
+    R: r => (1 / Math.sqrt(2)) * (1 - r / 2) * Math.exp(-r / 2),
+    formula: "R₂₀(r) = (1/√2)·(1 − r/2)·e^(−r/2)",
+    rmax: 24
+  },
+  "2,1": {
+    R: r => (1 / Math.sqrt(24)) * r * Math.exp(-r / 2),
+    formula: "R₂₁(r) = (1/√24)·r·e^(−r/2)",
+    rmax: 24
+  },
+  "3,0": {
+    R: r => (2 / (81 * Math.sqrt(3))) * (27 - 18 * r + 2 * r * r) * Math.exp(-r / 3),
+    formula: "R₃₀(r) = (2/(81√3))·(27 − 18r + 2r²)·e^(−r/3)",
+    rmax: 40
+  },
+  "3,1": {
+    R: r => (8 / (27 * Math.sqrt(6))) * (6 - r) * r * Math.exp(-r / 3),
+    formula: "R₃₁(r) = (8/(27√6))·(6 − r)·r·e^(−r/3)",
+    rmax: 40
+  },
+  "3,2": {
+    R: r => (4 / (81 * Math.sqrt(30))) * r * r * Math.exp(-r / 3),
+    formula: "R₃₂(r) = (4/(81√30))·r²·e^(−r/3)",
+    rmax: 40
+  }
+};
+
+// ─── dimensions ───────────────────────────────────────────────────
+const W = 620, H = 320;
+const margin = { top: 24, right: 24, bottom: 50, left: 62 };
+const innerW = W - margin.left - margin.right;
+const innerH = H - margin.top - margin.bottom;
+
+const W_strip = 620, H_strip = 80;
+const ms = { top: 10, right: 24, bottom: 30, left: 62 };
+const isW = W_strip - ms.left - ms.right;
+const isH = H_strip - ms.top - ms.bottom;
+
+// ─── build main SVG ───────────────────────────────────────────────
+const mainSvg = d3.select("#main-svg").attr("width", W).attr("height", H);
+const g = mainSvg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+const xScale = d3.scaleLinear().domain([0, 12]).range([0, innerW]);
+const yScale = d3.scaleLinear().domain([0, 0.55]).range([innerH, 0]);
+
+const xAxis = g.append("g").attr("class", "axis").attr("transform", `translate(0,${innerH})`);
+const yAxis = g.append("g").attr("class", "axis");
+
+g.append("text").attr("class", "axis-label")
+  .attr("x", innerW / 2).attr("y", innerH + 40)
+  .attr("text-anchor", "middle").text("r (Bohr radii a₀)");
+
+g.append("text").attr("class", "axis-label")
+  .attr("transform", "rotate(-90)")
+  .attr("x", -innerH / 2).attr("y", -50)
+  .attr("text-anchor", "middle").text("Probability density");
+
+// shaded area under P(r) for cumulative
+const areaPath = g.append("path")
+  .attr("fill", "#C8102E")
+  .attr("opacity", 0.15);
+
+// paths
+const pathWf = g.append("path").attr("fill", "none").attr("stroke", "#2A1A0E").attr("stroke-width", 1.5).attr("stroke-dasharray", "6,4");
+const pathP = g.append("path").attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2.5);
+
+// markers
+const markerRmp = g.append("line").attr("y1", 0).attr("y2", innerH).attr("stroke", "#C8102E").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+const markerRmean = g.append("line").attr("y1", 0).attr("y2", innerH).attr("stroke", "#545454").attr("stroke-width", 1.5).attr("stroke-dasharray", "4,3");
+const labelRmp = g.append("text").attr("font-size", 10).attr("fill", "#C8102E").attr("text-anchor", "middle");
+const labelRmean = g.append("text").attr("font-size", 10).attr("fill", "#545454").attr("text-anchor", "middle");
+
+// cumulative marker on main chart
+const cumLine = g.append("line").attr("y1", 0).attr("y2", innerH).attr("stroke", "#C8102E").attr("stroke-width", 1).attr("stroke-dasharray", "2,3").attr("opacity", 0.7);
+
+// ─── build strip SVG ─────────────────────────────────────────────
+const stripSvg = d3.select("#strip-svg").attr("width", W_strip).attr("height", H_strip);
+const gs = stripSvg.append("g").attr("transform", `translate(${ms.left},${ms.top})`);
+
+const xScaleS = d3.scaleLinear().range([0, isW]);
+const yScaleS = d3.scaleLinear().domain([0, 1]).range([isH, 0]);
+
+const sXAxis = gs.append("g").attr("class", "axis").attr("transform", `translate(0,${isH})`);
+gs.append("g").attr("class", "axis").call(d3.axisLeft(yScaleS).ticks(3).tickFormat(d3.format(".1f")));
+gs.append("text").attr("class", "axis-label").attr("x", isW / 2).attr("y", isH + 26).attr("text-anchor", "middle").attr("font-size", 11).text("r (a₀)");
+gs.append("text").attr("class", "axis-label").attr("transform", "rotate(-90)").attr("x", -isH / 2).attr("y", -48).attr("text-anchor", "middle").attr("font-size", 11).text("Cumul.");
+
+const stripAreaPath = gs.append("path").attr("fill", "#C8102E").attr("opacity", 0.3);
+const stripLinePath = gs.append("path").attr("fill", "none").attr("stroke", "#C8102E").attr("stroke-width", 2);
+const stripCumLine = gs.append("line").attr("y1", 0).attr("y2", isH).attr("stroke", "#C8102E").attr("stroke-width", 1.5);
+
+let showWf = true;
+
+// ─── numerical integration (trapezoidal) ─────────────────────────
+function trapz(xs, ys) {
+  let sum = 0;
+  for (let i = 1; i < xs.length; i++) {
+    sum += 0.5 * (ys[i - 1] + ys[i]) * (xs[i] - xs[i - 1]);
+  }
+  return sum;
+}
+
+function cumTrapz(xs, ys) {
+  const out = [0];
+  for (let i = 1; i < xs.length; i++) {
+    out.push(out[i - 1] + 0.5 * (ys[i - 1] + ys[i]) * (xs[i] - xs[i - 1]));
+  }
+  return out;
+}
+
+// ─── main update ─────────────────────────────────────────────────
+let currentState = null;
+let cumData = null;
+let rMaxCur = 12;
+
+function update(n, l) {
+  const key = `${n},${l}`;
+  const st = states[key];
+  if (!st) return;
+  currentState = st;
+
+  const rmax = st.rmax;
+  rMaxCur = rmax;
+  const Nr = 800;
+  const rs = d3.range(0, rmax + rmax / Nr, rmax / Nr);
+
+  const Rvals = rs.map(r => st.R(r));
+  const Psq = Rvals.map(R => R * R);               // |R|²
+  const Probs = rs.map((r, i) => r * r * Psq[i]);  // r²|R|²
+
+  // normalization check
+  const norm = trapz(rs, Probs);
+  document.getElementById("info-norm").textContent = norm.toFixed(4);
+
+  // cumulative
+  const cumProbs = cumTrapz(rs, Probs);
+  cumData = { rs, cumProbs, Probs };
+
+  // most probable radius
+  let rmp = 0, pmax = 0;
+  for (let i = 0; i < rs.length; i++) {
+    if (Probs[i] > pmax) { pmax = Probs[i]; rmp = rs[i]; }
+  }
+
+  // mean radius
+  const rMeanVals = rs.map((r, i) => r * Probs[i]);
+  const rmean = trapz(rs, rMeanVals) / norm;
+
+  // P(r < 1 a₀)
+  // find index of r=1
+  const idx1 = d3.bisectLeft(rs, 1);
+  const pAtA0 = idx1 < cumProbs.length ? cumProbs[idx1] : 0;
+
+  // Update info panel
+  document.getElementById("info-nl").textContent = `n=${n}, ℓ=${l}`;
+  document.getElementById("info-nodes").textContent = `${n - l - 1}`;
+  document.getElementById("info-rmp").textContent = rmp.toFixed(3) + " a₀";
+  document.getElementById("info-rmean").textContent = rmean.toFixed(3) + " a₀";
+  document.getElementById("info-p-a0").textContent = (pAtA0 * 100).toFixed(1) + "%";
+  document.getElementById("wf-formula").textContent = st.formula;
+
+  // Scales
+  const yMaxP = d3.max(Probs);
+  const yMaxWf = showWf ? d3.max(Psq) : 0;
+  const yDom = Math.max(yMaxP, yMaxWf) * 1.12;
+
+  xScale.domain([0, rmax]);
+  yScale.domain([0, yDom]);
+  xScaleS.domain([0, rmax]);
+
+  xAxis.call(d3.axisBottom(xScale).ticks(8));
+  yAxis.call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format(".3f")));
+  sXAxis.call(d3.axisBottom(xScaleS).ticks(8));
+
+  // paths
+  const lineP = d3.line().x((_, i) => xScale(rs[i])).y(d => yScale(d)).curve(d3.curveMonotoneX);
+  const lineWf = d3.line().x((_, i) => xScale(rs[i])).y(d => yScale(d)).curve(d3.curveMonotoneX);
+
+  pathP.datum(Probs).attr("d", lineP);
+  pathWf.datum(Psq).attr("d", lineWf).style("display", showWf ? null : "none");
+  document.getElementById("wf-legend").style.display = showWf ? "flex" : "none";
+
+  // markers
+  markerRmp.attr("x1", xScale(rmp)).attr("x2", xScale(rmp));
+  markerRmean.attr("x1", xScale(rmean)).attr("x2", xScale(rmean));
+  labelRmp.attr("x", xScale(rmp)).attr("y", -8).text(`r_mp=${rmp.toFixed(2)}`);
+  labelRmean.attr("x", xScale(rmean)).attr("y", -2).text(`⟨r⟩=${rmean.toFixed(2)}`);
+
+  // strip line
+  const lineStrip = d3.line()
+    .x(d => xScaleS(d.r))
+    .y(d => yScaleS(d.c))
+    .curve(d3.curveMonotoneX);
+
+  const stripLineData = rs.map((r, i) => ({ r, c: cumProbs[i] / norm }));
+  stripLinePath.datum(stripLineData).attr("d", lineStrip);
+
+  // Trigger cumulative update with current slider
+  const slider = document.getElementById("cum-slider");
+  updateCumulative(+slider.value * rmax);
+}
+
+function updateCumulative(xCum) {
+  if (!cumData) return;
+  const { rs, cumProbs, Probs } = cumData;
+  const norm = cumProbs[cumProbs.length - 1];
+  const rmax = rMaxCur;
+
+  // Clamp
+  xCum = Math.min(xCum, rmax);
+
+  // find index
+  const idx = d3.bisectLeft(rs, xCum);
+  const cumVal = idx < cumProbs.length ? cumProbs[idx] / norm : 1;
+
+  // area fill on main chart
+  const areaGen = d3.area()
+    .x((_, i) => xScale(rs[i]))
+    .y0(yScale(0))
+    .y1(d => yScale(d))
+    .defined((_, i) => rs[i] <= xCum)
+    .curve(d3.curveMonotoneX);
+  areaPath.datum(Probs).attr("d", areaGen);
+
+  // cumulative marker line on main
+  cumLine.attr("x1", xScale(xCum)).attr("x2", xScale(xCum));
+
+  // strip area
+  const stripAreaGen = d3.area()
+    .x(d => xScaleS(d.r))
+    .y0(yScaleS(0))
+    .y1(d => yScaleS(d.c))
+    .defined(d => d.r <= xCum)
+    .curve(d3.curveMonotoneX);
+  const stripData = rs.map((r, i) => ({ r, c: cumProbs[i] / norm }));
+  stripAreaPath.datum(stripData).attr("d", stripAreaGen);
+
+  // strip cum line
+  stripCumLine.attr("x1", xScaleS(xCum)).attr("x2", xScaleS(xCum));
+
+  // Labels
+  document.getElementById("cum-x-val").textContent = xCum.toFixed(2) + " a₀";
+  document.getElementById("cum-label").textContent = `P(r < ${xCum.toFixed(2)} a₀) = ${(cumVal * 100).toFixed(2)}%`;
+}
+
+// ─── ℓ dropdown rebuild ───────────────────────────────────────────
+function rebuildL(n) {
+  const lSel = document.getElementById("l-select");
+  lSel.innerHTML = "";
+  const names = ["0 (s)", "1 (p)", "2 (d)", "3 (f)"];
+  for (let l = 0; l < n; l++) {
+    const opt = document.createElement("option");
+    opt.value = l;
+    opt.textContent = names[l] || l;
+    lSel.appendChild(opt);
+  }
+  lSel.value = "0";
+}
+
+// ─── events ──────────────────────────────────────────────────────
+const nSel = document.getElementById("n-select");
+const lSel = document.getElementById("l-select");
+
+nSel.addEventListener("change", function () {
+  const n = +this.value;
+  rebuildL(n);
+  update(n, 0);
+  document.getElementById("cum-slider").value = 0.2;
+});
+
+lSel.addEventListener("change", function () {
+  update(+nSel.value, +this.value);
+  document.getElementById("cum-slider").value = 0.2;
+});
+
+document.getElementById("toggle-wf").addEventListener("click", function () {
+  showWf = !showWf;
+  this.classList.toggle("active", showWf);
+  this.textContent = showWf ? "Hide |R|²" : "Show |R|²";
+  update(+nSel.value, +lSel.value);
+});
+
+document.getElementById("cum-slider").addEventListener("input", function () {
+  const rmax = rMaxCur;
+  updateCumulative(+this.value * rmax);
+});
+
+// init
+rebuildL(1);
+update(1, 0);
+document.getElementById("cum-slider").value = 1 / 12; // x≈1 for n=1 rmax=12
+updateCumulative(1);
+</script>
+</body>
+</html>

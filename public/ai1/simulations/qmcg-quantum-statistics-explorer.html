@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Statistics Explorer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 24px 32px 32px;
+    max-width: 820px;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 20px;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+  .controls {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 18px;
+    align-items: flex-start;
+  }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .ctrl-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #545454;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .ctrl-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  input[type=range] {
+    width: 160px;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  .val-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2A1A0E;
+    min-width: 60px;
+  }
+  .sim-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  svg text {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+  }
+  .info-box {
+    background: #f7f5f2;
+    border: 1px solid #e0dbd4;
+    border-radius: 6px;
+    padding: 14px 16px;
+    width: 220px;
+    min-height: 140px;
+    flex-shrink: 0;
+  }
+  .info-box h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #545454;
+    margin-bottom: 10px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+  .info-label { color: #545454; font-weight: 600; }
+  .info-val { font-weight: 700; color: #2A1A0E; font-variant-numeric: tabular-nums; }
+  .info-val.fd { color: #2A1A0E; }
+  .info-val.be { color: #C8102E; }
+  .info-val.mb { color: #545454; }
+  .info-kt {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #545454;
+    border-top: 1px solid #e0dbd4;
+    padding-top: 8px;
+  }
+  .info-note {
+    margin-top: 6px;
+    font-size: 11px;
+    color: #545454;
+    font-style: italic;
+    line-height: 1.4;
+  }
+  .readout {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #545454;
+    background: #f7f5f2;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid #e8e3dc;
+  }
+  .axis path, .axis line { stroke: #ccc; }
+  .axis text { fill: #545454; font-size: 10px; }
+</style>
+</head>
+<body>
+<h1>Fermi-Dirac vs Bose-Einstein vs Maxwell-Boltzmann</h1>
+<p class="sub">One sign in the denominator separates solid matter from laser light. Drag T to see the step function freeze and the Bose peak diverge.</p>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <div class="ctrl-label">Temperature T</div>
+    <div class="ctrl-row">
+      <input type="range" id="sliderT" min="300" max="8000" step="50" value="1500">
+      <span class="val-badge" id="valT">1500 K</span>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Chemical Potential μ</div>
+    <div class="ctrl-row">
+      <input type="range" id="sliderMu" min="0.5" max="3.5" step="0.05" value="2.0">
+      <span class="val-badge" id="valMu">2.00 eV</span>
+    </div>
+  </div>
+</div>
+
+<div class="sim-row">
+  <svg id="main-svg" width="460" height="300"></svg>
+  <div class="info-box">
+    <h3>At E = μ + 0.5 eV</h3>
+    <div class="info-row"><span class="info-label">FD:</span><span class="info-val fd" id="ib-fd">—</span></div>
+    <div class="info-row"><span class="info-label">BE:</span><span class="info-val be" id="ib-be">—</span></div>
+    <div class="info-row"><span class="info-label">MB:</span><span class="info-val mb" id="ib-mb">—</span></div>
+    <div class="info-kt"><span id="ib-kt">kT = — eV</span></div>
+    <div class="info-note">"At high T: all three converge to MB"</div>
+  </div>
+</div>
+
+<div class="readout" id="readout">T = — K | kT = — eV | At E=μ+0.5 eV: FD=—, BE=—, MB=—</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+(function() {
+  const kB = 8.617e-5; // eV/K
+
+  // --- layout ---
+  const margin = { top: 20, right: 18, bottom: 42, left: 50 };
+  const W = 460, H = 300;
+  const iw = W - margin.left - margin.right;
+  const ih = H - margin.top - margin.bottom;
+
+  const svg = d3.select('#main-svg');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleLinear().domain([0, 5]).range([0, iw]);
+  const yScale = d3.scaleLog().domain([0.001, 100]).range([ih, 0]).clamp(true);
+
+  // Clip path to prevent drawing outside plot area
+  svg.append('defs').append('clipPath').attr('id', 'plot-clip')
+    .append('rect').attr('width', iw).attr('height', ih);
+
+  // Axes
+  const xAxis = d3.axisBottom(xScale).ticks(6).tickSize(4);
+  const yAxis = d3.axisLeft(yScale)
+    .tickValues([0.001, 0.01, 0.1, 1, 10, 100])
+    .tickFormat(d3.format('.4~g'))
+    .tickSize(4);
+
+  const xAxisG = g.append('g').attr('class', 'axis').attr('transform', `translate(0,${ih})`).call(xAxis);
+  const yAxisG = g.append('g').attr('class', 'axis').call(yAxis);
+
+  // Axis labels
+  g.append('text')
+    .attr('x', iw / 2).attr('y', ih + 36)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '12px').attr('font-weight', '600')
+    .text('E (eV)');
+
+  g.append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -ih / 2).attr('y', -40)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '12px').attr('font-weight', '600')
+    .text('⟨n⟩');
+
+  // Reference line y=1
+  const refLine = g.append('line')
+    .attr('x1', 0).attr('x2', iw)
+    .attr('y1', yScale(1)).attr('y2', yScale(1))
+    .attr('stroke', '#bbb').attr('stroke-width', 1)
+    .attr('stroke-dasharray', '4,3');
+
+  g.append('text')
+    .attr('x', iw - 2).attr('y', yScale(1) - 4)
+    .attr('text-anchor', 'end')
+    .attr('fill', '#aaa').attr('font-size', '10px')
+    .text('½-fill (FD)');
+
+  // Mu vertical line (dynamic)
+  const muLine = g.append('line')
+    .attr('y1', 0).attr('y2', ih)
+    .attr('stroke', '#545454').attr('stroke-width', 1)
+    .attr('stroke-dasharray', '5,3');
+
+  const muLabel = g.append('text')
+    .attr('y', 10)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#545454').attr('font-size', '11px').attr('font-weight', '600')
+    .text('μ');
+
+  // Curve clip group
+  const clipG = g.append('g').attr('clip-path', 'url(#plot-clip)');
+
+  // Path generators
+  const lineGen = d3.line()
+    .x(d => xScale(d[0]))
+    .y(d => yScale(d[1]))
+    .defined(d => isFinite(d[1]) && d[1] > 0)
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  const pathFD = clipG.append('path')
+    .attr('fill', 'none')
+    .attr('stroke', '#2A1A0E')
+    .attr('stroke-width', 2.5);
+
+  const pathBE = clipG.append('path')
+    .attr('fill', 'none')
+    .attr('stroke', '#C8102E')
+    .attr('stroke-width', 2.5);
+
+  const pathMB = clipG.append('path')
+    .attr('fill', 'none')
+    .attr('stroke', '#545454')
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '5,3');
+
+  // Legend
+  const legend = g.append('g').attr('transform', `translate(${iw - 90}, 4)`);
+  const legendData = [
+    { label: 'FD', color: '#2A1A0E', dash: null },
+    { label: 'BE', color: '#C8102E', dash: null },
+    { label: 'MB', color: '#545454', dash: '5,3' },
+  ];
+  legendData.forEach((d, i) => {
+    const row = legend.append('g').attr('transform', `translate(0, ${i * 18})`);
+    row.append('circle').attr('cx', 6).attr('cy', 0).attr('r', 5).attr('fill', d.color);
+    row.append('text').attr('x', 15).attr('y', 4)
+      .attr('fill', '#2A1A0E').attr('font-size', '11px').attr('font-weight', '600')
+      .text(d.label);
+  });
+
+  // --- Compute ---
+  function nFD(E, mu, kT) {
+    return 1 / (Math.exp((E - mu) / kT) + 1);
+  }
+  function nBE(E, mu, kT) {
+    const x = (E - mu) / kT;
+    if (x <= 0.001) return null; // avoid divergence
+    const v = 1 / (Math.exp(x) - 1);
+    return Math.min(v, 50); // clip at 50 for display
+  }
+  function nMB(E, mu, kT) {
+    return Math.exp(-(E - mu) / kT);
+  }
+
+  function update() {
+    const T = +document.getElementById('sliderT').value;
+    const mu = +document.getElementById('sliderMu').value;
+    const kT = kB * T;
+
+    document.getElementById('valT').textContent = T + ' K';
+    document.getElementById('valMu').textContent = mu.toFixed(2) + ' eV';
+
+    // Build curve data — 300 points from 0 to 5 eV
+    const N = 400;
+    const Emin = 0.001, Emax = 5.0;
+    const fdData = [], beData = [], mbData = [];
+
+    for (let i = 0; i <= N; i++) {
+      const E = Emin + (Emax - Emin) * i / N;
+      fdData.push([E, nFD(E, mu, kT)]);
+      const beVal = nBE(E, mu, kT);
+      if (beVal !== null) beData.push([E, beVal]);
+      mbData.push([E, nMB(E, mu, kT)]);
+    }
+
+    pathFD.attr('d', lineGen(fdData));
+    pathBE.attr('d', lineGen(beData));
+    pathMB.attr('d', lineGen(mbData));
+
+    // Mu line
+    muLine.attr('x1', xScale(mu)).attr('x2', xScale(mu));
+    muLabel.attr('x', xScale(mu) + 8);
+
+    // Info box
+    const EProbe = mu + 0.5;
+    const fdV = nFD(EProbe, mu, kT);
+    const beV = nBE(EProbe, mu, kT);
+    const mbV = nMB(EProbe, mu, kT);
+
+    document.getElementById('ib-fd').textContent = fdV.toFixed(4);
+    document.getElementById('ib-be').textContent = beV !== null ? beV.toFixed(4) : 'div!';
+    document.getElementById('ib-mb').textContent = mbV.toFixed(4);
+    document.getElementById('ib-kt').textContent = 'kT = ' + kT.toFixed(3) + ' eV';
+
+    // Readout
+    document.getElementById('readout').textContent =
+      `T = ${T} K | kT = ${kT.toFixed(3)} eV | At E=μ+0.5 eV:  FD=${fdV.toFixed(4)},  BE=${beV !== null ? beV.toFixed(4) : 'div'},  MB=${mbV.toFixed(4)}`;
+  }
+
+  document.getElementById('sliderT').addEventListener('input', update);
+  document.getElementById('sliderMu').addEventListener('input', update);
+
+  update();
+
+  // --- Testable predictions ---
+  // P1: FD step at T=300K — 0.1 eV corresponds to ~3.9×kT, so FD is steep but not a perfect step.
+  // fdBelow ≈ 0.979 (close to 1) and fdAbove ≈ 0.021 (close to 0), tolerance 5%.
+  const mu0 = 2.0, kT300 = 8.617e-5 * 300;  // kT300 ≈ 0.02585 eV
+  const fdBelow = 1 / (Math.exp((-0.1) / kT300) + 1);  // ≈ 0.979
+  const fdAbove = 1 / (Math.exp((0.1) / kT300) + 1);   // ≈ 0.021
+  console.assert(Math.abs(fdBelow - 1) < 0.05, 'P1a FD below mu at 300K ≈1 (within 5%): ' + fdBelow.toFixed(6));
+  console.assert(Math.abs(fdAbove) < 0.05,     'P1b FD above mu at 300K ≈0 (within 5%): ' + fdAbove.toFixed(6));
+
+  // P2: Classical (MB) limit — all three distributions converge when (E-μ)/kT >> 1.
+  // At x = (E-μ)/kT = 5: FD ≈ BE ≈ MB = exp(-5) ≈ 0.00674, all within 1% of each other.
+  const x5 = 5;  // deep classical regime
+  const fdX5 = 1 / (Math.exp(x5) + 1);   // ≈ 0.006693
+  const beX5 = 1 / (Math.exp(x5) - 1);   // ≈ 0.006784
+  const mbX5 = Math.exp(-x5);             // ≈ 0.006738
+  console.assert(Math.abs(fdX5 / mbX5 - 1) < 0.01, 'P2a FD/MB≈1 at x=5 (classical limit): ' + (fdX5 / mbX5).toFixed(4));
+  console.assert(Math.abs(beX5 / mbX5 - 1) < 0.01, 'P2b BE/MB≈1 at x=5 (classical limit): ' + (beX5 / mbX5).toFixed(4));
+  console.log('QS: P1 FD at 300K below=', fdBelow.toFixed(6), 'above=', fdAbove.toFixed(6),
+    'P2 ratios FD/MB=', (fdX5 / mbX5).toFixed(4), 'BE/MB=', (beX5 / mbX5).toFixed(4));
+})();
+</script>
+</body>
+</html>

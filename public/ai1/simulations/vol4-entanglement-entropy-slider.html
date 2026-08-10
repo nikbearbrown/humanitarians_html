@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entanglement Entropy — The Ebit Curve</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 20px; }
+  .controls {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=range] { width: 220px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.88rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 8px 14px;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .charts { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Entanglement Entropy — The Ebit Curve</h1>
+<div class="subtitle">cos θ|00⟩ + sin θ|11⟩ — drag θ from product state to Bell state; watch the entropy curve and the subsystem Bloch ball shrink.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Schmidt angle θ</label>
+    <input type="range" id="theta-slider" min="0" max="45" step="0.5" value="0">
+    <span class="val-display" id="theta-val">θ = 0° (product)</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Mode</label>
+    <select id="mode-select" style="padding:4px 8px; font-size:0.82rem; border:1px solid #ddd; font-family:inherit;">
+      <option value="sym">Symmetric: cos²θ, sin²θ</option>
+      <option value="asym">Asymmetric: α², 1−α²</option>
+    </select>
+  </div>
+  <div class="ctrl-group" id="alpha-ctrl" style="display:none;">
+    <label>α</label>
+    <input type="range" id="alpha-slider" min="0" max="1" step="0.01" value="0.5">
+    <span class="val-display" id="alpha-val">α = 0.500</span>
+  </div>
+</div>
+
+<div class="readout">
+  <div>θ = <span id="rtheta">0.0</span>°</div>
+  <div>λ₁ = <span id="rl1">1.000</span></div>
+  <div>λ₂ = <span id="rl2">0.000</span></div>
+  <div>S_E = <span id="rSE">0.000</span> ebits</div>
+  <div>Purity = <span id="rpurity">1.000</span></div>
+</div>
+
+<div class="charts">
+  <svg id="entropy-chart" width="340" height="280"></svg>
+  <svg id="bloch-chart" width="260" height="280"></svg>
+  <svg id="coeff-chart" width="200" height="280"></svg>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+let theta = 0; // degrees
+let mode = 'sym';
+let alphaVal = 0.5;
+
+function getSchmidtCoeffs() {
+  if (mode === 'sym') {
+    const tr = theta * Math.PI / 180;
+    return [Math.pow(Math.cos(tr), 2), Math.pow(Math.sin(tr), 2)];
+  } else {
+    return [alphaVal * alphaVal, 1 - alphaVal * alphaVal];
+  }
+}
+
+function entropy(l1, l2) {
+  let S = 0;
+  if (l1 > 1e-10) S -= l1 * Math.log2(l1);
+  if (l2 > 1e-10) S -= l2 * Math.log2(l2);
+  return S;
+}
+
+// ── Entropy chart ────────────────────────────────────────────────────────────
+const eSvg = d3.select('#entropy-chart');
+const eW = 340, eH = 280;
+const eM = {top: 30, right: 20, bottom: 48, left: 52};
+const eIW = eW - eM.left - eM.right, eIH = eH - eM.top - eM.bottom;
+const eG = eSvg.append('g').attr('transform', `translate(${eM.left},${eM.top})`);
+
+const eX = d3.scaleLinear().domain([0, 45]).range([0, eIW]);
+const eY = d3.scaleLinear().domain([0, 1.05]).range([eIH, 0]);
+
+eG.append('g').attr('transform',`translate(0,${eIH})`).call(d3.axisBottom(eX).ticks(5).tickFormat(d => `${d}°`));
+eG.append('g').call(d3.axisLeft(eY).ticks(5));
+eG.append('text').attr('x',eIW/2).attr('y',-12).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Entanglement Entropy S_E(θ)');
+eG.append('text').attr('x',eIW/2).attr('y',eIH+38).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('Schmidt angle θ');
+eG.append('text').attr('transform','rotate(-90)').attr('x',-eIH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('S_E (ebits)');
+
+// Static entropy curve
+const entropyData = d3.range(200).map(i => {
+  const th = 45 * i / 199;
+  const tr = th * Math.PI / 180;
+  const l1 = Math.pow(Math.cos(tr), 2), l2 = Math.pow(Math.sin(tr), 2);
+  return { th, S: entropy(l1, l2) };
+});
+
+eG.append('path').datum(entropyData).attr('fill','none').attr('stroke', INK).attr('stroke-width',1.5)
+  .attr('d', d3.line().x(d=>eX(d.th)).y(d=>eY(d.S)));
+
+// Reference points
+const refPts = [
+  { th: 30, label: 'θ=30°\nS≈0.811', S: entropy(3/4, 1/4) },
+  { th: 45, label: 'Bell\nS=1', S: 1.0 }
+];
+refPts.forEach(pt => {
+  eG.append('circle').attr('cx', eX(pt.th)).attr('cy', eY(pt.S)).attr('r', 4).attr('fill', SLATE).attr('opacity', 0.6);
+  eG.append('text').attr('x', eX(pt.th)).attr('y', eY(pt.S) - 8).attr('text-anchor', 'middle').attr('font-size', '9px').attr('fill', SLATE).text(pt.label.split('\n')[0]);
+});
+
+// Moving point (red dot on the curve)
+const movingDot = eG.append('circle').attr('r', 7).attr('fill', RED).attr('stroke', 'white').attr('stroke-width', 1.5);
+// Readout line
+const vLine = eG.append('line').attr('y1', 0).attr('y2', eIH).attr('stroke', RED).attr('stroke-width', 1).attr('stroke-dasharray', '4,3').attr('opacity', 0.5);
+
+// ── Bloch ball (purity panel) ────────────────────────────────────────────────
+const bSvg = d3.select('#bloch-chart');
+const bW = 260, bH = 280;
+const bM = {top: 30, right: 20, bottom: 30, left: 20};
+const bCx = bW/2, bCy = bH/2 + 10, bR = 90;
+const bG = bSvg.append('g');
+
+bG.append('text').attr('x', bCx).attr('y', 22).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill', INK).text("Subsystem A (Bloch ball)");
+
+// Outer circle (Bloch sphere boundary)
+bG.append('circle').attr('cx',bCx).attr('cy',bCy).attr('r',bR).attr('fill','none').attr('stroke','#ddd').attr('stroke-width',1.5);
+// Label
+bG.append('text').attr('x',bCx).attr('y',bCy-bR-8).attr('text-anchor','middle').attr('font-size','10px').attr('fill',SLATE).text('|0⟩');
+bG.append('text').attr('x',bCx).attr('y',bCy+bR+16).attr('text-anchor','middle').attr('font-size','10px').attr('fill',SLATE).text('|1⟩');
+
+// Mixed state boundary circle (shrinks with entanglement)
+const mixedCircle = bG.append('circle').attr('cx',bCx).attr('cy',bCy).attr('fill', BLUE).attr('opacity', 0.15);
+const pureDot = bG.append('circle').attr('cx', bCx).attr('cy', bCy-bR).attr('fill', RED).attr('r', 8);
+const purityText = bG.append('text').attr('x', bCx).attr('y', bCy + 6).attr('text-anchor','middle').attr('font-size','11px').attr('font-weight','700').attr('fill', INK);
+
+// ── Coefficient display ───────────────────────────────────────────────────────
+const cSvg = d3.select('#coeff-chart');
+const cW = 200, cH = 280;
+const cG = cSvg.append('g');
+cG.append('text').attr('x', cW/2).attr('y', 22).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Schmidt Coefficients');
+
+const barWidth = 60;
+const barMaxH = 180;
+const bar1X = 30, bar2X = 110, barBottom = 250;
+
+cG.append('text').attr('x', bar1X + barWidth/2).attr('y', barBottom + 16).attr('text-anchor','middle').attr('font-size','10px').attr('fill', BLUE).text('λ₁=cos²θ');
+cG.append('text').attr('x', bar2X + barWidth/2).attr('y', barBottom + 16).attr('text-anchor','middle').attr('font-size','10px').attr('fill', SLATE).text('λ₂=sin²θ');
+
+const bar1 = cG.append('rect').attr('x', bar1X).attr('y', barBottom - barMaxH).attr('width', barWidth).attr('fill', BLUE).attr('opacity', 0.8);
+const bar2 = cG.append('rect').attr('x', bar2X).attr('y', barBottom - barMaxH).attr('width', barWidth).attr('fill', SLATE).attr('opacity', 0.8);
+const label1 = cG.append('text').attr('x', bar1X + barWidth/2).attr('y', 0).attr('text-anchor','middle').attr('font-size','10px').attr('fill', BLUE);
+const label2 = cG.append('text').attr('x', bar2X + barWidth/2).attr('y', 0).attr('text-anchor','middle').attr('font-size','10px').attr('fill', SLATE);
+
+// Check mark
+const checkMark = cG.append('text').attr('x', cW/2).attr('y', barBottom - barMaxH - 12).attr('text-anchor','middle').attr('font-size','10px').attr('fill', '#4A7B4A');
+
+function updateAll() {
+  const [l1, l2] = getSchmidtCoeffs();
+  const S = entropy(l1, l2);
+  const purity = l1*l1 + l2*l2;
+
+  // Update readout
+  const dispTheta = mode === 'sym' ? theta : Math.acos(Math.sqrt(l1)) * 180 / Math.PI;
+  document.getElementById('rtheta').textContent = dispTheta.toFixed(1);
+  document.getElementById('rl1').textContent = l1.toFixed(4);
+  document.getElementById('rl2').textContent = l2.toFixed(4);
+  document.getElementById('rSE').textContent = S.toFixed(4);
+  document.getElementById('rpurity').textContent = purity.toFixed(4);
+
+  // Entropy chart moving dot
+  if (mode === 'sym') {
+    movingDot.attr('cx', eX(theta)).attr('cy', eY(S));
+    vLine.attr('x1', eX(theta)).attr('x2', eX(theta));
+  }
+
+  // Bloch ball: radius = purity radius = √(2purity - 1) when purity ≥ 0.5
+  // Actually for a qubit ρ_A = [[l1, 0], [0, l2]], Bloch vector z = l1 - l2
+  const blochZ = l1 - l2; // ranges from 1 (product) to 0 (Bell state)
+  const blochRadius = Math.abs(blochZ) * bR;
+  const dotY = bCy - blochZ * bR; // position of the pure state dot
+
+  mixedCircle.attr('r', Math.max(0, (1 - Math.abs(blochZ)) * bR))
+    .attr('opacity', 0.12 + 0.1 * (1 - Math.abs(blochZ)));
+  pureDot.attr('cy', dotY);
+  purityText.text(`Tr(ρ²) = ${purity.toFixed(3)}`);
+
+  // Coefficient bars
+  bar1.attr('height', l1 * barMaxH).attr('y', barBottom - l1 * barMaxH);
+  bar2.attr('height', l2 * barMaxH).attr('y', barBottom - l2 * barMaxH);
+  label1.attr('y', barBottom - l1 * barMaxH - 4).text(l1.toFixed(3));
+  label2.attr('y', barBottom - l2 * barMaxH - 4).text(l2.toFixed(3));
+
+  // Normalization check
+  checkMark.text(`λ₁+λ₂ = ${(l1+l2).toFixed(4)}`);
+}
+
+// Controls
+document.getElementById('theta-slider').addEventListener('input', e => {
+  theta = parseFloat(e.target.value);
+  const label = theta === 0 ? ' (product)' : theta === 45 ? ' (Bell |Φ+⟩)' : '';
+  document.getElementById('theta-val').textContent = `θ = ${theta.toFixed(1)}°${label}`;
+  updateAll();
+});
+
+document.getElementById('mode-select').addEventListener('change', e => {
+  mode = e.target.value;
+  const alphaCtrl = document.getElementById('alpha-ctrl');
+  alphaCtrl.style.display = mode === 'asym' ? 'flex' : 'none';
+  updateAll();
+});
+
+document.getElementById('alpha-slider').addEventListener('input', e => {
+  alphaVal = parseFloat(e.target.value);
+  document.getElementById('alpha-val').textContent = `α = ${alphaVal.toFixed(3)}`;
+  updateAll();
+});
+
+// Initial render
+updateAll();
+
+// Testable predictions
+console.assert(Math.abs(entropy(1, 0) - 0) < 1e-10, 'P1a: θ=0 → S_E=0');
+console.assert(Math.abs(entropy(0.5, 0.5) - 1.0) < 1e-10, 'P1b: θ=45° → S_E=1 ebit');
+const S_30 = entropy(3/4, 1/4);
+console.assert(Math.abs(S_30 - 0.8113) < 0.001, `P2: θ=30° → S_E≈0.811 ebits, got ${S_30.toFixed(4)}`);
+console.log(`✓ P1: θ=0° S_E = ${entropy(1, 0).toFixed(6)} = 0 (product state)`);
+console.log(`✓ P1: θ=45° S_E = ${entropy(0.5, 0.5).toFixed(6)} = 1 ebit (Bell state)`);
+console.log(`✓ P2: θ=30° S_E = ${S_30.toFixed(4)} ≈ 0.811 ebits`);
+</script>
+</body>
+</html>

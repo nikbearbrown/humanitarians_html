@@ -87,7 +87,7 @@ export default function AIForGoodPage() {
               <PrimaryButton href="/programs/ai-for-good/ai-for-good-details">
                 Learn More
               </PrimaryButton>
-              <SecondaryButton href="/programs/ai-for-good/explore">
+              <SecondaryButton href="/projects">
                 Explore Projects
               </SecondaryButton>
             </div>

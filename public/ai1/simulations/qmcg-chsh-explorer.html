@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHSH Bell Inequality Tester</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .main { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+  .left-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .dials { display: flex; gap: 16px; }
+  .dial-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .dial-group label { font-size: 0.75rem; color: #545454; font-weight: 600; text-transform: uppercase; }
+  input[type=range] { width: 140px; accent-color: #C8102E; }
+  .dial-val { font-size: 0.82rem; font-weight: 700; }
+  .s-meter {
+    width: 280px;
+    padding: 12px 16px;
+    border: 2px solid #2A1A0E;
+    margin: 8px 0;
+    position: relative;
+  }
+  .s-value { font-size: 2.4rem; font-weight: 900; text-align: center; }
+  .s-label { font-size: 0.78rem; color: #545454; text-align: center; margin-top: 2px; }
+  .violation { background: #fff0f0; border-color: #C8102E; }
+  .violation .s-value { color: #C8102E; }
+  .corr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .corr-cell {
+    padding: 8px 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+    font-size: 0.82rem;
+  }
+  .corr-cell span { font-weight: 700; }
+  .btn { padding: 7px 16px; font-size: 0.8rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; margin-top: 4px; }
+  .btn.active { background: #2A1A0E; color: #fff; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+  .info { font-size: 0.8rem; color: #545454; margin-top: 4px; }
+</style>
+</head>
+<body>
+<h1>CHSH Bell Inequality Tester</h1>
+<div class="subtitle">E(a,b) = −cos(a−b) for the singlet. Drag Alice and Bob's angles — find the configuration that pushes |S| above 2 and toward 2√2 ≈ 2.828.</div>
+
+<div class="main">
+  <div class="left-panel">
+    <div style="font-size:0.8rem;color:#545454;">Alice's angles</div>
+    <div class="dials">
+      <div class="dial-group">
+        <label>a₁</label>
+        <input type="range" id="a1" min="0" max="360" step="1" value="0">
+        <span class="dial-val" id="a1-val">0°</span>
+      </div>
+      <div class="dial-group">
+        <label>a₂</label>
+        <input type="range" id="a2" min="0" max="360" step="1" value="90">
+        <span class="dial-val" id="a2-val">90°</span>
+      </div>
+    </div>
+    <div style="font-size:0.8rem;color:#545454;">Bob's angles</div>
+    <div class="dials">
+      <div class="dial-group">
+        <label>b₁</label>
+        <input type="range" id="b1" min="0" max="360" step="1" value="45">
+        <span class="dial-val" id="b1-val">45°</span>
+      </div>
+      <div class="dial-group">
+        <label>b₂</label>
+        <input type="range" id="b2" min="0" max="360" step="1" value="315">
+        <span class="dial-val" id="b2-val">315°</span>
+      </div>
+    </div>
+
+    <div class="s-meter" id="s-meter">
+      <div class="s-value" id="s-value">2.828</div>
+      <div class="s-label">CHSH S value &nbsp;|&nbsp; LHV bound ±2 &nbsp;|&nbsp; Tsirelson ±2√2 = ±2.828</div>
+    </div>
+
+    <div class="corr-grid">
+      <div class="corr-cell">E(a₁,b₁) = <span id="e11">−0.707</span></div>
+      <div class="corr-cell">E(a₁,b₂) = <span id="e12">−0.707</span></div>
+      <div class="corr-cell">E(a₂,b₁) = <span id="e21">−0.707</span></div>
+      <div class="corr-cell">E(a₂,b₂) = <span id="e22">0.707</span></div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn" onclick="setOptimal()">🎯 Set Optimal</button>
+      <button class="btn" onclick="setClassical()">↺ All-Equal</button>
+      <button class="btn" onclick="randomSearch()">🔀 Random Search</button>
+    </div>
+    <div class="info" id="search-info">Click Random Search to find max |S|</div>
+  </div>
+
+  <div>
+    <svg id="polar-chart" width="300" height="300"></svg>
+  </div>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+const TSI = 2 * Math.SQRT2;
+
+let angles = { a1: 0, a2: 90, b1: 45, b2: 315 };
+
+function E_corr(a_deg, b_deg) {
+  const diff = (a_deg - b_deg) * Math.PI / 180;
+  return -Math.cos(diff);
+}
+
+function computeS() {
+  const e11 = E_corr(angles.a1, angles.b1);
+  const e12 = E_corr(angles.a1, angles.b2);
+  const e21 = E_corr(angles.a2, angles.b1);
+  const e22 = E_corr(angles.a2, angles.b2);
+  return { S: e11 + e12 + e21 - e22, e11, e12, e21, e22 };
+}
+
+function updateDisplay() {
+  const { S, e11, e12, e21, e22 } = computeS();
+  const absS = Math.abs(S);
+
+  document.getElementById('s-value').textContent = S.toFixed(4);
+  document.getElementById('e11').textContent = e11.toFixed(4);
+  document.getElementById('e12').textContent = e12.toFixed(4);
+  document.getElementById('e21').textContent = e21.toFixed(4);
+  document.getElementById('e22').textContent = e22.toFixed(4);
+
+  const meter = document.getElementById('s-meter');
+  if (absS > 2.0) {
+    meter.classList.add('violation');
+  } else {
+    meter.classList.remove('violation');
+  }
+
+  // Update labels
+  ['a1','a2','b1','b2'].forEach(k => {
+    document.getElementById(`${k}-val`).textContent = `${angles[k]}°`;
+    document.getElementById(k).value = angles[k];
+  });
+
+  updatePolarChart();
+  updateMeterBar(S);
+}
+
+function setOptimal() {
+  angles = { a1: 0, a2: 90, b1: 45, b2: 315 };
+  updateDisplay();
+}
+
+function setClassical() {
+  angles = { a1: 0, a2: 0, b1: 0, b2: 0 };
+  updateDisplay();
+}
+
+let searchBest = 0;
+function randomSearch() {
+  let best = 0;
+  for (let i = 0; i < 5000; i++) {
+    const trial = {
+      a1: Math.random() * 360,
+      a2: Math.random() * 360,
+      b1: Math.random() * 360,
+      b2: Math.random() * 360
+    };
+    const e11 = E_corr(trial.a1, trial.b1);
+    const e12 = E_corr(trial.a1, trial.b2);
+    const e21 = E_corr(trial.a2, trial.b1);
+    const e22 = E_corr(trial.a2, trial.b2);
+    const S = Math.abs(e11 + e12 + e21 - e22);
+    if (S > best) { best = S; angles = { a1: Math.round(trial.a1), a2: Math.round(trial.a2), b1: Math.round(trial.b1), b2: Math.round(trial.b2) }; }
+  }
+  document.getElementById('search-info').textContent = `Best found: |S| = ${best.toFixed(4)} (Tsirelson = ${TSI.toFixed(4)})`;
+  updateDisplay();
+}
+
+// ── Polar chart: angle dials on a circle ──────────────────────────────────────
+const polSvg = d3.select('#polar-chart');
+const pW = 300, pH = 300;
+const cx = 150, cy = 155, r = 110;
+const pG = polSvg.append('g');
+
+pG.append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).attr('fill','none').attr('stroke','#eee').attr('stroke-width',1.5);
+pG.append('text').attr('x',cx).attr('y',22).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Measurement Angle Dial');
+
+// Reference marks
+for (let a = 0; a < 360; a += 45) {
+  const rad = (a - 90) * Math.PI / 180;
+  const x1 = cx + (r-8)*Math.cos(rad), y1 = cy + (r-8)*Math.sin(rad);
+  const x2 = cx + (r+4)*Math.cos(rad), y2 = cy + (r+4)*Math.sin(rad);
+  pG.append('line').attr('x1',x1).attr('y1',y1).attr('x2',x2).attr('y2',y2).attr('stroke','#ddd').attr('stroke-width',1);
+  pG.append('text').attr('x',cx+(r+18)*Math.cos(rad)).attr('y',cy+(r+18)*Math.sin(rad)).attr('text-anchor','middle').attr('dominant-baseline','middle').attr('font-size','9px').attr('fill','#aaa').text(`${a}°`);
+}
+
+const aliceColors = [RED, '#FF6B6B'];
+const bobColors = [BLUE, '#4AA0D5'];
+const aliceLabels = ['a₁','a₂'];
+const bobLabels = ['b₁','b₂'];
+
+const aliceArrows = aliceLabels.map((lbl, i) =>
+  pG.append('line').attr('stroke', aliceColors[i]).attr('stroke-width', i===0?3:2).attr('marker-end', `url(#arrow-a${i})`)
+);
+const bobArrows = bobLabels.map((lbl, i) =>
+  pG.append('line').attr('stroke', bobColors[i]).attr('stroke-width', i===0?3:2).attr('stroke-dasharray', i===1?'6,3':'none')
+);
+
+// Arrow markers
+const defs = polSvg.append('defs');
+[...aliceColors, ...bobColors].forEach((color, i) => {
+  defs.append('marker').attr('id', `arrow${i}`).attr('viewBox','0 0 10 10').attr('refX',5).attr('refY',5).attr('markerWidth',4).attr('markerHeight',4).attr('orient','auto')
+    .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill', color);
+});
+
+// Legend
+pG.append('circle').attr('cx',20).attr('cy',pH-28).attr('r',5).attr('fill',RED);
+pG.append('text').attr('x',28).attr('y',pH-24).attr('font-size','10px').attr('fill',INK).text('Alice (a₁,a₂)');
+pG.append('circle').attr('cx',20).attr('cy',pH-14).attr('r',5).attr('fill',BLUE);
+pG.append('text').attr('x',28).attr('y',pH-10).attr('font-size','10px').attr('fill',INK).text('Bob (b₁,b₂)');
+
+function updatePolarChart() {
+  const keys = ['a1','a2','b1','b2'];
+  const allArrows = [
+    {ang: angles.a1, color: aliceColors[0], width: 3, dash:'none'},
+    {ang: angles.a2, color: aliceColors[1], width: 2, dash:'6,3'},
+    {ang: angles.b1, color: bobColors[0], width: 3, dash:'none'},
+    {ang: angles.b2, color: bobColors[1], width: 2, dash:'6,3'},
+  ];
+  pG.selectAll('.angle-arrow').remove();
+  pG.selectAll('.angle-label').remove();
+
+  allArrows.forEach(({ang, color, width, dash}) => {
+    const rad = (ang - 90) * Math.PI / 180;
+    const x2 = cx + r * 0.85 * Math.cos(rad);
+    const y2 = cy + r * 0.85 * Math.sin(rad);
+    pG.append('line').attr('class','angle-arrow')
+      .attr('x1',cx).attr('y1',cy).attr('x2',x2).attr('y2',y2)
+      .attr('stroke',color).attr('stroke-width',width)
+      .attr('stroke-dasharray',dash)
+      .attr('opacity',0.85);
+    pG.append('circle').attr('class','angle-label')
+      .attr('cx', cx + r*0.95*Math.cos(rad))
+      .attr('cy', cy + r*0.95*Math.sin(rad))
+      .attr('r', 5).attr('fill', color);
+  });
+}
+
+// ── Meter bar (bottom of S meter) ────────────────────────────────────────────
+const meterSvg = d3.select('#s-meter').insert('svg', ':first-child')
+  .style('display','block').style('margin','0 auto').attr('width', 248).attr('height', 28);
+
+const mScale = d3.scaleLinear().domain([-TSI-0.1, TSI+0.1]).range([4, 244]);
+meterSvg.append('rect').attr('x',4).attr('y',10).attr('width',240).attr('height',8).attr('fill','#f0f0f0');
+// LHV lines
+meterSvg.append('line').attr('x1',mScale(-2)).attr('x2',mScale(-2)).attr('y1',6).attr('y2',22).attr('stroke',RED).attr('stroke-width',1.5);
+meterSvg.append('line').attr('x1',mScale(2)).attr('x2',mScale(2)).attr('y1',6).attr('y2',22).attr('stroke',RED).attr('stroke-width',1.5);
+meterSvg.append('text').attr('x',mScale(-2)).attr('y',5).attr('text-anchor','middle').attr('font-size','8px').attr('fill',RED).text('-2');
+meterSvg.append('text').attr('x',mScale(2)).attr('y',5).attr('text-anchor','middle').attr('font-size','8px').attr('fill',RED).text('+2');
+// Tsirelson lines
+meterSvg.append('line').attr('x1',mScale(-TSI)).attr('x2',mScale(-TSI)).attr('y1',6).attr('y2',22).attr('stroke',BLUE).attr('stroke-width',1.5).attr('stroke-dasharray','3,2');
+meterSvg.append('line').attr('x1',mScale(TSI)).attr('x2',mScale(TSI)).attr('y1',6).attr('y2',22).attr('stroke',BLUE).attr('stroke-width',1.5).attr('stroke-dasharray','3,2');
+const meterNeedle = meterSvg.append('rect').attr('y',8).attr('width',4).attr('height',12).attr('fill',RED).attr('rx',2);
+
+function updateMeterBar(S) {
+  const clamped = Math.max(-TSI, Math.min(TSI, S));
+  meterNeedle.attr('x', mScale(clamped) - 2);
+}
+
+// Controls
+['a1','a2','b1','b2'].forEach(key => {
+  document.getElementById(key).addEventListener('input', e => {
+    angles[key] = parseInt(e.target.value);
+    document.getElementById(`${key}-val`).textContent = `${angles[key]}°`;
+    updateDisplay();
+  });
+});
+
+// Initial render
+updateDisplay();
+
+// Testable predictions
+const opt = { a1:0, a2:90, b1:45, b2:315 };
+const e11_opt = E_corr(opt.a1, opt.b1), e12_opt = E_corr(opt.a1, opt.b2);
+const e21_opt = E_corr(opt.a2, opt.b1), e22_opt = E_corr(opt.a2, opt.b2);
+const S_opt = e11_opt + e12_opt + e21_opt - e22_opt;
+console.assert(Math.abs(S_opt - TSI) < 0.001, `P1: optimal angles should give |S|=2√2=${TSI.toFixed(4)}, got ${S_opt.toFixed(4)}`);
+const S_eq = Math.abs(E_corr(0,0) + E_corr(0,0) + E_corr(0,0) - E_corr(0,0));
+console.assert(Math.abs(S_eq) < 0.001, `P2: all-same angles → S=0, got ${S_eq.toFixed(4)}`);
+console.log(`✓ P1: optimal angles → S = ${S_opt.toFixed(5)} ≈ 2√2 = ${TSI.toFixed(5)}`);
+console.log(`✓ P2: all-same angles → S = ${S_eq.toFixed(5)} ≈ 0`);
+</script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tunneling Wave Packet — Crank-Nicolson TDSE</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.76rem; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=range] { width: 160px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .btn { padding: 5px 14px; font-size: 0.8rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; }
+  .btn.active { background: #2A1A0E; color: #fff; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Tunneling Wave Packet</h1>
+<div class="subtitle">Crank-Nicolson TDSE: a Gaussian splits at a rectangular barrier — reflected and transmitted components emerge simultaneously.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Barrier height V₀ (eV)</label>
+    <input type="range" id="V0-slider" min="1.2" max="4.0" step="0.1" value="2.0">
+    <span class="val-display" id="V0-val">V₀ = 2.0 eV</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Barrier width L (nm)</label>
+    <input type="range" id="L-slider" min="0.3" max="2.0" step="0.1" value="1.0">
+    <span class="val-display" id="L-val">L = 1.0 nm</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Electron energy E (eV)</label>
+    <input type="range" id="E-slider" min="0.3" max="1.8" step="0.05" value="1.0">
+    <span class="val-display" id="E-val">E = 1.0 eV</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Control</label>
+    <button class="btn active" id="play-btn" onclick="togglePlay()">⏸ Pause</button>
+    &nbsp;
+    <button class="btn" onclick="resetSim()">↺ Reset</button>
+  </div>
+</div>
+
+<div class="readout">
+  <div>t = <span id="rt">0</span> fs</div>
+  <div>T_analytic = <span id="rT_an">0.001</span></div>
+  <div>P_right = <span id="rPright">0.000</span></div>
+  <div>P_left = <span id="rPleft">0.000</span></div>
+  <div>Norm = <span id="rnorm">1.000</span></div>
+</div>
+
+<svg id="main-chart" width="640" height="340"></svg>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+// Physical constants
+const HBAR = 0.6582; // eV·fs
+const M_E_EV = 0.511e6; // eV/c²
+const C_NM_FS = 299.792; // nm/fs
+
+// Simulation parameters
+const N_GRID = 512; // grid points
+let V0 = 2.0; // eV
+let barWidth = 1.0; // nm (barrier width)
+let E_kin = 1.0; // eV
+
+// Grid: x from -xMax to xMax nm
+const xMax = 12.0; // nm
+const dx = 2 * xMax / N_GRID; // nm
+const xArr = d3.range(N_GRID).map(i => -xMax + (i + 0.5) * dx);
+
+// Barrier: centered at x=2nm, shifted right
+const barCenter = 1.5; // nm
+
+// Wave packet initial: Gaussian centered at x0 = -4nm, moving right
+const x0_init = -5.0; // nm
+const sigma0 = 0.8; // nm width
+
+function getBarrierPot(V0, bWidth) {
+  const bLeft = barCenter - bWidth/2;
+  const bRight = barCenter + bWidth/2;
+  return xArr.map(x => (x >= bLeft && x <= bRight) ? V0 : 0.0);
+}
+
+// Effective mass in nm/eV units: ħ²/(2m) in eV·nm²
+const hbar2_over_2m = (HBAR * HBAR) / (2 * M_E_EV / (C_NM_FS * C_NM_FS)); // eV·nm²
+
+// dt in fs
+let dt_fs = 0.005;
+
+// Crank-Nicolson solver (tridiagonal system)
+// Full complex arrays: psi_re[i], psi_im[i]
+let psi_re = new Float64Array(N_GRID);
+let psi_im = new Float64Array(N_GRID);
+let V = new Float64Array(N_GRID);
+let tCurrent = 0; // fs
+let playing = true;
+let animId = null;
+let lastWallTime = null;
+
+function initWavepacket() {
+  const k0 = Math.sqrt(2 * M_E_EV / (C_NM_FS * C_NM_FS) * E_kin) / HBAR; // nm⁻¹
+  let norm2 = 0;
+  for (let i = 0; i < N_GRID; i++) {
+    const x = xArr[i];
+    const env = Math.exp(-((x - x0_init)*(x - x0_init)) / (4 * sigma0 * sigma0));
+    psi_re[i] = env * Math.cos(k0 * x);
+    psi_im[i] = env * Math.sin(k0 * x);
+    norm2 += (psi_re[i]*psi_re[i] + psi_im[i]*psi_im[i]) * dx;
+  }
+  const norm = Math.sqrt(norm2);
+  for (let i = 0; i < N_GRID; i++) { psi_re[i] /= norm; psi_im[i] /= norm; }
+  tCurrent = 0;
+}
+
+function initPotential() {
+  V = new Float64Array(getBarrierPot(V0, barWidth));
+}
+
+// Crank-Nicolson step:
+// (I + i*dt/(2ħ)*H)|ψ^{n+1}⟩ = (I - i*dt/(2ħ)*H)|ψ^n⟩
+// H = -ħ²/(2m) d²/dx² + V
+// With central differences: H_ij|ψ⟩ → -α(ψ_{i-1}-2ψ_i+ψ_{i+1}) + V_i ψ_i
+// α = ħ²/(2m dx²)
+// This leads to a tridiagonal system. We split into real/imag and solve.
+// For efficiency, use the fact that at each step we solve:
+// A ψ^{n+1} = b, where A is tridiagonal complex.
+// We'll use Thomas algorithm on complex tridiagonals.
+
+function cnStep() {
+  const alpha = hbar2_over_2m / (dx * dx); // eV / nm² * nm² = eV
+  const r = dt_fs / (2 * HBAR); // fs / (eV·fs) = 1/eV
+
+  // Build RHS: b = (I - i*r*H)|ψ^n⟩
+  // b_i = ψ_i - i*r*(-α*ψ_{i-1} + (2α+V_i)ψ_i - α*ψ_{i+1})
+  // = ψ_i + i*r*α*ψ_{i-1} - i*r*(2α+V_i)*ψ_i + i*r*α*ψ_{i+1}
+
+  const bRe = new Float64Array(N_GRID);
+  const bIm = new Float64Array(N_GRID);
+
+  for (let i = 0; i < N_GRID; i++) {
+    const iPrev = i > 0 ? i-1 : 0;
+    const iNext = i < N_GRID-1 ? i+1 : N_GRID-1;
+    // multiply by i (complex rotation): i*(re + i*im) = -im + i*re
+    // b = psi + i*r*alpha*(psi_prev + psi_next) - i*r*(2*alpha+V)*psi
+    const diag = 2*alpha + V[i];
+    bRe[i] = psi_re[i]
+           + r*alpha*(-psi_im[iPrev] - psi_im[iNext])
+           - r*diag*(-psi_im[i]);
+    bIm[i] = psi_im[i]
+           + r*alpha*(psi_re[iPrev] + psi_re[iNext])
+           - r*diag*(psi_re[i]);
+    // Wait, let me redo this more carefully
+    // b_i = psi_i - i*r*H|psi>_i
+    // H|psi>_i = -alpha*(psi_{i-1} - 2*psi_i + psi_{i+1}) + V_i * psi_i
+    //          = -alpha*psi_{i-1} + (2*alpha + V_i)*psi_i - alpha*psi_{i+1}
+    // So b_i = psi_i - i*r*(-alpha*psi_{i-1} + (2*alpha+V_i)*psi_i - alpha*psi_{i+1})
+    // b_i_re = psi_re_i - i*r*(...): multiply -i*(a+ib) = b - ia
+    // Let Hpsi_re = -alpha*(psi_re_{i-1} - 2*psi_re_i + psi_re_{i+1}) + V_i*psi_re_i
+    const Hpsi_re = -alpha*(psi_re[iPrev] - 2*psi_re[i] + psi_re[iNext]) + V[i]*psi_re[i];
+    const Hpsi_im = -alpha*(psi_im[iPrev] - 2*psi_im[i] + psi_im[iNext]) + V[i]*psi_im[i];
+    // b = psi - i*r*Hpsi = psi - i*r*(Hpsi_re + i*Hpsi_im)
+    //   = psi - i*r*Hpsi_re + r*Hpsi_im
+    bRe[i] = psi_re[i] + r * Hpsi_im;
+    bIm[i] = psi_im[i] - r * Hpsi_re;
+  }
+
+  // Solve (I + i*r*H)|psi^{n+1}> = b
+  // Matrix A: diagonal d_i = 1 + i*r*(2*alpha+V_i), off-diagonal u = l = -i*r*alpha
+  // d_i = (1 - r*(2*alpha+V_i)*0) + i*r*(2*alpha+V_i)  [imaginary diagonal]
+  // d_re = 1, d_im = r*(2*alpha+V_i)
+  // u_re = 0, u_im = -r*alpha
+
+  // Thomas algorithm for complex tridiagonal
+  const newRe = new Float64Array(N_GRID);
+  const newIm = new Float64Array(N_GRID);
+
+  // Forward sweep
+  const cRe = new Float64Array(N_GRID);
+  const cIm = new Float64Array(N_GRID);
+  const dRe = new Float64Array(N_GRID);
+  const dIm = new Float64Array(N_GRID);
+
+  // lower = upper = off-diagonal: l = u = -i*r*alpha = (0, -r*alpha)
+  const offRe = 0, offIm = -r * alpha;
+
+  // First row
+  const d0Re = 1.0, d0Im = r * (2*alpha + V[0]);
+  const mag0 = d0Re*d0Re + d0Im*d0Im;
+  cRe[0] = (offRe*d0Re + offIm*d0Im) / mag0;
+  cIm[0] = (offIm*d0Re - offRe*d0Im) / mag0;
+  dRe[0] = (bRe[0]*d0Re + bIm[0]*d0Im) / mag0;
+  dIm[0] = (bIm[0]*d0Re - bRe[0]*d0Im) / mag0;
+
+  for (let i = 1; i < N_GRID; i++) {
+    // w = l * c[i-1]
+    const wRe = offRe*cRe[i-1] - offIm*cIm[i-1];
+    const wIm = offRe*cIm[i-1] + offIm*cRe[i-1];
+    // diag = d_i - w (where d_i = (1, r*(2a+V[i])))
+    const diagRe = 1.0 - wRe;
+    const diagIm = r*(2*alpha + V[i]) - wIm;
+    const mag = diagRe*diagRe + diagIm*diagIm;
+    if (mag < 1e-30) { cRe[i] = 0; cIm[i] = 0; dRe[i] = bRe[i]; dIm[i] = bIm[i]; continue; }
+    cRe[i] = (offRe*diagRe + offIm*diagIm) / mag;
+    cIm[i] = (offIm*diagRe - offRe*diagIm) / mag;
+    // rhs_new = (b[i] - l * d[i-1]) / diag
+    const rhsRe = bRe[i] - (offRe*dRe[i-1] - offIm*dIm[i-1]);
+    const rhsIm = bIm[i] - (offRe*dIm[i-1] + offIm*dRe[i-1]);
+    dRe[i] = (rhsRe*diagRe + rhsIm*diagIm) / mag;
+    dIm[i] = (rhsIm*diagRe - rhsRe*diagIm) / mag;
+  }
+
+  // Back substitution
+  newRe[N_GRID-1] = dRe[N_GRID-1];
+  newIm[N_GRID-1] = dIm[N_GRID-1];
+  for (let i = N_GRID-2; i >= 0; i--) {
+    newRe[i] = dRe[i] - (cRe[i]*newRe[i+1] - cIm[i]*newIm[i+1]);
+    newIm[i] = dIm[i] - (cRe[i]*newIm[i+1] + cIm[i]*newRe[i+1]);
+  }
+
+  for (let i = 0; i < N_GRID; i++) { psi_re[i] = newRe[i]; psi_im[i] = newIm[i]; }
+  tCurrent += dt_fs;
+}
+
+function getPsi2() {
+  return xArr.map((x, i) => psi_re[i]*psi_re[i] + psi_im[i]*psi_im[i]);
+}
+
+function getProbRight() {
+  let p = 0;
+  for (let i = 0; i < N_GRID; i++) {
+    if (xArr[i] > barCenter + barWidth/2 + 0.5) {
+      p += (psi_re[i]*psi_re[i] + psi_im[i]*psi_im[i]) * dx;
+    }
+  }
+  return p;
+}
+
+function getProbLeft() {
+  let p = 0;
+  for (let i = 0; i < N_GRID; i++) {
+    if (xArr[i] < -3) {
+      p += (psi_re[i]*psi_re[i] + psi_im[i]*psi_im[i]) * dx;
+    }
+  }
+  return p;
+}
+
+function getNorm() {
+  let n = 0;
+  for (let i = 0; i < N_GRID; i++) {
+    n += (psi_re[i]*psi_re[i] + psi_im[i]*psi_im[i]) * dx;
+  }
+  return n;
+}
+
+function analyticT(V0, Lbar, E) {
+  const kappa = Math.sqrt(Math.max(0, 2 * M_E_EV/(C_NM_FS*C_NM_FS) * (V0 - E))) / HBAR;
+  const gamma = kappa * Lbar;
+  if (V0 <= E) return 1.0; // above barrier (simplified)
+  const sh = Math.sinh(gamma);
+  return 1 / (1 + V0*V0*sh*sh / (4*E*(V0-E)));
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────────
+const svg = d3.select('#main-chart');
+const W = 640, H = 340;
+const M = {top: 30, right: 20, bottom: 44, left: 52};
+const IW = W - M.left - M.right, IH = H - M.top - M.bottom;
+const G = svg.append('g').attr('transform', `translate(${M.left},${M.top})`);
+
+const cX = d3.scaleLinear().domain([-xMax, xMax]).range([0, IW]);
+const cY = d3.scaleLinear().domain([0, 1]).range([IH, 0]);
+const cYV = d3.scaleLinear().domain([0, 5]).range([IH, 0]); // for potential
+
+G.append('g').attr('transform',`translate(0,${IH})`).call(d3.axisBottom(cX).ticks(10));
+G.append('g').call(d3.axisLeft(cY).ticks(5));
+G.append('text').attr('x',IW/2).attr('y',-12).attr('text-anchor','middle').attr('font-size','13px').attr('font-weight','700').attr('fill',INK).text('|ψ(x,t)|² — Tunneling Wave Packet (Crank-Nicolson)');
+G.append('text').attr('x',IW/2).attr('y',IH+36).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('x (nm)');
+G.append('text').attr('transform','rotate(-90)').attr('x',-IH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('|ψ|² (nm⁻¹)');
+
+// Potential barrier (shaded rectangle)
+const barrierRect = G.append('rect').attr('y', 0).attr('fill', SLATE).attr('opacity', 0.12);
+
+// Barrier height line
+const barrierLine = G.append('line').attr('stroke', SLATE).attr('stroke-width', 1).attr('stroke-dasharray','4,3');
+
+// Energy line
+const energyLine = G.append('line').attr('stroke', BLUE).attr('stroke-width', 1).attr('stroke-dasharray','3,3').attr('opacity', 0.7);
+const energyLabel = G.append('text').attr('font-size','10px').attr('fill',BLUE).attr('opacity',0.7);
+
+// Wave function area
+const waveArea = d3.area()
+  .x((d, i) => cX(xArr[i]))
+  .y0(IH)
+  .y1(d => cY(d))
+  .curve(d3.curveBasis);
+const waveFill = G.append('path').attr('fill', RED).attr('opacity', 0.45);
+const waveLine2 = d3.line()
+  .x((d, i) => cX(xArr[i]))
+  .y(d => cY(d))
+  .curve(d3.curveBasis);
+const waveStroke = G.append('path').attr('fill','none').attr('stroke', RED).attr('stroke-width', 1.5);
+
+function drawBarrier() {
+  const bLeft = barCenter - barWidth/2;
+  const bRight = barCenter + barWidth/2;
+  barrierRect
+    .attr('x', cX(bLeft))
+    .attr('width', cX(bRight) - cX(bLeft))
+    .attr('height', IH);
+  barrierLine
+    .attr('x1', cX(bLeft)).attr('x2', cX(bRight))
+    .attr('y1', cYV(V0)).attr('y2', cYV(V0));
+  // V0 label on RHS
+  G.selectAll('.v0-label').remove();
+  G.append('text').attr('class','v0-label')
+    .attr('x', cX(bRight)+4).attr('y', cYV(V0)+4)
+    .attr('font-size','9px').attr('fill',SLATE)
+    .text(`V₀=${V0}eV`);
+}
+
+function drawEnergyLine() {
+  energyLine
+    .attr('x1', cX(-xMax)).attr('x2', cX(xMax))
+    .attr('y1', cYV(E_kin)).attr('y2', cYV(E_kin));
+  energyLabel
+    .attr('x', cX(-xMax)+4).attr('y', cYV(E_kin)-4)
+    .text(`E=${E_kin}eV`);
+}
+
+function updateAnalyticT() {
+  const T = analyticT(V0, barWidth, E_kin);
+  document.getElementById('rT_an').textContent = T < 1e-6 ? T.toExponential(2) : T.toFixed(4);
+}
+
+function renderFrame() {
+  const psi2 = getPsi2();
+  const maxP = Math.max(...psi2);
+  cY.domain([0, Math.max(0.3, maxP * 1.15)]);
+
+  waveFill.datum(psi2).attr('d', waveArea);
+  waveStroke.datum(psi2).attr('d', waveLine2);
+
+  const pRight = getProbRight();
+  const pLeft = getProbLeft();
+  const norm = getNorm();
+
+  document.getElementById('rt').textContent = tCurrent.toFixed(1);
+  document.getElementById('rPright').textContent = pRight.toFixed(4);
+  document.getElementById('rPleft').textContent = pLeft.toFixed(4);
+  document.getElementById('rnorm').textContent = norm.toFixed(4);
+}
+
+const STEPS_PER_FRAME = 20;
+
+function animate(ts) {
+  if (!playing) return;
+  for (let s = 0; s < STEPS_PER_FRAME; s++) cnStep();
+  renderFrame();
+  animId = requestAnimationFrame(animate);
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('play-btn');
+  btn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  btn.classList.toggle('active', playing);
+  if (playing) animId = requestAnimationFrame(animate);
+}
+
+function resetSim() {
+  initPotential();
+  initWavepacket();
+  drawBarrier();
+  drawEnergyLine();
+  updateAnalyticT();
+  renderFrame();
+}
+
+// Control listeners
+document.getElementById('V0-slider').addEventListener('input', e => {
+  V0 = parseFloat(e.target.value);
+  document.getElementById('V0-val').textContent = `V₀ = ${V0.toFixed(1)} eV`;
+  resetSim();
+});
+
+document.getElementById('L-slider').addEventListener('input', e => {
+  barWidth = parseFloat(e.target.value);
+  document.getElementById('L-val').textContent = `L = ${barWidth.toFixed(1)} nm`;
+  resetSim();
+});
+
+document.getElementById('E-slider').addEventListener('input', e => {
+  E_kin = parseFloat(e.target.value);
+  document.getElementById('E-val').textContent = `E = ${E_kin.toFixed(2)} eV`;
+  resetSim();
+});
+
+// Init
+resetSim();
+requestAnimationFrame(animate);
+
+// Testable predictions
+const T_default = analyticT(2.0, 1.0, 1.0);
+const kappa = Math.sqrt(2 * M_E_EV/(C_NM_FS*C_NM_FS) * (2.0 - 1.0)) / HBAR;
+const gamma = kappa * 1.0;
+const T_wkb = Math.exp(-2 * gamma);
+console.log(`✓ Analytic T (V₀=2eV, L=1nm, E=1eV): ${T_default.toExponential(4)}`);
+console.log(`  WKB approx T ≈ e^(-2γ) = ${T_wkb.toExponential(4)}, γ=${gamma.toFixed(3)}`);
+const T_narrow = analyticT(2.0, 0.5, 1.0);
+const T_wide = analyticT(2.0, 2.0, 1.0);
+console.log(`  L=0.5nm: T=${T_narrow.toExponential(3)}, L=2nm: T=${T_wide.toExponential(3)}`);
+console.log(`  Ratio (L=2nm)/(L=0.5nm) = ${(T_wide/T_narrow).toExponential(2)} (orders of magnitude)`);
+// P2: reflected packet arrival time
+const vg = HBAR * Math.sqrt(2 * M_E_EV/(C_NM_FS*C_NM_FS) * E_kin) / M_E_EV * C_NM_FS * C_NM_FS; // nm/fs
+const d_to_barrier = Math.abs(x0_init) + (barCenter - barWidth/2);
+const t_reflect = 2 * d_to_barrier / vg;
+console.log(`✓ P2: reflected peak expected at t ≈ ${t_reflect.toFixed(1)} fs (v_g = ${vg.toFixed(3)} nm/fs)`);
+</script>
+</body>
+</html>

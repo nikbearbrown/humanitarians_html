@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermitian Eigenvalue Explorer</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .layout { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+  .matrix-panel { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 16px;
+    border: 2px solid #2A1A0E;
+    border-radius: 2px;
+  }
+  .entry-group { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .entry-group label { font-size: 0.72rem; color: #545454; font-weight: 600; }
+  .entry-group input { width: 90px; padding: 4px 6px; border: 1px solid #ddd; font-family: inherit; font-size: 0.82rem; text-align: center; }
+  .hermitian-note {
+    font-size: 0.78rem;
+    color: #545454;
+    background: #f8f8f8;
+    padding: 5px 10px;
+    border-radius: 2px;
+  }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .btn { padding: 5px 12px; font-size: 0.78rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; }
+  .btn:hover { background: #f0f0f0; }
+  .hermitian-toggle { margin-top: 4px; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Hermitian Eigenvalue Explorer</h1>
+<div class="subtitle">Drag matrix entries — the moment the matrix becomes Hermitian, eigenvalues snap to the real axis and stay there no matter how you twirl the complex entries.</div>
+
+<div class="layout">
+  <div class="matrix-panel">
+    <div style="font-size:0.82rem;color:#545454;">Matrix A = [[a, b], [c, d]]</div>
+    <div class="matrix-grid">
+      <div class="entry-group">
+        <label>a (real)</label>
+        <input type="number" id="a-re" value="0" step="0.1">
+      </div>
+      <div class="entry-group">
+        <label>b (complex: Re + i·Im)</label>
+        <div style="display:flex;gap:4px;">
+          <input type="number" id="b-re" value="0" step="0.1" style="width:44px;">
+          <input type="number" id="b-im" value="-1" step="0.1" style="width:44px;">
+        </div>
+      </div>
+      <div class="entry-group">
+        <label>c = b* (Hermitian) / free</label>
+        <div style="display:flex;gap:4px;">
+          <input type="number" id="c-re" value="0" step="0.1" style="width:44px;">
+          <input type="number" id="c-im" value="1" step="0.1" style="width:44px;">
+        </div>
+      </div>
+      <div class="entry-group">
+        <label>d (real)</label>
+        <input type="number" id="d-re" value="0" step="0.1">
+      </div>
+    </div>
+
+    <div class="hermitian-note" id="herm-note">
+      Hermitian: c = b* ✓
+    </div>
+
+    <div class="presets">
+      <button class="btn" onclick="setPreset('sigma_y')">σ_y</button>
+      <button class="btn" onclick="setPreset('sigma_x')">σ_x</button>
+      <button class="btn" onclick="setPreset('non_herm')">Non-Hermitian</button>
+      <button class="btn" onclick="setPreset('antisym')">Antisymmetric</button>
+    </div>
+
+    <label style="display:flex;gap:8px;align-items:center;font-size:0.8rem;cursor:pointer;" class="hermitian-toggle">
+      <input type="checkbox" id="enforce-herm" checked style="accent-color:#C8102E;">
+      Enforce Hermitian (c = b*)
+    </label>
+
+    <div class="readout">
+      <div>λ₁ = <span id="lam1">−1.000</span></div>
+      <div>λ₂ = <span id="lam2">+1.000</span></div>
+      <div>Hermitian? <span id="is-herm">Yes</span></div>
+      <div>λ real? <span id="lam-real">Yes</span></div>
+    </div>
+  </div>
+
+  <div>
+    <svg id="eig-plane" width="360" height="300"></svg>
+    <svg id="char-poly" width="360" height="180"></svg>
+  </div>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+let enforceHerm = true;
+
+function getMatrix() {
+  const a = parseFloat(document.getElementById('a-re').value) || 0;
+  const bRe = parseFloat(document.getElementById('b-re').value) || 0;
+  const bIm = parseFloat(document.getElementById('b-im').value) || 0;
+  let cRe = parseFloat(document.getElementById('c-re').value) || 0;
+  let cIm = parseFloat(document.getElementById('c-im').value) || 0;
+  const d = parseFloat(document.getElementById('d-re').value) || 0;
+
+  if (enforceHerm) { cRe = bRe; cIm = -bIm; }
+  return { a, bRe, bIm, cRe, cIm, d };
+}
+
+function computeEigenvalues(m) {
+  // Characteristic polynomial: λ² - (a+d)λ + (ad - bc) = 0
+  // where bc = (bRe + i·bIm)(cRe + i·cIm) = bRe·cRe - bIm·cIm + i(bRe·cIm + bIm·cRe)
+  const tr = m.a + m.d;
+  const bcRe = m.bRe*m.cRe - m.bIm*m.cIm;
+  const bcIm = m.bRe*m.cIm + m.bIm*m.cRe;
+  const detRe = m.a*m.d - bcRe;
+  const detIm = -bcIm;
+
+  // discriminant = tr² - 4·det = (tr² - 4·detRe) + i(-4·detIm)
+  const discRe = tr*tr - 4*detRe;
+  const discIm = -4*detIm;
+
+  // sqrt of complex disc = re + i·im
+  const discMag = Math.sqrt(discRe*discRe + discIm*discIm);
+  const discArg = Math.atan2(discIm, discRe);
+  const sqrtRe = Math.sqrt(discMag) * Math.cos(discArg/2);
+  const sqrtIm = Math.sqrt(discMag) * Math.sin(discArg/2);
+
+  const l1Re = (tr + sqrtRe) / 2;
+  const l1Im = sqrtIm / 2;
+  const l2Re = (tr - sqrtRe) / 2;
+  const l2Im = -sqrtIm / 2;
+
+  return [{re: l1Re, im: l1Im}, {re: l2Re, im: l2Im}];
+}
+
+function isHermitian(m) {
+  return Math.abs(m.cRe - m.bRe) < 0.01 && Math.abs(m.cIm + m.bIm) < 0.01 &&
+         Math.abs(m.a) === Math.abs(m.a); // a real
+}
+
+// ── Eigenvalue plane ─────────────────────────────────────────────────────────
+const eigSvg = d3.select('#eig-plane');
+const eW = 360, eH = 300;
+const eM = {top: 28, right: 20, bottom: 20, left: 52};
+const eIW = eW - eM.left - eM.right, eIH = eH - eM.top - eM.bottom;
+const eG = eigSvg.append('g').attr('transform', `translate(${eM.left},${eM.top})`);
+
+const eX = d3.scaleLinear().domain([-4, 4]).range([0, eIW]);
+const eY = d3.scaleLinear().domain([-4, 4]).range([eIH, 0]);
+
+eG.append('g').attr('transform',`translate(0,${eIH/2})`).call(d3.axisBottom(eX).ticks(8));
+eG.append('g').attr('transform',`translate(${eIW/2},0)`).call(d3.axisLeft(eY).ticks(8));
+eG.append('text').attr('x',eIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('Eigenvalue Plane (Complex)');
+eG.append('text').attr('x',eIW-4).attr('y',eIH/2-4).attr('font-size','10px').attr('fill',SLATE).text('Re(λ)');
+eG.append('text').attr('x',eIW/2+4).attr('y',12).attr('font-size','10px').attr('fill',SLATE).text('Im(λ)');
+
+// Real axis highlight
+eG.append('line').attr('x1',0).attr('x2',eIW).attr('y1',eIH/2).attr('y2',eIH/2).attr('stroke',INK).attr('stroke-width',1.5).attr('opacity',0.3);
+
+// Eigenvalue dots
+const dot1 = eG.append('circle').attr('r',8).attr('fill',RED);
+const dot2 = eG.append('circle').attr('r',8).attr('fill',BLUE);
+const lab1 = eG.append('text').attr('font-size','11px').attr('fill',RED).attr('font-weight','700');
+const lab2 = eG.append('text').attr('font-size','11px').attr('fill',BLUE).attr('font-weight','700');
+
+// ── Characteristic polynomial ─────────────────────────────────────────────────
+const cpSvg = d3.select('#char-poly');
+const cW = 360, cH = 180;
+const cM = {top: 24, right: 20, bottom: 36, left: 52};
+const cIW = cW - cM.left - cM.right, cIH = cH - cM.top - cM.bottom;
+const cG = cpSvg.append('g').attr('transform', `translate(${cM.left},${cM.top})`);
+
+const cpX = d3.scaleLinear().domain([-4, 4]).range([0, cIW]);
+const cpY = d3.scaleLinear().domain([-10, 10]).range([cIH, 0]);
+
+cG.append('g').attr('transform',`translate(0,${cIH})`).call(d3.axisBottom(cpX).ticks(8));
+cG.append('g').call(d3.axisLeft(cpY).ticks(5));
+cG.append('text').attr('x',cIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','11px').attr('font-weight','700').attr('fill',INK).text('Characteristic Polynomial p(λ) = det(A−λI)');
+cG.append('line').attr('x1',0).attr('x2',cIW).attr('y1',cIH/2+cpY(0)-cpY(0)).attr('y2',cIH/2+cpY(0)-cpY(0)).attr('stroke','#ddd');
+
+const cpPath = cG.append('path').attr('fill','none').attr('stroke',INK).attr('stroke-width',2);
+const cpZero1 = cG.append('circle').attr('r',5).attr('fill',RED);
+const cpZero2 = cG.append('circle').attr('r',5).attr('fill',BLUE);
+
+function updateAll() {
+  const m = getMatrix();
+  const eigenvals = computeEigenvalues(m);
+  const herm = isHermitian(m);
+  const bothReal = eigenvals.every(l => Math.abs(l.im) < 0.001);
+
+  // Update c inputs if enforcing Hermitian
+  if (enforceHerm) {
+    document.getElementById('c-re').value = m.bRe.toFixed(1);
+    document.getElementById('c-im').value = (-m.bIm).toFixed(1);
+  }
+
+  // Eigenvalue display
+  const fmt = (re, im) => {
+    if (Math.abs(im) < 0.001) return re.toFixed(3);
+    return `${re.toFixed(3)} + ${im.toFixed(3)}i`;
+  };
+  document.getElementById('lam1').textContent = fmt(eigenvals[0].re, eigenvals[0].im);
+  document.getElementById('lam2').textContent = fmt(eigenvals[1].re, eigenvals[1].im);
+  document.getElementById('is-herm').textContent = herm ? 'Yes ✓' : 'No';
+  document.getElementById('lam-real').textContent = bothReal ? 'Yes ✓' : 'No';
+
+  const hNote = document.getElementById('herm-note');
+  hNote.textContent = herm ? 'Hermitian: c = b* ✓' : 'Non-Hermitian: c ≠ b*';
+  hNote.style.color = herm ? '#4A7B4A' : RED;
+
+  // Dots in eigenvalue plane
+  const clamp = v => Math.max(-4, Math.min(4, v));
+  dot1.attr('cx', eX(clamp(eigenvals[0].re))).attr('cy', eY(clamp(eigenvals[0].im)));
+  dot2.attr('cx', eX(clamp(eigenvals[1].re))).attr('cy', eY(clamp(eigenvals[1].im)));
+  lab1.attr('x', eX(clamp(eigenvals[0].re))+10).attr('y', eY(clamp(eigenvals[0].im))-8).text('λ₁');
+  lab2.attr('x', eX(clamp(eigenvals[1].re))+10).attr('y', eY(clamp(eigenvals[1].im))+14).text('λ₂');
+
+  dot1.attr('fill', bothReal ? RED : '#FF7070');
+  dot2.attr('fill', bothReal ? BLUE : '#7070FF');
+
+  // Characteristic polynomial p(λ) = λ² - tr·λ + det
+  const tr = m.a + m.d;
+  const bcRe = m.bRe*m.cRe - m.bIm*m.cIm;
+  const detRe = m.a*m.d - bcRe;
+  const cpData = d3.range(200).map(i => {
+    const lam = -4 + 8 * i / 199;
+    const p = lam*lam - tr*lam + detRe;
+    return { lam, p };
+  });
+  cpY.domain([Math.min(-10, ...cpData.map(d=>d.p)*1.2), Math.max(10, ...cpData.map(d=>d.p)*1.2)]);
+  cpPath.datum(cpData).attr('d', d3.line().x(d=>cpX(d.lam)).y(d=>cpY(Math.max(-20,Math.min(20,d.p)))));
+
+  // Zero crossings
+  cpZero1.attr('cx', cpX(clamp(eigenvals[0].re))).attr('cy', cpY(0));
+  cpZero2.attr('cx', cpX(clamp(eigenvals[1].re))).attr('cy', cpY(0));
+}
+
+function setPreset(name) {
+  const presets = {
+    sigma_y:   { a: 0, bRe: 0, bIm: -1, cRe: 0, cIm: 1, d: 0 },
+    sigma_x:   { a: 0, bRe: 1, bIm: 0, cRe: 1, cIm: 0, d: 0 },
+    non_herm:  { a: 1, bRe: 2, bIm: 0, cRe: 0, cIm: 0, d: -1 },
+    antisym:   { a: 0, bRe: 0, bIm: 2, cRe: 0, bIm2: -2, d: 0 }
+  };
+  if (name === 'antisym') {
+    document.getElementById('a-re').value = 0;
+    document.getElementById('b-re').value = 0;
+    document.getElementById('b-im').value = 2;
+    document.getElementById('c-re').value = 0;
+    document.getElementById('c-im').value = -2;
+    document.getElementById('d-re').value = 0;
+    document.getElementById('enforce-herm').checked = false;
+    enforceHerm = false;
+  } else {
+    const p = presets[name];
+    document.getElementById('a-re').value = p.a;
+    document.getElementById('b-re').value = p.bRe;
+    document.getElementById('b-im').value = p.bIm;
+    document.getElementById('c-re').value = p.cRe;
+    document.getElementById('c-im').value = p.cIm;
+    document.getElementById('d-re').value = p.d;
+    document.getElementById('enforce-herm').checked = name !== 'non_herm';
+    enforceHerm = name !== 'non_herm';
+  }
+  updateAll();
+}
+
+document.getElementById('enforce-herm').addEventListener('change', e => {
+  enforceHerm = e.target.checked;
+  updateAll();
+});
+
+['a-re','b-re','b-im','c-re','c-im','d-re'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateAll);
+});
+
+setPreset('sigma_y');
+
+// Testable predictions
+setPreset('sigma_y');
+let ev = computeEigenvalues(getMatrix());
+console.assert(Math.abs(ev[0].re + 1) < 0.01 || Math.abs(ev[0].re - 1) < 0.01, `P1: σ_y eigenvalues should be ±1`);
+console.assert(Math.abs(ev[0].im) < 0.01 && Math.abs(ev[1].im) < 0.01, `P1: σ_y eigenvalues should be real`);
+console.log(`✓ P1: σ_y eigenvalues = ${ev[0].re.toFixed(3)} + ${ev[0].im.toFixed(3)}i, ${ev[1].re.toFixed(3)} + ${ev[1].im.toFixed(3)}i (real ✓)`);
+
+// P2: antisymmetric matrix [[0,2],[-2,0]] → eigenvalues ±2i
+const m_anti = { a: 0, bRe: 2, bIm: 0, cRe: -2, cIm: 0, d: 0 };
+// Wait: [[0,2],[-2,0]] → char poly λ² + 4 = 0 → λ = ±2i
+enforceHerm = false;
+document.getElementById('a-re').value = 0;
+document.getElementById('b-re').value = 2; document.getElementById('b-im').value = 0;
+document.getElementById('c-re').value = -2; document.getElementById('c-im').value = 0;
+document.getElementById('d-re').value = 0;
+const evAnti = computeEigenvalues(getMatrix());
+console.assert(Math.abs(evAnti[0].re) < 0.01 && Math.abs(Math.abs(evAnti[0].im) - 2) < 0.01, `P2: [[0,2],[-2,0]] → eigenvalues ±2i`);
+console.log(`✓ P2: [[0,2],[-2,0]] → λ = ${evAnti[0].re.toFixed(3)} + ${evAnti[0].im.toFixed(3)}i, ${evAnti[1].re.toFixed(3)} + ${evAnti[1].im.toFixed(3)}i (purely imaginary ✓)`);
+
+setPreset('sigma_y'); // restore
+</script>
+</body>
+</html>

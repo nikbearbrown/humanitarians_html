@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<!-- Putnam Tetrahedron Problem — D3 v7 interactive simulation
+     P(n random points on S^(d-1) form simplex containing center) = 1/2^(n-1)
+     2D: P = 1/4 (triangle on circle), 3D: P = 1/8 (tetrahedron on sphere)
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Putnam: Simplex Contains Center</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+    --green: #1A7A3A;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 28px auto; padding: 0 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: var(--slate); margin: 0 0 20px; }
+
+  #controls {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .mode-btn {
+    padding: 6px 20px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--slate);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px; font-family: inherit;
+  }
+  .mode-btn.active { border-color: var(--ink); color: var(--ink); background: #f5f5f5; }
+  button.ctrl-btn {
+    padding: 6px 16px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px; font-family: inherit;
+  }
+  button.ctrl-btn:hover { background: #f5f5f5; }
+  .ctrl-label { font-size: 13px; color: var(--slate); }
+  input[type=range] { accent-color: var(--red); cursor: pointer; }
+
+  #main { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  #viz-col { flex: 0 0 380px; }
+  #info-col { flex: 1 1 240px; }
+
+  #viz-svg { display: block; }
+
+  .counter-block { margin-bottom: 16px; }
+  .counter-big {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 32px; font-weight: 700; color: var(--ink);
+    line-height: 1;
+  }
+  .counter-label { font-size: 12px; color: var(--slate); margin-top: 2px; }
+  .frac-display {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 18px; font-weight: 700;
+    margin-top: 6px;
+  }
+  .frac-display.green { color: #1A7A3A; }
+  .frac-display.red { color: var(--red); }
+
+  .theory-block {
+    border: 1.5px solid var(--border);
+    border-radius: 3px; padding: 12px;
+    margin-bottom: 16px;
+  }
+  .theory-title { font-size: 11px; color: var(--slate); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .theory-formula {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px; color: var(--ink); font-weight: 700;
+  }
+
+  /* Coin flip tree */
+  #coin-tree { margin-bottom: 16px; }
+  .tree-title { font-size: 11px; color: var(--slate); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  #coin-svg { display: block; }
+
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 20px; padding-top: 12px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); }
+  .check { color: var(--red); font-weight: 700; }
+
+  #run-status { font-size: 12px; color: var(--slate); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Putnam: Does the Simplex Contain the Center?</h1>
+  <p class="sub">
+    n random points on S^(d−1) form a simplex containing the origin with probability <strong>1/2^(n−1)</strong>.
+    2D (circle, n=3): P = 1/4. &nbsp; 3D (sphere, n=4): P = 1/8.
+  </p>
+
+  <div id="controls">
+    <button class="mode-btn active" id="btn-2d">2D Mode (circle)</button>
+    <button class="mode-btn" id="btn-3d">3D Mode (sphere)</button>
+    <button class="ctrl-btn" id="btn-step">Step (1 trial)</button>
+    <button class="ctrl-btn" id="btn-auto">Auto</button>
+    <button class="ctrl-btn" id="btn-reset">Reset</button>
+    <div>
+      <div class="ctrl-label" style="margin-bottom:2px">Speed</div>
+      <input type="range" id="speed-slider" min="1" max="100" value="5">
+      <span class="ctrl-label" id="speed-label">5/sec</span>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="viz-col">
+      <svg id="viz-svg" width="380" height="380"></svg>
+      <div id="run-status"></div>
+    </div>
+
+    <div id="info-col">
+      <div class="counter-block">
+        <div class="counter-big" id="n-trials">0</div>
+        <div class="counter-label">Total trials</div>
+        <div class="counter-big" id="n-hits" style="color:var(--green)">0</div>
+        <div class="counter-label">Contain center</div>
+        <div class="frac-display" id="frac-display">0 / 0 = —</div>
+        <div class="counter-label">Empirical probability</div>
+      </div>
+
+      <div class="theory-block">
+        <div class="theory-title">Theory</div>
+        <div class="theory-formula" id="theory-formula">P = 1/2² = 0.250</div>
+        <div style="font-size:11px;color:var(--slate);margin-top:4px" id="theory-note">
+          2D: no arc ≥ π → triangle wraps center
+        </div>
+      </div>
+
+      <div id="coin-tree">
+        <div class="tree-title">Coin flip tree (<span id="tree-label">4 outcomes, 1 favorable</span>)</div>
+        <svg id="coin-svg" width="220" height="120"></svg>
+      </div>
+
+      <div id="predictions">
+        <div class="pred"><strong>P1:</strong> 2D → 0.25 ± 0.01 after 1000 trials. <span class="check" id="p1-check"></span></div>
+        <div class="pred"><strong>P2:</strong> 3D → 0.125 ± 0.01 after 1000 trials. <span class="check" id="p2-check"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+const GREEN = '#1A7A3A';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let mode = '2d';
+let nTrials = 0, nHits = 0;
+let autoTimer = null;
+let lastResult = null;
+
+// ─── 2D geometry ──────────────────────────────────────────────────────────────
+function randomOnCircle() {
+  const a = Math.random() * 2 * Math.PI;
+  return { x: Math.cos(a), y: Math.sin(a), angle: a };
+}
+
+function triangleContainsOrigin2D(pts) {
+  // Check no arc between consecutive points ≥ π
+  const angles = pts.map(p => p.angle).sort((a, b) => a - b);
+  const gaps = [
+    angles[1] - angles[0],
+    angles[2] - angles[1],
+    (angles[0] + 2 * Math.PI) - angles[2]
+  ];
+  return gaps.every(g => g < Math.PI);
+}
+
+// ─── 3D geometry ──────────────────────────────────────────────────────────────
+function randomOnSphere() {
+  // Gaussian method
+  let x, y, z, r;
+  do {
+    x = (Math.random() * 2 - 1);
+    y = (Math.random() * 2 - 1);
+    z = (Math.random() * 2 - 1);
+    r = Math.sqrt(x * x + y * y + z * z);
+  } while (r > 1 || r < 0.001);
+  return { x: x / r, y: y / r, z: z / r };
+}
+
+function tetraContainsOrigin3D(pts) {
+  // Tetrahedron contains origin iff origin is on the interior side of all 4 face planes.
+  // For each face (defined by 3 of the 4 points), the 4th point and origin must be on the same side.
+  for (let i = 0; i < 4; i++) {
+    const face = pts.filter((_, j) => j !== i);
+    const opposite = pts[i];
+    // Normal to face: cross product of two edges
+    const v1 = { x: face[1].x - face[0].x, y: face[1].y - face[0].y, z: face[1].z - face[0].z };
+    const v2 = { x: face[2].x - face[0].x, y: face[2].y - face[0].y, z: face[2].z - face[0].z };
+    const n = {
+      x: v1.y * v2.z - v1.z * v2.y,
+      y: v1.z * v2.x - v1.x * v2.z,
+      z: v1.x * v2.y - v1.y * v2.x
+    };
+    // Signed distance of opposite and origin from this plane
+    const d_opp = n.x * (opposite.x - face[0].x) + n.y * (opposite.y - face[0].y) + n.z * (opposite.z - face[0].z);
+    const d_ori = n.x * (0 - face[0].x) + n.y * (0 - face[0].y) + n.z * (0 - face[0].z);
+    if (Math.sign(d_opp) !== Math.sign(d_ori)) return false;
+  }
+  return true;
+}
+
+// ─── Orthographic projection ──────────────────────────────────────────────────
+const ROT_X = 0.4, ROT_Y = 0.6;
+
+function project3D(p) {
+  // Rotate around Y then X
+  const cosY = Math.cos(ROT_Y), sinY = Math.sin(ROT_Y);
+  const x1 = p.x * cosY + p.z * sinY;
+  const z1 = -p.x * sinY + p.z * cosY;
+  const cosX = Math.cos(ROT_X), sinX = Math.sin(ROT_X);
+  const y1 = p.y * cosX - z1 * sinX;
+  const z2 = p.y * sinX + z1 * cosX;
+  return { sx: x1, sy: y1, sz: z2 };
+}
+
+// ─── SVG setup ────────────────────────────────────────────────────────────────
+const VSZ = 380;
+const CX = VSZ / 2, CY = VSZ / 2;
+const R = 150;
+
+const svg = d3.select('#viz-svg');
+
+// Background circle/ellipse
+const bgCircle = svg.append('ellipse').attr('cx', CX).attr('cy', CY)
+  .attr('fill', 'none').attr('stroke', BORDER).attr('stroke-width', 1.5);
+// Equator (3D only, dashed)
+const equator = svg.append('ellipse').attr('cx', CX).attr('cy', CY)
+  .attr('fill', 'none').attr('stroke', BORDER).attr('stroke-width', 1)
+  .attr('stroke-dasharray', '4,4').attr('display', 'none');
+
+// Grid layer (draws axes)
+svg.append('line').attr('x1', CX - R - 10).attr('y1', CY).attr('x2', CX + R + 10).attr('y2', CY)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+svg.append('line').attr('x1', CX).attr('y1', CY - R - 10).attr('x2', CX).attr('y2', CY + R + 10)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+// Origin dot
+svg.append('circle').attr('cx', CX).attr('cy', CY).attr('r', 5)
+  .attr('fill', INK).attr('stroke', '#fff').attr('stroke-width', 2);
+svg.append('text').attr('x', CX + 8).attr('y', CY - 6)
+  .attr('font-size', 11).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif').text('O');
+
+// Shape layer (triangle or tetrahedron)
+const shapeG = svg.append('g').attr('id', 'shape');
+// Points layer
+const ptsG = svg.append('g').attr('id', 'points');
+
+function updateMode() {
+  if (mode === '2d') {
+    bgCircle.attr('rx', R).attr('ry', R);
+    equator.attr('display', 'none');
+    d3.select('#theory-formula').text('P = 1/2² = 0.250');
+    d3.select('#theory-note').text('2D: no arc ≥ π → triangle wraps center');
+    d3.select('#tree-label').text('4 outcomes, 1 favorable');
+    drawCoinTree(2);
+  } else {
+    // 3D: sphere shown as ellipse
+    bgCircle.attr('rx', R).attr('ry', R * 0.6);
+    equator.attr('display', null).attr('rx', R).attr('ry', R * 0.2);
+    d3.select('#theory-formula').text('P = 1/2³ = 0.125');
+    d3.select('#theory-note').text('3D: origin on interior side of all 4 faces');
+    d3.select('#tree-label').text('8 outcomes, 1 favorable');
+    drawCoinTree(3);
+  }
+}
+
+// ─── Draw a trial ─────────────────────────────────────────────────────────────
+function drawTrial(pts, contains) {
+  const color = contains ? GREEN : RED;
+  shapeG.selectAll('*').remove();
+  ptsG.selectAll('*').remove();
+
+  if (mode === '2d') {
+    const screenPts = pts.map(p => ({ sx: CX + p.x * R, sy: CY - p.y * R }));
+    // Triangle
+    shapeG.append('polygon')
+      .attr('points', screenPts.map(p => `${p.sx},${p.sy}`).join(' '))
+      .attr('fill', color).attr('opacity', 0.15)
+      .attr('stroke', color).attr('stroke-width', 2);
+    // Points
+    screenPts.forEach(p => {
+      ptsG.append('circle').attr('cx', p.sx).attr('cy', p.sy).attr('r', 6)
+        .attr('fill', color).attr('stroke', '#fff').attr('stroke-width', 2);
+    });
+  } else {
+    // 3D: project and draw tetrahedron edges
+    const proj = pts.map(project3D);
+    const screen = proj.map(p => ({ sx: CX + p.sx * R, sy: CY - p.sy * (R * 0.9), sz: p.sz }));
+
+    // Draw edges (6 edges of tetrahedron)
+    const edges = [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+    edges.forEach(([a, b]) => {
+      const behind = screen[a].sz < 0 && screen[b].sz < 0;
+      shapeG.append('line')
+        .attr('x1', screen[a].sx).attr('y1', screen[a].sy)
+        .attr('x2', screen[b].sx).attr('y2', screen[b].sy)
+        .attr('stroke', color).attr('stroke-width', 1.8)
+        .attr('opacity', behind ? 0.3 : 0.85)
+        .attr('stroke-dasharray', behind ? '4,4' : 'none');
+    });
+
+    // Fill faces (semi-transparent)
+    const faces = [[0,1,2],[0,1,3],[0,2,3],[1,2,3]];
+    faces.forEach(([a, b, c]) => {
+      const midZ = (screen[a].sz + screen[b].sz + screen[c].sz) / 3;
+      shapeG.append('polygon')
+        .attr('points', [screen[a], screen[b], screen[c]].map(p => `${p.sx},${p.sy}`).join(' '))
+        .attr('fill', color).attr('opacity', midZ > 0 ? 0.08 : 0.03)
+        .attr('stroke', 'none');
+    });
+
+    // Points
+    // Sort by z for proper depth
+    const sorted = [...screen].sort((a, b) => a.sz - b.sz);
+    screen.forEach((p) => {
+      ptsG.append('circle').attr('cx', p.sx).attr('cy', p.sy)
+        .attr('r', p.sz > 0 ? 7 : 5)
+        .attr('fill', color).attr('stroke', '#fff').attr('stroke-width', 2)
+        .attr('opacity', p.sz > 0 ? 1 : 0.5);
+    });
+  }
+}
+
+// ─── Run one trial ────────────────────────────────────────────────────────────
+function runTrial() {
+  let pts, contains;
+  if (mode === '2d') {
+    pts = [randomOnCircle(), randomOnCircle(), randomOnCircle()];
+    contains = triangleContainsOrigin2D(pts);
+  } else {
+    pts = [randomOnSphere(), randomOnSphere(), randomOnSphere(), randomOnSphere()];
+    contains = tetraContainsOrigin3D(pts);
+  }
+  nTrials++;
+  if (contains) nHits++;
+  lastResult = { pts, contains };
+  drawTrial(pts, contains);
+  updateCounters();
+}
+
+function updateCounters() {
+  d3.select('#n-trials').text(nTrials);
+  d3.select('#n-hits').text(nHits);
+  const frac = nTrials > 0 ? nHits / nTrials : 0;
+  d3.select('#frac-display')
+    .text(nTrials > 0 ? `${nHits} / ${nTrials} = ${frac.toFixed(4)}` : '0 / 0 = —')
+    .classed('green', lastResult && lastResult.contains)
+    .classed('red', lastResult && !lastResult.contains);
+
+  if (mode === '2d' && nTrials >= 1000) {
+    if (Math.abs(frac - 0.25) < 0.015) d3.select('#p1-check').text('✓ within 0.01 of 0.250');
+  }
+  if (mode === '3d' && nTrials >= 1000) {
+    if (Math.abs(frac - 0.125) < 0.015) d3.select('#p2-check').text('✓ within 0.01 of 0.125');
+  }
+
+  d3.select('#run-status').text(
+    lastResult ? (lastResult.contains ? '✓ Contains center' : '✗ Does not contain center') : ''
+  ).style('color', lastResult ? (lastResult.contains ? GREEN : RED) : SLATE)
+   .style('font-weight', '700').style('font-size', '14px').style('margin-top', '6px');
+}
+
+// ─── Coin flip tree ───────────────────────────────────────────────────────────
+function drawCoinTree(depth) {
+  // 2^depth outcomes, 1 favorable
+  const tsv = d3.select('#coin-svg');
+  tsv.selectAll('*').remove();
+  const TW = 220, TH = 120;
+  const outcomes = Math.pow(2, depth);
+  const favorable = 1;
+
+  // Simple visual: show outcomes as squares
+  const cols = outcomes;
+  const sqW = Math.min(24, (TW - 20) / cols);
+  const sqH = 22;
+  const startX = (TW - cols * (sqW + 3)) / 2;
+
+  for (let i = 0; i < cols; i++) {
+    const x = startX + i * (sqW + 3);
+    const y = TH - sqH - 12;
+    tsv.append('rect').attr('x', x).attr('y', y)
+      .attr('width', sqW).attr('height', sqH).attr('rx', 2)
+      .attr('fill', i === 0 ? GREEN : BORDER)
+      .attr('stroke', i === 0 ? GREEN : BORDER).attr('stroke-width', 1);
+  }
+
+  tsv.append('text').attr('x', TW / 2).attr('y', TH - 2)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 10).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+    .text(`1 favorable out of ${outcomes} = 1/2^${depth}`);
+
+  // Tree lines (simplified)
+  const rootX = TW / 2, rootY = 14;
+  tsv.append('circle').attr('cx', rootX).attr('cy', rootY).attr('r', 6)
+    .attr('fill', INK).attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+  if (depth <= 3) {
+    // Draw 2 branches at each level
+    function branch(x, y, w, d) {
+      if (d === 0) return;
+      const childY = y + (TH - 36 - 14) / depth;
+      const lx = x - w / 2, rx = x + w / 2;
+      tsv.append('line').attr('x1', x).attr('y1', y).attr('x2', lx).attr('y2', childY)
+        .attr('stroke', BORDER).attr('stroke-width', 1);
+      tsv.append('line').attr('x1', x).attr('y1', y).attr('x2', rx).attr('y2', childY)
+        .attr('stroke', BORDER).attr('stroke-width', 1);
+      if (d > 1) {
+        tsv.append('circle').attr('cx', lx).attr('cy', childY).attr('r', 4)
+          .attr('fill', SLATE).attr('opacity', 0.5);
+        tsv.append('circle').attr('cx', rx).attr('cy', childY).attr('r', 4)
+          .attr('fill', SLATE).attr('opacity', 0.5);
+        branch(lx, childY, w / 2, d - 1);
+        branch(rx, childY, w / 2, d - 1);
+      }
+    }
+    branch(rootX, rootY + 6, TW * 0.6, depth);
+  }
+}
+
+// ─── Mode switching ───────────────────────────────────────────────────────────
+d3.select('#btn-2d').on('click', () => {
+  mode = '2d';
+  d3.select('#btn-2d').classed('active', true);
+  d3.select('#btn-3d').classed('active', false);
+  resetAll();
+  updateMode();
+});
+
+d3.select('#btn-3d').on('click', () => {
+  mode = '3d';
+  d3.select('#btn-2d').classed('active', false);
+  d3.select('#btn-3d').classed('active', true);
+  resetAll();
+  updateMode();
+});
+
+function resetAll() {
+  stopAuto();
+  nTrials = 0; nHits = 0; lastResult = null;
+  shapeG.selectAll('*').remove();
+  ptsG.selectAll('*').remove();
+  d3.select('#n-trials').text(0);
+  d3.select('#n-hits').text(0);
+  d3.select('#frac-display').text('0 / 0 = —').classed('green', false).classed('red', false);
+  d3.select('#run-status').text('');
+}
+
+d3.select('#btn-step').on('click', () => runTrial());
+d3.select('#btn-reset').on('click', resetAll);
+
+function stopAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  d3.select('#btn-auto').text('Auto').style('border-color', null).style('color', null);
+}
+
+d3.select('#btn-auto').on('click', function() {
+  if (autoTimer) { stopAuto(); return; }
+  d3.select(this).text('Pause').style('border-color', RED).style('color', RED);
+  const speed = +d3.select('#speed-slider').property('value');
+  const interval = Math.max(10, 1000 / speed);
+  autoTimer = setInterval(runTrial, interval);
+});
+
+d3.select('#speed-slider').on('input', function() {
+  const v = +this.value;
+  d3.select('#speed-label').text(`${v}/sec`);
+  if (autoTimer) { stopAuto(); d3.select('#btn-auto').click(); }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+updateMode();
+</script>
+</body>
+</html>

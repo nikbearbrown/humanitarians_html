@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rabi Oscillation — Spin Flopping Between Up and Down</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 20px; }
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=range] { width: 200px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.88rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 8px 14px;
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .btn {
+    padding: 6px 18px;
+    font-size: 0.82rem;
+    border: 1.5px solid #2A1A0E;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 2px;
+  }
+  .btn.active { background: #2A1A0E; color: #fff; }
+  .charts { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Rabi Oscillation</h1>
+<div class="subtitle">P↑(t) = cos²(ω₀t/2) — deterministic spin flip, no measurement, no collapse. NMR in one formula.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Rabi freq ω₀ / (2π)</label>
+    <input type="range" id="omega-slider" min="0.2" max="5" step="0.1" value="1.0">
+    <span class="val-display" id="omega-val">ω₀/(2π) = 1.0 MHz</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Initial θ₀</label>
+    <input type="range" id="theta-slider" min="0" max="180" step="5" value="0">
+    <span class="val-display" id="theta-val">θ₀ = 0° (|↑⟩)</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Animation</label>
+    <button class="btn active" id="play-btn" onclick="togglePlay()">▶ Play</button>
+  </div>
+</div>
+
+<div class="readout">
+  <div>t = <span id="rt">0.00</span> µs</div>
+  <div>P↑ = <span id="rpu">1.000</span></div>
+  <div>P↓ = <span id="rpd">0.000</span></div>
+  <div>P↑+P↓ = <span id="rsum">1.000</span></div>
+  <div>Period = <span id="rperiod">1.00</span> µs</div>
+</div>
+
+<div class="charts">
+  <svg id="prob-chart" width="400" height="240"></svg>
+  <svg id="bloch-chart" width="220" height="280"></svg>
+</div>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+let omega = 1.0; // MHz (2π × MHz)
+let theta0 = 0;  // degrees, initial polar angle
+let tCurrent = 0;
+let playing = true;
+let animId = null;
+let lastTime = null;
+
+function P_up(t, w, th0) {
+  const th0r = th0 * Math.PI / 180;
+  // General formula: P_up(t) = cos²(wt/2)sin²(th0/2) + cos²(th0/2) - cross terms
+  // For initial state |ψ⟩ = cos(th0/2)|↑⟩ - i·sin(th0/2)|↓⟩
+  // P_up(t) = |cos(wt/2)cos(th0/2) + i·sin(wt/2)sin(th0/2)|² ... let me be careful
+  // H = ω₀S_x → |ψ(t)⟩ = cos(wt/2)|↑⟩ - i·sin(wt/2)|↓⟩ for |↑⟩ initial (th0=0)
+  // General: starting from cos(th0/2)|↑⟩ + sin(th0/2)|↓⟩
+  // |ψ(t)⟩ = [cos(th0/2)cos(wt/2) - i·sin(th0/2)sin(wt/2)]|↑⟩
+  //         + [-i·cos(th0/2)sin(wt/2) + sin(th0/2)cos(wt/2)]|↓⟩
+  const c0 = Math.cos(th0r/2), s0 = Math.sin(th0r/2);
+  const ct = Math.cos(w*Math.PI*t/2), st = Math.sin(w*Math.PI*t/2); // w here is in units of 2πMHz so period = 1/w µs
+  const pu = c0*c0*ct*ct + s0*s0*st*st;
+  return pu;
+}
+
+// ── Probability chart ────────────────────────────────────────────────────────
+const pSvg = d3.select('#prob-chart');
+const pW = 400, pH = 240;
+const pM = {top: 28, right: 20, bottom: 44, left: 52};
+const pIW = pW - pM.left - pM.right, pIH = pH - pM.top - pM.bottom;
+const pG = pSvg.append('g').attr('transform', `translate(${pM.left},${pM.top})`);
+
+const tMax = 4.0; // µs - show 4 periods at ω₀=1MHz
+const pX = d3.scaleLinear().domain([0, tMax]).range([0, pIW]);
+const pY = d3.scaleLinear().domain([0, 1]).range([pIH, 0]);
+
+pG.append('g').attr('transform', `translate(0,${pIH})`).call(d3.axisBottom(pX).ticks(6));
+pG.append('g').call(d3.axisLeft(pY).ticks(5));
+pG.append('text').attr('x', pIW/2).attr('y', -10).attr('text-anchor', 'middle').attr('font-size', '12px').attr('font-weight', '700').attr('fill', INK).text('Spin Probability vs Time');
+pG.append('text').attr('x', pIW/2).attr('y', pIH+36).attr('text-anchor', 'middle').attr('font-size', '11px').attr('fill', SLATE).text('t (µs)');
+pG.append('text').attr('transform','rotate(-90)').attr('x',-pIH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('Probability');
+
+// Background curves (static preview of full oscillation)
+const nPts = 400;
+function makeCurveData(w, th0) {
+  return d3.range(nPts).map(i => {
+    const t = tMax * i / (nPts - 1);
+    return { t, pu: P_up(t, w, th0), pd: 1 - P_up(t, w, th0) };
+  });
+}
+
+const curvePU = pG.append('path').attr('fill','none').attr('stroke',BLUE).attr('stroke-width',1.5).attr('opacity',0.35);
+const curvePD = pG.append('path').attr('fill','none').attr('stroke',SLATE).attr('stroke-width',1.5).attr('opacity',0.35);
+
+// Legend
+pG.append('rect').attr('x', pIW-80).attr('y', 8).attr('width', 12).attr('height', 3).attr('fill', BLUE);
+pG.append('text').attr('x', pIW-64).attr('y', 12).attr('font-size','10px').attr('fill',BLUE).text('P↑');
+pG.append('rect').attr('x', pIW-80).attr('y', 22).attr('width', 12).attr('height', 3).attr('fill', SLATE);
+pG.append('text').attr('x', pIW-64).attr('y', 26).attr('font-size','10px').attr('fill',SLATE).text('P↓');
+
+// Animated time marker
+const timeMarker = pG.append('line').attr('y1', 0).attr('y2', pIH).attr('stroke', RED).attr('stroke-width', 1.5).attr('stroke-dasharray','4,3');
+const puDot = pG.append('circle').attr('r', 5).attr('fill', BLUE);
+const pdDot = pG.append('circle').attr('r', 5).attr('fill', SLATE);
+
+function updateCurves() {
+  const data = makeCurveData(omega, theta0);
+  curvePU.datum(data).attr('d', d3.line().x(d=>pX(d.t)).y(d=>pY(d.pu)));
+  curvePD.datum(data).attr('d', d3.line().x(d=>pX(d.t)).y(d=>pY(d.pd)));
+}
+
+// ── Bloch sphere (2D projection) ─────────────────────────────────────────────
+const bSvg = d3.select('#bloch-chart');
+const bW = 220, bH = 280;
+const bCx = bW/2, bCy = bH/2, bR = 88;
+const bG = bSvg.append('g');
+
+// Outer circle
+bG.append('circle').attr('cx',bCx).attr('cy',bCy).attr('r',bR).attr('fill','none').attr('stroke','#ddd').attr('stroke-width',1.5);
+// Axes
+bG.append('line').attr('x1',bCx).attr('x2',bCx).attr('y1',bCy-bR-16).attr('y2',bCy+bR+16).attr('stroke','#ddd').attr('stroke-width',1);
+bG.append('line').attr('x1',bCx-bR-16).attr('x2',bCx+bR+16).attr('y1',bCy).attr('y2',bCy).attr('stroke','#ddd').attr('stroke-width',1);
+// Labels
+bG.append('text').attr('x',bCx).attr('y',bCy-bR-20).attr('text-anchor','middle').attr('font-size','12px').attr('fill',INK).text('|↑⟩');
+bG.append('text').attr('x',bCx).attr('y',bCy+bR+28).attr('text-anchor','middle').attr('font-size','12px').attr('fill',INK).text('|↓⟩');
+bG.append('text').attr('x',bCx+bR+20).attr('y',bCy+4).attr('font-size','10px').attr('fill',SLATE).text('|+⟩');
+bG.append('text').attr('x',bCx).attr('y',bCy-bR+24).attr('text-anchor','middle').attr('font-size','10px').attr('fill',SLATE).text('Bloch sphere (x–z plane)');
+
+// State vector arrow
+const blochLine = bG.append('line').attr('stroke',RED).attr('stroke-width',2.5);
+const blochDot = bG.append('circle').attr('r',6).attr('fill',RED);
+
+// Trajectory trace (last 2 periods)
+const traceData = [];
+const tracePath = bG.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',1).attr('opacity',0.3);
+const traceLen = 100;
+
+function blochCoords(t, w, th0) {
+  // Bloch vector rotates in x-z plane for H = ω₀S_x starting from |↑⟩
+  // For initial state at angle th0 from z-axis: Bloch = (sin(th0),0,cos(th0))
+  // Under H = ω₀S_x: z-component oscillates, x-component also
+  // |ψ(t)⟩ = cos(wπt/2)|↑⟩ - i·sin(wπt/2)|↓⟩ for th0=0
+  // ⟨Z⟩ = cos(w·2πt/2)... hmm let me be more careful
+  // For |↑⟩ initial state and H = ω₀S_x:
+  // ⟨Z⟩(t) = cos(ω₀t) and ⟨X⟩(t) = 0 (stays in y-z plane? no...)
+  // Actually H = ω₀S_x means rotation around x-axis at rate ω₀
+  // Bloch vector starts at (0,0,1) and rotates around x-axis
+  // After time t: (0, sin(ω₀t), cos(ω₀t)) in (x,y,z)
+  // P_up = (1 + ⟨Z⟩)/2 = (1 + cos(ω₀t))/2 = cos²(ω₀t/2) ✓
+  const th0r = th0 * Math.PI/180;
+  const wt = w * 2 * Math.PI * t; // radians, w in MHz, t in µs → w*2π*t radians
+  // Start: (sin(th0), 0, cos(th0)), rotate around x-axis
+  const z0 = Math.cos(th0r), y0 = Math.sin(th0r);
+  const z = z0 * Math.cos(wt) - y0 * Math.sin(wt); // No wait...
+  // Rotation by angle wt around x-axis: (x,y,z) → (x, y·cos-z·sin, y·sin+z·cos)
+  // Initial: (0, sin(th0), cos(th0))
+  const bz = Math.sin(th0r) * Math.sin(wt) + Math.cos(th0r) * Math.cos(wt);
+  return bz; // the z-component
+}
+
+function updateBloch(t) {
+  const bz = blochCoords(t, omega, theta0);
+  // We show 2D: vertical = z (up = north = |↑⟩), horizontal = sin(ωt) component
+  const wt = omega * 2 * Math.PI * t;
+  const th0r = theta0 * Math.PI / 180;
+  const by = -Math.sin(th0r)*Math.cos(wt) + Math.cos(th0r)*Math.sin(wt);
+  // Project onto x=by, y=bz for the 2D view (showing y-z plane of Bloch sphere)
+  const screenX = bCx + bR * by;
+  const screenY = bCy - bR * bz;  // y inverted for screen
+
+  blochLine.attr('x1', bCx).attr('y1', bCy).attr('x2', screenX).attr('y2', screenY);
+  blochDot.attr('cx', screenX).attr('cy', screenY);
+
+  traceData.push({x: screenX, y: screenY});
+  if (traceData.length > traceLen) traceData.shift();
+  if (traceData.length > 1) {
+    tracePath.attr('d', d3.line().x(d=>d.x).y(d=>d.y).curve(d3.curveCatmullRom)(traceData));
+  }
+}
+
+function updateMarker(t) {
+  const tClamped = ((t % tMax) + tMax) % tMax;
+  const pu = P_up(tClamped, omega, theta0);
+  const pd = 1 - pu;
+  timeMarker.attr('x1', pX(tClamped)).attr('x2', pX(tClamped));
+  puDot.attr('cx', pX(tClamped)).attr('cy', pY(pu));
+  pdDot.attr('cx', pX(tClamped)).attr('cy', pY(pd));
+  document.getElementById('rt').textContent = tClamped.toFixed(2);
+  document.getElementById('rpu').textContent = pu.toFixed(3);
+  document.getElementById('rpd').textContent = pd.toFixed(3);
+  document.getElementById('rsum').textContent = (pu + pd).toFixed(4);
+}
+
+function animate(ts) {
+  if (!playing) return;
+  if (!lastTime) lastTime = ts;
+  const dt = (ts - lastTime) / 1000; // seconds
+  lastTime = ts;
+  tCurrent += dt * 0.8; // speed up a bit
+
+  const tDisp = ((tCurrent % tMax) + tMax) % tMax;
+  updateMarker(tDisp);
+  updateBloch(tDisp);
+  animId = requestAnimationFrame(animate);
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('play-btn');
+  btn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  btn.classList.toggle('active', playing);
+  if (playing) {
+    lastTime = null;
+    animId = requestAnimationFrame(animate);
+  }
+}
+
+document.getElementById('omega-slider').addEventListener('input', e => {
+  omega = parseFloat(e.target.value);
+  document.getElementById('omega-val').textContent = `ω₀/(2π) = ${omega.toFixed(1)} MHz`;
+  document.getElementById('rperiod').textContent = (1/omega).toFixed(2);
+  tMax2 = 4 / omega;
+  pX.domain([0, 4/omega]);
+  pG.select('.x-axis').remove();
+  updateCurves();
+  traceData.length = 0;
+});
+
+document.getElementById('theta-slider').addEventListener('input', e => {
+  theta0 = parseFloat(e.target.value);
+  document.getElementById('theta-val').textContent = `θ₀ = ${theta0}°${theta0 === 0 ? ' (|↑⟩)' : theta0 === 90 ? ' (|+⟩)' : theta0 === 180 ? ' (|↓⟩)' : ''}`;
+  updateCurves();
+  traceData.length = 0;
+});
+
+// Update tMax dynamically
+let tMax2 = 4.0;
+pX.domain([0, tMax2]);
+
+// Init
+document.getElementById('rperiod').textContent = (1/omega).toFixed(2);
+updateCurves();
+requestAnimationFrame(animate);
+
+// Testable predictions
+const pu_at_pi = P_up(1/(2*omega), omega, 0); // t = T/2 = π/ω₀ → complete inversion
+console.assert(Math.abs(pu_at_pi) < 1e-6, `P1: at t=T/2, P↑ should be 0, got ${pu_at_pi.toFixed(6)}`);
+const pu_0 = P_up(0, omega, 0), pd_0 = 1 - pu_0;
+console.assert(Math.abs(pu_0 + pd_0 - 1.0) < 1e-10, 'P2: P↑+P↓ = 1 always');
+console.log(`✓ P1: at t=π/ω₀, P↑ = ${pu_at_pi.toExponential(3)} ≈ 0 (complete inversion)`);
+console.log(`✓ P2: P↑+P↓ = ${(pu_0+pd_0).toFixed(10)} = 1 (unitarity)`);
+</script>
+</body>
+</html>

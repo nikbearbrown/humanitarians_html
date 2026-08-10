@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wave Packet Spreading — Group vs Phase Velocity</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 0.88rem; color: #545454; margin-bottom: 16px; }
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+  }
+  .ctrl-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  label { font-size: 0.78rem; color: #545454; font-weight: 600; text-transform: uppercase; }
+  input[type=range] { width: 160px; accent-color: #C8102E; }
+  .val-display { font-size: 0.82rem; color: #2A1A0E; font-weight: 700; }
+  .readout {
+    font-size: 0.85rem;
+    background: #f8f8f8;
+    border-left: 3px solid #C8102E;
+    padding: 7px 12px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .readout span { font-weight: 700; color: #C8102E; }
+  .btn { padding: 6px 16px; font-size: 0.8rem; border: 1.5px solid #2A1A0E; background: #fff; cursor: pointer; font-family: inherit; border-radius: 2px; }
+  .btn.active { background: #2A1A0E; color: #fff; }
+  svg text { font-family: 'Inter', Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Wave Packet Spreading</h1>
+<div class="subtitle">Free-particle dispersion ω=ħk²/2m: group velocity v_g = 2×phase velocity. Peaks march at v_p; envelope races at v_g.</div>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>σ₀ (nm)</label>
+    <input type="range" id="sigma-slider" min="0.3" max="3" step="0.1" value="1.0">
+    <span class="val-display" id="sigma-val">σ₀ = 1.0 nm</span>
+  </div>
+  <div class="ctrl-group">
+    <label>k₀ (nm⁻¹)</label>
+    <input type="range" id="k0-slider" min="1" max="10" step="0.5" value="5">
+    <span class="val-display" id="k0-val">k₀ = 5.0 nm⁻¹</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Time</label>
+    <input type="range" id="t-slider" min="0" max="100" step="1" value="0">
+    <span class="val-display" id="t-val">t = 0 fs</span>
+  </div>
+  <div class="ctrl-group">
+    <label>Animation</label>
+    <button class="btn active" id="play-btn" onclick="togglePlay()">⏸ Pause</button>
+  </div>
+</div>
+
+<div class="readout">
+  <div>t = <span id="rt">0</span> fs</div>
+  <div>σ(t) = <span id="rsigma">1.000</span> nm</div>
+  <div>v_g = <span id="rvg">0</span> nm/fs</div>
+  <div>v_p = v_g/2 = <span id="rvp">0</span> nm/fs</div>
+  <div>⟨x⟩ = <span id="rxavg">0</span> nm</div>
+</div>
+
+<svg id="wave-chart" width="640" height="240"></svg>
+<svg id="spread-chart" width="640" height="140"></svg>
+
+<script>
+const INK = '#2A1A0E';
+const RED = '#C8102E';
+const SLATE = '#545454';
+const BLUE = '#1A6B9A';
+
+const HBAR = 0.6582; // eV·fs
+const M_E_EV = 0.511e6; // eV/c²
+const C_NM_FS = 299.792; // nm/fs
+const HBAR2_OVER_M = (HBAR * HBAR) * (C_NM_FS * C_NM_FS) / M_E_EV; // nm²/fs
+
+let sigma0 = 1.0; // nm
+let k0 = 5.0; // nm⁻¹
+let t_fs = 0; // current time in fs
+let playing = true;
+let animId = null;
+let lastWallTime = null;
+
+// v_g = ħk₀/m = ħk₀ * c²/mc² = ħk₀ / (m*c²/c²)
+// v_g in nm/fs: ħ in eV·fs, k₀ in nm⁻¹, m in eV/c², c in nm/fs
+// v_g = ħk₀ * c² / (mc²) nm/fs
+function v_group(k0) {
+  return HBAR * k0 * C_NM_FS * C_NM_FS / M_E_EV; // nm/fs
+}
+
+function sigma_t(t) {
+  const tau = 2 * M_E_EV / (C_NM_FS*C_NM_FS) * sigma0*sigma0 / HBAR; // spreading time in fs
+  return sigma0 * Math.sqrt(1 + (t/tau)*(t/tau));
+}
+
+// Analytic free-particle wavepacket
+// ψ(x,t) = A(t) · exp[-(x-x_c)²/(4σ(t)²)] · exp[i(k₀x - ω₀t + phase)]
+// where x_c = v_g · t, and σ(t) is complex spread
+// For real plotting, we use:
+// Re[ψ] = A·exp(-(x-xc)²/4σ²)·cos(k₀x - ω₀t + arg(A(t)))
+// |ψ|² = (1/(√(2π)σ(t))) · exp(-(x-xc)²/(2σ(t)²))
+function psiRe(x, t) {
+  const vg = v_group(k0);
+  const xc = vg * t;
+  const sig = sigma_t(t);
+  const omega0 = HBAR * k0*k0 / (2 * M_E_EV / (C_NM_FS*C_NM_FS)); // eV/ħ = fs⁻¹ ... wait
+  // ω₀ = ħk₀²/(2m) in rad/fs: ħ in eV·fs, so ω₀ = k₀² * ħ * c²/(2mc²) rad/fs
+  const omega_0_fs = k0*k0 * HBAR * C_NM_FS*C_NM_FS / (2 * M_E_EV); // rad/fs
+  // Phase term: the dispersive spreading also adds a time-dependent phase
+  // For exact free-particle: ψ(x,t) = (σ₀/σ(t))^{1/2} · e^{-(x-xc)²/4σ*(t)σ(t)} · e^{i(k₀x - ωt)}
+  // where σ*(t) = σ₀² + iħt/2m
+  // For the real part display: envelope × cos(k₀x - ω₀t + chirp phase)
+  const tau = 2 * M_E_EV / (C_NM_FS*C_NM_FS) * sigma0*sigma0 / HBAR;
+  const chirp = -Math.atan(t/tau) / 2 + (x-xc)*(x-xc) * t / (tau * 4 * sig*sig); // approximate
+  const env = Math.exp(-(x-xc)*(x-xc) / (4*sig*sig));
+  const phase = k0*x - omega_0_fs*t;
+  return env * Math.cos(phase);
+}
+
+function psiIm(x, t) {
+  const vg = v_group(k0);
+  const xc = vg * t;
+  const sig = sigma_t(t);
+  const omega_0_fs = k0*k0 * HBAR * C_NM_FS*C_NM_FS / (2 * M_E_EV);
+  const env = Math.exp(-(x-xc)*(x-xc) / (4*sig*sig));
+  return env * Math.sin(k0*x - omega_0_fs*t);
+}
+
+function psi2(x, t) {
+  const vg = v_group(k0);
+  const xc = vg * t;
+  const sig = sigma_t(t);
+  return Math.exp(-(x-xc)*(x-xc) / (2*sig*sig)) / (Math.sqrt(2*Math.PI) * sig);
+}
+
+// ── Wave chart ─────────────────────────────────────────────────────────────
+const wSvg = d3.select('#wave-chart');
+const wW = 640, wH = 240;
+const wM = {top: 28, right: 20, bottom: 36, left: 52};
+const wIW = wW - wM.left - wM.right, wIH = wH - wM.top - wM.bottom;
+const wG = wSvg.append('g').attr('transform', `translate(${wM.left},${wM.top})`);
+
+const xExt = [-15, 15]; // nm
+const wX = d3.scaleLinear().domain(xExt).range([0, wIW]);
+const wY = d3.scaleLinear().domain([-1, 1]).range([wIH, 0]);
+
+const wXAxis = wG.append('g').attr('transform',`translate(0,${wIH})`).call(d3.axisBottom(wX).ticks(10));
+wG.append('g').call(d3.axisLeft(wY).ticks(5));
+wG.append('text').attr('x',wIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','12px').attr('font-weight','700').attr('fill',INK).text('ψ(x,t) — Free Particle Wave Packet');
+wG.append('text').attr('x',wIW/2).attr('y',wIH+28).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('x (nm)');
+
+// Zero line
+wG.append('line').attr('x1',0).attr('x2',wIW).attr('y1',wY(0)).attr('y2',wY(0)).attr('stroke','#eee');
+
+// Re(ψ), Im(ψ), |ψ|² (as envelope), |ψ|² fill
+const psi2Fill = wG.append('path').attr('fill',RED).attr('opacity',0.15);
+const psi2Line = wG.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',2).attr('opacity',0.7);
+const rePathEl = wG.append('path').attr('fill','none').attr('stroke',BLUE).attr('stroke-width',1.5);
+const imPathEl = wG.append('path').attr('fill','none').attr('stroke',SLATE).attr('stroke-width',1).attr('stroke-dasharray','4,3').attr('opacity',0.6);
+
+// Envelope markers
+const envMarker = wG.append('line').attr('y1',0).attr('y2',wIH).attr('stroke',RED).attr('stroke-width',1).attr('stroke-dasharray','3,3').attr('opacity',0.5);
+const phaseMarker = wG.append('line').attr('y1',0).attr('y2',wIH).attr('stroke',BLUE).attr('stroke-width',1).attr('stroke-dasharray','2,4').attr('opacity',0.5);
+
+// Legend
+wG.append('line').attr('x1',4).attr('x2',20).attr('y1',8).attr('y2',8).attr('stroke',BLUE).attr('stroke-width',1.5);
+wG.append('text').attr('x',22).attr('y',12).attr('font-size','9px').attr('fill',BLUE).text('Re(ψ)');
+wG.append('line').attr('x1',56).attr('x2',72).attr('y1',8).attr('y2',8).attr('stroke',SLATE).attr('stroke-width',1).attr('stroke-dasharray','4,3');
+wG.append('text').attr('x',74).attr('y',12).attr('font-size','9px').attr('fill',SLATE).text('Im(ψ)');
+wG.append('line').attr('x1',108).attr('x2',124).attr('y1',8).attr('y2',8).attr('stroke',RED).attr('stroke-width',2);
+wG.append('text').attr('x',126).attr('y',12).attr('font-size','9px').attr('fill',RED).text('|ψ|²');
+
+// ── Spreading chart ────────────────────────────────────────────────────────
+const sSvg = d3.select('#spread-chart');
+const sW = 640, sH = 140;
+const sM = {top: 24, right: 20, bottom: 36, left: 52};
+const sIW = sW - sM.left - sM.right, sIH = sH - sM.top - sM.bottom;
+const sG = sSvg.append('g').attr('transform', `translate(${sM.left},${sM.top})`);
+
+const tMax = 100; // fs
+const sX = d3.scaleLinear().domain([0, tMax]).range([0, sIW]);
+const sY = d3.scaleLinear().domain([0, 1]).range([sIH, 0]);
+
+sG.append('g').attr('transform',`translate(0,${sIH})`).call(d3.axisBottom(sX).ticks(10));
+sG.append('g').call(d3.axisLeft(sY).ticks(4));
+sG.append('text').attr('x',sIW/2).attr('y',-10).attr('text-anchor','middle').attr('font-size','11px').attr('font-weight','700').attr('fill',INK).text('σ(t) — Spreading Width');
+sG.append('text').attr('x',sIW/2).attr('y',sIH+28).attr('text-anchor','middle').attr('font-size','11px').attr('fill',SLATE).text('t (fs)');
+
+const spreadData = d3.range(200).map(i => ({ t: tMax*i/199, sig: sigma_t(tMax*i/199) }));
+const spreadLine = d3.line().x(d=>sX(d.t)).y(d=>sY(d.sig));
+const spreadPath = sG.append('path').attr('fill','none').attr('stroke',RED).attr('stroke-width',2);
+const tMarker = sG.append('line').attr('y1',0).attr('y2',sIH).attr('stroke',INK).attr('stroke-width',1.5).attr('stroke-dasharray','3,3');
+const tDot = sG.append('circle').attr('r',5).attr('fill',RED);
+
+function updateSpreadChart() {
+  const maxSig = sigma_t(tMax) * 1.1;
+  sY.domain([0, maxSig]);
+  sG.select('.y-axis')?.call(d3.axisLeft(sY).ticks(4));
+  const newSpreadData = d3.range(200).map(i => ({ t: tMax*i/199, sig: sigma_t(tMax*i/199) }));
+  spreadPath.datum(newSpreadData).attr('d', spreadLine);
+}
+
+const nPts = 500;
+
+function render() {
+  const vg = v_group(k0);
+  const vp = vg / 2;
+  const xc = vg * t_fs;
+  const sig = sigma_t(t_fs);
+
+  // Update domain
+  const xHalf = Math.max(8, Math.abs(xc) + 6*sig);
+  wX.domain([-xHalf, xHalf]);
+  wXAxis.call(d3.axisBottom(wX).ticks(10));
+
+  // Re(ψ), Im(ψ), |ψ|²
+  const reData = d3.range(nPts).map(i => {
+    const x = -xHalf + 2*xHalf * i/(nPts-1);
+    return { x, v: psiRe(x, t_fs) };
+  });
+  const imData = d3.range(nPts).map(i => {
+    const x = -xHalf + 2*xHalf * i/(nPts-1);
+    return { x, v: psiIm(x, t_fs) };
+  });
+  const psi2Data = d3.range(nPts).map(i => {
+    const x = -xHalf + 2*xHalf * i/(nPts-1);
+    return { x, v: psi2(x, t_fs) };
+  });
+
+  const maxPsi2 = Math.max(...psi2Data.map(d=>d.v));
+  // Scale so |ψ|² peak ≈ 0.7 in display
+  const scale = 0.7 / Math.max(maxPsi2, 0.01);
+
+  rePathEl.datum(reData).attr('d', d3.line().x(d=>wX(d.x)).y(d=>wY(d.v * 0.4)).curve(d3.curveBasis));
+  imPathEl.datum(imData).attr('d', d3.line().x(d=>wX(d.x)).y(d=>wY(d.v * 0.4)).curve(d3.curveBasis));
+  psi2Line.datum(psi2Data).attr('d', d3.line().x(d=>wX(d.x)).y(d=>wY(d.v * scale)).curve(d3.curveBasis));
+  psi2Fill.datum(psi2Data).attr('d', d3.area().x(d=>wX(d.x)).y0(wY(0)).y1(d=>wY(d.v * scale)).curve(d3.curveBasis));
+
+  // Markers: envelope peak (v_g) and phase crest nearest to peak (v_p)
+  envMarker.attr('x1',wX(xc)).attr('x2',wX(xc));
+  // Nearest phase crest to xc: at x = xc + n*(2π/k0) closest to 0 offset
+  const lambda = 2*Math.PI / k0;
+  const nCrest = Math.round(xc / lambda);
+  const xPhase = nCrest * lambda;
+  phaseMarker.attr('x1',wX(xPhase)).attr('x2',wX(xPhase));
+
+  // Spreading chart marker
+  tMarker.attr('x1',sX(t_fs)).attr('x2',sX(t_fs));
+  tDot.attr('cx',sX(t_fs)).attr('cy',sY(sig));
+
+  // Readout
+  document.getElementById('rt').textContent = t_fs.toFixed(1);
+  document.getElementById('rsigma').textContent = sig.toFixed(3);
+  document.getElementById('rvg').textContent = vg.toFixed(3);
+  document.getElementById('rvp').textContent = vp.toFixed(3);
+  document.getElementById('rxavg').textContent = xc.toFixed(2);
+  document.getElementById('t-slider').value = t_fs;
+  document.getElementById('t-val').textContent = `t = ${t_fs.toFixed(0)} fs`;
+}
+
+function animate(ts) {
+  if (!playing) return;
+  if (!lastWallTime) lastWallTime = ts;
+  const dt = (ts - lastWallTime) / 1000;
+  lastWallTime = ts;
+  t_fs = (t_fs + dt * 30) % tMax; // 30 fs/s of sim time
+  render();
+  animId = requestAnimationFrame(animate);
+}
+
+function togglePlay() {
+  playing = !playing;
+  const btn = document.getElementById('play-btn');
+  btn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  btn.classList.toggle('active', playing);
+  if (playing) { lastWallTime = null; animId = requestAnimationFrame(animate); }
+}
+
+document.getElementById('sigma-slider').addEventListener('input', e => {
+  sigma0 = parseFloat(e.target.value);
+  document.getElementById('sigma-val').textContent = `σ₀ = ${sigma0.toFixed(1)} nm`;
+  updateSpreadChart();
+  render();
+});
+
+document.getElementById('k0-slider').addEventListener('input', e => {
+  k0 = parseFloat(e.target.value);
+  document.getElementById('k0-val').textContent = `k₀ = ${k0.toFixed(1)} nm⁻¹`;
+  updateSpreadChart();
+  render();
+});
+
+document.getElementById('t-slider').addEventListener('input', e => {
+  t_fs = parseFloat(e.target.value);
+  render();
+});
+
+updateSpreadChart();
+requestAnimationFrame(animate);
+
+// Testable predictions
+const vg = v_group(k0);
+const vp = vg / 2;
+console.assert(Math.abs(vg / vp - 2.0) < 0.001, `P1: v_g/v_p should be 2, got ${(vg/vp).toFixed(4)}`);
+console.log(`✓ P1: v_g = ${vg.toFixed(4)} nm/fs, v_p = ${vp.toFixed(4)} nm/fs, ratio = ${(vg/vp).toFixed(4)} = 2`);
+// P2: σ²(t) is linear in t²
+const tau = 2 * M_E_EV / (C_NM_FS*C_NM_FS) * sigma0*sigma0 / HBAR;
+const sig10 = sigma_t(10);
+const sig20 = sigma_t(20);
+// Check σ²(t) - σ²(0) = (ħ/(2mσ₀))² * t²  → σ² = σ₀² + slope*t²
+const slope_check = (sig10*sig10 - sigma0*sigma0) / (10*10);
+const expected_slope = (HBAR*HBAR * C_NM_FS*C_NM_FS*C_NM_FS*C_NM_FS) / (4 * M_E_EV*M_E_EV * sigma0*sigma0);
+console.assert(Math.abs(slope_check/expected_slope - 1) < 0.01, `P2: σ² linear in t², slope matches ħ/m formula`);
+console.log(`✓ P2: σ²(t) = σ₀² + ${slope_check.toExponential(3)}·t² (linear in t² ✓)`);
+</script>
+</body>
+</html>

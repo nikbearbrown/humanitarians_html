@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrogen Atom — Energy Levels &amp; Transitions</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 13px;
+    padding: 16px 20px;
+    max-width: 1060px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 3px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 14px;
+  }
+  .main-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .left-panel {
+    flex: 0 0 auto;
+    width: 400px;
+  }
+  .right-panel {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .panel {
+    border: 1px solid #e0dbd5;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .panel-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #545454;
+    margin-bottom: 6px;
+  }
+  #info-box {
+    min-height: 90px;
+    background: #f8f6f3;
+    border: 1px solid #e0dbd5;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .info-allowed { color: #C8102E; font-weight: 700; }
+  .info-absorbed { color: #545454; font-weight: 700; }
+  .info-forbidden { color: #888; font-weight: 700; }
+  .console {
+    background: #f8f6f3;
+    border: 1px solid #e0dbd5;
+    padding: 8px 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #2A1A0E;
+    margin-top: 12px;
+  }
+  .console .pass { color: #1a7a1a; font-weight: 700; }
+  .console .label { color: #545454; }
+  svg { display: block; }
+  .instr {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 12px;
+    font-size: 10px;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .reset-btn {
+    padding: 5px 12px;
+    border: 1.5px solid #545454;
+    background: #FFFFFF;
+    color: #545454;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-bottom: 8px;
+  }
+  .reset-btn:hover { background: #f0ece8; }
+</style>
+</head>
+<body>
+
+<h1>Hydrogen Atom — Energy Levels &amp; Radiative Transitions</h1>
+<p class="subtitle">
+  E_n = −13.6/n² eV &nbsp;|&nbsp; Selection rules: Δℓ = ±1, Δm = 0, ±1 &nbsp;|&nbsp;
+  λ = 1240/ΔE[eV] nm &nbsp;|&nbsp; Click two levels to inspect any transition
+</p>
+
+<div class="main-row">
+  <div class="left-panel">
+    <div class="panel-title">Energy Level Diagram (n = 1–6, ℓ sublevels)</div>
+    <p class="instr">Click first level (initial), then second level (final).<br>
+      Arrows: <span style="color:#C8102E;font-weight:600;">red solid</span> = allowed emission,
+      <span style="color:#545454;font-weight:600;">slate dashed</span> = allowed absorption,
+      <span style="color:#aaa;font-weight:600;">gray dashed</span> = forbidden.
+    </p>
+    <button class="reset-btn" onclick="resetSelection()">Reset selection</button>
+    <svg id="svgLevel"></svg>
+  </div>
+  <div class="right-panel">
+    <div id="info-box">
+      <span style="color:#545454;">Select two energy levels on the diagram to inspect a transition.</span>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Emission Spectrum (major series)</div>
+      <div class="legend-grid">
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#7400B8" stroke-width="2"/></svg> Lyman (UV, →n=1)</div>
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#E05010" stroke-width="2"/></svg> Balmer Hα 656 nm</div>
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#4080D0" stroke-width="2"/></svg> Balmer Hβ 486 nm</div>
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#7020A0" stroke-width="2"/></svg> Balmer Hγ 434 nm</div>
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#8B0000" stroke-width="2"/></svg> Paschen (IR, →n=3)</div>
+        <div class="legend-item"><svg width="16" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#bbb" stroke-width="1.5" stroke-dasharray="3,2"/></svg> Forbidden</div>
+      </div>
+      <svg id="svgSpectrum"></svg>
+    </div>
+    <div class="console" id="console">Loading physics checks…</div>
+  </div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────────
+// Physics functions
+// ──────────────────────────────────────────────────────────────────
+function En(n) { return -13.6 / (n * n); } // eV
+
+function deltaE(ni, nf) {
+  // positive = emission (ni>nf), negative = absorption
+  return En(nf) - En(ni); // eV gained by photon in emission: En(nf) - En(ni) > 0 when nf < ni
+}
+
+function wavelengthNm(ni, nf) {
+  const dE = Math.abs(En(nf) - En(ni));
+  if (dE < 1e-10) return Infinity;
+  return 1240 / dE; // nm
+}
+
+function isAllowed(li, lf) {
+  return Math.abs(li - lf) === 1;
+}
+
+function seriesName(ni, nf) {
+  const nLow = Math.min(ni, nf);
+  if (nLow === 1) return 'Lyman';
+  if (nLow === 2) return 'Balmer';
+  if (nLow === 3) return 'Paschen';
+  if (nLow === 4) return 'Brackett';
+  return 'Higher';
+}
+
+// wavelength → approximate visible color
+function wavelengthToColor(nm) {
+  if (nm < 380 || nm > 700) return null; // outside visible
+  if (nm < 450) return `hsl(${270 + (nm - 380) * 30 / 70},100%,45%)`;
+  if (nm < 490) return `hsl(${240 - (nm - 450) * 20 / 40},100%,45%)`;
+  if (nm < 560) return `hsl(${120 + (nm - 490) * 40 / 70},100%,38%)`;
+  if (nm < 590) return `hsl(${60 - (nm - 560) * 40 / 30},100%,42%)`;
+  if (nm < 625) return `hsl(${20 - (nm - 590) * 10 / 35},100%,44%)`;
+  return `hsl(${10 - (nm - 625) * 8 / 75},100%,40%)`;
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Level diagram data
+// n = 1..6,  l = 0..n-1
+// ──────────────────────────────────────────────────────────────────
+const NMAX = 6;
+const levels = [];
+for (let n = 1; n <= NMAX; n++) {
+  for (let l = 0; l < n; l++) {
+    levels.push({ n, l, id: `${n}-${l}`, energy: En(n) });
+  }
+}
+const lLabels = ['s', 'p', 'd', 'f', 'g'];
+
+// ──────────────────────────────────────────────────────────────────
+// SVG dimensions — level diagram
+// ──────────────────────────────────────────────────────────────────
+const LW = 390, LH = 500;
+const Lm = { top: 24, right: 20, bottom: 30, left: 48 };
+const LiW = LW - Lm.left - Lm.right;
+const LiH = LH - Lm.top - Lm.bottom;
+
+const svgLevel = d3.select('#svgLevel')
+  .attr('width', LW).attr('height', LH)
+  .attr('viewBox', `0 0 ${LW} ${LH}`);
+
+const gLevel = svgLevel.append('g').attr('transform', `translate(${Lm.left},${Lm.top})`);
+
+// energy scale: -13.6 (n=1) to 0.5 (continuum)
+const eMin = En(1) - 0.3; // ~ -13.9
+const eMax = 0.5;
+const yE = d3.scaleLinear().domain([eMin, eMax]).range([LiH, 0]);
+
+// l columns: 4 columns (s,p,d,f), x-axis
+const lCols = 4;
+const colW = LiW / lCols;
+const xL = (l) => l * colW + colW * 0.5;
+
+// draw column headers
+for (let l = 0; l < lCols; l++) {
+  gLevel.append('text')
+    .attr('x', xL(l)).attr('y', -8)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', 11).attr('font-weight', '700')
+    .attr('fill', '#545454')
+    .text(lLabels[l]);
+  // column separator
+  if (l > 0) {
+    gLevel.append('line')
+      .attr('x1', l * colW).attr('y1', 0)
+      .attr('x2', l * colW).attr('y2', LiH)
+      .attr('stroke', '#e8e4e0').attr('stroke-width', 1);
+  }
+}
+
+// y axis (energy)
+const yAxisE = d3.axisLeft(yE)
+  .tickValues([-13.6, -3.4, -1.51, -0.85, -0.54, -0.38, 0])
+  .tickFormat(d => d === 0 ? '0' : d.toFixed(2));
+gLevel.append('g').attr('class', 'y-axis').call(yAxisE)
+  .selectAll('text').attr('font-size', 9).attr('fill', '#545454');
+gLevel.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -LiH / 2).attr('y', -38)
+  .attr('text-anchor', 'middle')
+  .attr('font-size', 10).attr('fill', '#545454')
+  .text('Energy (eV)');
+
+// continuum line
+gLevel.append('line')
+  .attr('x1', 0).attr('y1', yE(0))
+  .attr('x2', LiW).attr('y2', yE(0))
+  .attr('stroke', '#aaa').attr('stroke-width', 1).attr('stroke-dasharray', '3,3');
+gLevel.append('text')
+  .attr('x', LiW - 2).attr('y', yE(0) - 4)
+  .attr('text-anchor', 'end').attr('font-size', 9).attr('fill', '#aaa')
+  .text('Continuum E=0');
+
+// ── draw level tick marks ──────────────────────────────────────────
+const tickHalf = 14;
+const LEVEL_COLOR = '#2A1A0E';
+
+// group for arrows (drawn below ticks)
+const arrowGroup = gLevel.append('g').attr('class', 'arrows');
+
+// group for level ticks (drawn on top)
+const tickGroup = gLevel.append('g').attr('class', 'ticks');
+
+levels.forEach(lv => {
+  const cx = xL(lv.l);
+  const cy = yE(lv.energy);
+  const g = tickGroup.append('g')
+    .attr('class', `level level-${lv.id}`)
+    .style('cursor', 'pointer')
+    .on('click', () => handleClick(lv));
+  // tick line
+  g.append('line')
+    .attr('x1', cx - tickHalf).attr('y1', cy)
+    .attr('x2', cx + tickHalf).attr('y2', cy)
+    .attr('stroke', LEVEL_COLOR).attr('stroke-width', 1.8);
+  // hit area
+  g.append('rect')
+    .attr('x', cx - tickHalf - 4).attr('y', cy - 7)
+    .attr('width', tickHalf * 2 + 8).attr('height', 14)
+    .attr('fill', 'transparent');
+  // n label on s column
+  if (lv.l === 0) {
+    g.append('text')
+      .attr('x', cx - tickHalf - 4).attr('y', cy + 4)
+      .attr('text-anchor', 'end').attr('font-size', 9)
+      .attr('fill', '#545454')
+      .text(`n=${lv.n}`);
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────
+// Pre-draw major series arrows at startup
+// ──────────────────────────────────────────────────────────────────
+const majorTransitions = [
+  // Lyman
+  { ni: 2, li: 1, nf: 1, lf: 0 }, // 2p→1s
+  { ni: 3, li: 1, nf: 1, lf: 0 }, // 3p→1s
+  { ni: 4, li: 1, nf: 1, lf: 0 }, // 4p→1s
+  // Balmer
+  { ni: 3, li: 2, nf: 2, lf: 1 }, // 3d→2p  Hα
+  { ni: 4, li: 2, nf: 2, lf: 1 }, // 4d→2p  Hβ
+  { ni: 5, li: 2, nf: 2, lf: 1 }, // 5d→2p  Hγ
+  // Paschen
+  { ni: 4, li: 3, nf: 3, lf: 2 }, // 4f→3d  Pa
+  // Forbidden example
+  { ni: 2, li: 0, nf: 1, lf: 0 }, // 2s→1s  forbidden
+];
+
+function seriesColor(ni, nf, lambda) {
+  const s = seriesName(ni, nf);
+  if (s === 'Lyman') return '#7400B8';
+  if (s === 'Paschen') return '#8B0000';
+  const vc = wavelengthToColor(lambda);
+  return vc || '#888888';
+}
+
+function drawArrow(g, ni, li, nf, lf, opts = {}) {
+  const allowed = isAllowed(li, lf);
+  const emission = ni > nf;
+  const lambda = wavelengthNm(ni, nf);
+
+  const x1 = xL(li);
+  const y1 = yE(En(ni));
+  const x2 = xL(lf);
+  const y2 = yE(En(nf));
+
+  let stroke, dasharray, strokeWidth;
+  if (!allowed) {
+    stroke = opts.highlight ? '#C8102E' : '#bbb';
+    dasharray = '4,3';
+    strokeWidth = opts.highlight ? 2.0 : 1.2;
+  } else if (emission) {
+    stroke = opts.highlight ? '#C8102E' : seriesColor(ni, nf, lambda);
+    dasharray = null;
+    strokeWidth = opts.highlight ? 2.4 : 1.6;
+  } else {
+    // absorption
+    stroke = opts.highlight ? '#C8102E' : '#545454';
+    dasharray = '5,3';
+    strokeWidth = opts.highlight ? 2.0 : 1.5;
+  }
+
+  const arrowId = `arr-${ni}-${li}-${nf}-${lf}${opts.suffix || ''}`;
+  const markerId = `marker-${arrowId}`;
+
+  // define arrowhead marker
+  const defs = g.select('defs').empty() ? g.append('defs') : g.select('defs');
+  // use svgLevel's defs
+  let defsEl = svgLevel.select('defs');
+  if (defsEl.empty()) defsEl = svgLevel.insert('defs', ':first-child');
+  defsEl.selectAll(`#${markerId}`).remove();
+  if (allowed || opts.highlight) {
+    defsEl.append('marker')
+      .attr('id', markerId)
+      .attr('markerWidth', 7).attr('markerHeight', 7)
+      .attr('refX', 6).attr('refY', 3.5)
+      .attr('orient', 'auto')
+      .append('polygon')
+      .attr('points', '0 0, 7 3.5, 0 7')
+      .attr('fill', stroke);
+  }
+
+  const line = g.append('line')
+    .attr('id', arrowId)
+    .attr('x1', x1).attr('y1', y1)
+    .attr('x2', x2).attr('y2', y2)
+    .attr('stroke', stroke)
+    .attr('stroke-width', strokeWidth)
+    .attr('opacity', opts.highlight ? 1 : 0.7);
+  if (dasharray) line.attr('stroke-dasharray', dasharray);
+  if (allowed || opts.highlight) line.attr('marker-end', `url(#${markerId})`);
+
+  // wavelength label on major transitions
+  if (!opts.noLabel) {
+    const lx = (x1 + x2) / 2 + (opts.labelOffX || 6);
+    const ly = (y1 + y2) / 2 + (opts.labelOffY || 0);
+    g.append('text')
+      .attr('id', arrowId + '-lbl')
+      .attr('x', lx).attr('y', ly)
+      .attr('font-size', 8.5)
+      .attr('fill', stroke)
+      .attr('opacity', opts.highlight ? 1 : 0.75)
+      .text(lambda < 2100 ? `${lambda.toFixed(0)}nm` : `${(lambda / 1000).toFixed(2)}μm`);
+  }
+}
+
+// draw major transitions
+majorTransitions.forEach(tr => {
+  drawArrow(arrowGroup, tr.ni, tr.li, tr.nf, tr.lf, { labelOffX: 4 });
+});
+
+// ──────────────────────────────────────────────────────────────────
+// Click interaction
+// ──────────────────────────────────────────────────────────────────
+let sel = []; // [{n,l,energy,id}]
+
+function handleClick(lv) {
+  if (sel.length === 0) {
+    sel = [lv];
+    highlightLevel(lv, true);
+  } else if (sel.length === 1) {
+    if (sel[0].id === lv.id) { resetSelection(); return; }
+    sel.push(lv);
+    highlightLevel(lv, true);
+    showTransition(sel[0], sel[1]);
+  } else {
+    resetSelection();
+    sel = [lv];
+    highlightLevel(lv, true);
+  }
+}
+
+function highlightLevel(lv, on) {
+  tickGroup.select(`.level-${lv.id} line`)
+    .attr('stroke', on ? '#C8102E' : LEVEL_COLOR)
+    .attr('stroke-width', on ? 3 : 1.8);
+}
+
+function resetSelection() {
+  sel.forEach(lv => highlightLevel(lv, false));
+  sel = [];
+  arrowGroup.selectAll('.user-arrow').remove();
+  svgLevel.selectAll('defs #marker-user-arr').remove();
+  document.getElementById('info-box').innerHTML =
+    '<span style="color:#545454;">Select two energy levels on the diagram to inspect a transition.</span>';
+  // re-highlight selected line in spectrum
+  d3.select('#svgSpectrum').selectAll('.spec-line').attr('stroke-width', d => d.major ? 2.5 : 2);
+  d3.select('#svgSpectrum').selectAll('.spec-line-selected').remove();
+}
+
+function showTransition(lvA, lvB) {
+  // lvA = first clicked (initial), lvB = second clicked (final)
+  const ni = lvA.n, li = lvA.l;
+  const nf = lvB.n, lf = lvB.l;
+  const allowed = isAllowed(li, lf);
+  const emission = ni > nf;
+  const absorption = ni < nf;
+  const lambda = wavelengthNm(ni, nf);
+  const dE = Math.abs(En(nf) - En(ni));
+  const deltaL = lf - li;
+
+  // draw user arrow
+  arrowGroup.selectAll('.user-arrow').remove();
+  const uGroup = arrowGroup.append('g').attr('class', 'user-arrow');
+  drawArrow(uGroup, ni, li, nf, lf, { highlight: true, suffix: 'user', noLabel: true });
+
+  // info box
+  const sn = seriesName(ni, nf);
+  let html = '';
+  const nl = (lLabels[li] || '?');
+  const nlf = (lLabels[lf] || '?');
+  const stateI = `${ni}${nl}`;
+  const stateF = `${nf}${nlf}`;
+
+  if (allowed && emission) {
+    html = `<span class="info-allowed">ALLOWED EMISSION</span>  ${stateI} → ${stateF}<br>` +
+      `ΔE = ${dE.toFixed(4)} eV &nbsp;|&nbsp; λ = <strong>${lambda.toFixed(1)} nm</strong><br>` +
+      `Series: ${sn} &nbsp;|&nbsp; Δℓ = ${deltaL} (= ${deltaL > 0 ? '+' : ''}${deltaL})`;
+    if (ni === 3 && li === 2 && nf === 2 && lf === 1) html += `  <em>(Hα)</em>`;
+    if (ni === 4 && li === 2 && nf === 2 && lf === 1) html += `  <em>(Hβ)</em>`;
+    if (ni === 5 && li === 2 && nf === 2 && lf === 1) html += `  <em>(Hγ)</em>`;
+    if (ni === 2 && li === 1 && nf === 1 && lf === 0) html += `  <em>(Ly α, τ ≈ 1.6 ns)</em>`;
+  } else if (allowed && absorption) {
+    html = `<span class="info-absorbed">ALLOWED ABSORPTION</span>  ${stateF} ← ${stateI}<br>` +
+      `ΔE = ${dE.toFixed(4)} eV &nbsp;|&nbsp; λ = <strong>${lambda.toFixed(1)} nm</strong><br>` +
+      `Series: ${sn} &nbsp;|&nbsp; Δℓ = ${deltaL}`;
+  } else {
+    // forbidden
+    const dLval = lf - li;
+    const reason = `Δℓ = ${dLval} (must be ±1)`;
+    html = `<span class="info-forbidden">FORBIDDEN</span>  ${stateI} → ${stateF}  [${reason}]<br>` +
+      `ΔE = ${dE.toFixed(4)} eV &nbsp;|&nbsp; λ = ${lambda.toFixed(1)} nm (if two-photon)<br>`;
+    if (ni === 2 && li === 0 && nf === 1 && lf === 0) {
+      html += `2s → 1s: two-photon decay τ ≈ 0.12 s<br>` +
+        `(vs 2p → 1s one-photon τ ≈ 1.6 ns, ratio ≈ 7.5×10⁷)`;
+    } else {
+      html += `Electric-dipole forbidden; may proceed via two-photon or higher-multipole.`;
+    }
+  }
+  document.getElementById('info-box').innerHTML = html;
+
+  // highlight in spectrum
+  highlightSpectrum(lambda, allowed && emission);
+}
+
+function highlightSpectrum(lambda, isEmission) {
+  d3.select('#svgSpectrum').selectAll('.spec-line-selected').remove();
+  if (!isEmission) return;
+  const xS = specXScale;
+  if (!xS) return;
+  const x = xS(lambda);
+  if (x < 0 || x > specIW + 2) return;
+  d3.select('#gSpec').append('line')
+    .attr('class', 'spec-line-selected')
+    .attr('x1', x).attr('y1', 0)
+    .attr('x2', x).attr('y2', specIH - 20)
+    .attr('stroke', '#C8102E').attr('stroke-width', 3).attr('opacity', 0.9);
+  d3.select('#gSpec').append('text')
+    .attr('class', 'spec-line-selected')
+    .attr('x', x).attr('y', specIH - 22)
+    .attr('text-anchor', 'middle').attr('font-size', 9).attr('fill', '#C8102E')
+    .text(`${lambda.toFixed(0)}nm`);
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Spectrum panel
+// ──────────────────────────────────────────────────────────────────
+const SW = 590, SH = 220;
+const Sm = { top: 30, right: 16, bottom: 40, left: 14 };
+const specIW = SW - Sm.left - Sm.right;
+const specIH = SH - Sm.top - Sm.bottom;
+
+const svgSpectrum = d3.select('#svgSpectrum')
+  .attr('width', SW).attr('height', SH)
+  .attr('viewBox', `0 0 ${SW} ${SH}`);
+
+// log scale 90–2000 nm
+const specXScale = d3.scaleLog().domain([90, 2000]).range([0, specIW]);
+
+const gSpec = svgSpectrum.append('g')
+  .attr('id', 'gSpec')
+  .attr('transform', `translate(${Sm.left},${Sm.top})`);
+
+// x axis
+const xAxisSpec = d3.axisBottom(specXScale)
+  .tickValues([100, 150, 200, 400, 500, 600, 700, 1000, 2000])
+  .tickFormat(d => d < 1000 ? `${d}` : `${d / 1000}k`);
+gSpec.append('g').attr('class', 'x-axis-spec')
+  .attr('transform', `translate(0,${specIH})`)
+  .call(xAxisSpec)
+  .selectAll('text').attr('font-size', 9);
+gSpec.append('text')
+  .attr('x', specIW / 2).attr('y', specIH + 32)
+  .attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', '#545454')
+  .text('Wavelength (nm) — log scale');
+
+// region labels
+const regions = [
+  { label: 'UV', x1: 90, x2: 380 },
+  { label: 'Visible', x1: 380, x2: 700 },
+  { label: 'Near-IR', x1: 700, x2: 2000 },
+];
+regions.forEach(r => {
+  const cx = specXScale((r.x1 + r.x2) / 2);
+  gSpec.append('text')
+    .attr('x', cx).attr('y', -16)
+    .attr('text-anchor', 'middle').attr('font-size', 8.5)
+    .attr('fill', '#bbb').attr('letter-spacing', '0.5px')
+    .text(r.label);
+  gSpec.append('line')
+    .attr('x1', specXScale(r.x2)).attr('y1', -10)
+    .attr('x2', specXScale(r.x2)).attr('y2', specIH)
+    .attr('stroke', '#eee').attr('stroke-width', 1);
+});
+
+// visible light gradient band
+const gradId = 'vis-grad';
+const defs = svgSpectrum.insert('defs', ':first-child');
+const grad = defs.append('linearGradient').attr('id', gradId)
+  .attr('x1', '0%').attr('x2', '100%');
+const visColors = [
+  { pos: 0, color: '#7400B8' }, { pos: 0.15, color: '#4400ff' },
+  { pos: 0.3, color: '#0066ff' }, { pos: 0.45, color: '#00cc88' },
+  { pos: 0.6, color: '#88cc00' }, { pos: 0.75, color: '#ffdd00' },
+  { pos: 0.88, color: '#ff6600' }, { pos: 1, color: '#cc0000' },
+];
+visColors.forEach(c => grad.append('stop').attr('offset', `${c.pos * 100}%`).attr('stop-color', c.color));
+
+const visX1 = specXScale(380);
+const visX2 = specXScale(700);
+gSpec.append('rect')
+  .attr('x', visX1).attr('y', specIH - 10)
+  .attr('width', visX2 - visX1).attr('height', 8)
+  .attr('fill', `url(#${gradId})`).attr('opacity', 0.5);
+
+// define known transitions for spectrum
+const specLines = [
+  // Lyman
+  { ni: 2, li: 1, nf: 1, lf: 0, major: true },
+  { ni: 3, li: 1, nf: 1, lf: 0, major: true },
+  { ni: 4, li: 1, nf: 1, lf: 0, major: true },
+  { ni: 5, li: 1, nf: 1, lf: 0, major: false },
+  // Balmer
+  { ni: 3, li: 2, nf: 2, lf: 1, major: true },  // Hα
+  { ni: 4, li: 2, nf: 2, lf: 1, major: true },  // Hβ
+  { ni: 5, li: 2, nf: 2, lf: 1, major: true },  // Hγ
+  { ni: 6, li: 2, nf: 2, lf: 1, major: false }, // Hδ
+  { ni: 3, li: 1, nf: 2, lf: 0, major: false }, // 3p→2s (same λ as Hα group)
+  // Paschen
+  { ni: 4, li: 3, nf: 3, lf: 2, major: true },
+  { ni: 5, li: 3, nf: 3, lf: 2, major: false },
+  // Forbidden (2s→1s)
+  { ni: 2, li: 0, nf: 1, lf: 0, forbidden: true },
+];
+
+// draw spectrum lines
+specLines.forEach((sl, i) => {
+  const lambda = wavelengthNm(sl.ni, sl.nf);
+  const x = specXScale(lambda);
+  const allowed = isAllowed(sl.li, sl.lf);
+  const emission = sl.ni > sl.nf;
+
+  let color;
+  if (sl.forbidden || !allowed) {
+    color = '#bbb';
+  } else {
+    color = seriesColor(sl.ni, sl.nf, lambda);
+  }
+
+  const lineH = sl.major ? specIH - 28 : specIH - 40;
+  const lineY = sl.major ? 0 : 12;
+
+  gSpec.append('line')
+    .attr('class', 'spec-line')
+    .datum({ lambda, major: sl.major })
+    .attr('x1', x).attr('y1', lineY)
+    .attr('x2', x).attr('y2', lineH)
+    .attr('stroke', color)
+    .attr('stroke-width', sl.major ? 2.5 : 2)
+    .attr('stroke-dasharray', (sl.forbidden || !allowed) ? '3,2' : null)
+    .attr('opacity', sl.major ? 1 : 0.65);
+
+  if (sl.major) {
+    // label
+    let labelText = `${lambda.toFixed(0)}nm`;
+    if (sl.ni === 3 && sl.li === 2 && sl.nf === 2 && sl.lf === 1) labelText = `Hα\n${labelText}`;
+    if (sl.ni === 4 && sl.li === 2 && sl.nf === 2 && sl.lf === 1) labelText = `Hβ\n${labelText}`;
+    if (sl.ni === 5 && sl.li === 2 && sl.nf === 2 && sl.lf === 1) labelText = `Hγ\n${labelText}`;
+
+    const labelParts = labelText.split('\n');
+    const labelGrp = gSpec.append('g');
+    labelParts.forEach((part, pi) => {
+      labelGrp.append('text')
+        .attr('x', x).attr('y', lineH + 10 + pi * 10)
+        .attr('text-anchor', 'middle').attr('font-size', 8)
+        .attr('fill', color).attr('opacity', 0.85)
+        .text(part);
+    });
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────
+// Physics checks
+// ──────────────────────────────────────────────────────────────────
+function runChecks() {
+  // P1: Balmer α (3d→2p): ΔE = 13.6*(1/4-1/9) = 1.889 eV → λ=656.6 nm
+  const dE_ha = Math.abs(En(2) - En(3));
+  const lambda_ha = wavelengthNm(3, 2);
+  const p1_ok = Math.abs(lambda_ha - 656.3) < 1.0;
+
+  // P2: 2s→1s forbidden (Δℓ=0)
+  const p2_ok = !isAllowed(0, 0);
+
+  // P3: 2p→1s allowed, τ ratio: 2s is ~7.5e7 × longer than 2p
+  const p3_ok = isAllowed(1, 0) && !isAllowed(0, 0);
+
+  document.getElementById('console').innerHTML =
+    `<span class="label">── Physics Checks ──────────────────────────────────────────────────────</span>\n` +
+    `P1  Balmer α (3d→2p): ΔE = 13.6·(1/4−1/9) = ${dE_ha.toFixed(4)} eV → λ = ${lambda_ha.toFixed(1)} nm  (expect 656.3)  ` +
+    `<span class="${p1_ok ? 'pass' : 'fail'}">${p1_ok ? '✓ PASS' : '✗ FAIL'}</span>\n` +
+    `P2  2s→1s: Δℓ = 0−0 = 0 ≠ ±1 → FORBIDDEN  ` +
+    `<span class="${p2_ok ? 'pass' : 'fail'}">${p2_ok ? '✓ PASS' : '✗ FAIL'}</span>  τ ≈ 0.12 s (two-photon)\n` +
+    `P3  2p→1s: Δℓ = 0−1 = −1 → ALLOWED  ` +
+    `<span class="${p3_ok ? 'pass' : 'fail'}">${p3_ok ? '✓ PASS' : '✗ FAIL'}</span>  τ ≈ 1.6 ns, ratio τ(2s)/τ(2p) ≈ 7.5×10⁷\n` +
+    `──\n` +
+    `Ly α: λ=${wavelengthNm(2,1).toFixed(1)} nm  |  Ly β: λ=${wavelengthNm(3,1).toFixed(1)} nm  |  Hβ: λ=${wavelengthNm(4,2).toFixed(1)} nm  |  Hγ: λ=${wavelengthNm(5,2).toFixed(1)} nm`;
+}
+
+runChecks();
+</script>
+</body>
+</html>

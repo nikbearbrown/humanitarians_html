@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argentine Ant Supercolony: Genetic Diversity as a Phase Transition</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    font-family: 'Montserrat', sans-serif;
+    color: #2A1A0E;
+    width: 900px;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2A1A0E;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    font-size: 11px; color: #545454; margin-bottom: 12px;
+  }
+  .layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  canvas {
+    display: block;
+    border: 1px solid #D4D4D4;
+    border-radius: 3px;
+  }
+  .right-panel { width: 260px; flex-shrink: 0; }
+  .ctrl-title {
+    font-size: 10px; font-weight: 600; color: #545454;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 6px; margin-top: 10px;
+  }
+  .ctrl-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; font-size: 12px;
+  }
+  .ctrl-row input[type=range] { width: 120px; accent-color: #2A1A0E; }
+  .ctrl-row span { font-weight: 700; color: #2A1A0E; min-width: 28px; }
+  .stat-box {
+    background: #F5F5F5;
+    border: 1px solid #D4D4D4;
+    border-radius: 3px;
+    padding: 8px 10px;
+    margin-top: 10px;
+  }
+  .stat-row { font-size: 12px; line-height: 1.8; }
+  .stat-label { color: #545454; }
+  .stat-val { font-weight: 700; color: #2A1A0E; }
+  .phase-indicator {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    font-size: 12px; font-weight: 700;
+    text-align: center;
+    transition: background 0.4s, color 0.4s;
+  }
+  .phase-super { background: #C8102E; color: #fff; }
+  .phase-multi { background: #2A1A0E; color: #fff; }
+  .preset-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn {
+    flex: 1;
+    padding: 7px 8px;
+    border: 1.5px solid #2A1A0E;
+    background: #fff;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px; font-weight: 700;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: #F0F0F0; }
+  .btn.active { background: #2A1A0E; color: #fff; }
+  .note {
+    font-size: 10px; color: #545454; margin-top: 8px; line-height: 1.5;
+  }
+  .speed-row {
+    display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px;
+  }
+  .speed-row input[type=range] { width: 90px; accent-color: #2A1A0E; }
+</style>
+</head>
+<body>
+<h1>Argentine Ant Supercolony: Genetic Diversity as a Phase Transition</h1>
+<div class="subtitle">Low genetic diversity collapses war-torn territories into one empire. Drag the Founder Count slider to see the phase transition.</div>
+
+<div class="layout">
+  <canvas id="grid-canvas" width="560" height="480"></canvas>
+  <div class="right-panel">
+    <div class="ctrl-title">Founder count (diversity)</div>
+    <div class="ctrl-row">
+      <input type="range" id="founder-slider" min="1" max="30" value="1">
+      <span id="founder-val">1</span>
+    </div>
+    <div class="preset-row">
+      <div class="btn active" id="btn-invasive" onclick="setPreset(1)">Invasive<br>(1 queen)</div>
+      <div class="btn" id="btn-native" onclick="setPreset(20)">Native range<br>(20 queens)</div>
+    </div>
+
+    <div class="ctrl-title">Simulation speed</div>
+    <div class="speed-row">
+      <input type="range" id="speed-slider" min="1" max="30" value="10">
+      <span id="speed-val" style="font-size:11px;color:#545454">10 steps/frame</span>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-row">
+        <span class="stat-label">Active territories: </span>
+        <span class="stat-val" id="territory-count">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Diversity τ threshold: </span>
+        <span class="stat-val" id="tau-val">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Cooperation within τ:</span>
+        <span class="stat-val"> yes</span>
+      </div>
+    </div>
+
+    <div class="phase-indicator phase-super" id="phase-label">SUPERCOLONY FORMING</div>
+
+    <div class="ctrl-title" style="margin-top:14px">Cooperation threshold τ</div>
+    <div class="ctrl-row">
+      <input type="range" id="tau-slider" min="0.01" max="0.5" step="0.01" value="0.15">
+      <span id="tau-display">0.15</span>
+    </div>
+
+    <button class="btn" style="width:100%;margin-top:8px" onclick="reinitGrid()">Reset Grid</button>
+
+    <div class="note">
+      Below ~10 founders → territory converges to 1 color (supercolony).<br>
+      Above ~10 founders → stable patchwork with active battle fronts.
+    </div>
+  </div>
+</div>
+
+<script>
+const ROWS = 40, COLS = 56;
+const CELL = 10;  // px per cell (56×10=560, 40×10=400... using 480 height for margins)
+const canvas = document.getElementById("grid-canvas");
+const ctx = canvas.getContext("2d");
+canvas.width  = COLS * CELL;
+canvas.height = ROWS * CELL;
+
+// State: grid of genetic IDs (float 0..1, hue)
+let grid = new Float32Array(ROWS * COLS);
+let founders = 1;
+let tau = 0.15;
+let stepsPerFrame = 10;
+let running = true;
+let animId = null;
+
+// Color scheme: use hue from genetic ID
+function geneToColor(g) {
+  // Use d3 hsl - hue 0-360
+  return d3.hsl(g * 360, 0.65, 0.52).formatHex();
+}
+
+// Pre-build color lookup for performance (256 buckets)
+const colorCache = [];
+for (let i = 0; i < 256; i++) {
+  colorCache.push(geneToColor(i / 255));
+}
+function geneToColorFast(g) {
+  return colorCache[Math.round(g * 255)];
+}
+
+function initGrid(numFounders) {
+  // Place founder patches randomly
+  const founderGenes = [];
+  for (let f = 0; f < numFounders; f++) {
+    founderGenes.push(f / Math.max(1, numFounders));
+  }
+  // Fill grid randomly with founder genes
+  for (let i = 0; i < ROWS * COLS; i++) {
+    grid[i] = founderGenes[Math.floor(Math.random() * numFounders)];
+  }
+}
+
+function step() {
+  // Pick random cell, pick random neighbor, fight or cooperate
+  const idx = Math.floor(Math.random() * ROWS * COLS);
+  const r = Math.floor(idx / COLS);
+  const c = idx % COLS;
+
+  // Random neighbor (4-directional with wrap)
+  const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  const [dr, dc] = dirs[Math.floor(Math.random() * 4)];
+  const nr = (r + dr + ROWS) % ROWS;
+  const nc = (c + dc + COLS) % COLS;
+  const ni = nr * COLS + nc;
+
+  const gA = grid[idx];
+  const gB = grid[ni];
+  const dist = Math.abs(gA - gB);
+
+  if (dist < tau) {
+    // Cooperate — no change
+    return;
+  } else {
+    // Fight — winner takes the loser's cell with 50/50 probability
+    if (Math.random() < 0.5) {
+      grid[ni] = gA;
+    } else {
+      grid[idx] = gB;
+    }
+  }
+}
+
+function countTerritories() {
+  const seen = new Set();
+  for (let i = 0; i < grid.length; i++) {
+    seen.add(Math.round(grid[i] * 255));
+  }
+  return seen.size;
+}
+
+function draw() {
+  // Draw grid
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const g = grid[r * COLS + c];
+      ctx.fillStyle = geneToColorFast(g);
+      ctx.fillRect(c * CELL, r * CELL, CELL, CELL);
+    }
+  }
+}
+
+function updateStats() {
+  const n = countTerritories();
+  document.getElementById("territory-count").textContent = n;
+  document.getElementById("tau-val").textContent = tau.toFixed(2);
+
+  const phaseEl = document.getElementById("phase-label");
+  if (n <= 3) {
+    phaseEl.textContent = "SUPERCOLONY FORMING";
+    phaseEl.className = "phase-indicator phase-super";
+  } else if (n <= 8) {
+    phaseEl.textContent = "TRANSITIONAL PHASE";
+    phaseEl.className = "phase-indicator phase-multi";
+    phaseEl.style.background = "#888888";
+    phaseEl.style.color = "#fff";
+  } else {
+    phaseEl.textContent = "STABLE MULTI-COLONY";
+    phaseEl.className = "phase-indicator phase-multi";
+    phaseEl.style.background = "#2A1A0E";
+    phaseEl.style.color = "#fff";
+  }
+}
+
+let frameCount = 0;
+function animate() {
+  for (let i = 0; i < stepsPerFrame; i++) step();
+  draw();
+  frameCount++;
+  if (frameCount % 10 === 0) updateStats();
+  animId = requestAnimationFrame(animate);
+}
+
+function reinitGrid() {
+  if (animId) cancelAnimationFrame(animId);
+  initGrid(founders);
+  draw();
+  updateStats();
+  frameCount = 0;
+  animId = requestAnimationFrame(animate);
+}
+
+function setPreset(n) {
+  founders = n;
+  document.getElementById("founder-slider").value = n;
+  document.getElementById("founder-val").textContent = n;
+  document.getElementById("btn-invasive").className = n === 1 ? "btn active" : "btn";
+  document.getElementById("btn-native").className = n === 20 ? "btn active" : "btn";
+  reinitGrid();
+}
+
+// ── Controls ─────────────────────────────────────────────────────────────────
+document.getElementById("founder-slider").addEventListener("input", e => {
+  founders = +e.target.value;
+  document.getElementById("founder-val").textContent = founders;
+  document.getElementById("btn-invasive").className = "btn";
+  document.getElementById("btn-native").className = "btn";
+  reinitGrid();
+});
+
+document.getElementById("tau-slider").addEventListener("input", e => {
+  tau = +e.target.value;
+  document.getElementById("tau-display").textContent = tau.toFixed(2);
+  document.getElementById("tau-val").textContent = tau.toFixed(2);
+});
+
+document.getElementById("speed-slider").addEventListener("input", e => {
+  stepsPerFrame = +e.target.value;
+  document.getElementById("speed-val").textContent = stepsPerFrame + " steps/frame";
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+reinitGrid();
+</script>
+</body>
+</html>

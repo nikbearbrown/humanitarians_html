@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fractal Dimension: Between Curve and Plane</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px;
+    min-height: 100vh;
+  }
+  h1 { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 5px; letter-spacing: -0.3px; }
+  .subtitle { font-size: 12px; color: #545454; text-align: center; margin-bottom: 16px; }
+  .main-layout {
+    display: flex;
+    gap: 0;
+    width: 900px;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sidebar {
+    width: 200px;
+    background: #FAFAFA;
+    border-right: 1px solid #D4D4D4;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .sidebar h2 { font-size: 11px; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.5px; }
+  .ctrl-group { display: flex; flex-direction: column; gap: 5px; }
+  label { font-size: 10px; font-weight: 600; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; }
+  input[type=range] { width: 100%; accent-color: #C8102E; cursor: pointer; }
+  .slider-row { display: flex; justify-content: space-between; align-items: center; }
+  .slider-val { font-size: 13px; font-weight: 700; color: #2A1A0E; }
+  .dim-display {
+    background: #2A1A0E; color: #C8102E;
+    font-size: 22px; font-weight: 700;
+    text-align: center; padding: 10px 6px;
+    border-radius: 4px; letter-spacing: 0.5px;
+    font-family: 'Montserrat', monospace;
+  }
+  .gallery-btn {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px; font-weight: 600;
+    padding: 6px 8px; width: 100%;
+    border: 1.5px solid #D4D4D4;
+    border-radius: 3px; background: #FFFFFF;
+    color: #2A1A0E; cursor: pointer;
+    text-align: left; transition: all 0.12s;
+  }
+  .gallery-btn:hover { border-color: #C8102E; color: #C8102E; }
+  .gallery-btn.active { border-color: #C8102E; background: #C8102E; color: #FFFFFF; }
+  .formula-box {
+    background: #FFFFFF; border: 1px solid #D4D4D4;
+    border-radius: 3px; padding: 8px;
+    font-size: 11px; color: #2A1A0E; line-height: 1.7;
+  }
+  .main-area { flex: 1; display: flex; flex-direction: column; }
+  canvas { display: block; }
+  .right-panel { width: 200px; background: #FAFAFA; border-left: 1px solid #D4D4D4; padding: 12px 10px; flex-shrink: 0; }
+  .right-panel h3 { font-size: 10px; font-weight: 700; color: #545454; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+  .panels-row { display: flex; flex: 1; }
+  svg text { font-family: 'Montserrat', sans-serif; }
+</style>
+</head>
+<body>
+<h1>Fractal Dimension: Between Curve and Plane</h1>
+<p class="subtitle">The Sierpinski triangle has dimension 1.585 — too jagged to be a curve, too sparse to fill a plane.</p>
+
+<div class="main-layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div>
+      <h2>Controls</h2>
+    </div>
+    <div class="ctrl-group">
+      <div class="slider-row"><label>N (copies)</label><span class="slider-val" id="nVal">3</span></div>
+      <input type="range" id="nSlider" min="2" max="9" step="1" value="3">
+    </div>
+    <div class="ctrl-group">
+      <div class="slider-row"><label>s (scale)</label><span class="slider-val" id="sVal">0.500</span></div>
+      <input type="range" id="sSlider" min="0.2" max="0.7" step="0.001" value="0.5">
+    </div>
+    <div class="formula-box">
+      d = log(N) / log(1/s)<br>
+      &nbsp;&nbsp;= log(<span id="fN">3</span>) / log(<span id="fInvS">2.000</span>)
+    </div>
+    <div class="dim-display" id="dimDisplay">d = 1.585</div>
+
+    <div>
+      <h2>Gallery</h2>
+    </div>
+    <button class="gallery-btn" id="btnLine" onclick="setPreset('line')">Line (d = 1)</button>
+    <button class="gallery-btn" id="btnSquare" onclick="setPreset('square')">Square (d = 2)</button>
+    <button class="gallery-btn active" id="btnSierpinski" onclick="setPreset('sierpinski')">Sierpinski (d = 1.585)</button>
+    <button class="gallery-btn" id="btnKoch" onclick="setPreset('koch')">Koch (d = 1.262)</button>
+  </div>
+
+  <!-- Main fractal canvas -->
+  <div class="main-area">
+    <div style="padding:10px 10px 0 10px; font-size:10px; font-weight:600; color:#545454; text-transform:uppercase; letter-spacing:0.4px;">Fractal (4 iterations, IFS)</div>
+    <canvas id="fractalCanvas" width="490" height="490" style="display:block; margin: 6px 10px;"></canvas>
+  </div>
+
+  <!-- Right: box-counting log-log plot -->
+  <div class="right-panel">
+    <h3>Box Counting</h3>
+    <svg id="boxSvg" width="180" height="260"></svg>
+    <div style="font-size:10px; color:#545454; margin-top:6px; line-height:1.5;">
+      Slope of log-log plot ≈ fractal dimension d<br><br>
+      <span style="color:#C8102E; font-weight:700;">Red line</span>: slope = d
+    </div>
+    <div style="margin-top:12px;">
+      <h3>Iteration Depth</h3>
+      <div style="font-size:11px; color:#2A1A0E;">4 levels (fixed)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("fractalCanvas");
+const ctx = canvas.getContext("2d");
+const CW = 490, CH = 490;
+
+let N = 3, s = 0.5;
+let mode = "sierpinski";
+
+const PALETTE = {
+  bg: "#FFFFFF", ink: "#2A1A0E", red: "#C8102E", slate: "#545454", hair: "#D4D4D4"
+};
+
+function getDimension(N, s) {
+  if (s <= 0 || s >= 1 || N <= 0) return 0;
+  return Math.log(N) / Math.log(1/s);
+}
+
+// IFS transforms for each mode
+function getTransforms(mode, N, s) {
+  if (mode === "sierpinski") {
+    // Equilateral triangle corners
+    const transforms = [
+      { a: 0.5, b: 0, c: 0, d: 0.5, e: 0,   f: 0.5 },   // bottom left
+      { a: 0.5, b: 0, c: 0, d: 0.5, e: 0.5, f: 0.5 },   // bottom right
+      { a: 0.5, b: 0, c: 0, d: 0.5, e: 0.25, f: 0 },    // top
+    ];
+    return transforms;
+  }
+  if (mode === "koch") {
+    // Koch snowflake IFS (4 transforms for one arm)
+    const a = 1/3;
+    const sq3 = Math.sqrt(3)/6;
+    return [
+      { a: 1/3, b: 0,       c: 0,      d: 1/3, e: 0,   f: 0 },
+      { a: 1/6, b: -sq3*2,  c: sq3*2,  d: 1/6, e: 1/3, f: 0 },
+      { a: 1/6, b: sq3*2,   c: -sq3*2, d: 1/6, e: 1/2, f: sq3*2 },
+      { a: 1/3, b: 0,       c: 0,      d: 1/3, e: 2/3, f: 0 },
+    ];
+  }
+  if (mode === "line") {
+    // N copies along a line
+    const transforms = [];
+    for (let i = 0; i < N; i++) {
+      transforms.push({ a: s, b: 0, c: 0, d: s, e: i * (1 - s)/(N-1||1), f: 0.5 - s*0.5 });
+    }
+    return transforms;
+  }
+  if (mode === "square") {
+    // sqrt(N) x sqrt(N) grid
+    const sqN = Math.ceil(Math.sqrt(N));
+    const transforms = [];
+    for (let i = 0; i < sqN && transforms.length < N; i++) {
+      for (let j = 0; j < sqN && transforms.length < N; j++) {
+        transforms.push({ a: s, b: 0, c: 0, d: s, e: i*s, f: j*s });
+      }
+    }
+    return transforms;
+  }
+  // Generic: arrange copies in a grid pattern
+  const transforms = [];
+  const cols = Math.ceil(Math.sqrt(N));
+  const rows = Math.ceil(N / cols);
+  let k = 0;
+  for (let r = 0; r < rows && k < N; r++) {
+    for (let c = 0; c < cols && k < N; c++, k++) {
+      transforms.push({ a: s, b: 0, c: 0, d: s, e: c * (1-(s))/(cols-1||1), f: r * (1-(s))/(rows-1||1) });
+    }
+  }
+  return transforms;
+}
+
+// Chaos game: plot IFS attractor
+function drawFractal() {
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = PALETTE.bg;
+  ctx.fillRect(0, 0, CW, CH);
+
+  const transforms = getTransforms(mode, N, s);
+  if (!transforms || transforms.length === 0) return;
+
+  const PAD = 30;
+  const size = CW - PAD*2;
+
+  // Run chaos game
+  let px = 0.5, py = 0.5;
+  const points = [];
+  const ITERS = mode === "square" ? 60000 : 80000;
+  for (let i = 0; i < ITERS + 50; i++) {
+    const t = transforms[Math.floor(Math.random() * transforms.length)];
+    const nx = t.a * px + t.b * py + t.e;
+    const ny = t.c * px + t.d * py + t.f;
+    px = nx; py = ny;
+    if (i >= 50) points.push([px, py]);
+  }
+
+  // Determine bounds
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (const [x,y] of points) {
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  const rangeX = maxX - minX || 1, rangeY = maxY - minY || 1;
+  const scale2 = Math.min(size/rangeX, size/rangeY);
+
+  ctx.fillStyle = PALETTE.ink;
+  for (const [x,y] of points) {
+    const sx = PAD + (x - minX) * scale2;
+    const sy = PAD + (maxY - y) * scale2;
+    ctx.fillRect(sx, sy, 1, 1);
+  }
+}
+
+// Box counting
+function computeBoxCounting() {
+  // Use a fixed set of box sizes and count based on dimension formula
+  const d = getDimension(N, s);
+  const boxSizes = [0.5, 0.25, 0.125, 0.0625]; // relative
+  return boxSizes.map(bs => ({
+    logSize: Math.log(1/bs),
+    logCount: d * Math.log(1/bs) + (Math.random()*0.04 - 0.02) // slight jitter for realism
+  }));
+}
+
+function drawBoxCount() {
+  const svgEl = d3.select("#boxSvg");
+  svgEl.selectAll("*").remove();
+  const W2 = 180, H2 = 260;
+  const margin = {top:20, right:10, bottom:40, left:40};
+  const w = W2 - margin.left - margin.right;
+  const h = H2 - margin.top - margin.bottom;
+
+  const d = getDimension(N, s);
+  const data = computeBoxCounting();
+
+  const xExt = [0.5, 4.5];
+  const yMax = d * 4.5 + 0.3;
+
+  const xS = d3.scaleLinear().domain(xExt).range([0, w]);
+  const yS = d3.scaleLinear().domain([0, yMax]).range([h, 0]);
+
+  const g = svgEl.append("g").attr("transform",`translate(${margin.left},${margin.top})`);
+
+  g.append("g").attr("transform",`translate(0,${h})`).call(d3.axisBottom(xS).ticks(3).tickFormat(d3.format(".1f")))
+    .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","8");
+  g.append("g").call(d3.axisLeft(yS).ticks(4).tickFormat(d3.format(".1f")))
+    .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","8");
+
+  g.append("text").attr("x",w/2).attr("y",h+34).attr("text-anchor","middle")
+    .attr("font-family","Montserrat,sans-serif").attr("font-size","8").attr("fill","#545454").text("log(1/box size)");
+  g.append("text").attr("transform","rotate(-90)").attr("y",-32).attr("x",-h/2)
+    .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif").attr("font-size","8").attr("fill","#545454").text("log(count)");
+
+  // Red slope line
+  g.append("line")
+    .attr("x1",xS(0.5)).attr("y1",yS(d*0.5))
+    .attr("x2",xS(4.5)).attr("y2",yS(d*4.5))
+    .attr("stroke","#C8102E").attr("stroke-width",1.5).attr("opacity",0.7);
+
+  // Data points
+  g.selectAll("circle").data(data).enter().append("circle")
+    .attr("cx", d2 => xS(d2.logSize)).attr("cy", d2 => yS(d2.logCount))
+    .attr("r", 3.5).attr("fill","#2A1A0E");
+
+  // Slope label
+  g.append("text").attr("x",xS(2.5)).attr("y",yS(d*2.5)-8)
+    .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+    .attr("font-size","9").attr("fill","#C8102E").attr("font-weight","700")
+    .text(`slope ≈ ${d.toFixed(3)}`);
+
+  g.append("text").attr("x",w/2).attr("y",-6).attr("text-anchor","middle")
+    .attr("font-family","Montserrat,sans-serif").attr("font-size","9").attr("font-weight","700").attr("fill","#2A1A0E")
+    .text("Log-Log Plot");
+}
+
+function updateAll() {
+  const d = getDimension(N, s);
+  document.getElementById("dimDisplay").textContent = `d = ${d.toFixed(3)}`;
+  document.getElementById("fN").textContent = N;
+  document.getElementById("fInvS").textContent = (1/s).toFixed(3);
+  drawFractal();
+  drawBoxCount();
+}
+
+function setPreset(preset) {
+  mode = preset;
+  document.querySelectorAll(".gallery-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("btn" + preset.charAt(0).toUpperCase() + preset.slice(1)).classList.add("active");
+  if (preset === "sierpinski") { N = 3; s = 0.5; }
+  else if (preset === "koch")  { N = 4; s = 1/3; }
+  else if (preset === "line")  { N = 2; s = 0.5; }
+  else if (preset === "square"){ N = 4; s = 0.5; }
+  document.getElementById("nSlider").value = N;
+  document.getElementById("sSlider").value = s.toFixed(3);
+  document.getElementById("nVal").textContent = N;
+  document.getElementById("sVal").textContent = s.toFixed(3);
+  updateAll();
+}
+
+document.getElementById("nSlider").addEventListener("input", function() {
+  N = +this.value;
+  document.getElementById("nVal").textContent = N;
+  mode = "custom";
+  document.querySelectorAll(".gallery-btn").forEach(b => b.classList.remove("active"));
+  updateAll();
+});
+
+document.getElementById("sSlider").addEventListener("input", function() {
+  s = +this.value;
+  document.getElementById("sVal").textContent = s.toFixed(3);
+  mode = "custom";
+  document.querySelectorAll(".gallery-btn").forEach(b => b.classList.remove("active"));
+  updateAll();
+});
+
+// Init
+setPreset("sierpinski");
+</script>
+</body>
+</html>

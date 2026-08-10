@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spherical Harmonics & Angular Momentum Cone</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Inter', Helvetica, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 32px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 20px;
+  }
+
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 20px;
+  }
+
+  .panel {
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 14px;
+    background: #FAFAF8;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 10px;
+  }
+  svg text { font-family: 'Inter', Helvetica, sans-serif; }
+
+  .controls {
+    width: 100%;
+    max-width: 900px;
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 16px 20px;
+    background: #FAFAF8;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+  }
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #2A1A0E;
+    display: flex;
+    justify-content: space-between;
+  }
+  .control-label span { color: #C8102E; font-weight: 600; }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #d0c8c0;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #2A1A0E;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  }
+
+  .info-panel {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .info-card {
+    border: 1.5px solid #e0d8d0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #FAFAF8;
+  }
+  .info-card .label {
+    font-size: 11px;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+  .info-card .value {
+    font-size: 17px;
+    font-weight: 600;
+    color: #2A1A0E;
+  }
+  .info-card .unit {
+    font-size: 11px;
+    color: #545454;
+    margin-top: 2px;
+  }
+  .info-card.highlight .value { color: #C8102E; }
+
+  .check-strip {
+    width: 100%;
+    max-width: 900px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #545454;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .check { display: flex; align-items: center; gap: 5px; }
+  .check-dot { width: 8px; height: 8px; border-radius: 50%; background: #22a74f; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<h1>Spherical Harmonics &amp; Angular Momentum Cone</h1>
+<p class="subtitle">Quantum angular momentum quantisation — cone precession &amp; |Y<sub>ℓm</sub>(θ)|² polar density</p>
+
+<div class="controls">
+  <div class="control-row">
+    <div class="control-label">ℓ (orbital quantum number) <span id="lval">1</span></div>
+    <input type="range" id="lSlider" min="0" max="4" step="1" value="1">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#545454;margin-top:-2px;">
+      <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+    </div>
+  </div>
+  <div class="control-row">
+    <div class="control-label">m (magnetic quantum number) <span id="mval">1</span></div>
+    <input type="range" id="mSlider" min="-4" max="4" step="1" value="1">
+    <div id="mTicks" style="display:flex;justify-content:space-between;font-size:11px;color:#545454;margin-top:-2px;"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+  <div class="panel">
+    <div class="panel-title">Angular Momentum Cone</div>
+    <svg id="coneSVG" width="100%" viewBox="0 0 360 360"></svg>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Polar Density P(θ) = 2π sinθ · |Y<sub>ℓm</sub>(θ)|²</div>
+    <svg id="polarSVG" width="100%" viewBox="0 0 360 360"></svg>
+  </div>
+</div>
+
+<div class="info-panel">
+  <div class="info-card">
+    <div class="label">|L| = ħ√(ℓ(ℓ+1))</div>
+    <div class="value" id="Lmag">1.414</div>
+    <div class="unit">ħ</div>
+  </div>
+  <div class="info-card">
+    <div class="label">L_z = mħ</div>
+    <div class="value" id="Lz">1.000</div>
+    <div class="unit">ħ</div>
+  </div>
+  <div class="info-card highlight">
+    <div class="label">θ_cone = arccos(m/|L|)</div>
+    <div class="value" id="thetaCone">45.0°</div>
+    <div class="unit">from z-axis</div>
+  </div>
+  <div class="info-card">
+    <div class="label">Missing L⊥ = √(ℓ(ℓ+1)−m²) ħ</div>
+    <div class="value" id="missingL">1.000</div>
+    <div class="unit">ħ</div>
+  </div>
+</div>
+
+<div class="check-strip" id="checkStrip"></div>
+
+<script>
+// ─── Palette ───────────────────────────────────────────────
+const INK   = "#2A1A0E";
+const RED   = "#C8102E";
+const SLATE = "#545454";
+const LIGHT_SLATE = "#d4cfc9";
+const BG    = "#FFFFFF";
+
+// ─── State ─────────────────────────────────────────────────
+let ell = 1, m = 1;
+
+// ─── Spherical harmonic angular density (marginal over φ) ──
+// P(θ) = 2π|sinθ| * |Y_ℓm(θ,φ)|²  (φ-independent since |Y|² is azimuthally symmetric)
+function Ylm2(l, mm, theta) {
+  // Returns |Y_lm(θ,φ)|² (no φ-dependence in magnitude²)
+  const cosT = Math.cos(theta);
+  const sinT = Math.sin(theta);
+  const pi = Math.PI;
+
+  if (l === 0 && mm === 0) return 1 / (4 * pi);
+  if (l === 1) {
+    if (mm === 0)  return (3 / (4 * pi)) * cosT * cosT;
+    if (Math.abs(mm) === 1) return (3 / (8 * pi)) * sinT * sinT;
+  }
+  if (l === 2) {
+    if (mm === 0) {
+      const v = 3 * cosT * cosT - 1;
+      return (5 / (16 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 1) return (15 / (8 * pi)) * sinT * sinT * cosT * cosT;
+    if (Math.abs(mm) === 2) return (15 / (32 * pi)) * Math.pow(sinT, 4);
+  }
+  if (l === 3) {
+    if (mm === 0) {
+      const v = 5 * cosT * cosT * cosT - 3 * cosT;
+      return (7 / (16 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 1) {
+      const v = sinT * (5 * cosT * cosT - 1);
+      return (21 / (64 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 2) return (105 / (32 * pi)) * Math.pow(sinT, 4) * cosT * cosT;
+    if (Math.abs(mm) === 3) return (35 / (64 * pi)) * Math.pow(sinT, 6);
+  }
+  if (l === 4) {
+    if (mm === 0) {
+      const v = 35 * Math.pow(cosT, 4) - 30 * cosT * cosT + 3;
+      return (9 / (256 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 1) {
+      const v = sinT * (7 * Math.pow(cosT, 3) - 3 * cosT);
+      return (45 / (32 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 2) {
+      const v = sinT * sinT * (7 * cosT * cosT - 1);
+      return (45 / (64 * pi)) * v * v;
+    }
+    if (Math.abs(mm) === 3) return (315 / (32 * pi)) * Math.pow(sinT, 6) * cosT * cosT;
+    if (Math.abs(mm) === 4) return (315 / (512 * pi)) * Math.pow(sinT, 8);
+  }
+  return 0;
+}
+
+function polarDensity(l, mm, theta) {
+  return 2 * Math.PI * Math.abs(Math.sin(theta)) * Ylm2(l, mm, theta);
+}
+
+// ─── Cone diagram ──────────────────────────────────────────
+function drawCone(l, mm) {
+  const svg = d3.select("#coneSVG");
+  svg.selectAll("*").remove();
+
+  const W = 360, H = 360;
+  const cx = W / 2, cy = H / 2;
+  // Isometric projection params
+  const axisLen = 140;   // pixel length of z-axis half
+  const xAxisLen = 100;  // x-axis half length
+  const Lscale = 80;     // pixels per ħ unit for ell=1 (|L|=√2≈1.414 → ~113px)
+
+  // For ell=0,m=0: special case
+  const L = Math.sqrt(l * (l + 1));
+  const Lz = mm;
+  const Lperp = Math.sqrt(Math.max(0, l * (l + 1) - mm * mm));
+  const thetaConeRad = (L > 0) ? Math.acos(Math.max(-1, Math.min(1, mm / L))) : 0;
+  const thetaConeDeg = thetaConeRad * 180 / Math.PI;
+
+  // Scale so largest |L| (l=4 → L=√20≈4.47) stays in view
+  // Reference: l=1 → L=√2, use scale so L=√2 → 80px
+  const pxPerH = 70 / Math.sqrt(2); // ~49.5 px/ħ
+
+  const Lpx = L * pxPerH;    // radius of vector sphere
+  const Lzpx = mm * pxPerH;  // height of Lz on z-axis
+
+  // 3D→2D isometric: z is vertical, x-axis goes right-down, y-axis goes left-down
+  const isoX = (x, y, z) => cx + x * 0.87 * 60 + y * (-0.5) * 60 * 0.5;
+  const isoY = (x, y, z) => cy - z * pxPerH + x * 0.5 * 20 + y * 0.87 * 20;
+
+  // Simpler: draw in 2D projection — z vertical, show cone as ellipse
+  // z-axis vertical through centre
+  // The cone: top of cone at origin (tip), opening upward/downward at height Lz
+  // Cone radius at height Lz = |Lperp| * pxPerH
+  const coneR = Lperp * pxPerH;      // px radius of cone circle at Lz height
+  const coneRy = coneR * 0.3;        // ellipse minor axis (foreshortening)
+
+  // ─ z-axis ─
+  svg.append("line")
+    .attr("x1", cx).attr("y1", cy - axisLen)
+    .attr("x2", cx).attr("y2", cy + axisLen)
+    .attr("stroke", INK).attr("stroke-width", 1.5).attr("opacity", 0.5);
+
+  // z-axis arrow
+  svg.append("polygon")
+    .attr("points", `${cx},${cy - axisLen - 8} ${cx - 5},${cy - axisLen + 4} ${cx + 5},${cy - axisLen + 4}`)
+    .attr("fill", INK).attr("opacity", 0.5);
+
+  // z-label
+  svg.append("text")
+    .attr("x", cx + 8).attr("y", cy - axisLen + 4)
+    .attr("fill", INK).attr("font-size", 13).attr("font-weight", 600)
+    .text("z");
+
+  // ─ x-y plane indicator (ellipse) ─
+  svg.append("ellipse")
+    .attr("cx", cx).attr("cy", cy)
+    .attr("rx", 90).attr("ry", 27)
+    .attr("fill", "none").attr("stroke", LIGHT_SLATE)
+    .attr("stroke-width", 1).attr("stroke-dasharray", "4,3");
+
+  svg.append("text")
+    .attr("x", cx + 94).attr("y", cy + 4)
+    .attr("fill", SLATE).attr("font-size", 11).text("x-y");
+
+  if (l === 0) {
+    // Special case: single point, no cone
+    svg.append("circle").attr("cx", cx).attr("cy", cy).attr("r", 6)
+      .attr("fill", RED);
+    svg.append("text").attr("x", cx + 12).attr("y", cy + 4)
+      .attr("fill", RED).attr("font-size", 12)
+      .text("|L| = 0");
+    svg.append("text").attr("x", cx - 80).attr("y", cy + 50)
+      .attr("fill", SLATE).attr("font-size", 11)
+      .text("ℓ=0: L is exactly zero, no cone");
+    return;
+  }
+
+  // ─ Sphere of radius |L| (as circle in cross-section) ─
+  svg.append("circle")
+    .attr("cx", cx).attr("cy", cy)
+    .attr("r", Lpx)
+    .attr("fill", "none").attr("stroke", LIGHT_SLATE)
+    .attr("stroke-width", 1).attr("stroke-dasharray", "3,3");
+
+  // ─ Cone frustum ─
+  if (coneR > 1) {
+    // Shade cone interior (two triangles from origin to top/bottom of cone circle)
+    // Cone goes from origin to circle at height Lzpx
+    // Left edge
+    svg.append("line")
+      .attr("x1", cx).attr("y1", cy)
+      .attr("x2", cx - coneR).attr("y2", cy - Lzpx)
+      .attr("stroke", SLATE).attr("stroke-width", 1).attr("opacity", 0.5);
+    svg.append("line")
+      .attr("x1", cx).attr("y1", cy)
+      .attr("x2", cx + coneR).attr("y2", cy - Lzpx)
+      .attr("stroke", SLATE).attr("stroke-width", 1).attr("opacity", 0.5);
+
+    // Shaded cone region (polygon)
+    const polyPts = `${cx},${cy} ${cx - coneR},${cy - Lzpx} ${cx + coneR},${cy - Lzpx}`;
+    svg.append("polygon").attr("points", polyPts)
+      .attr("fill", SLATE).attr("opacity", 0.08);
+
+    // Precession circle (ellipse at height Lzpx)
+    svg.append("ellipse")
+      .attr("cx", cx).attr("cy", cy - Lzpx)
+      .attr("rx", coneR).attr("ry", coneRy)
+      .attr("fill", "none").attr("stroke", RED)
+      .attr("stroke-width", 2).attr("stroke-dasharray", "5,3");
+
+    // Dashed horizontal line from z-axis to circle (L_z indicator)
+    svg.append("line")
+      .attr("x1", cx).attr("y1", cy - Lzpx)
+      .attr("x2", cx + coneR).attr("y2", cy - Lzpx)
+      .attr("stroke", SLATE).attr("stroke-width", 1)
+      .attr("stroke-dasharray", "4,3");
+  }
+
+  // ─ L vector (one instance on cone) ─
+  const vecEndX = cx + coneR;
+  const vecEndY = cy - Lzpx;
+  svg.append("line")
+    .attr("x1", cx).attr("y1", cy)
+    .attr("x2", vecEndX).attr("y2", vecEndY)
+    .attr("stroke", INK).attr("stroke-width", 2.5);
+  // arrowhead
+  const angle = Math.atan2(cy - vecEndY, vecEndX - cx);
+  const ax = vecEndX, ay = vecEndY;
+  svg.append("polygon")
+    .attr("points", `${ax + 8 * Math.cos(angle)},${ay - 8 * Math.sin(angle)} ${ax + 3 * Math.cos(angle + Math.PI * 0.7)},${ay - 3 * Math.sin(angle + Math.PI * 0.7)} ${ax + 3 * Math.cos(angle - Math.PI * 0.7)},${ay - 3 * Math.sin(angle - Math.PI * 0.7)}`)
+    .attr("fill", INK);
+
+  // ─ Lz dashed line ─
+  if (Math.abs(Lzpx) > 2) {
+    svg.append("line")
+      .attr("x1", cx).attr("y1", cy)
+      .attr("x2", cx).attr("y2", cy - Lzpx)
+      .attr("stroke", RED).attr("stroke-width", 2).attr("stroke-dasharray", "6,3");
+
+    // Lz tick
+    svg.append("line")
+      .attr("x1", cx - 6).attr("y1", cy - Lzpx)
+      .attr("x2", cx + 6).attr("y2", cy - Lzpx)
+      .attr("stroke", RED).attr("stroke-width", 2);
+  }
+
+  // ─ Angle arc ─
+  if (coneR > 1 && Lzpx !== 0) {
+    const arcR = Math.min(35, Lpx * 0.4);
+    const arcAngle = Math.atan2(coneR, Lzpx); // angle from z-axis (in 2D projection)
+    const arcPath = d3.arc()({
+      innerRadius: 0, outerRadius: arcR,
+      startAngle: -(Math.PI / 2 - arcAngle),
+      endAngle: -Math.PI / 2,
+    });
+    svg.append("path")
+      .attr("d", arcPath)
+      .attr("transform", `translate(${cx},${cy})`)
+      .attr("fill", RED).attr("opacity", 0.15);
+
+    // angle label
+    const midA = arcAngle / 2;
+    svg.append("text")
+      .attr("x", cx + (arcR + 10) * Math.sin(midA))
+      .attr("y", cy - (arcR + 10) * Math.cos(midA) + 4)
+      .attr("fill", RED).attr("font-size", 11).attr("font-weight", 500)
+      .text(`θ=${thetaConeDeg.toFixed(1)}°`);
+  }
+
+  // ─ Labels ─
+  const lblX = cx + Lpx + 8;
+  svg.append("text")
+    .attr("x", cx - 10).attr("y", cy + Lpx + 16)
+    .attr("fill", SLATE).attr("font-size", 11)
+    .text(`|L| = ħ√${l}(${l}+1) = ${L.toFixed(3)}ħ`);
+
+  svg.append("text")
+    .attr("x", cx + 8).attr("y", cy - Lzpx - 8)
+    .attr("fill", RED).attr("font-size", 11)
+    .text(`Lz = ${mm}ħ`);
+
+  if (l === mm && mm > 0) {
+    svg.append("text")
+      .attr("x", 10).attr("y", H - 12)
+      .attr("fill", SLATE).attr("font-size", 11)
+      .text(`m=ℓ: maximum Lz state`);
+  }
+}
+
+// ─── Polar plot ────────────────────────────────────────────
+function drawPolar(l, mm) {
+  const svg = d3.select("#polarSVG");
+  svg.selectAll("*").remove();
+
+  const W = 360, H = 360;
+  const cx = W / 2, cy = H / 2;
+  const maxR = 130;
+
+  // Compute P(θ) values
+  const N = 360;
+  const thetas = d3.range(0, 2 * Math.PI + 0.001, 2 * Math.PI / N);
+  const vals = thetas.map(t => polarDensity(l, mm, t));
+  const maxVal = d3.max(vals) || 1e-10;
+
+  // Scale so max → maxR
+  const scale = maxR / maxVal;
+
+  // Convert to cartesian (θ measured from +z = top, going clockwise)
+  // In SVG: x = r*sin(θ), y = -r*cos(θ)
+  const points = thetas.map((t, i) => {
+    const r = vals[i] * scale;
+    return [cx + r * Math.sin(t), cy - r * Math.cos(t)];
+  });
+
+  // ─ Reference rings ─
+  [0.33, 0.67, 1].forEach(f => {
+    svg.append("circle").attr("cx", cx).attr("cy", cy)
+      .attr("r", f * maxR)
+      .attr("fill", "none").attr("stroke", LIGHT_SLATE)
+      .attr("stroke-width", 0.8).attr("stroke-dasharray", "2,2");
+  });
+
+  // ─ z-axis ─
+  svg.append("line")
+    .attr("x1", cx).attr("y1", cy - maxR - 18)
+    .attr("x2", cx).attr("y2", cy + maxR + 18)
+    .attr("stroke", INK).attr("stroke-width", 1.5).attr("opacity", 0.5);
+
+  svg.append("polygon")
+    .attr("points", `${cx},${cy - maxR - 26} ${cx - 4},${cy - maxR - 14} ${cx + 4},${cy - maxR - 14}`)
+    .attr("fill", INK).attr("opacity", 0.5);
+
+  svg.append("text").attr("x", cx + 7).attr("y", cy - maxR - 20)
+    .attr("fill", INK).attr("font-size", 13).attr("font-weight", 600).text("z");
+
+  // ─ Equatorial line ─
+  svg.append("line")
+    .attr("x1", cx - maxR - 10).attr("y1", cy)
+    .attr("x2", cx + maxR + 10).attr("y2", cy)
+    .attr("stroke", LIGHT_SLATE).attr("stroke-width", 1);
+
+  // ─ Polar curve ─
+  const lineGen = d3.line().curve(d3.curveCatmullRomClosed);
+  if (maxVal > 1e-12) {
+    svg.append("path")
+      .datum(points)
+      .attr("d", lineGen)
+      .attr("fill", RED).attr("fill-opacity", 0.12)
+      .attr("stroke", RED).attr("stroke-width", 2.5);
+  } else {
+    // l=0, m=0 → constant sphere (isotropic)
+    svg.append("circle").attr("cx", cx).attr("cy", cy)
+      .attr("r", maxR * 0.8)
+      .attr("fill", RED).attr("fill-opacity", 0.12)
+      .attr("stroke", RED).attr("stroke-width", 2.5);
+  }
+
+  // ─ Find and label maximum(s) ─
+  let maxIdx = 0;
+  vals.forEach((v, i) => { if (v > vals[maxIdx]) maxIdx = i; });
+  const tMax = thetas[maxIdx];
+  const rMax = vals[maxIdx] * scale;
+  if (rMax > 5) {
+    svg.append("circle")
+      .attr("cx", cx + rMax * Math.sin(tMax))
+      .attr("cy", cy - rMax * Math.cos(tMax))
+      .attr("r", 5).attr("fill", RED);
+
+    const tDeg = (tMax * 180 / Math.PI).toFixed(0);
+    const lx = cx + (rMax + 16) * Math.sin(tMax);
+    const ly = cy - (rMax + 16) * Math.cos(tMax);
+    svg.append("text").attr("x", lx).attr("y", ly)
+      .attr("fill", RED).attr("font-size", 10).attr("font-weight", 500)
+      .attr("text-anchor", Math.sin(tMax) >= 0 ? "start" : "end")
+      .text(`θ≈${tDeg}°`);
+  }
+
+  // ─ Label ─
+  svg.append("text")
+    .attr("x", cx).attr("y", H - 8)
+    .attr("text-anchor", "middle").attr("fill", SLATE).attr("font-size", 11)
+    .text(`|Y_{${l},${mm}}(θ)|² polar density  (ℓ=${l}, m=${mm})`);
+}
+
+// ─── Physics checks ────────────────────────────────────────
+function runChecks() {
+  const L = Math.sqrt(ell * (ell + 1));
+  const Lz = m;
+  const Lperp = Math.sqrt(Math.max(0, ell * (ell + 1) - m * m));
+  const thetaDeg = (L > 0) ? Math.acos(Math.max(-1, Math.min(1, m / L))) * 180 / Math.PI : null;
+
+  const checks = [];
+
+  // P1: ell=1,m=1 → θ=45°
+  const L11 = Math.sqrt(2);
+  const theta11 = Math.acos(1 / L11) * 180 / Math.PI;
+  checks.push({
+    label: `ℓ=1,m=1: θ=${theta11.toFixed(1)}° (expect 45.0°)`,
+    ok: Math.abs(theta11 - 45) < 0.1,
+  });
+
+  // P2: ell=0 → L=0
+  checks.push({
+    label: `ℓ=0: |L|=0 ✓`,
+    ok: true,
+  });
+
+  // P3: Check |Y_00|² integrates to 1/(4π): at any θ it equals 1/(4π)
+  const y00_check = Math.abs(Ylm2(0, 0, 1.1) - 1 / (4 * Math.PI)) < 1e-9;
+  checks.push({
+    label: `|Y_00|² = 1/(4π) constant: ${y00_check ? "✓" : "✗"}`,
+    ok: y00_check,
+  });
+
+  // P4: ell=2,m=2: θ=arccos(2/√6)
+  const L22 = Math.sqrt(6);
+  const theta22 = Math.acos(2 / L22) * 180 / Math.PI;
+  checks.push({
+    label: `ℓ=2,m=2: θ=${theta22.toFixed(2)}° (expect 35.26°)`,
+    ok: Math.abs(theta22 - 35.26) < 0.1,
+  });
+
+  const strip = document.getElementById("checkStrip");
+  strip.innerHTML = checks.map(c =>
+    `<div class="check"><div class="check-dot" style="background:${c.ok ? "#22a74f" : "#C8102E"}"></div>${c.label}</div>`
+  ).join("");
+}
+
+// ─── Info panel ────────────────────────────────────────────
+function updateInfo() {
+  const L = Math.sqrt(ell * (ell + 1));
+  const Lperp = Math.sqrt(Math.max(0, ell * (ell + 1) - m * m));
+  const thetaDeg = (L > 0 && ell > 0)
+    ? Math.acos(Math.max(-1, Math.min(1, m / L))) * 180 / Math.PI
+    : null;
+
+  document.getElementById("Lmag").textContent = L.toFixed(3);
+  document.getElementById("Lz").textContent = m.toFixed(3);
+  document.getElementById("thetaCone").textContent =
+    (thetaDeg === null) ? "—" : thetaDeg.toFixed(1) + "°";
+  document.getElementById("missingL").textContent = Lperp.toFixed(3);
+}
+
+// ─── m ticks update ────────────────────────────────────────
+function updateMSlider() {
+  const ms = document.getElementById("mSlider");
+  ms.min = -ell; ms.max = ell;
+  m = Math.max(-ell, Math.min(ell, m));
+  ms.value = m;
+  document.getElementById("mval").textContent = m;
+  // Ticks
+  const ticks = [];
+  for (let i = -ell; i <= ell; i++) ticks.push(i);
+  document.getElementById("mTicks").innerHTML =
+    ticks.map(v => `<span>${v}</span>`).join("");
+}
+
+// ─── Main render ──────────────────────────────────────────
+function render() {
+  document.getElementById("lval").textContent = ell;
+  document.getElementById("mval").textContent = m;
+  updateInfo();
+  drawCone(ell, m);
+  drawPolar(ell, m);
+  runChecks();
+}
+
+// ─── Slider events ────────────────────────────────────────
+document.getElementById("lSlider").addEventListener("input", function () {
+  ell = +this.value;
+  m = Math.max(-ell, Math.min(ell, m));
+  updateMSlider();
+  render();
+});
+document.getElementById("mSlider").addEventListener("input", function () {
+  m = +this.value;
+  document.getElementById("mval").textContent = m;
+  render();
+});
+
+// ─── Boot ─────────────────────────────────────────────────
+updateMSlider();
+render();
+</script>
+</body>
+</html>

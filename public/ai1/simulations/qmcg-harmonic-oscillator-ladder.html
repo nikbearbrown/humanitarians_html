@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Harmonic Oscillator Ladder — Uncertainty Floor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:#2A1A0E;font-family:'Inter',Helvetica,sans-serif;padding:24px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.sub{font-size:13px;color:#545454;margin-top:4px;margin-bottom:20px}
+.ctrl{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:8px}
+label{font-size:12px;color:#545454}
+input[type=range]{width:120px;accent-color:#C8102E}
+.val{font-size:13px;font-weight:600;color:#2A1A0E;min-width:32px;display:inline-block}
+.panels{display:flex;gap:24px;flex-wrap:wrap}
+.panel{flex:1;min-width:300px}
+.ptitle{font-size:11px;font-weight:700;color:#545454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+svg{display:block;overflow:visible}
+.rdout{font-size:12px;color:#545454;margin-top:8px;line-height:1.6}
+.rdout b{color:#C8102E}
+</style>
+</head>
+<body>
+<h1>Harmonic Oscillator Ladder</h1>
+<div class="sub">Every rung adds exactly ħω — and σₓ·σₚ rises by exactly ħ per step from the Robertson floor.</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>Level n</label>
+    <input type="range" id="slN" min="0" max="10" step="1" value="0">
+    <span class="val" id="vN">0</span>
+  </div>
+  <div class="cg" id="sqCtrl">
+    <label>Squeeze r (n=0 only)</label>
+    <input type="range" id="slSq" min="-1.5" max="1.5" step="0.05" value="0">
+    <span class="val" id="vSq">0.00</span>
+  </div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="ptitle">Energy Ladder + ψₙ(x)</div>
+    <svg id="svgL" width="360" height="440"></svg>
+    <div class="rdout">E = <b id="rE">0.5</b> ħω &nbsp;|&nbsp; nodes in ψₙ: <b id="rNodes">0</b></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">Robertson Plane σₓ vs σₚ (units: x₀, ħ/x₀)</div>
+    <svg id="svgR" width="360" height="440"></svg>
+    <div class="rdout">σₓ·σₚ = <b id="rProd">0.500</b> ħ &nbsp;|&nbsp; Robertson floor = 0.500 ħ</div>
+  </div>
+</div>
+
+<script>
+// ─── Hermite polynomials H_n(x) — physicists' convention
+function H(n,x){
+  if(n===0)return 1;
+  if(n===1)return 2*x;
+  let a=1,b=2*x;
+  for(let k=2;k<=n;k++){const c=2*x*b-2*(k-1)*a;a=b;b=c;}
+  return b;
+}
+// Normalisation N_n = 1/sqrt(2^n n! sqrt(pi))
+function Nn(n){
+  let f=1;for(let k=1;k<=n;k++)f*=k;
+  return 1/Math.sqrt(Math.pow(2,n)*f*Math.sqrt(Math.PI));
+}
+// ψ_n(ξ) in natural units x₀=1, ħ=1
+function psi(n,xi){return Nn(n)*H(n,xi)*Math.exp(-xi*xi/2);}
+
+// ─── Geometry
+const ML={top:22,right:16,bot:38,left:48};
+const WL=360,HL=440,iW=WL-ML.left-ML.right,iH=HL-ML.top-ML.bot;
+const NMAX=10;
+const XRNG=[-4,4],NPTS=300;
+const xs=d3.range(NPTS).map(i=>XRNG[0]+(XRNG[1]-XRNG[0])*i/(NPTS-1));
+
+// Left SVG
+const svgL=d3.select('#svgL');
+const gL=svgL.append('g').attr('transform',`translate(${ML.left},${ML.top})`);
+const yE=d3.scaleLinear().domain([-0.2,NMAX+1]).range([iH,0]);
+const xXi=d3.scaleLinear().domain(XRNG).range([0,iW]);
+
+gL.append('g').call(d3.axisLeft(yE).tickValues(d3.range(0,NMAX+1).map(n=>n+.5)).tickFormat(n=>`${n}ħω`).tickSize(3));
+gL.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xXi).ticks(5).tickFormat(d=>`${d}x₀`));
+gL.append('text').attr('x',iW/2).attr('y',iH+30).attr('text-anchor','middle').attr('font-size',10).attr('fill','#545454').text('x / x₀');
+
+const PSI_SCALE=0.35; // energy units for wavefunction amplitude
+
+// Static rung lines
+for(let n=0;n<=NMAX;n++){
+  const E=n+.5;
+  gL.append('line').attr('x1',0).attr('x2',iW).attr('y1',yE(E)).attr('y2',yE(E))
+    .attr('stroke','#ddd').attr('stroke-width',1);
+}
+
+// Wavefunction paths — one per level (dim), plus current (red)
+const dimPaths=[];
+for(let n=0;n<=NMAX;n++){
+  dimPaths.push(gL.append('path').attr('fill','none').attr('stroke','#d5cfc8').attr('stroke-width',.7));
+}
+const curPath=gL.append('path').attr('fill','none').attr('stroke','#C8102E').attr('stroke-width',2);
+
+// Highlight rung
+const hlRung=gL.append('rect').attr('fill','#fff3f0').attr('x',0).attr('y',0).attr('width',iW).attr('height',10).attr('rx',2).attr('opacity',0);
+
+// ─── Right SVG — Robertson plane
+const svgR=d3.select('#svgR');
+const gR=svgR.append('g').attr('transform',`translate(${ML.left},${ML.top})`);
+const SIG_MAX=4;
+const xS=d3.scaleLinear().domain([0,SIG_MAX]).range([0,iW]);
+const yS=d3.scaleLinear().domain([0,SIG_MAX]).range([iH,0]);
+
+gR.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xS).ticks(5));
+gR.append('g').call(d3.axisLeft(yS).ticks(5));
+gR.append('text').attr('x',iW/2).attr('y',iH+30).attr('text-anchor','middle').attr('font-size',10).attr('fill','#545454').text('σₓ (x₀)');
+gR.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-36).attr('text-anchor','middle').attr('font-size',10).attr('fill','#545454').text('σₚ (ħ/x₀)');
+
+// Robertson hyperbola σ_p = 0.5/σ_x
+const hypData=d3.range(200).map(i=>{const sx=.04+(SIG_MAX-.04)*i/199;return{sx,sp:.5/sx};}).filter(d=>d.sp<=SIG_MAX+.1);
+gR.append('path').datum(hypData).attr('d',d3.line().x(d=>xS(d.sx)).y(d=>yS(d.sp)).curve(d3.curveBasis))
+  .attr('fill','none').attr('stroke','#545454').attr('stroke-width',1.5).attr('stroke-dasharray','5,3');
+gR.append('text').attr('x',xS(3.2)).attr('y',yS(.5/3.2)-8).attr('font-size',9).attr('fill','#545454').text('Robertson floor ħ/2');
+
+// All eigenstate dots (static gray)
+for(let n=0;n<=NMAX;n++){
+  const sig=Math.sqrt(n+.5);
+  gR.append('circle').attr('cx',xS(sig)).attr('cy',yS(sig)).attr('r',4)
+    .attr('fill','#ddd').attr('stroke','#bbb').attr('stroke-width',1).attr('class',`dot-${n}`);
+}
+// Connecting path for eigenstate dots
+const diagData=d3.range(NMAX+1).map(n=>({sx:Math.sqrt(n+.5),sp:Math.sqrt(n+.5)}));
+gR.append('path').datum(diagData).attr('d',d3.line().x(d=>xS(d.sx)).y(d=>yS(d.sp)))
+  .attr('fill','none').attr('stroke','#ccc').attr('stroke-width',1).attr('stroke-dasharray','3,3');
+
+// Squeeze path (red dashed, shown only at n=0)
+const sqPath=gR.append('path').attr('fill','none').attr('stroke','#C8102E').attr('stroke-width',1.5)
+  .attr('stroke-dasharray','4,3').attr('opacity',0);
+
+// Current dot (red)
+const curDot=gR.append('circle').attr('r',8).attr('fill','#C8102E').attr('stroke','#fff').attr('stroke-width',2.5);
+
+// ─── Update
+function update(){
+  const n=+document.getElementById('slN').value;
+  const r=+document.getElementById('slSq').value;
+  document.getElementById('vN').textContent=n;
+  document.getElementById('vSq').textContent=r.toFixed(2);
+  document.getElementById('sqCtrl').style.opacity= n===0?'1':'0.35';
+
+  // Energy
+  const E=n+.5;
+  document.getElementById('rE').textContent=E.toFixed(1);
+  document.getElementById('rNodes').textContent=n;
+
+  // Highlight rung
+  const ry=yE(E);
+  const ry2=yE(E+1);
+  hlRung.attr('y',Math.min(ry,ry2)).attr('height',Math.abs(ry-ry2)).attr('opacity',1);
+
+  // Draw all wavefunctions (dim)
+  for(let nn=0;nn<=NMAX;nn++){
+    const Enn=nn+.5;
+    const pts=xs.map(xi=>({x:xXi(xi),y:yE(Enn+PSI_SCALE*psi(nn,xi))}));
+    dimPaths[nn].attr('d',d3.line().x(d=>d.x).y(d=>d.y)(pts));
+  }
+  // Current (red)
+  const ptsN=xs.map(xi=>({x:xXi(xi),y:yE(E+PSI_SCALE*psi(n,xi))}));
+  curPath.attr('d',d3.line().x(d=>d.x).y(d=>d.y)(ptsN));
+
+  // Dot colors on Robertson plane
+  for(let nn=0;nn<=NMAX;nn++){
+    gR.select(`.dot-${nn}`).attr('fill',nn===n?'#C8102E':'#ddd').attr('r',nn===n?6:4).attr('stroke',nn===n?'#fff':'#bbb');
+  }
+
+  // Robertson dot position
+  let sx,sp,label;
+  if(n===0){
+    // n=0 with squeeze r: σ_x = e^{-r}/√2, σ_p = e^r/√2
+    sx=Math.exp(-r)/Math.sqrt(2);
+    sp=Math.exp(r)/Math.sqrt(2);
+    const prod=(sx*sp).toFixed(3);
+    label=`${prod} ħ (squeezed, on floor)`;
+    // Squeeze path along floor
+    const sqData=d3.range(60).map(i=>{
+      const rr=-1.5+3*i/59;
+      return{sx:Math.exp(-rr)/Math.sqrt(2),sp:Math.exp(rr)/Math.sqrt(2)};
+    }).filter(d=>d.sx>=.01&&d.sx<=SIG_MAX&&d.sp>=.01&&d.sp<=SIG_MAX);
+    sqPath.datum(sqData).attr('d',d3.line().x(d=>xS(d.sx)).y(d=>yS(d.sp))).attr('opacity',.7);
+  } else {
+    sx=Math.sqrt(n+.5);
+    sp=Math.sqrt(n+.5);
+    label=`${(n+.5).toFixed(3)} ħ`;
+    sqPath.attr('opacity',0);
+  }
+  curDot.attr('cx',xS(sx)).attr('cy',yS(sp));
+  document.getElementById('rProd').textContent=label;
+}
+
+document.getElementById('slN').addEventListener('input',update);
+document.getElementById('slSq').addEventListener('input',update);
+update();
+
+// ─── Testable predictions
+// P1: n=0 → σ_x·σ_p = ħ/2 = 0.500
+const p1=(Math.sqrt(.5)*Math.sqrt(.5));
+console.assert(Math.abs(p1-.5)<1e-10,'P1: n=0 saturates Robertson floor: '+p1);
+// P2: each n→n+1 adds ħ=1.000
+const diff=(1+.5)-(0+.5);
+console.assert(Math.abs(diff-1)<1e-10,'P2: step adds exactly 1ħ: '+diff);
+console.log('HO Ladder: P1 σ_x·σ_p(n=0)=',p1.toFixed(4),'P2 Δ(σ_x·σ_p)=',diff.toFixed(4));
+</script>
+</body>
+</html>

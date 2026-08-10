@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fourier Transform: Winding a Signal Around a Circle</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2A1A0E;
+    text-align: center;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #545454;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    padding: 12px 20px;
+    background: #FAFAFA;
+    border: 1px solid #D4D4D4;
+    border-radius: 6px;
+    width: 900px;
+  }
+  .ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  }
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input[type=range] {
+    width: 180px;
+    accent-color: #C8102E;
+    cursor: pointer;
+  }
+  select {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    padding: 5px 8px;
+    border: 1px solid #D4D4D4;
+    border-radius: 4px;
+    color: #2A1A0E;
+    background: #FFFFFF;
+    cursor: pointer;
+  }
+  button {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border: 2px solid #C8102E;
+    border-radius: 4px;
+    background: #FFFFFF;
+    color: #C8102E;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  button:hover { background: #C8102E; color: #FFFFFF; }
+  button.active { background: #C8102E; color: #FFFFFF; }
+  .freq-display {
+    font-size: 20px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 60px;
+    text-align: center;
+  }
+  svg text { font-family: 'Montserrat', sans-serif; }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #545454;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-anchor: middle;
+  }
+  .com-label {
+    font-size: 11px;
+    color: #C8102E;
+    font-weight: 600;
+    text-anchor: middle;
+  }
+</style>
+</head>
+<body>
+
+<h1>The Fourier Transform: Winding a Signal Around a Circle</h1>
+<p class="subtitle">Wind a signal around a circle — at the signal's frequency, the center of mass lurches to one side. That lurch IS the Fourier transform.</p>
+
+<div class="controls">
+  <div class="ctrl-group">
+    <label>Signal</label>
+    <select id="signalSelect">
+      <option value="3hz">3 Hz pure sine</option>
+      <option value="2hz3hz">2 Hz + 3 Hz mixture</option>
+      <option value="1hz2hz5hz">1 Hz + 2 Hz + 5 Hz</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Winding Frequency</label>
+    <input type="range" id="freqSlider" min="0" max="6" step="0.05" value="1.0">
+  </div>
+  <div class="ctrl-group">
+    <label>f =</label>
+    <div class="freq-display" id="freqDisplay">1.00 Hz</div>
+  </div>
+  <div class="ctrl-group">
+    <label>Center of Mass x̄</label>
+    <div id="comDisplay" style="font-size:16px;font-weight:700;color:#2A1A0E;min-width:80px;text-align:center;">0.000</div>
+  </div>
+  <div class="ctrl-group">
+    <label>&nbsp;</label>
+    <button id="sweepBtn">Auto-sweep 0→6 Hz</button>
+  </div>
+  <div class="ctrl-group">
+    <label>&nbsp;</label>
+    <button id="resetBtn">Reset Spectrum</button>
+  </div>
+</div>
+
+<svg id="mainSvg" width="900" height="500"></svg>
+
+<script>
+const W = 900, H = 500;
+const svg = d3.select("#mainSvg");
+
+// Panels
+const leftCx = 195, leftCy = 250, leftR = 160;
+const rightX = 420, rightY = 40, rightW = 460, rightH = 380;
+
+// Signal generators
+const N = 400, T = 2.0;
+const t = d3.range(N).map(i => i * T / (N - 1));
+
+function getSignal(type) {
+  switch(type) {
+    case "3hz":    return t.map(ti => Math.sin(2*Math.PI*3*ti));
+    case "2hz3hz": return t.map(ti => 0.6*Math.sin(2*Math.PI*2*ti) + 0.6*Math.sin(2*Math.PI*3*ti));
+    case "1hz2hz5hz": return t.map(ti => 0.5*Math.sin(2*Math.PI*1*ti) + 0.5*Math.sin(2*Math.PI*2*ti) + 0.5*Math.sin(2*Math.PI*5*ti));
+  }
+}
+
+let currentSignalType = "3hz";
+let currentFreq = 1.0;
+let spectrumData = []; // {f, com}
+let sweeping = false;
+let sweepTimer = null;
+
+// Spectrum x scale
+const specX = d3.scaleLinear().domain([0, 6]).range([rightX + 40, rightX + rightW - 10]);
+const specY = d3.scaleLinear().domain([-0.6, 0.6]).range([rightY + rightH - 30, rightY + 20]);
+
+// Left panel background
+svg.append("rect")
+  .attr("x", 10).attr("y", 20).attr("width", 370).attr("height", 460)
+  .attr("fill", "#FAFAFA").attr("stroke", "#D4D4D4").attr("stroke-width", 1).attr("rx", 4);
+
+svg.append("text").attr("x", 195).attr("y", 44)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+  .attr("font-size","11").attr("font-weight","600").attr("fill","#545454")
+  .text("WINDING SPACE");
+
+// Circle
+svg.append("circle")
+  .attr("cx", leftCx).attr("cy", leftCy).attr("r", leftR)
+  .attr("fill","none").attr("stroke","#D4D4D4").attr("stroke-width",1.5);
+
+// Axis lines in circle
+svg.append("line").attr("x1",leftCx-leftR-5).attr("y1",leftCy).attr("x2",leftCx+leftR+5).attr("y2",leftCy)
+  .attr("stroke","#D4D4D4").attr("stroke-width",0.7);
+svg.append("line").attr("x1",leftCx).attr("y1",leftCy-leftR-5).attr("x2",leftCx).attr("y2",leftCy+leftR+5)
+  .attr("stroke","#D4D4D4").attr("stroke-width",0.7);
+
+// Wound curve path
+const woundPath = svg.append("path")
+  .attr("fill","none").attr("stroke","#2A1A0E").attr("stroke-width",1.2).attr("opacity",0.6);
+
+// Center of mass dot
+const comDot = svg.append("circle")
+  .attr("r", 9).attr("fill","#C8102E").attr("stroke","#FFFFFF").attr("stroke-width",2);
+
+const comLabel = svg.append("text")
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+  .attr("font-size","10").attr("font-weight","700").attr("fill","#C8102E");
+
+// Right panel
+svg.append("rect")
+  .attr("x", rightX - 10).attr("y", rightY - 10).attr("width", rightW + 10).attr("height", rightH + 20)
+  .attr("fill","#FAFAFA").attr("stroke","#D4D4D4").attr("stroke-width",1).attr("rx",4);
+
+svg.append("text").attr("x", rightX + rightW/2 - 5).attr("y", rightY + 10)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+  .attr("font-size","11").attr("font-weight","600").attr("fill","#545454")
+  .text("SPECTRUM  (center-of-mass x̄ vs winding frequency)");
+
+// Spectrum axes
+const specXAxis = d3.axisBottom(specX).ticks(7).tickFormat(d => d+" Hz");
+const specYAxis = d3.axisLeft(specY).ticks(5).tickFormat(d3.format(".1f"));
+
+svg.append("g").attr("transform",`translate(0,${specY(0)})`).call(specXAxis)
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+svg.append("g").attr("transform",`translate(${rightX+40},0)`).call(specYAxis)
+  .selectAll("text").attr("font-family","Montserrat,sans-serif").attr("font-size","10");
+
+svg.append("line")
+  .attr("x1",specX(0)).attr("y1",specY(0)).attr("x2",specX(6)).attr("y2",specY(0))
+  .attr("stroke","#D4D4D4").attr("stroke-width",0.8).attr("stroke-dasharray","3,3");
+
+// y-axis label
+svg.append("text").attr("transform",`translate(${rightX+14},${rightY + rightH/2})rotate(-90)`)
+  .attr("text-anchor","middle").attr("font-family","Montserrat,sans-serif")
+  .attr("font-size","10").attr("fill","#545454").text("Center of mass x̄");
+
+// Spectrum bars group
+const specGroup = svg.append("g").attr("class","spectrum");
+
+// Cursor line
+const cursorLine = svg.append("line")
+  .attr("y1",specY.range()[1]).attr("y2",specY.range()[0])
+  .attr("stroke","#C8102E").attr("stroke-width",1.5).attr("opacity",0.8);
+
+// Zero-line
+svg.append("line").attr("x1",specX(0)).attr("y1",specY(0)).attr("x2",specX(6)).attr("y2",specY(0))
+  .attr("stroke","#545454").attr("stroke-width",0.5);
+
+function computeWinding(signal, f) {
+  let wx = [], wy = [];
+  let sumX = 0, sumY = 0;
+  for (let i = 0; i < signal.length; i++) {
+    const ang = -2 * Math.PI * f * t[i];
+    const cx_ = signal[i] * Math.cos(ang);
+    const cy_ = signal[i] * Math.sin(ang);
+    wx.push(cx_); wy.push(cy_);
+    sumX += cx_; sumY += cy_;
+  }
+  return {
+    wx, wy,
+    comX: sumX / signal.length,
+    comY: sumY / signal.length
+  };
+}
+
+function getSignalScale(type) {
+  // Return max amplitude for normalizing display
+  if (type === "3hz") return 1.0;
+  if (type === "2hz3hz") return 1.2;
+  if (type === "1hz2hz5hz") return 1.5;
+  return 1.0;
+}
+
+function updateLeft() {
+  const signal = getSignal(currentSignalType);
+  const scale = getSignalScale(currentSignalType);
+  const f = currentFreq;
+  const { wx, wy, comX, comY } = computeWinding(signal, f);
+
+  // Map to pixel space (scale so amplitude 1 fills about 0.7 of radius)
+  const px = d => leftCx + (d / (scale * 1.4)) * leftR;
+  const py = d => leftCy + (d / (scale * 1.4)) * leftR;
+
+  const lineGen = d3.line()
+    .x((_, i) => px(wx[i]))
+    .y((_, i) => py(wy[i]))
+    .curve(d3.curveCatmullRom.alpha(0.5));
+
+  woundPath.datum(wx).attr("d", lineGen);
+
+  const dotX = px(comX), dotY = py(comY);
+  comDot.attr("cx", dotX).attr("cy", dotY);
+  comLabel.attr("x", dotX).attr("y", dotY - 15).text(`x̄=${comX.toFixed(3)}`);
+
+  document.getElementById("comDisplay").textContent = comX.toFixed(4);
+
+  // Update cursor
+  cursorLine.attr("x1", specX(f)).attr("x2", specX(f));
+
+  return comX;
+}
+
+function updateSpectrum() {
+  const bars = specGroup.selectAll("line.specbar").data(spectrumData, d => d.f);
+  bars.enter().append("line").attr("class","specbar")
+    .attr("x1", d => specX(d.f)).attr("x2", d => specX(d.f))
+    .attr("y1", specY(0)).attr("y2", d => specY(Math.max(-0.55, Math.min(0.55, d.com))))
+    .attr("stroke", d => Math.abs(d.com) > 0.15 ? "#C8102E" : "#545454")
+    .attr("stroke-width", 2.5).attr("opacity", 0.75);
+
+  bars.attr("x1", d => specX(d.f)).attr("x2", d => specX(d.f))
+    .attr("y1", specY(0)).attr("y2", d => specY(Math.max(-0.55, Math.min(0.55, d.com))))
+    .attr("stroke", d => Math.abs(d.com) > 0.15 ? "#C8102E" : "#545454");
+}
+
+function addSpectrumPoint(f) {
+  const signal = getSignal(currentSignalType);
+  const { comX } = computeWinding(signal, f);
+  // Remove if exists
+  spectrumData = spectrumData.filter(d => Math.abs(d.f - f) > 0.04);
+  spectrumData.push({ f, com: comX });
+  spectrumData.sort((a,b) => a.f - b.f);
+  updateSpectrum();
+}
+
+function resetSpectrum() {
+  spectrumData = [];
+  specGroup.selectAll("*").remove();
+}
+
+// Initial draw
+let comX = updateLeft();
+addSpectrumPoint(currentFreq);
+
+// Slider
+document.getElementById("freqSlider").addEventListener("input", function() {
+  currentFreq = +this.value;
+  document.getElementById("freqDisplay").textContent = currentFreq.toFixed(2) + " Hz";
+  updateLeft();
+  addSpectrumPoint(currentFreq);
+});
+
+// Signal selector
+document.getElementById("signalSelect").addEventListener("change", function() {
+  currentSignalType = this.value;
+  resetSpectrum();
+  updateLeft();
+  addSpectrumPoint(currentFreq);
+});
+
+// Auto-sweep
+document.getElementById("sweepBtn").addEventListener("click", function() {
+  if (sweeping) {
+    sweeping = false;
+    if (sweepTimer) { clearInterval(sweepTimer); sweepTimer = null; }
+    this.textContent = "Auto-sweep 0→6 Hz";
+    this.classList.remove("active");
+    return;
+  }
+  sweeping = true;
+  this.textContent = "Stop Sweep";
+  this.classList.add("active");
+  resetSpectrum();
+  let f = 0;
+  const slider = document.getElementById("freqSlider");
+  sweepTimer = setInterval(() => {
+    if (f > 6.01) {
+      sweeping = false;
+      clearInterval(sweepTimer); sweepTimer = null;
+      document.getElementById("sweepBtn").textContent = "Auto-sweep 0→6 Hz";
+      document.getElementById("sweepBtn").classList.remove("active");
+      return;
+    }
+    currentFreq = +f.toFixed(2);
+    slider.value = currentFreq;
+    document.getElementById("freqDisplay").textContent = currentFreq.toFixed(2) + " Hz";
+    updateLeft();
+    addSpectrumPoint(currentFreq);
+    f += 0.05;
+  }, 40);
+});
+
+// Reset
+document.getElementById("resetBtn").addEventListener("click", function() {
+  resetSpectrum();
+  updateLeft();
+});
+
+// Annotations
+svg.append("text").attr("x", leftCx - leftR + 5).attr("y", leftCy + leftR + 20)
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","10").attr("fill","#545454")
+  .text("Each point: (g(t)·cos(−2πft), g(t)·sin(−2πft))");
+
+svg.append("circle").attr("cx",165).attr("cy",473).attr("r",5).attr("fill","#C8102E");
+svg.append("text").attr("x",175).attr("y",477)
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","10").attr("fill","#C8102E")
+  .attr("font-weight","600").text("Center of mass x̄");
+
+svg.append("text").attr("x", rightX + 40).attr("y", rightY + rightH + 8)
+  .attr("font-family","Montserrat,sans-serif").attr("font-size","10").attr("fill","#545454")
+  .text("Spike at signal frequency → Fourier transform detects that frequency component");
+</script>
+</body>
+</html>

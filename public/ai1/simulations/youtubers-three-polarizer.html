@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<!-- Three Polarizer Paradox — D3 v7 interactive simulation
+     Malus's Law: cos²(Δθ). Three filters, middle filter draggable.
+     Teardown palette: white / INK #2A1A0E / RED #C8102E / SLATE #545454 -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Three Polarizer Paradox</title>
+<style>
+  :root {
+    --red: #C8102E;
+    --ink: #2A1A0E;
+    --slate: #545454;
+    --border: #D4D4D4;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+  }
+  #wrap { max-width: 960px; margin: 28px auto; padding: 0 24px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+  .sub { font-size: 13px; color: var(--slate); margin: 0 0 20px; }
+
+  #main { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+  #left-col { flex: 1 1 520px; }
+  #right-col { flex: 0 0 220px; }
+
+  #controls {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  button {
+    padding: 6px 16px; border: 1.5px solid var(--ink);
+    background: #fff; color: var(--ink);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    border-radius: 2px;
+  }
+  button:hover { background: #f5f5f5; }
+  button.active { border-color: var(--red); color: var(--red); }
+  .ctrl-label { font-size: 13px; color: var(--slate); }
+
+  #stage-svg { display: block; }
+
+  #stats {
+    display: flex; gap: 28px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .stat-block { font-size: 13px; }
+  .stat-val {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 28px; font-weight: 700; color: var(--red);
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: var(--slate); margin-top: 2px; }
+
+  #theta-display {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 32px; font-weight: 700; color: var(--ink);
+  }
+  .theta-label { font-size: 12px; color: var(--slate); margin-top: 2px; }
+
+  .panel-title {
+    font-size: 11px; color: var(--slate); font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 6px;
+  }
+
+  #predictions {
+    border-top: 1px solid var(--border);
+    margin-top: 20px; padding-top: 12px;
+    font-size: 13px; color: var(--slate);
+    display: flex; gap: 40px; flex-wrap: wrap;
+  }
+  .pred strong { color: var(--ink); }
+  .check { color: var(--red); font-weight: 700; }
+
+  #curve-svg { display: block; }
+  .curve-label { font-size: 11px; color: var(--slate); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>Three Polarizer Paradox</h1>
+  <p class="sub">
+    Filter 1 at 0°, Filter 2 at θ (drag), Filter 3 at 90°.
+    Without Filter 2: 0% transmission. With Filter 2 at 45°: <strong>25%</strong> transmission.
+    Malus's law: I → I·cos²(Δθ) at each filter.
+  </p>
+
+  <div id="controls">
+    <button id="btn-toggle2">Remove Filter 2</button>
+    <span class="ctrl-label">Drag the middle filter to change θ</span>
+  </div>
+
+  <div id="main">
+    <div id="left-col">
+      <svg id="stage-svg" width="520" height="320"></svg>
+      <div id="stats">
+        <div class="stat-block">
+          <div class="stat-val" id="trans-pct">0.0%</div>
+          <div class="stat-label">Transmission (observed)</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-val" id="trans-theory">0.0%</div>
+          <div class="stat-label">Theory: sin²(2θ)/4</div>
+        </div>
+        <div class="stat-block">
+          <div id="theta-display">45°</div>
+          <div class="theta-label">θ (Filter 2 angle)</div>
+        </div>
+      </div>
+    </div>
+    <div id="right-col">
+      <div class="panel-title">Theoretical curve: sin²(2θ)/4</div>
+      <svg id="curve-svg" width="200" height="160"></svg>
+      <div class="curve-label">θ = 0° to 90°; peak = 25% at 45°</div>
+    </div>
+  </div>
+
+  <div id="predictions">
+    <div class="pred"><strong>P1:</strong> θ=45° → transmission converges to 25%. <span class="check" id="p1-check"></span></div>
+    <div class="pred"><strong>P2:</strong> θ=0° or θ=90° → 0% transmission. <span class="check" id="p2-check"></span></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const RED = '#C8102E', INK = '#2A1A0E', SLATE = '#545454', BORDER = '#D4D4D4';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let theta = Math.PI / 4;  // radians (45°)
+let filter2Active = true;
+let photonCount = 0;
+let passedCount = 0;
+let secondsElapsed = 0;
+
+// ─── Stage SVG ────────────────────────────────────────────────────────────────
+const SW = 520, SH = 320;
+const svg = d3.select('#stage-svg');
+
+// Filter positions (x)
+const F1_X = 80, F2_X = 240, F3_X = 400;
+const FILT_H = 180, FILT_W = 16;
+const FILT_Y = (SH - FILT_H) / 2;
+const BEAM_Y = SH / 2;
+const BEAM_X_START = 16;
+const BEAM_X_END = SW - 16;
+
+// Draw beam background
+const beamGrad = svg.append('defs').append('linearGradient')
+  .attr('id', 'beamGrad').attr('x1', '0%').attr('y1', '0%').attr('x2', '100%').attr('y2', '0%');
+beamGrad.append('stop').attr('offset', '0%').attr('stop-color', '#ffe0a0').attr('stop-opacity', 0.5);
+beamGrad.append('stop').attr('offset', '100%').attr('stop-color', '#ffe0a0').attr('stop-opacity', 0.05);
+
+svg.append('rect')
+  .attr('x', BEAM_X_START).attr('y', BEAM_Y - 6)
+  .attr('width', BEAM_X_END - BEAM_X_START).attr('height', 12)
+  .attr('fill', 'url(#beamGrad)').attr('rx', 3);
+
+// Filter 1 (fixed, 0°)
+const f1g = svg.append('g').attr('transform', `translate(${F1_X}, ${FILT_Y})`);
+f1g.append('rect')
+  .attr('x', -FILT_W / 2).attr('y', 0)
+  .attr('width', FILT_W).attr('height', FILT_H)
+  .attr('fill', SLATE).attr('rx', 2).attr('opacity', 0.7);
+f1g.append('text').attr('x', 0).attr('y', -10).attr('text-anchor', 'middle')
+  .attr('font-size', 12).attr('fill', INK).attr('font-family', 'Inter,sans-serif')
+  .attr('font-weight', 600).text('Filter 1');
+f1g.append('text').attr('x', 0).attr('y', FILT_H + 18).attr('text-anchor', 'middle')
+  .attr('font-size', 11).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('0°');
+// Polarization lines
+for (let y = 16; y < FILT_H - 8; y += 14) {
+  f1g.append('line')
+    .attr('x1', -FILT_W / 2 + 2).attr('y1', y)
+    .attr('x2', FILT_W / 2 - 2).attr('y2', y)
+    .attr('stroke', '#fff').attr('stroke-width', 1.2).attr('opacity', 0.6);
+}
+
+// Filter 3 (fixed, 90°)
+const f3g = svg.append('g').attr('transform', `translate(${F3_X}, ${FILT_Y})`);
+f3g.append('rect')
+  .attr('x', -FILT_W / 2).attr('y', 0)
+  .attr('width', FILT_W).attr('height', FILT_H)
+  .attr('fill', SLATE).attr('rx', 2).attr('opacity', 0.7);
+f3g.append('text').attr('x', 0).attr('y', -10).attr('text-anchor', 'middle')
+  .attr('font-size', 12).attr('fill', INK).attr('font-family', 'Inter,sans-serif')
+  .attr('font-weight', 600).text('Filter 3');
+f3g.append('text').attr('x', 0).attr('y', FILT_H + 18).attr('text-anchor', 'middle')
+  .attr('font-size', 11).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('90°');
+// Vertical polarization lines
+for (let y = 16; y < FILT_H - 8; y += 14) {
+  f3g.append('line')
+    .attr('x1', 0).attr('y1', y).attr('x2', 0).attr('y2', y)  // placeholder
+    .attr('stroke', '#fff').attr('stroke-width', 1.2).attr('opacity', 0.6);
+  f3g.append('line')
+    .attr('x1', -FILT_W / 2 + 3).attr('y1', y - 3)
+    .attr('x2', FILT_W / 2 - 3).attr('y2', y + 3)
+    .attr('stroke', '#fff').attr('stroke-width', 1.2).attr('opacity', 0.6);
+}
+
+// Filter 2 (draggable, angle = theta)
+const f2g = svg.append('g').attr('id', 'f2g').attr('transform', `translate(${F2_X}, ${FILT_Y})`);
+const f2rect = f2g.append('rect')
+  .attr('x', -FILT_W / 2).attr('y', 0)
+  .attr('width', FILT_W).attr('height', FILT_H)
+  .attr('fill', RED).attr('rx', 2).attr('opacity', 0.75)
+  .attr('cursor', 'default');
+const f2label = f2g.append('text').attr('x', 0).attr('y', -10).attr('text-anchor', 'middle')
+  .attr('font-size', 12).attr('fill', INK).attr('font-family', 'Inter,sans-serif')
+  .attr('font-weight', 600).text('Filter 2');
+const f2deg = f2g.append('text').attr('x', 0).attr('y', FILT_H + 18).attr('text-anchor', 'middle')
+  .attr('font-size', 11).attr('fill', RED).attr('font-family', 'JetBrains Mono, monospace');
+
+// Dial circle on filter 2
+const DIAL_R = 22;
+const dialG = f2g.append('g').attr('transform', `translate(0, ${FILT_H / 2})`);
+dialG.append('circle').attr('r', DIAL_R)
+  .attr('fill', '#fff').attr('stroke', INK).attr('stroke-width', 1.5).attr('opacity', 0.9)
+  .attr('cursor', 'grab');
+const dialLine = dialG.append('line')
+  .attr('stroke', RED).attr('stroke-width', 2.5).attr('stroke-linecap', 'round');
+dialG.append('text').attr('y', DIAL_R + 12).attr('text-anchor', 'middle')
+  .attr('font-size', 9).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif')
+  .text('drag');
+
+function updateDialLine() {
+  const angle = theta; // 0 = horizontal at filter; polarization direction
+  dialLine
+    .attr('x1', -Math.cos(angle) * (DIAL_R - 4))
+    .attr('y1', -Math.sin(angle) * (DIAL_R - 4))
+    .attr('x2', Math.cos(angle) * (DIAL_R - 4))
+    .attr('y2', Math.sin(angle) * (DIAL_R - 4));
+}
+
+// Drag interaction on the dial
+const dialDrag = d3.drag()
+  .on('drag', function(event) {
+    // event.x, event.y are relative to the dial group (transformed)
+    // Get position relative to filter center
+    const [mx, my] = d3.pointer(event, dialG.node());
+    let newTheta = Math.atan2(-my, mx); // angle from horizontal
+    // Clamp to [0, PI/2] (0° to 90°)
+    newTheta = Math.max(0, Math.min(Math.PI / 2, newTheta));
+    theta = newTheta;
+    updateDialLine();
+    updateThetaDisplay();
+    resetCounters();
+  });
+
+dialG.call(dialDrag);
+
+function updateThetaDisplay() {
+  const deg = Math.round(theta * 180 / Math.PI);
+  f2deg.text(`${deg}°`);
+  d3.select('#theta-display').text(`${deg}°`);
+  const theory = Math.sin(2 * theta) ** 2 / 4 * 100;
+  d3.select('#trans-theory').text(`${theory.toFixed(1)}%`);
+  updateCursorDot(theta);
+  checkP2();
+}
+
+// ─── Theoretical curve ────────────────────────────────────────────────────────
+const CW = 200, CH = 160;
+const curvesvg = d3.select('#curve-svg');
+const cxScale = d3.scaleLinear().domain([0, Math.PI / 2]).range([28, CW - 10]);
+const cyScale = d3.scaleLinear().domain([0, 0.28]).range([CH - 24, 8]);
+
+// Axes
+curvesvg.append('line').attr('x1', 28).attr('y1', CH - 24).attr('x2', CW - 6).attr('y2', CH - 24)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+curvesvg.append('line').attr('x1', 28).attr('y1', 8).attr('x2', 28).attr('y2', CH - 24)
+  .attr('stroke', BORDER).attr('stroke-width', 1);
+curvesvg.append('text').attr('x', 28).attr('y', CH - 10).attr('text-anchor', 'middle')
+  .attr('font-size', 9).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif').text('0°');
+curvesvg.append('text').attr('x', CW - 10).attr('y', CH - 10).attr('text-anchor', 'middle')
+  .attr('font-size', 9).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif').text('90°');
+curvesvg.append('text').attr('x', 14).attr('y', cyScale(0.25) + 4).attr('text-anchor', 'middle')
+  .attr('font-size', 9).attr('fill', SLATE).attr('font-family', 'Inter,sans-serif').text('25%');
+// 25% line
+curvesvg.append('line')
+  .attr('x1', 28).attr('y1', cyScale(0.25)).attr('x2', CW - 6).attr('y2', cyScale(0.25))
+  .attr('stroke', BORDER).attr('stroke-width', 1).attr('stroke-dasharray', '3,3');
+
+const curveData = d3.range(0, Math.PI / 2 + 0.01, 0.02).map(t => ({
+  t, v: Math.sin(2 * t) ** 2 / 4
+}));
+const curveLine = d3.line().x(d => cxScale(d.t)).y(d => cyScale(d.v)).curve(d3.curveCatmullRom);
+curvesvg.append('path').datum(curveData)
+  .attr('fill', 'none').attr('stroke', RED).attr('stroke-width', 2).attr('d', curveLine);
+
+const cursorDot = curvesvg.append('circle').attr('r', 5)
+  .attr('fill', INK).attr('stroke', '#fff').attr('stroke-width', 2);
+
+function updateCursorDot(th) {
+  const v = Math.sin(2 * th) ** 2 / 4;
+  cursorDot.attr('cx', cxScale(th)).attr('cy', cyScale(v));
+}
+
+// ─── Photon animation ─────────────────────────────────────────────────────────
+const PHOTON_RATE = 60;  // per second
+const PHOTON_SPEED = 180; // px/sec
+
+// Active photons: { x, y, vx, state: 'in-flight'|'dead', r, color, born, startX, endX }
+let photons = [];
+let lastTime = null;
+let accumulator = 0;  // time since last spawn (ms)
+let frameId = null;
+
+function spawnPhoton() {
+  const startX = BEAM_X_START + 4;
+  photons.push({
+    x: startX, y: BEAM_Y + (Math.random() - 0.5) * 8,
+    vx: PHOTON_SPEED,
+    state: 'alive',
+    passed1: false, passed2: false, passed3: false,
+    dead: false,
+    fadeTimer: 0
+  });
+  photonCount++;
+}
+
+function updatePhotons(dt) {
+  const dtSec = dt / 1000;
+  photons.forEach(p => {
+    if (p.dead) return;
+    p.x += p.vx * dtSec;
+
+    // Filter 1 check (at x = F1_X)
+    if (!p.passed1 && p.x >= F1_X) {
+      p.passed1 = true;
+      // All pass filter 1 (0° → 0° = cos²(0) = 1)
+    }
+
+    // Filter 2 check
+    if (!p.passed2 && p.x >= F2_X) {
+      p.passed2 = true;
+      if (filter2Active) {
+        const prob = Math.cos(theta) ** 2;
+        if (Math.random() > prob) {
+          p.dead = true; p.fadeTimer = 300;
+          return;
+        }
+      }
+    }
+
+    // Filter 3 check
+    if (!p.passed3 && p.x >= F3_X) {
+      p.passed3 = true;
+      // angle from filter2 to filter3: (PI/2 - theta)
+      const prob2 = filter2Active
+        ? Math.cos(Math.PI / 2 - theta) ** 2
+        : 0;  // no filter 2 → crossed → 0%
+      if (Math.random() > prob2) {
+        p.dead = true; p.fadeTimer = 300;
+        return;
+      }
+      passedCount++;
+    }
+
+    if (p.x > BEAM_X_END + 10) { p.dead = true; }
+  });
+
+  // Decay dead photons
+  photons = photons.filter(p => {
+    if (p.dead && p.fadeTimer > 0) { p.fadeTimer -= dt; return p.fadeTimer > 0; }
+    return !p.dead;
+  });
+}
+
+// SVG photon elements pool
+const photonLayer = svg.append('g').attr('id', 'photons');
+
+function renderPhotons() {
+  const alive = photons.filter(p => !p.dead);
+  const dying = photons.filter(p => p.dead && p.fadeTimer > 0);
+
+  const all = [...alive, ...dying];
+  const circles = photonLayer.selectAll('circle').data(all, (_, i) => i);
+
+  circles.join(
+    enter => enter.append('circle').attr('r', 3.5),
+    update => update,
+    exit => exit.remove()
+  )
+    .attr('cx', d => d.x)
+    .attr('cy', d => d.y)
+    .attr('fill', d => {
+      if (d.dead) return RED;
+      if (d.passed3) return '#FFD700';
+      if (d.passed2) return '#88BBFF';
+      return '#FFAA00';
+    })
+    .attr('opacity', d => d.dead ? d.fadeTimer / 300 : 1)
+    .attr('stroke', 'none');
+}
+
+// ─── Stats update (per second) ────────────────────────────────────────────────
+let secTimer = 0;
+
+function animate(ts) {
+  if (lastTime === null) lastTime = ts;
+  const dt = ts - lastTime;
+  lastTime = ts;
+
+  accumulator += dt;
+  const spawnInterval = 1000 / PHOTON_RATE;
+  while (accumulator >= spawnInterval) {
+    spawnPhoton();
+    accumulator -= spawnInterval;
+  }
+
+  updatePhotons(dt);
+  renderPhotons();
+
+  secTimer += dt;
+  if (secTimer >= 500) {
+    secTimer = 0;
+    if (photonCount > 0) {
+      const pct = passedCount / photonCount * 100;
+      d3.select('#trans-pct').text(`${pct.toFixed(1)}%`);
+      checkP1();
+    }
+  }
+
+  frameId = requestAnimationFrame(animate);
+}
+
+function resetCounters() {
+  photonCount = 0; passedCount = 0;
+  photons = [];
+  d3.select('#trans-pct').text('0.0%');
+}
+
+// ─── Toggle filter 2 ─────────────────────────────────────────────────────────
+d3.select('#btn-toggle2').on('click', function() {
+  filter2Active = !filter2Active;
+  d3.select(this).text(filter2Active ? 'Remove Filter 2' : 'Restore Filter 2')
+    .classed('active', !filter2Active);
+  f2g.attr('opacity', filter2Active ? 1 : 0.2);
+  resetCounters();
+  if (!filter2Active) {
+    d3.select('#trans-theory').text('0.0%');
+  } else {
+    updateThetaDisplay();
+  }
+});
+
+// ─── P checks ─────────────────────────────────────────────────────────────────
+function checkP1() {
+  if (!filter2Active) return;
+  if (photonCount < 200) return;
+  const obs = passedCount / photonCount * 100;
+  const theory = Math.sin(2 * theta) ** 2 / 4 * 100;
+  const deg = Math.round(theta * 180 / Math.PI);
+  if (Math.abs(deg - 45) < 2 && Math.abs(obs - 25) < 5) {
+    d3.select('#p1-check').text('✓ converging to 25%');
+  }
+}
+
+function checkP2() {
+  const deg = Math.round(theta * 180 / Math.PI);
+  if (deg <= 2 || deg >= 88) {
+    d3.select('#p2-check').text('✓ 0% at θ=0° or 90°');
+  } else {
+    d3.select('#p2-check').text('');
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+updateDialLine();
+updateThetaDisplay();
+updateCursorDot(theta);
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>

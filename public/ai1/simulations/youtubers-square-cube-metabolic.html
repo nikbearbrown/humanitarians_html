@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Square-Cube Metabolic Law</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #FFFFFF; color: #2A1A0E;
+    min-height: 100vh; padding: 24px;
+  }
+  h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #545454; font-size: 0.875rem; margin-bottom: 24px; }
+  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 32px; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #545454; margin-bottom: 10px;
+  }
+  .control-group { margin-bottom: 20px; }
+  label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; }
+  .slider-wrap { position: relative; }
+  input[type=range] { width: 100%; accent-color: #C8102E; cursor: pointer; }
+  .ref-marks {
+    display: flex; justify-content: space-between;
+    font-size: 0.6rem; color: #545454; margin-top: 3px;
+  }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .card {
+    border: 1.5px solid #D4D4D4; border-radius: 6px; padding: 12px 14px;
+  }
+  .card-label { font-size: 0.65rem; color: #545454; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .card-value {
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 1.1rem; font-weight: 700; color: #2A1A0E;
+  }
+  .food-card {
+    border-radius: 6px; padding: 14px 16px; margin-bottom: 16px;
+    border: 2px solid;
+  }
+  .food-card.green { border-color: #22a06b; background: #f0faf5; }
+  .food-card.yellow { border-color: #e8b23a; background: #fffbf0; }
+  .food-card.red { border-color: #C8102E; background: #fff5f5; }
+  .food-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .food-value {
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 1.5rem; font-weight: 700;
+  }
+  .food-note { font-size: 0.75rem; margin-top: 4px; }
+  .gauge-wrap { margin-bottom: 20px; }
+  .silhouette-area {
+    display: flex; align-items: flex-end; justify-content: center;
+    height: 180px; margin-bottom: 16px; border: 1.5px solid #D4D4D4;
+    border-radius: 4px; background: #fafafa; overflow: hidden;
+    position: relative;
+  }
+  svg text { font-family: Inter, Helvetica, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Square-Cube Law &amp; Metabolic Scaling</h1>
+<p class="subtitle">Surface ∝ L² · Volume ∝ L³ · S/V ∝ 1/L · Metabolic rate ∝ L<sup>−0.25</sup> (Kleiber)</p>
+
+<div class="layout">
+  <div class="panel">
+    <div class="section-label">Body Length</div>
+    <div class="control-group">
+      <label>Length: <strong id="len-display">7</strong> cm</label>
+      <div class="slider-wrap">
+        <input type="range" id="len-slider" min="-1.398" max="0.699" step="0.01" value="-1.155">
+        <!-- log10 scale: 0.04m=4cm → log10(0.04)=-1.398; 5m=500cm → log10(5)=0.699 -->
+      </div>
+      <div class="ref-marks">
+        <span title="4cm">Shrew 4cm</span>
+        <span title="7cm">Mouse 7cm</span>
+        <span title="50cm">Cat 50cm</span>
+        <span title="175cm">Human 175cm</span>
+        <span title="420cm">Elephant 420cm</span>
+      </div>
+    </div>
+
+    <div class="silhouette-area" id="silhouette-area">
+      <svg id="silhouette-svg" width="300" height="180"></svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Body Length</div>
+        <div class="card-value" id="c-length">7 cm</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Surface Area</div>
+        <div class="card-value" id="c-surface">294 cm²</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Volume</div>
+        <div class="card-value" id="c-volume">343 cm³</div>
+      </div>
+      <div class="card">
+        <div class="card-label">S/V Ratio</div>
+        <div class="card-value" id="c-sv">0.857 cm⁻¹</div>
+      </div>
+    </div>
+
+    <div id="food-card" class="food-card yellow">
+      <div class="food-label">Daily Food (% Body Weight)</div>
+      <div class="food-value" id="food-pct">~200%</div>
+      <div class="food-note" id="food-note">Normal for this size</div>
+    </div>
+
+    <div class="gauge-wrap">
+      <div class="section-label">Heat Danger (S/V too low = can't shed heat)</div>
+      <svg id="gauge-svg" width="280" height="110" viewBox="0 0 280 110"></svg>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Scaling Curves</div>
+    <svg id="curves-svg" width="100%" viewBox="0 0 500 380" style="border:1.5px solid #D4D4D4;border-radius:4px;"></svg>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+// L in meters. Slider is log10(L_meters)
+const slider = document.getElementById('len-slider');
+
+// Normalize: mouse (L=0.07m) → food% = 200
+// food% = 200 × (0.07/L)^0.25
+function computeMetrics(L) {
+  const Lcm = L * 100;
+  const surface = 6 * Lcm * Lcm; // cm²
+  const volume = Lcm * Lcm * Lcm; // cm³
+  const sv = 6 / Lcm; // cm⁻¹
+  const foodPct = 200 * Math.pow(0.07 / L, 0.25);
+  return { L, Lcm, surface, volume, sv, foodPct };
+}
+
+function fmt(n) {
+  if (n >= 1e6) return d3.format('.3s')(n);
+  if (n >= 1000) return d3.format(',.0f')(n);
+  if (n >= 10) return d3.format('.1f')(n);
+  return d3.format('.3f')(n);
+}
+
+// Gauge
+const gaugeSvg = d3.select('#gauge-svg');
+const gaugeW = 280, gaugeH = 110;
+const gaugeR = 90;
+const gaugeCx = 140, gaugeCy = 100;
+
+// Arc background
+const arcBg = d3.arc().innerRadius(55).outerRadius(85)
+  .startAngle(-Math.PI/2).endAngle(Math.PI/2);
+// Gradient arc segments
+const nSeg = 60;
+for (let i = 0; i < nSeg; i++) {
+  const t = i / nSeg;
+  const startA = -Math.PI/2 + t * Math.PI;
+  const endA = -Math.PI/2 + (t+1)/nSeg * Math.PI;
+  const color = d3.interpolateRgb('#22a06b','#C8102E')(t);
+  gaugeSvg.append('path')
+    .attr('transform', `translate(${gaugeCx},${gaugeCy})`)
+    .attr('d', d3.arc().innerRadius(55).outerRadius(85).startAngle(startA).endAngle(endA)())
+    .style('fill', color);
+}
+const gaugeNeedle = gaugeSvg.append('line')
+  .style('stroke','#2A1A0E').style('stroke-width',3)
+  .style('stroke-linecap','round');
+gaugeSvg.append('text').attr('x',140).attr('y',108)
+  .attr('text-anchor','middle').style('font-size','10px').style('fill','#545454')
+  .text('← Cool (large)     Hot (small) →');
+
+function updateGauge(sv) {
+  // sv range: very small animal ~6/0.04=150 (high danger), large ~6/500=0.012 (low danger)
+  // Danger ∝ 1/sv (inversely — wait, small sv = large animal = CAN'T shed heat? No.
+  // Actually small S/V → large animal → heat BUILD-UP danger (can't dissipate heat fast enough per volume).
+  // Large S/V → small animal → easily sheds heat (too much loss in cold).
+  // Gauge: danger = inability to shed heat. For hot environments: small sv = danger.
+  const svMin = 0.012, svMax = 150;
+  const logSV = Math.log10(sv);
+  const logMin = Math.log10(svMin), logMax = Math.log10(svMax);
+  // danger: small sv → high danger (right side of gauge)
+  const t = 1 - (logSV - logMin) / (logMax - logMin);
+  const angle = -Math.PI/2 + t * Math.PI;
+  const nx = gaugeCx + 70 * Math.cos(angle);
+  const ny = gaugeCy + 70 * Math.sin(angle);
+  gaugeNeedle.attr('x1', gaugeCx).attr('y1', gaugeCy).attr('x2', nx).attr('y2', ny);
+}
+
+// Curves SVG (D3)
+const cm = {top:20, right:20, bottom:55, left:65};
+const cW = 500-cm.left-cm.right, cH = 380-cm.top-cm.bottom;
+const cSvg = d3.select('#curves-svg').append('g').attr('transform',`translate(${cm.left},${cm.top})`);
+
+const Ls = d3.range(-1.398, 0.7, 0.02).map(l => Math.pow(10,l));
+const xSc = d3.scaleLog().domain([0.04,5]).range([0,cW]);
+const ySc = d3.scaleLog().domain([0.01, 300]).range([cH, 0]);
+
+const xAx = cSvg.append('g').attr('transform',`translate(0,${cH})`);
+const yAx = cSvg.append('g');
+
+xAx.call(d3.axisBottom(xSc).tickValues([0.04,0.07,0.5,1.75,4.2]).tickFormat(d=>d*100+'cm'));
+yAx.call(d3.axisLeft(ySc).tickValues([0.01,0.1,1,10,100]).tickFormat(d3.format('.2~g')));
+
+[xAx, yAx].forEach(ax => {
+  ax.selectAll('line,path').style('stroke','#D4D4D4');
+  ax.selectAll('text').style('fill','#545454').style('font-size','10px');
+});
+
+cSvg.append('text').attr('x',cW/2).attr('y',cH+45).attr('text-anchor','middle')
+  .style('font-size','11px').style('fill','#545454').text('Body Length (log scale)');
+
+// S/V curve
+const svLine = d3.line().x(d=>xSc(d)).y(d=>ySc(6/(d*100))).curve(d3.curveBasis);
+cSvg.append('path').datum(Ls).attr('d',svLine)
+  .style('fill','none').style('stroke','#545454').style('stroke-width',2);
+cSvg.append('text').attr('x',xSc(0.05)).attr('y',ySc(6/(0.05*100))-6)
+  .style('font-size','10px').style('fill','#545454').text('S/V (cm⁻¹)');
+
+// Food% curve
+const foodLine = d3.line().x(d=>xSc(d)).y(d=>ySc(Math.max(200*Math.pow(0.07/d,0.25),0.01))).curve(d3.curveBasis);
+cSvg.append('path').datum(Ls).attr('d',foodLine)
+  .style('fill','none').style('stroke','#C8102E').style('stroke-width',2);
+cSvg.append('text').attr('x',xSc(0.05)).attr('y',ySc(200*Math.pow(0.07/0.045,0.25))+14)
+  .style('font-size','10px').style('fill','#C8102E').text('Daily food %');
+
+// Legend
+[[''+'— S/V ratio', '#545454'],[' — Food % body weight', '#C8102E']].forEach(([t,c],i) => {
+  cSvg.append('line').attr('x1',cW-180).attr('x2',cW-165).attr('y1',12+i*16).attr('y2',12+i*16)
+    .style('stroke',c).style('stroke-width',2);
+  cSvg.append('text').attr('x',cW-160).attr('y',15+i*16)
+    .style('font-size','10px').style('fill',c).text(t.trim());
+});
+
+// Reference animals
+const animals = [{L:0.04,name:'Shrew'},{L:0.07,name:'Mouse'},{L:0.5,name:'Cat'},{L:1.75,name:'Human'},{L:4.2,name:'Elephant'}];
+animals.forEach(a => {
+  cSvg.append('line').attr('x1',xSc(a.L)).attr('x2',xSc(a.L))
+    .attr('y1',0).attr('y2',cH).style('stroke','#D4D4D4').style('stroke-dasharray','3,3').style('stroke-width',1);
+  cSvg.append('text').attr('x',xSc(a.L)+2).attr('y',cH-4)
+    .style('font-size','9px').style('fill','#545454').text(a.name);
+});
+
+// Tracking dots
+const dotSV = cSvg.append('circle').attr('r',6).style('fill','#545454').style('stroke','#fff').style('stroke-width',2);
+const dotFood = cSvg.append('circle').attr('r',6).style('fill','#C8102E').style('stroke','#fff').style('stroke-width',2);
+
+function update() {
+  const logL = parseFloat(slider.value);
+  const L = Math.pow(10, logL);
+  const m = computeMetrics(L);
+
+  document.getElementById('len-display').textContent = m.Lcm.toFixed(1);
+  document.getElementById('c-length').textContent = m.Lcm.toFixed(1) + ' cm';
+  document.getElementById('c-surface').textContent = fmt(m.surface) + ' cm²';
+  document.getElementById('c-volume').textContent = fmt(m.volume) + ' cm³';
+  document.getElementById('c-sv').textContent = m.sv.toFixed(3) + ' cm⁻¹';
+
+  const fp = m.foodPct;
+  const foodEl = document.getElementById('food-card');
+  const foodPctEl = document.getElementById('food-pct');
+  const foodNote = document.getElementById('food-note');
+  foodPctEl.textContent = fp.toFixed(1) + '%';
+  if (fp < 30) {
+    foodEl.className = 'food-card green';
+    foodNote.textContent = 'Low demand — large animal territory';
+    foodPctEl.style.color = '#22a06b';
+  } else if (fp < 150) {
+    foodEl.className = 'food-card yellow';
+    foodNote.textContent = 'Normal metabolic demand';
+    foodPctEl.style.color = '#e8b23a';
+  } else {
+    foodEl.className = 'food-card red';
+    foodNote.textContent = 'Extreme demand — animal barely survives!';
+    foodPctEl.style.color = '#C8102E';
+  }
+
+  updateGauge(m.sv);
+
+  // Update silhouette
+  drawSilhouette(m.Lcm);
+
+  // Update dots
+  dotSV.attr('cx',xSc(L)).attr('cy',ySc(Math.max(m.sv, 0.012)));
+  dotFood.attr('cx',xSc(L)).attr('cy',ySc(Math.max(fp, 0.01)));
+}
+
+function drawSilhouette(Lcm) {
+  const maxH = 160;
+  const maxL = 500;
+  const h = Math.min(Lcm / maxL * maxH * 3, maxH);
+  const w = h * 1.8;
+  const svg = d3.select('#silhouette-svg');
+  svg.selectAll('*').remove();
+  const cx = 150, cy = 175;
+  // Simple blob animal
+  svg.append('ellipse').attr('cx',cx).attr('cy',cy-h/2).attr('rx',w/2).attr('ry',h/2)
+    .style('fill','#2A1A0E').style('opacity',0.15);
+  svg.append('ellipse').attr('cx',cx).attr('cy',cy-h/2).attr('rx',w/2*0.95).attr('ry',h/2*0.95)
+    .style('fill','#2A1A0E').style('opacity',0.85);
+  // head
+  svg.append('circle').attr('cx',cx+w/2*0.7).attr('cy',cy-h/2)
+    .attr('r',h/5).style('fill','#2A1A0E');
+  // legs
+  for (let i=-1;i<=1;i+=2) {
+    svg.append('line').attr('x1',cx+i*w/4).attr('y1',cy)
+      .attr('x2',cx+i*w/3).attr('y2',cy+h/3)
+      .style('stroke','#2A1A0E').style('stroke-width',Math.max(1.5,h/20));
+  }
+  // size label
+  svg.append('text').attr('x',150).attr('y',20)
+    .attr('text-anchor','middle').style('font-size','12px').style('fill','#545454')
+    .text(Lcm.toFixed(1) + ' cm');
+}
+
+slider.addEventListener('input', update);
+update();
+</script>
+</body>
+</html>

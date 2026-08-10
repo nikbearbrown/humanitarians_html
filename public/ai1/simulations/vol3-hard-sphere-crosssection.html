@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hard-Sphere Quantum Scattering Cross Section</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fff;color:#2A1A0E;font-family:'Inter',Helvetica,sans-serif;padding:24px}
+h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.sub{font-size:13px;color:#545454;margin-top:4px;margin-bottom:20px}
+.ctrl{display:flex;align-items:center;gap:24px;margin-bottom:20px;flex-wrap:wrap}
+.cg{display:flex;align-items:center;gap:8px}
+label{font-size:12px;color:#545454}
+input[type=range]{width:140px;accent-color:#C8102E}
+.val{font-size:13px;font-weight:600;color:#2A1A0E;min-width:36px;display:inline-block}
+.panels{display:flex;gap:24px;flex-wrap:wrap}
+.panel{flex:1;min-width:300px}
+.ptitle{font-size:11px;font-weight:700;color:#545454;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+svg{display:block}
+.rdout{font-size:12px;color:#545454;margin-top:8px;line-height:1.8}
+.rdout b{color:#C8102E}
+</style>
+</head>
+<body>
+<h1>Hard-Sphere Scattering Cross Section</h1>
+<div class="sub">Classically πa². Quantum: 4πa² at low energy, 2πa² at high energy. Neither equals classical.</div>
+
+<div class="ctrl">
+  <div class="cg">
+    <label>ka (wavenumber×radius)</label>
+    <input type="range" id="slKA" min="0.1" max="30" step="0.1" value="1">
+    <span class="val" id="vKA">1.0</span>
+  </div>
+  <div class="cg">
+    <label>ℓ_max shown</label>
+    <input type="range" id="slLmax" min="1" max="15" step="1" value="8">
+    <span class="val" id="vLmax">8</span>
+  </div>
+</div>
+
+<div class="panels">
+  <div class="panel">
+    <div class="ptitle">σ_tot / πa² vs ka</div>
+    <svg id="svgMain" width="460" height="380"></svg>
+    <div class="rdout">
+      At ka = <b id="rKA">1.0</b>: &nbsp;σ/πa² = <b id="rSig">—</b><br>
+      Low energy limit → <b>4</b> (quantum, 4×classical)<br>
+      High energy limit → <b>2</b> (Babinet's principle)
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">Partial Wave Contributions (2ℓ+1)sin²δ_ℓ</div>
+    <svg id="svgBars" width="340" height="320"></svg>
+    <div class="rdout">Current ka = <b id="rKA2">1.0</b> &nbsp;|&nbsp; ℓ<sub>max</sub> needed ≈ <b id="rLneed">—</b></div>
+  </div>
+</div>
+
+<script>
+// ─── Spherical Bessel functions (forward recursion)
+function jl_yl(lmax, x){
+  // Returns arrays j[0..lmax] and y[0..lmax]
+  const j=new Array(lmax+1), y=new Array(lmax+1);
+  if(x<1e-10){
+    // Small x limits: j_0→1, j_l→0 for l>0; y_0→-inf
+    j[0]=1; y[0]=-1e15;
+    for(let l=1;l<=lmax;l++){j[l]=0;y[l]=-1e15;}
+    return{j,y};
+  }
+  j[0]=Math.sin(x)/x;
+  y[0]=-Math.cos(x)/x;
+  if(lmax>=1){
+    j[1]=Math.sin(x)/(x*x)-Math.cos(x)/x;
+    y[1]=-Math.cos(x)/(x*x)-Math.sin(x)/x;
+  }
+  for(let l=1;l<lmax;l++){
+    j[l+1]=(2*l+1)/x*j[l]-j[l-1];
+    y[l+1]=(2*l+1)/x*y[l]-y[l-1];
+  }
+  return{j,y};
+}
+
+// Hard sphere phase shift: tan(δ_l) = j_l(ka)/y_l(ka)
+// sin²δ_l = j_l²/(j_l²+y_l²)
+function sin2delta(l, ka){
+  const{j,y}=jl_yl(l,ka);
+  const jv=j[l], yv=y[l];
+  const d=jv*jv+yv*yv;
+  if(d<1e-30)return 0;
+  return jv*jv/d;
+}
+
+// Total cross section σ/πa² = (4/z²) Σ (2l+1) sin²δ_l
+function sigma_over_pia2(ka){
+  if(ka<0.01)return 4.0;
+  const lmax=Math.min(Math.ceil(2*ka)+10, 60);
+  const{j,y}=jl_yl(lmax,ka);
+  let sum=0;
+  for(let l=0;l<=lmax;l++){
+    const jv=j[l],yv=y[l];
+    const d=jv*jv+yv*yv;
+    if(d<1e-30)continue;
+    sum+=(2*l+1)*jv*jv/d;
+  }
+  return 4/(ka*ka)*sum;
+}
+
+// ─── Precompute full curve
+const NPTS=200;
+const kaArr=d3.range(NPTS).map(i=>0.05+(30-0.05)*i/(NPTS-1));
+const sigArr=kaArr.map(ka=>sigma_over_pia2(ka));
+
+// ─── Main SVG
+const ML={top:20,right:20,bot:40,left:52};
+const W1=460,H1=380,iW=W1-ML.left-ML.right,iH=H1-ML.top-ML.bot;
+const svg1=d3.select('#svgMain');
+const g1=svg1.append('g').attr('transform',`translate(${ML.left},${ML.top})`);
+
+const xKA=d3.scaleLinear().domain([0,30]).range([0,iW]);
+const ySig=d3.scaleLinear().domain([0,5]).range([iH,0]);
+
+g1.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xKA).ticks(8));
+g1.append('g').call(d3.axisLeft(ySig).ticks(6));
+g1.append('text').attr('x',iW/2).attr('y',iH+30).attr('text-anchor','middle').attr('font-size',11).attr('fill','#545454').text('ka');
+g1.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size',11).attr('fill','#545454').text('σ / πa²');
+
+// Reference lines
+[{v:4,lbl:'4 (quantum low-E)',clr:'#545454'},{v:2,lbl:'2 (Babinet / high-E)',clr:'#C8102E'},{v:1,lbl:'1 (classical)',clr:'#aaa'}].forEach(({v,lbl,clr})=>{
+  g1.append('line').attr('x1',0).attr('x2',iW).attr('y1',ySig(v)).attr('y2',ySig(v))
+    .attr('stroke',clr).attr('stroke-width',v===2?1.5:1).attr('stroke-dasharray','4,3');
+  g1.append('text').attr('x',iW+2).attr('y',ySig(v)).attr('dy','0.35em').attr('font-size',9).attr('fill',clr).text(lbl);
+});
+
+// Main curve
+g1.append('path').datum(kaArr.map((ka,i)=>({ka,sig:sigArr[i]}))).attr('d',d3.line().x(d=>xKA(d.ka)).y(d=>ySig(d.sig)))
+  .attr('fill','none').attr('stroke','#2A1A0E').attr('stroke-width',2);
+
+// Current ka vertical line
+const vLine=g1.append('line').attr('y1',0).attr('y2',iH).attr('stroke','#C8102E').attr('stroke-width',1.5);
+const vDot=g1.append('circle').attr('r',5).attr('fill','#C8102E').attr('stroke','#fff').attr('stroke-width',2);
+
+// ─── Bars SVG
+const MB={top:16,right:16,bot:40,left:44};
+const W2=340,H2=320,iW2=W2-MB.left-MB.right,iH2=H2-MB.top-MB.bot;
+const svg2=d3.select('#svgBars');
+const g2=svg2.append('g').attr('transform',`translate(${MB.left},${MB.top})`);
+const xBar=d3.scaleBand().range([0,iW2]).padding(0.2);
+const yBar=d3.scaleLinear().domain([0,1]).range([iH2,0]);
+
+g2.append('g').attr('transform',`translate(0,${iH2})`).attr('class','xaxis');
+g2.append('g').call(d3.axisLeft(yBar).ticks(5));
+g2.append('text').attr('x',iW2/2).attr('y',iH2+30).attr('text-anchor','middle').attr('font-size',10).attr('fill','#545454').text('Partial wave ℓ');
+g2.append('text').attr('transform','rotate(-90)').attr('x',-iH2/2).attr('y',-32).attr('text-anchor','middle').attr('font-size',10).attr('fill','#545454').text('(2ℓ+1)sin²δ_ℓ');
+
+function updateBars(ka, lmaxShow){
+  const{j,y}=jl_yl(lmaxShow, ka);
+  const barData=[];
+  for(let l=0;l<=lmaxShow;l++){
+    const jv=j[l],yv=y[l];
+    const d=jv*jv+yv*yv;
+    const s2=(d<1e-30)?0:jv*jv/d;
+    barData.push({l, val:(2*l+1)*s2});
+  }
+  xBar.domain(barData.map(d=>d.l));
+  g2.select('.xaxis').call(d3.axisBottom(xBar).tickFormat(d=>d));
+  const maxVal=d3.max(barData,d=>d.val)||1;
+  yBar.domain([0,Math.max(1,maxVal*1.1)]);
+  g2.select('g:nth-child(2)').call(d3.axisLeft(yBar).ticks(5));
+  g2.selectAll('.bar').remove();
+  g2.selectAll('.bar').data(barData).join('rect').attr('class','bar')
+    .attr('x',d=>xBar(d.l)).attr('y',d=>yBar(d.val)).attr('width',xBar.bandwidth())
+    .attr('height',d=>iH2-yBar(d.val)).attr('fill',d=>d.l===0?'#C8102E':'#2A1A0E').attr('opacity',.8);
+}
+
+function update(){
+  const ka=+document.getElementById('slKA').value;
+  const lmaxShow=+document.getElementById('slLmax').value;
+  document.getElementById('vKA').textContent=ka.toFixed(1);
+  document.getElementById('vLmax').textContent=lmaxShow;
+  document.getElementById('rKA').textContent=ka.toFixed(1);
+  document.getElementById('rKA2').textContent=ka.toFixed(1);
+
+  const sig=sigma_over_pia2(ka);
+  document.getElementById('rSig').textContent=sig.toFixed(3);
+  document.getElementById('rLneed').textContent=Math.ceil(ka)+2;
+
+  vLine.attr('x1',xKA(ka)).attr('x2',xKA(ka));
+  vDot.attr('cx',xKA(ka)).attr('cy',ySig(sig));
+
+  updateBars(ka,lmaxShow);
+}
+
+document.getElementById('slKA').addEventListener('input',update);
+document.getElementById('slLmax').addEventListener('input',update);
+update();
+
+// ─── Testable predictions
+// P1: ka→0, σ/πa² → 4
+const sig001=sigma_over_pia2(0.05);
+console.assert(Math.abs(sig001-4)<0.1,'P1: ka→0 σ/πa²≈4: '+sig001.toFixed(3));
+// P2: ka=1, σ/πa² ≈ 3.5 (within 0.5 of 3.5)
+const sig1=sigma_over_pia2(1);
+console.assert(Math.abs(sig1-3.5)<0.5,'P2: ka=1 σ/πa²≈3.5: '+sig1.toFixed(3));
+// High energy check: ka=20 should be near 2
+const sig20=sigma_over_pia2(20);
+console.log('Hard Sphere: P1 ka=0.05 σ/πa²=',sig001.toFixed(3),'P2 ka=1 σ/πa²=',sig1.toFixed(3),'ka=20 σ/πa²=',sig20.toFixed(3));
+</script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandelbrot &amp; Julia Sets</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #FFFFFF; color: #2A1A0E;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 3px; }
+  .subtitle { color: #545454; font-size: 0.85rem; margin-bottom: 16px; }
+  .top-bar { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  button {
+    padding: 6px 14px; border: 1.5px solid #2A1A0E;
+    border-radius: 4px; background: #fff; color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s;
+  }
+  button:hover { background: #f0f0f0; }
+  button.active { background: #2A1A0E; color: #fff; }
+  .label { font-size: 0.75rem; color: #545454; }
+  .iter-label { font-size: 0.8rem; }
+  input[type=range] { accent-color: #C8102E; width: 100px; }
+  .main-area { display: flex; gap: 16px; flex-wrap: wrap; }
+  .canvas-wrap { position: relative; }
+  canvas {
+    display: block; border: 1.5px solid #D4D4D4; border-radius: 4px;
+    cursor: crosshair;
+  }
+  .status-bar {
+    background: #f8f8f8; border: 1px solid #D4D4D4;
+    font-family: JetBrains Mono, ui-monospace, monospace;
+    font-size: 0.75rem; color: #545454; padding: 5px 10px;
+    border-radius: 0 0 4px 4px; display: flex; gap: 20px;
+  }
+  .render-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(42,26,14,0.85); color: #fff;
+    font-size: 0.7rem; padding: 3px 8px; border-radius: 3px;
+    display: none;
+  }
+  .panel-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: #545454; margin-bottom: 6px;
+  }
+  .orbit-panel {
+    width: 200px;
+  }
+  .orbit-panel canvas { width: 200px; height: 160px; }
+  .julia-panel { width: 340px; }
+  .info-box {
+    background: #f8f8f8; border: 1px solid #D4D4D4; border-radius: 4px;
+    padding: 10px; font-size: 0.78rem; color: #545454; margin-top: 10px;
+    max-width: 560px;
+  }
+</style>
+</head>
+<body>
+<h1>Mandelbrot &amp; Julia Sets</h1>
+<p class="subtitle">f(z) = z² + c — iterate from z₀=0; color by escape speed. Click to select c; scroll to zoom.</p>
+
+<div class="top-bar">
+  <button onclick="resetView()">Reset View</button>
+  <button id="julia-btn" onclick="toggleJulia()">Show Julia Set</button>
+  <button id="orbit-btn" onclick="toggleOrbit()">Show Orbit</button>
+  <span class="label">Max iterations:</span>
+  <input type="range" id="iter-slider" min="50" max="500" step="50" value="100">
+  <span class="iter-label" id="iter-val">100</span>
+  <button onclick="zoomIn()">Zoom In 2×</button>
+  <button onclick="zoomOut()">Zoom Out 2×</button>
+</div>
+
+<div class="main-area">
+  <div>
+    <div class="panel-label">Mandelbrot Set — click to select c, scroll to zoom</div>
+    <div class="canvas-wrap">
+      <canvas id="mandel-canvas" width="560" height="420"></canvas>
+      <div class="render-badge" id="render-badge">Rendering...</div>
+    </div>
+    <div class="status-bar">
+      <span id="coord-display">Re: -0.500 · Im: 0.000</span>
+      <span id="escape-display">Escapes: —</span>
+      <span id="c-display">c: —</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="orbit-panel" id="orbit-panel" style="display:none">
+      <div class="panel-label">Orbit</div>
+      <canvas id="orbit-canvas" width="200" height="160"></canvas>
+      <div class="info-box" id="orbit-info">Click on the Mandelbrot set to see the orbit of that c value.</div>
+    </div>
+    <div class="julia-panel" id="julia-panel" style="display:none; margin-top: 12px;">
+      <div class="panel-label">Julia Set for selected c</div>
+      <canvas id="julia-canvas" width="340" height="260"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" style="margin-top:12px;">
+  <strong>How to use:</strong> Click on the Mandelbrot set to select a point c. Points inside the set (dark) never escape — click the main cardioid to see a converging orbit, or the period-2 bulb (left circle) for a 2-cycle. Scroll to zoom. Toggle Julia Set to see the Julia set for that c.
+</div>
+
+<script>
+const canvas = document.getElementById('mandel-canvas');
+const ctx = canvas.getContext('2d');
+const CW = canvas.width, CH = canvas.height;
+let maxIter = 100;
+
+// View state
+let view = { xMin: -2.5, xMax: 1.0, yMin: -1.25, yMax: 1.25 };
+let selectedC = { re: -0.5, im: 0.0 };
+let showJulia = false, showOrbit = false;
+let rendering = false;
+let renderQueue = null;
+
+// Color scheme: smooth escape coloring
+function escapeColor(iter, maxIter, zr, zi) {
+  if (iter === maxIter) return [42, 26, 14]; // INK
+  // Smooth iteration count
+  const smooth = iter + 1 - Math.log2(Math.log2(Math.sqrt(zr*zr + zi*zi)));
+  const t = smooth / maxIter;
+  // Warm gold → cool blue ramp
+  const t2 = t < 0.5 ? 2*t : 2*(1-t);
+  const r = Math.round(255 * Math.pow(t, 0.4));
+  const g = Math.round(180 * Math.pow(t2, 0.5));
+  const b = Math.round(220 * (1 - Math.pow(t, 0.6)));
+  return [r, g, b];
+}
+
+// Mandelbrot iteration
+function iterate(cr, ci, maxIter) {
+  let zr = 0, zi = 0, i = 0;
+  while (i < maxIter && zr*zr + zi*zi <= 4) {
+    const tmp = zr*zr - zi*zi + cr;
+    zi = 2*zr*zi + ci;
+    zr = tmp;
+    i++;
+  }
+  return { iter: i, zr, zi };
+}
+
+// Chunked rendering
+function scheduleRender() {
+  if (renderQueue) { renderQueue.cancel = true; }
+  document.getElementById('render-badge').style.display = 'block';
+  const job = { cancel: false };
+  renderQueue = job;
+  const imgData = ctx.createImageData(CW, CH);
+  const data = imgData.data;
+  const { xMin, xMax, yMin, yMax } = view;
+  const xStep = (xMax - xMin) / CW, yStep = (yMax - yMin) / CH;
+  let row = 0;
+
+  function renderChunk() {
+    if (job.cancel) return;
+    const endRow = Math.min(row + 50, CH);
+    for (let y = row; y < endRow; y++) {
+      const ci = yMin + y * yStep;
+      for (let x = 0; x < CW; x++) {
+        const cr = xMin + x * xStep;
+        const { iter, zr, zi } = iterate(cr, ci, maxIter);
+        const [r, g, b] = escapeColor(iter, maxIter, zr, zi);
+        const idx = (y * CW + x) * 4;
+        data[idx] = r; data[idx+1] = g; data[idx+2] = b; data[idx+3] = 255;
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    drawOverlay();
+    row = endRow;
+    if (row < CH) {
+      requestAnimationFrame(renderChunk);
+    } else {
+      document.getElementById('render-badge').style.display = 'none';
+      drawOverlay();
+    }
+  }
+  requestAnimationFrame(renderChunk);
+}
+
+function drawOverlay() {
+  // Draw selected point
+  const sx = Math.round((selectedC.re - view.xMin) / (view.xMax - view.xMin) * CW);
+  const sy = Math.round((selectedC.im - view.yMin) / (view.yMax - view.yMin) * CH);
+  ctx.save();
+  ctx.strokeStyle = '#C8102E';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(sx, sy, 5, 0, 2*Math.PI); ctx.stroke();
+  ctx.restore();
+}
+
+// Orbit display
+function drawOrbit() {
+  const oc = document.getElementById('orbit-canvas');
+  const oct = oc.getContext('2d');
+  const W = oc.width, H = oc.height;
+  oct.clearRect(0,0,W,H);
+  oct.fillStyle = '#f8f8f8'; oct.fillRect(0,0,W,H);
+  oct.strokeStyle = '#D4D4D4'; oct.strokeRect(0,0,W,H);
+
+  const { re: cr, im: ci } = selectedC;
+  const pts = [{zr:0, zi:0}];
+  let zr=0, zi=0;
+  for (let i=0;i<40;i++) {
+    const tmp = zr*zr - zi*zi + cr;
+    zi = 2*zr*zi + ci; zr = tmp;
+    pts.push({zr, zi});
+    if (zr*zr+zi*zi>100) break;
+  }
+
+  // Auto scale
+  let maxR = 0;
+  pts.forEach(p => { maxR = Math.max(maxR, Math.abs(p.zr), Math.abs(p.zi)); });
+  maxR = Math.max(maxR, 2.1);
+  const sc = Math.min(W,H)/2 / maxR * 0.85;
+  const cx=W/2, cy=H/2;
+
+  // Axes
+  oct.strokeStyle='#D4D4D4'; oct.lineWidth=1;
+  oct.beginPath(); oct.moveTo(0,cy); oct.lineTo(W,cy); oct.stroke();
+  oct.beginPath(); oct.moveTo(cx,0); oct.lineTo(cx,H); oct.stroke();
+
+  // Draw orbit
+  oct.strokeStyle='#C8102E'; oct.lineWidth=1.5;
+  oct.beginPath();
+  pts.forEach((p,i) => {
+    const px=cx+p.zr*sc, py=cy+p.zi*sc;
+    if (i===0) oct.moveTo(px,py); else oct.lineTo(px,py);
+  });
+  oct.stroke();
+
+  pts.forEach((p,i) => {
+    const px=cx+p.zr*sc, py=cy+p.zi*sc;
+    oct.fillStyle = i===0 ? '#22a06b' : (i===pts.length-1 ? '#C8102E' : '#2A1A0E');
+    oct.beginPath(); oct.arc(px,py,2.5,0,2*Math.PI); oct.fill();
+  });
+
+  const esc = iterate(cr, ci, 100);
+  document.getElementById('orbit-info').textContent =
+    esc.iter===100 ? `c=(${cr.toFixed(3)},${ci.toFixed(3)}i) — BOUNDED (${pts.length-1} steps shown)` :
+    `c=(${cr.toFixed(3)},${ci.toFixed(3)}i) — Escapes at step ${esc.iter}`;
+}
+
+// Julia set rendering
+function renderJulia() {
+  const jc = document.getElementById('julia-canvas');
+  const jt = jc.getContext('2d');
+  const JW = jc.width, JH = jc.height;
+  const imgData = jt.createImageData(JW, JH);
+  const data = imgData.data;
+  const { re: cr, im: ci } = selectedC;
+  const jRange = 2.0;
+
+  for (let y=0; y<JH; y++) {
+    for (let x=0; x<JW; x++) {
+      let zr = -jRange + x/JW*2*jRange;
+      let zi = -jRange + y/JH*2*jRange;
+      let iter=0;
+      while (iter<maxIter && zr*zr+zi*zi<=4) {
+        const tmp = zr*zr - zi*zi + cr;
+        zi = 2*zr*zi + ci; zr=tmp; iter++;
+      }
+      const [r,g,b] = escapeColor(iter, maxIter, zr, zi);
+      const idx=(y*JW+x)*4;
+      data[idx]=r; data[idx+1]=g; data[idx+2]=b; data[idx+3]=255;
+    }
+  }
+  jt.putImageData(imgData,0,0);
+}
+
+// Zoom
+function toWorld(px, py) {
+  return {
+    re: view.xMin + px/CW*(view.xMax-view.xMin),
+    im: view.yMin + py/CH*(view.yMax-view.yMin)
+  };
+}
+
+function zoomAt(wx, wy, factor) {
+  const dx=(view.xMax-view.xMin)*factor/2, dy=(view.yMax-view.yMin)*factor/2;
+  view.xMin=wx-dx; view.xMax=wx+dx;
+  view.yMin=wy-dy; view.yMax=wy+dy;
+  scheduleRender();
+}
+
+function resetView() {
+  view = {xMin:-2.5, xMax:1.0, yMin:-1.25, yMax:1.25};
+  scheduleRender();
+}
+function zoomIn() { const c=toWorld(CW/2,CH/2); zoomAt(c.re,c.im,0.5); }
+function zoomOut() { const c=toWorld(CW/2,CH/2); zoomAt(c.re,c.im,2.0); }
+
+function toggleJulia() {
+  showJulia = !showJulia;
+  document.getElementById('julia-btn').classList.toggle('active', showJulia);
+  document.getElementById('julia-panel').style.display = showJulia ? 'block' : 'none';
+  if (showJulia) renderJulia();
+}
+function toggleOrbit() {
+  showOrbit = !showOrbit;
+  document.getElementById('orbit-btn').classList.toggle('active', showOrbit);
+  document.getElementById('orbit-panel').style.display = showOrbit ? 'block' : 'none';
+  if (showOrbit) drawOrbit();
+}
+
+// Events
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX-rect.left)*CW/rect.width;
+  const py = (e.clientY-rect.top)*CH/rect.height;
+  const w = toWorld(px,py);
+  selectedC = w;
+  const res = iterate(w.re, w.im, maxIter);
+  document.getElementById('c-display').textContent = `c=${w.re.toFixed(4)}+${w.im.toFixed(4)}i`;
+  document.getElementById('escape-display').textContent = res.iter===maxIter ? 'Bounded' : `Escapes @${res.iter}`;
+  drawOverlay();
+  if (showOrbit) drawOrbit();
+  if (showJulia) renderJulia();
+});
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX-rect.left)*CW/rect.width;
+  const py = (e.clientY-rect.top)*CH/rect.height;
+  const w = toWorld(px,py);
+  document.getElementById('coord-display').textContent = `Re: ${w.re.toFixed(5)} · Im: ${w.im.toFixed(5)}`;
+});
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX-rect.left)*CW/rect.width;
+  const py = (e.clientY-rect.top)*CH/rect.height;
+  const w = toWorld(px,py);
+  const factor = e.deltaY > 0 ? 2.0 : 0.5;
+  zoomAt(w.re, w.im, factor);
+}, {passive:false});
+
+canvas.addEventListener('dblclick', e => {
+  const rect = canvas.getBoundingClientRect();
+  const px = (e.clientX-rect.left)*CW/rect.width;
+  const py = (e.clientY-rect.top)*CH/rect.height;
+  const w = toWorld(px,py);
+  zoomAt(w.re, w.im, 0.5);
+});
+
+document.getElementById('iter-slider').addEventListener('input', e => {
+  maxIter = parseInt(e.target.value);
+  document.getElementById('iter-val').textContent = maxIter;
+  scheduleRender();
+  if (showJulia) renderJulia();
+});
+
+scheduleRender();
+</script>
+</body>
+</html>

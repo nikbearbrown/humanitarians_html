@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windmill Invariant — IMO 2011</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    background: #FFFFFF; color: #2A1A0E;
+    min-height: 100vh; padding: 20px;
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 3px; }
+  .subtitle { color: #545454; font-size: 0.85rem; margin-bottom: 16px; }
+  .layout { display: grid; grid-template-columns: 1fr 280px; gap: 24px; }
+  .controls {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 12px;
+  }
+  button {
+    padding: 7px 14px; border: 1.5px solid #2A1A0E;
+    border-radius: 4px; background: #fff; color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  }
+  button:hover { background: #f0f0f0; }
+  button.active { background: #2A1A0E; color: #fff; }
+  button.red { border-color: #C8102E; color: #C8102E; }
+  button.red:hover { background: #fff5f5; }
+  .speed-label { font-size: 0.8rem; color: #545454; }
+  input[type=range] { accent-color: #C8102E; width: 80px; }
+  svg { border: 1.5px solid #D4D4D4; border-radius: 4px; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #545454; margin-bottom: 8px;
+  }
+  .stat-box {
+    background: #f8f8f8; border: 1px solid #D4D4D4;
+    border-radius: 4px; padding: 12px; margin-bottom: 12px;
+    font-size: 0.85rem;
+  }
+  .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .stat-label { color: #545454; }
+  .stat-val { font-family: JetBrains Mono, ui-monospace, monospace; font-weight: 700; }
+  .invariant-box {
+    border: 2px solid #C8102E; border-radius: 4px; padding: 12px;
+    margin-bottom: 12px; background: #fff5f5;
+  }
+  .inv-title { font-size: 0.7rem; font-weight: 700; color: #C8102E; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .visit-bar {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;
+  }
+  .visit-dot {
+    width: 24px; height: 24px; border-radius: 50%; border: 2px solid #D4D4D4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700;
+  }
+  .visit-dot.visited { background: #2A1A0E; color: #fff; border-color: #2A1A0E; }
+  .visit-dot.pivot { background: #C8102E; color: #fff; border-color: #C8102E; }
+  .info-box {
+    font-size: 0.78rem; color: #545454; background: #f8f8f8;
+    border: 1px solid #D4D4D4; border-radius: 4px; padding: 10px;
+    margin-bottom: 10px; line-height: 1.5;
+  }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+  .leg-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid; }
+</style>
+</head>
+<body>
+<h1>Windmill Invariant — IMO 2011 Problem 2</h1>
+<p class="subtitle">A rotating line pivots through every point equally — the invariant that proves it</p>
+
+<div class="controls">
+  <button onclick="step()">Step (1°)</button>
+  <button id="auto-btn" onclick="toggleAuto()">Auto</button>
+  <button onclick="reset()">Reset</button>
+  <button onclick="wrongStart()" class="red">Set Wrong Start</button>
+  <button onclick="addPoint()">Add Point</button>
+  <button onclick="removePoint()">Remove Point</button>
+  <span class="speed-label">Speed:</span>
+  <input type="range" id="speed-slider" min="1" max="30" value="15">
+  <span id="speed-val" class="speed-label">15°/s</span>
+</div>
+
+<div class="layout">
+  <div>
+    <svg id="windmill-svg" width="600" height="480" style="cursor:default;"></svg>
+  </div>
+
+  <div>
+    <div class="section-label">Invariant</div>
+    <div class="invariant-box">
+      <div class="inv-title">Color Count (must never change)</div>
+      <div class="stat-row">
+        <span class="stat-label" style="color:#4a7ec7">Blue count:</span>
+        <span class="stat-val" id="blue-count">2</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" style="color:#545454">Brown count:</span>
+        <span class="stat-val" id="brown-count">2</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label" style="color:#C8102E">Pivot:</span>
+        <span class="stat-val" id="pivot-id">P2</span>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="section-label">Progress</div>
+      <div class="stat-row">
+        <span class="stat-label">Angle θ:</span>
+        <span class="stat-val" id="angle-disp">0.0°</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Half-turns:</span>
+        <span class="stat-val" id="half-turns">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Total pivots:</span>
+        <span class="stat-val" id="total-pivots">0</span>
+      </div>
+      <div style="margin-top:8px;">
+        <div class="section-label">Visited this half-turn</div>
+        <div class="visit-bar" id="visit-bar"></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#4a7ec7;border-color:#4a7ec7;"></div>Blue (left)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#545454;border-color:#545454;"></div>Brown (right)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#C8102E;border-color:#C8102E;"></div>Current pivot</div>
+    </div>
+
+    <div class="info-box">
+      <strong>Key insight:</strong> When the line hits a new point and pivots, one side's count stays constant. Starting with ⌊(n-1)/2⌋ blue = 2 (for n=5), every point becomes pivot exactly once per 180°. Try the "Wrong Start" button — one point is forever skipped!
+    </div>
+
+    <div class="info-box" id="warning-box" style="display:none; border-color:#C8102E; background:#fff5f5; color:#C8102E;">
+      Wrong starting configuration! Blue count ≠ Brown count. Some point will be skipped as pivot.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+const W=600, H=480, CX=300, CY=240;
+let points = [], pivotIdx = 0, theta = 0;
+let autoRunning = false, autoTimer = null;
+let halfTurns = 0, totalPivots = 0;
+let visitedThisHalf = new Set();
+let wrongMode = false;
+
+const svg = d3.select('#windmill-svg');
+
+// Initialize 5 points in "correct" position (median line)
+function initPoints() {
+  // 5 points, sorted by x. Middle (index 2) is initial pivot.
+  // Use nice positions for 600x480 SVG
+  points = [
+    {x:140, y:200, id:0},
+    {x:220, y:320, id:1},
+    {x:330, y:160, id:2}, // median by x
+    {x:430, y:280, id:3},
+    {x:500, y:200, id:4},
+  ];
+  // Sort by x
+  points.sort((a,b) => a.x - b.x);
+  pivotIdx = 2; // middle by x
+  theta = 0;
+  // The initial line is roughly horizontal (theta=0).
+  // Color left/right of this line: above line = "blue", below = "brown"
+  // For theta=0, line is horizontal through pivot.
+  assignColors();
+  halfTurns = 0; totalPivots = 0;
+  visitedThisHalf = new Set([pivotIdx]);
+  wrongMode = false;
+  document.getElementById('warning-box').style.display = 'none';
+}
+
+function wrongStart() {
+  wrongMode = true;
+  // Set 3 blue, 1 brown
+  points = [
+    {x:140, y:200, id:0},
+    {x:220, y:320, id:1},
+    {x:330, y:160, id:2},
+    {x:430, y:280, id:3},
+    {x:500, y:200, id:4},
+  ];
+  points.sort((a,b) => a.x - b.x);
+  pivotIdx = 0; // use leftmost as pivot
+  theta = 0;
+  // Manually set wrong colors
+  points.forEach((p,i) => {
+    if (i===pivotIdx) p.color='pivot';
+    else if (i<3) p.color='blue';
+    else p.color='brown';
+  });
+  halfTurns = 0; totalPivots = 0;
+  visitedThisHalf = new Set([pivotIdx]);
+  document.getElementById('warning-box').style.display = 'block';
+  render();
+  updateStats();
+}
+
+function assignColors() {
+  const pivot = points[pivotIdx];
+  const dx = Math.cos(theta), dy = Math.sin(theta);
+  points.forEach((p,i) => {
+    if (i===pivotIdx) { p.color='pivot'; return; }
+    // Cross product: (dx,dy) × (p-pivot) → positive = left
+    const cross = dx*(p.y-pivot.y) - dy*(p.x-pivot.x);
+    p.color = cross > 0 ? 'blue' : 'brown';
+  });
+}
+
+function colorOf(c) {
+  if (c==='blue') return '#4a7ec7';
+  if (c==='brown') return '#545454';
+  return '#C8102E';
+}
+
+function lineIntersectPoint(theta, pivot, point) {
+  // Point-to-line distance for directed line through pivot at angle theta
+  // Line direction: (cos θ, sin θ)
+  const dx = Math.cos(theta), dy = Math.sin(theta);
+  const px = point.x - pivot.x, py = point.y - pivot.y;
+  const dist = Math.abs(-dy*px + dx*py);
+  const along = dx*px + dy*py;
+  return { dist, along };
+}
+
+function step() {
+  const delta = Math.PI / 180; // 1 degree
+  advanceBy(delta);
+}
+
+function advanceBy(delta) {
+  const pivot = points[pivotIdx];
+  const oldTheta = theta;
+  let newTheta = theta + delta;
+
+  // Find if any non-pivot point crosses the line in this arc
+  let minAngle = Infinity, hitIdx = -1;
+
+  points.forEach((p,i) => {
+    if (i===pivotIdx) return;
+    // Angle from pivot to point
+    const dx = p.x - pivot.x, dy = p.y - pivot.y;
+    const pAngle = Math.atan2(dy, dx); // -π to π
+    // Normalize pAngle to [theta-ε, theta+π-ε] (half-revolution ahead)
+    // Cross product sign at theta
+    const crossOld = Math.cos(theta)*(p.y-pivot.y) - Math.sin(theta)*(p.x-pivot.x);
+    // At what theta does cross=0? When line passes through p.
+    // That's theta = atan2(p.y-pivot.y, p.x-pivot.x) or + π
+    let hit1 = Math.atan2(p.y-pivot.y, p.x-pivot.x);
+    let hit2 = hit1 + Math.PI;
+
+    [hit1, hit2].forEach(h => {
+      // Normalize to [theta, theta+2π)
+      while (h < theta) h += 2*Math.PI;
+      while (h >= theta + 2*Math.PI) h -= 2*Math.PI;
+      if (h > theta + 1e-6 && h < minAngle) {
+        minAngle = h; hitIdx = i;
+      }
+    });
+  });
+
+  if (hitIdx >= 0 && minAngle < newTheta) {
+    // Pivot
+    theta = minAngle;
+    const oldPivot = pivotIdx;
+    pivotIdx = hitIdx;
+    totalPivots++;
+    visitedThisHalf.add(hitIdx);
+
+    // Check half-turn
+    const thetaStart = 0;
+    if (theta >= thetaStart + halfTurns * Math.PI + Math.PI) {
+      halfTurns++;
+      visitedThisHalf = new Set([hitIdx]);
+    }
+
+    assignColors();
+  } else {
+    theta = newTheta;
+    // Check if half-turn completed
+    if (theta >= (halfTurns+1) * Math.PI) {
+      halfTurns++;
+      visitedThisHalf = new Set([pivotIdx]);
+    }
+    assignColors();
+  }
+
+  render();
+  updateStats();
+}
+
+function getLineEndpoints() {
+  const pivot = points[pivotIdx];
+  const len = 700;
+  return {
+    x1: pivot.x - Math.cos(theta)*len,
+    y1: pivot.y - Math.sin(theta)*len,
+    x2: pivot.x + Math.cos(theta)*len,
+    y2: pivot.y + Math.sin(theta)*len,
+  };
+}
+
+function render() {
+  svg.selectAll('*').remove();
+
+  // Line
+  const le = getLineEndpoints();
+  svg.append('line').attr('x1',le.x1).attr('y1',le.y1).attr('x2',le.x2).attr('y2',le.y2)
+    .style('stroke','#C8102E').style('stroke-width',1.5).style('opacity',0.7);
+
+  // Points
+  points.forEach((p,i) => {
+    const g = svg.append('g').attr('transform',`translate(${p.x},${p.y})`);
+
+    g.append('circle').attr('r', 18)
+      .style('fill', colorOf(p.color))
+      .style('stroke', p.color==='pivot' ? '#8b0000' : '#fff')
+      .style('stroke-width', 2)
+      .call(d3.drag()
+        .on('drag', function(event) {
+          p.x = Math.max(20, Math.min(W-20, event.x));
+          p.y = Math.max(20, Math.min(H-20, event.y));
+          assignColors();
+          render(); updateStats();
+        })
+      );
+
+    g.append('text').attr('text-anchor','middle').attr('dy','0.35em')
+      .style('fill','#fff').style('font-size','11px').style('font-weight','700')
+      .style('pointer-events','none')
+      .text(`P${i+1}`);
+  });
+}
+
+function updateStats() {
+  const blues = points.filter(p=>p.color==='blue').length;
+  const browns = points.filter(p=>p.color==='brown').length;
+  document.getElementById('blue-count').textContent = blues;
+  document.getElementById('brown-count').textContent = browns;
+  document.getElementById('pivot-id').textContent = `P${pivotIdx+1}`;
+  document.getElementById('angle-disp').textContent = (theta * 180/Math.PI % 360).toFixed(1) + '°';
+  document.getElementById('half-turns').textContent = halfTurns;
+  document.getElementById('total-pivots').textContent = totalPivots;
+
+  // Visit bar
+  const vb = document.getElementById('visit-bar');
+  vb.innerHTML = '';
+  points.forEach((p,i) => {
+    const dot = document.createElement('div');
+    dot.className = 'visit-dot' + (i===pivotIdx ? ' pivot' : (visitedThisHalf.has(i) ? ' visited' : ''));
+    dot.textContent = `P${i+1}`;
+    dot.title = visitedThisHalf.has(i) ? 'Has been pivot this half-turn' : 'Not yet visited';
+    vb.appendChild(dot);
+  });
+}
+
+function toggleAuto() {
+  autoRunning = !autoRunning;
+  document.getElementById('auto-btn').classList.toggle('active', autoRunning);
+  if (autoRunning) runAuto();
+  else if (autoTimer) { clearTimeout(autoTimer); autoTimer=null; }
+}
+
+function runAuto() {
+  if (!autoRunning) return;
+  const speed = parseInt(document.getElementById('speed-slider').value);
+  const deltaPerFrame = (speed * Math.PI / 180) / 30; // per frame at ~30fps
+  advanceBy(deltaPerFrame);
+  autoTimer = requestAnimationFrame(runAuto);
+}
+
+function reset() {
+  autoRunning = false;
+  document.getElementById('auto-btn').classList.remove('active');
+  if (autoTimer) { cancelAnimationFrame(autoTimer); autoTimer=null; }
+  initPoints();
+  render();
+  updateStats();
+}
+
+function addPoint() {
+  if (points.length >= 9) return;
+  points.push({x: 150 + Math.random()*300, y: 100 + Math.random()*280, id:points.length});
+  assignColors();
+  render(); updateStats();
+}
+function removePoint() {
+  if (points.length <= 3) return;
+  points.splice(points.length-1,1);
+  if (pivotIdx >= points.length) pivotIdx=0;
+  assignColors();
+  render(); updateStats();
+}
+
+document.getElementById('speed-slider').addEventListener('input', e => {
+  document.getElementById('speed-val').textContent = e.target.value + '°/s';
+});
+
+initPoints();
+render();
+updateStats();
+</script>
+</body>
+</html>

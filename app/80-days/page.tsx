@@ -394,7 +394,7 @@ export default function EightyDaystoStay() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Get Started & Resources</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/80-days-to-stay">
+              <PrimaryButton href="https://github.com/Humanitariansai">
                 GitHub Repository
               </PrimaryButton>
               <SecondaryButton href="https://www.youtube.com/@humanitariansai">

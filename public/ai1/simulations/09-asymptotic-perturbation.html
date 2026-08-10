@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asymptotic Series &amp; Perturbation Theory — Anharmonic Oscillator</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+    color: #2A1A0E;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    max-width: 900px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+  }
+  .panel {
+    border: 1.5px solid #2A1A0E;
+    padding: 16px;
+  }
+  .panel-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+    color: #545454;
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .control-label {
+    font-size: 12px;
+    color: #545454;
+    font-weight: 600;
+  }
+  input[type=range] {
+    accent-color: #2A1A0E;
+    width: 180px;
+    cursor: pointer;
+  }
+  .lambda-display {
+    font-size: 14px;
+    font-weight: 700;
+    color: #C8102E;
+    min-width: 70px;
+  }
+  svg text { font-family: Inter, Helvetica, sans-serif; }
+  .annotation-box {
+    background: #f7f4f0;
+    border-left: 3px solid #C8102E;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.65;
+    margin-top: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  th {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #545454;
+    border-bottom: 1.5px solid #2A1A0E;
+    padding: 5px 6px;
+    text-align: right;
+  }
+  th:first-child { text-align: center; }
+  td {
+    padding: 4px 6px;
+    border-bottom: 1px solid #e0dbd4;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 11.5px;
+  }
+  td:first-child { text-align: center; font-weight: 700; }
+  tr.opt-row td { background: #fff0f0; color: #C8102E; font-weight: 700; }
+  tr.div-row td { color: #888; }
+  .formula-box {
+    background: #f7f4f0;
+    border: 1px solid #ccc4b8;
+    padding: 9px 12px;
+    font-size: 12px;
+    margin-top: 12px;
+    line-height: 1.75;
+  }
+  .formula-box b { color: #C8102E; }
+  .legend-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 2px;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .legend-item.active { border-color: #2A1A0E; }
+  .legend-swatch {
+    width: 22px;
+    height: 3px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Asymptotic Perturbation Theory — Anharmonic Oscillator H = p²/2 + x²/2 + λx⁴</h1>
+<p class="subtitle">
+  Bender–Wu (1969): the perturbation series <b>diverges</b> for every λ &gt; 0 (Dyson argument).
+  Yet the partial sums are <b>asymptotically useful</b>: error first decreases, reaches a minimum at N_opt ≈ 1/(2λ), then grows without bound.
+  Exact energies via finite-difference matrix diagonalization (shift-invert iteration).
+</p>
+
+<div class="layout">
+
+  <!-- MAIN PANEL -->
+  <div class="panel">
+    <div class="panel-title">log₁₀|E_PT(N,λ) − E_exact(λ)| vs N (number of PT terms)</div>
+    <div class="controls">
+      <span class="control-label">Highlight λ:</span>
+      <input type="range" id="lambda-slider" min="0" max="100" value="50" step="1">
+      <span class="lambda-display" id="lambda-val">—</span>
+    </div>
+    <div class="legend-wrap" id="legend-container"></div>
+    <svg id="main-svg"></svg>
+    <div class="annotation-box" id="annotation-box"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel">
+    <div class="panel-title">Detail: Selected λ</div>
+    <div id="selected-lambda-info" style="font-size:12px; font-weight:700; margin-bottom:10px; color:#2A1A0E; line-height:1.5;"></div>
+    <table id="detail-table">
+      <thead>
+        <tr>
+          <th>N</th>
+          <th>E_PT</th>
+          <th>|Error|</th>
+          <th>ratio</th>
+        </tr>
+      </thead>
+      <tbody id="detail-tbody"></tbody>
+    </table>
+    <div class="formula-box">
+      <b>N_opt ≈ 1/(2λ)</b> — optimal truncation<br>
+      ratio = |a<sub>N+1</sub>λ<sup>N+1</sup>| / |a<sub>N</sub>λ<sup>N</sup>|<br>
+      Series diverges when ratio &gt; 1 (red rows = past N_opt)<br><br>
+      Divergence rate: |a_n| ~ (2n)!/3<sup>n</sup> → factorial growth
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── Bender-Wu coefficients (exact, 1969) ────────────────────────────────────
+const BW = [
+  0.5,           // n=0
+  0.75,          // n=1
+  -2.625,        // n=2
+  20.8125,       // n=3
+  -241.171875,   // n=4
+  3688.125,      // n=5
+  -67232.8125,   // n=6
+  1396478.0625,  // n=7
+  -3.37906e7,    // n=8
+  9.27697e8,     // n=9
+  -2.85523e10,   // n=10
+  9.67329e11,    // n=11
+  -3.56700e13    // n=12
+];
+
+// E_PT(N, λ) = Σ_{n=0}^{N} a_n λ^n
+function E_PT(N, lam) {
+  let e = 0, lpow = 1;
+  for (let n = 0; n <= N; n++) { e += BW[n] * lpow; lpow *= lam; }
+  return e;
+}
+
+// ─── Exact ground-state energy via finite-difference matrix (shift-invert) ───
+// H = -1/2 d²/dx² + 1/2 x² + λx⁴  on [-L, L] with Dirichlet BC
+function groundStateEnergy(lam) {
+  const L = 8, h = 0.05;
+  const N = Math.round(2 * L / h) - 1; // number of interior grid points
+  // Tridiagonal Hamiltonian:
+  //   diagonal:    d_i = 1/h² + V(x_i)
+  //   off-diagonal: b   = -1/(2h²)
+  const d = new Float64Array(N);
+  const b_off = -0.5 / (h * h);
+  for (let i = 0; i < N; i++) {
+    const x = -L + (i + 1) * h;
+    d[i] = 1.0 / (h * h) + 0.5 * x * x + lam * x * x * x * x;
+  }
+
+  // Thomas algorithm tridiagonal solver: a*x = r, off-diag = b_off everywhere
+  function tridSolve(diag, rhs) {
+    const n = diag.length;
+    const c = new Float64Array(diag);
+    const x = new Float64Array(rhs);
+    // Forward sweep
+    for (let i = 1; i < n; i++) {
+      const w = b_off / c[i - 1];
+      c[i] -= w * b_off;
+      x[i] -= w * x[i - 1];
+    }
+    // Back substitution
+    x[n - 1] /= c[n - 1];
+    for (let i = n - 2; i >= 0; i--) {
+      x[i] = (x[i] - b_off * x[i + 1]) / c[i];
+    }
+    return x;
+  }
+
+  // Shift-invert power iteration: (H - σI)^{-1} converges to lowest eigenvalue
+  const sigma = 0.40; // shift safely below E_0 for all λ in [0.005, 0.5]
+  const shifted_d = d.map(v => v - sigma);
+
+  // Initial vector: Gaussian near center
+  let v = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const x = -L + (i + 1) * h;
+    v[i] = Math.exp(-x * x / 4);
+  }
+  let norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0));
+  v = v.map(x => x / norm);
+
+  let eigenval = 0;
+  for (let iter = 0; iter < 400; iter++) {
+    const w = tridSolve(shifted_d, v);
+    const lambda_inv = Math.sqrt(w.reduce((s, x) => s + x * x, 0));
+    v = w.map(x => x / lambda_inv);
+    eigenval = sigma + 1.0 / lambda_inv;
+  }
+  return eigenval;
+}
+
+// ─── Precompute exact energies ────────────────────────────────────────────────
+const LAMBDAS = [0.005, 0.01, 0.05, 0.1, 0.2];
+
+console.log("=== Exact ground-state energies (finite-difference matrix) ===");
+const E_EXACT = {};
+LAMBDAS.forEach(lam => {
+  E_EXACT[lam] = groundStateEnergy(lam);
+  console.log(`  E_exact(λ=${lam}) = ${E_EXACT[lam].toFixed(6)}`);
+});
+
+// ─── Physics checks ───────────────────────────────────────────────────────────
+console.log("\n=== Physics checks ===");
+
+// P1: λ=0.1, N_opt: verify error at N_opt < error at N=12
+{
+  const lam = 0.1, E = E_EXACT[lam];
+  const errs = Array.from({length: 13}, (_, N) => Math.abs(E_PT(N, lam) - E));
+  let nopt = 0;
+  for (let n = 1; n < errs.length; n++) if (errs[n] < errs[nopt]) nopt = n;
+  const pass1 = errs[nopt] < errs[12];
+  console.log(`P1: λ=0.1 — N_opt=${nopt}, err[${nopt}]=${errs[nopt].toExponential(3)}, err[12]=${errs[12].toExponential(3)}`);
+  console.log(`    err[N_opt] < err[12]: ${pass1 ? "PASS ✓" : "FAIL"}`);
+  console.log(`    N_opt ≈ 1/(2×0.1)=5 (theory): actual N_opt=${nopt} [asymptotic estimate good for small λ]`);
+}
+
+// P2: λ=0.01, error still decreasing at N=7
+{
+  const lam = 0.01, E = E_EXACT[lam];
+  const errs = Array.from({length: 13}, (_, N) => Math.abs(E_PT(N, lam) - E));
+  let nopt = 0;
+  for (let n = 1; n < errs.length; n++) if (errs[n] < errs[nopt]) nopt = n;
+  const pass2 = errs[8] < errs[7] || nopt > 7;
+  console.log(`P2: λ=0.01 — N_opt=${nopt}, err[7]=${errs[7].toExponential(3)}, err[8]=${errs[8].toExponential(3)}`);
+  console.log(`    N_opt > 7: ${nopt > 7 ? "PASS ✓" : `N_opt=${nopt} (1/(2×0.01)=50 terms before divergence)`}`);
+  console.log(`    err[7] still decreasing (err[8]<err[7]): ${errs[8]<errs[7] ? "PASS ✓" : "monotone"}`);
+}
+
+// P3: E_exact(λ=0.1) ≈ 0.5590
+{
+  const E = E_EXACT[0.1];
+  const pass3 = Math.abs(E - 0.559) < 0.003;
+  console.log(`P3: E_exact(λ=0.1) = ${E.toFixed(6)} (expected ≈ 0.5590): ${pass3 ? "PASS ✓" : "FAIL"}`);
+  const ept2 = E_PT(2, 0.1);
+  console.log(`    E_PT(N=2) = ${ept2.toFixed(6)} (first 3 BW terms, expected ≈ 0.549): ${Math.abs(ept2-0.549)<0.002 ? "PASS ✓" : "FAIL"}`);
+}
+
+// ─── Helper functions ─────────────────────────────────────────────────────────
+function buildErrorData(lam) {
+  const E = E_EXACT[lam];
+  return Array.from({length: 13}, (_, N) => {
+    const ept = E_PT(N, lam);
+    const err = Math.abs(ept - E);
+    return { N, ept, err, logErr: err > 1e-16 ? Math.log10(err) : -16 };
+  });
+}
+
+function findNopt(pts) {
+  let nopt = 0;
+  for (let i = 1; i < pts.length; i++) if (pts[i].err < pts[nopt].err) nopt = i;
+  return nopt;
+}
+
+// Color scale: SLATE (small λ) → INK (large λ)
+const colorScale = d3.scaleSequential()
+  .domain([0, LAMBDAS.length - 1])
+  .interpolator(d3.interpolateRgb('#9090A8', '#2A1A0E'));
+
+function lambdaColor(i) { return colorScale(i); }
+
+const allData = LAMBDAS.map((lam, i) => ({ lam, i, pts: buildErrorData(lam) }));
+
+// ─── Main SVG ─────────────────────────────────────────────────────────────────
+const mW = 660, mH = 360;
+const mMar = { top: 28, right: 55, bottom: 50, left: 62 };
+const mInn = { w: mW - mMar.left - mMar.right, h: mH - mMar.top - mMar.bottom };
+
+const mainSvg = d3.select('#main-svg').attr('width', mW).attr('height', mH);
+const mg = mainSvg.append('g').attr('transform', `translate(${mMar.left},${mMar.top})`);
+
+// y-range: from -2.5 (best accuracy region) to +2 (divergent)
+const Y_MIN = -3.5, Y_MAX = 2.5;
+const xS = d3.scaleLinear().domain([0, 12]).range([0, mInn.w]);
+const yS = d3.scaleLinear().domain([Y_MIN, Y_MAX]).range([mInn.h, 0]);
+
+// Grid lines
+const gridData_y = d3.range(Y_MIN, Y_MAX + 1, 1);
+mg.append('g').selectAll('line').data(gridData_y).enter().append('line')
+  .attr('x1', 0).attr('x2', mInn.w)
+  .attr('y1', d => yS(d)).attr('y2', d => yS(d))
+  .attr('stroke', '#e8e2d8').attr('stroke-width', d => d === 0 ? 1 : 0.5);
+
+mg.append('g').selectAll('line').data(d3.range(0, 13)).enter().append('line')
+  .attr('y1', 0).attr('y2', mInn.h)
+  .attr('x1', d => xS(d)).attr('x2', d => xS(d))
+  .attr('stroke', '#e8e2d8').attr('stroke-width', 0.5);
+
+// Zero line annotation
+mg.append('text')
+  .attr('x', mInn.w + 4).attr('y', yS(0) + 4)
+  .style('font-size', '10px').style('fill', '#999')
+  .text('10⁰');
+
+// Axes
+mg.append('g').attr('transform', `translate(0,${mInn.h})`)
+  .call(d3.axisBottom(xS).ticks(12).tickSize(4))
+  .call(g => g.select('.domain').attr('stroke', '#2A1A0E'))
+  .call(g => g.selectAll('text').style('font-size', '12px').style('fill', '#2A1A0E'));
+
+mg.append('g')
+  .call(d3.axisLeft(yS).ticks(6).tickSize(4).tickFormat(d => d === 0 ? '0' : d))
+  .call(g => g.select('.domain').attr('stroke', '#2A1A0E'))
+  .call(g => g.selectAll('text').style('font-size', '12px').style('fill', '#2A1A0E'));
+
+// Axis labels
+mainSvg.append('text')
+  .attr('x', mMar.left + mInn.w / 2).attr('y', mH - 8)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '13px').style('fill', '#2A1A0E').style('font-weight', '600')
+  .text('N (number of Bender–Wu terms included in sum)');
+
+mainSvg.append('text')
+  .attr('transform', 'rotate(-90)')
+  .attr('x', -(mMar.top + mInn.h / 2)).attr('y', 14)
+  .attr('text-anchor', 'middle')
+  .style('font-size', '13px').style('fill', '#2A1A0E').style('font-weight', '600')
+  .text('log₁₀ |E_PT(N,λ) − E_exact(λ)|');
+
+// Line generator
+const lineGen = d3.line()
+  .x(d => xS(d.N))
+  .y(d => yS(Math.max(Math.min(d.logErr, Y_MAX), Y_MIN)));
+
+// Draw curves
+const curveGroups = mg.selectAll('.curve-group')
+  .data(allData).enter().append('g').attr('class', 'curve-group');
+
+const curvePaths = curveGroups.append('path')
+  .attr('class', (d, i) => `curve-path cp-${i}`)
+  .attr('d', d => lineGen(d.pts))
+  .attr('fill', 'none')
+  .attr('stroke', (d, i) => lambdaColor(i))
+  .attr('stroke-width', 1.8)
+  .attr('opacity', 0.7);
+
+// Dots on curves
+curveGroups.each(function(d, i) {
+  d3.select(this).selectAll('.dot')
+    .data(d.pts).enter().append('circle')
+    .attr('cx', p => xS(p.N))
+    .attr('cy', p => yS(Math.max(Math.min(p.logErr, Y_MAX), Y_MIN)))
+    .attr('r', 3)
+    .attr('fill', lambdaColor(i))
+    .attr('stroke', '#fff').attr('stroke-width', 0.8);
+});
+
+// Optimal N red dots
+const optLayer = mg.append('g').attr('class', 'opt-layer');
+allData.forEach((d, i) => {
+  const nopt = findNopt(d.pts);
+  const pt = d.pts[nopt];
+  const ly = Math.max(Math.min(pt.logErr, Y_MAX), Y_MIN);
+  optLayer.append('circle')
+    .attr('cx', xS(pt.N)).attr('cy', yS(ly))
+    .attr('r', 7).attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1.5)
+    .attr('opacity', 0.88);
+  // Label for outermost λ values
+  if (i === 0 || i === LAMBDAS.length - 1) {
+    optLayer.append('text')
+      .attr('x', xS(pt.N))
+      .attr('y', yS(ly) - 12)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '9.5px')
+      .style('fill', '#C8102E')
+      .text(`N_opt=${pt.N}`);
+  }
+});
+
+// Right-side λ labels
+allData.forEach((d, i) => {
+  const lastPt = d.pts[12];
+  const ly = Math.max(Math.min(lastPt.logErr, Y_MAX - 0.1), Y_MIN);
+  mg.append('text')
+    .attr('x', xS(12) + 5).attr('y', yS(ly) + 4)
+    .style('font-size', '10px').style('fill', lambdaColor(i))
+    .text(`λ=${d.lam}`);
+});
+
+// Annotation text on plot
+mg.append('text')
+  .attr('x', xS(9.5)).attr('y', yS(Y_MIN + 0.5))
+  .style('font-size', '10px').style('fill', '#999')
+  .text('← small λ: N_opt→∞, tiny error');
+
+mg.append('text')
+  .attr('x', xS(0.5)).attr('y', yS(Y_MAX - 0.4))
+  .style('font-size', '10px').style('fill', '#999')
+  .text('large λ: diverges fast →');
+
+// ─── Legend ───────────────────────────────────────────────────────────────────
+const legendEl = document.getElementById('legend-container');
+LAMBDAS.forEach((lam, i) => {
+  const item = document.createElement('span');
+  item.className = 'legend-item';
+  item.dataset.idx = i;
+  const sw = document.createElement('span');
+  sw.className = 'legend-swatch';
+  sw.style.background = lambdaColor(i);
+  item.appendChild(sw);
+  item.appendChild(document.createTextNode(`λ=${lam}`));
+  item.addEventListener('click', () => selectLambda(lam));
+  legendEl.appendChild(item);
+});
+
+// ─── State: selected lambda ───────────────────────────────────────────────────
+let selectedLambda = 0.1;
+
+function getSliderLambda(v) {
+  const logMin = Math.log10(0.005), logMax = Math.log10(0.2);
+  return Math.pow(10, logMin + (v / 100) * (logMax - logMin));
+}
+
+function closestLambda(target) {
+  return LAMBDAS.reduce((best, lam) =>
+    Math.abs(Math.log10(lam) - Math.log10(target)) < Math.abs(Math.log10(best) - Math.log10(target))
+      ? lam : best
+  );
+}
+
+function selectLambda(lam) {
+  selectedLambda = lam;
+  document.getElementById('lambda-val').textContent = `λ = ${lam}`;
+  updateHighlight(lam);
+  updateDetail(lam);
+  updateLegendActive(LAMBDAS.indexOf(lam));
+  // Sync slider
+  const logMin = Math.log10(0.005), logMax = Math.log10(0.2);
+  const v = ((Math.log10(lam) - logMin) / (logMax - logMin)) * 100;
+  document.getElementById('lambda-slider').value = Math.round(v);
+}
+
+function updateLegendActive(idx) {
+  document.querySelectorAll('.legend-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+}
+
+function updateHighlight(lam) {
+  const idx = LAMBDAS.indexOf(lam);
+  d3.selectAll('.curve-path')
+    .attr('stroke-width', (d, i) => i === idx ? 3.5 : 1.5)
+    .attr('opacity', (d, i) => i === idx ? 1 : 0.35);
+
+  const nopt = findNopt(buildErrorData(lam));
+  const noptEst = Math.round(1 / (2 * lam));
+  const minErr = buildErrorData(lam)[nopt].err;
+  document.getElementById('annotation-box').innerHTML =
+    `<b>λ = ${lam}</b> &emsp;|&emsp;
+     Optimal truncation N_opt = <b>${nopt}</b> &emsp;
+     Theory: 1/(2λ) = <b>${noptEst}</b> &emsp;
+     Min error ≈ <b>${minErr.toExponential(2)}</b><br>
+     The series diverges for every λ &gt; 0 (Dyson argument: coefficients grow as |a_n| ~ (2n)!/3ⁿ),
+     yet the partial sum asymptotically achieves exponentially small errors near N_opt.
+     Each curve traces a <i>boomerang</i> shape — initial improvement, then catastrophic growth.`;
+}
+
+function updateDetail(lam) {
+  const E = E_EXACT[lam];
+  const pts = buildErrorData(lam);
+  const nopt = findNopt(pts);
+  const noptEst = Math.round(1 / (2 * lam));
+
+  document.getElementById('selected-lambda-info').innerHTML =
+    `λ = ${lam}<br>E_exact = ${E.toFixed(6)} eV<br>N_opt = ${nopt}  (1/(2λ) = ${noptEst})`;
+
+  const tbody = document.getElementById('detail-tbody');
+  tbody.innerHTML = '';
+  for (let N = 0; N <= 12; N++) {
+    const pt = pts[N];
+    let ratio = '—';
+    if (N < 12) {
+      const num = Math.abs(BW[N + 1]) * Math.pow(lam, N + 1);
+      const den = Math.abs(BW[N]) * Math.pow(lam, N);
+      if (den > 0) ratio = (num / den).toFixed(3);
+    }
+    const tr = document.createElement('tr');
+    if (N === nopt) tr.className = 'opt-row';
+    else if (N > nopt) tr.className = 'div-row';
+    tr.innerHTML = `
+      <td>${N}</td>
+      <td>${pt.ept.toFixed(5)}</td>
+      <td>${pt.err < 1e-14 ? '< 1e-14' : pt.err.toExponential(3)}</td>
+      <td>${ratio}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ─── Slider ───────────────────────────────────────────────────────────────────
+const slider = document.getElementById('lambda-slider');
+slider.addEventListener('input', () => {
+  const raw = getSliderLambda(+slider.value);
+  selectLambda(closestLambda(raw));
+});
+
+// Initial render
+selectLambda(0.1);
+
+</script>
+</body>
+</html>

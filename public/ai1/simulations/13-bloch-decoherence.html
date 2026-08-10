@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloch Sphere Decoherence — T₁, T₂, T_φ</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 16px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #545454;
+    margin-bottom: 16px;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 12px; }
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  .panel {
+    border: 1.5px solid #2A1A0E;
+    padding: 12px 14px;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #545454;
+    margin-bottom: 8px;
+  }
+
+  /* Sliders */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .slider-label {
+    width: 32px;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  input[type=range] {
+    flex: 1;
+    accent-color: #2A1A0E;
+    height: 4px;
+  }
+  .slider-val {
+    width: 72px;
+    text-align: right;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  /* T2 constraint display */
+  .t2-display {
+    background: #f7f7f7;
+    border: 1.5px solid #2A1A0E;
+    padding: 10px 12px;
+    margin-top: 4px;
+  }
+  .t2-big {
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+  .t2-constraint {
+    font-size: 12px;
+    color: #545454;
+  }
+  .constraint-ok { color: #1a7a1a; font-weight: 700; }
+  .constraint-warn { color: #C8102E; font-weight: 700; }
+
+  /* Playback */
+  .playback-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  button {
+    background: #2A1A0E;
+    color: #fff;
+    border: none;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+  button:hover { background: #C8102E; }
+  .time-val {
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+  }
+
+  /* Platform presets */
+  .preset-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .preset-btn {
+    background: #fff;
+    color: #2A1A0E;
+    border: 1.5px solid #2A1A0E;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .preset-btn:hover, .preset-btn.active {
+    background: #2A1A0E;
+    color: #fff;
+  }
+
+  /* Bloch SVG */
+  #bloch-svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Component plots */
+  .plots-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .plot-wrap { position: relative; }
+  .plot-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #545454;
+    margin-bottom: 4px;
+  }
+
+  /* Axis labels */
+  .axis-label {
+    font-size: 10px;
+    fill: #545454;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+  }
+  .axis-line { stroke: #2A1A0E; stroke-width: 1; }
+
+  /* Legend */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+
+<h1>Bloch Sphere Decoherence</h1>
+<p class="subtitle">T₁ relaxation · T_φ pure dephasing · T₂ total coherence time (μs)</p>
+
+<div class="layout">
+  <!-- LEFT COLUMN: controls + Bloch sphere -->
+  <div class="left-col">
+
+    <!-- Controls -->
+    <div class="panel">
+      <div class="panel-title">Parameters</div>
+
+      <div class="slider-row">
+        <span class="slider-label">T₁</span>
+        <input type="range" id="sl-T1" min="0" max="100" step="0.01" value="50">
+        <span class="slider-val" id="val-T1">100 μs</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">T_φ</span>
+        <input type="range" id="sl-Tphi" min="0" max="100" step="0.01" value="74.68">
+        <span class="slider-val" id="val-Tphi">300 μs</span>
+      </div>
+
+      <div class="t2-display">
+        <div class="t2-big" id="t2-val">T₂ = 120.0 μs</div>
+        <div class="t2-constraint">
+          Limit: T₂ ≤ 2T₁ = <span id="t2-limit">200.0</span> μs &nbsp;
+          <span id="t2-check" class="constraint-ok">✓ physical</span>
+        </div>
+        <div class="t2-constraint" style="margin-top:4px">
+          T₂ = 1 / (1/(2T₁) + 1/T_φ)
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="panel-title" style="margin-bottom:4px">Platform Presets</div>
+        <div class="preset-row">
+          <button class="preset-btn active" id="preset-sc" onclick="applyPreset('sc')">Superconducting</button>
+          <button class="preset-btn" id="preset-nv" onclick="applyPreset('nv')">NV Center</button>
+          <button class="preset-btn" id="preset-custom" onclick="applyPreset('custom')" style="display:none">Custom</button>
+        </div>
+        <div style="font-size:11px; color:#545454; margin-top:4px" id="preset-desc">
+          T₁=100 μs, T₂=120 μs (T_φ=300 μs)
+        </div>
+      </div>
+    </div>
+
+    <!-- Time controls -->
+    <div class="panel">
+      <div class="panel-title">Time Animation</div>
+      <div class="playback-row">
+        <button id="play-btn" onclick="togglePlay()">▶ Play</button>
+        <span class="time-val" id="time-display">t = 0.0 μs</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label" style="width:18px">t</span>
+        <input type="range" id="sl-time" min="0" max="1000" step="1" value="0">
+        <span class="slider-val" id="val-tmax">0→5T₂</span>
+      </div>
+      <div style="font-size:11px; color:#545454">Drag or press Play to animate trajectory</div>
+    </div>
+
+    <!-- State readout -->
+    <div class="panel">
+      <div class="panel-title">Bloch Vector at t</div>
+      <div style="font-variant-numeric: tabular-nums; line-height: 1.8; font-size:13px">
+        <div>Bx = <span id="bx-val">—</span></div>
+        <div>By = <span id="by-val">—</span></div>
+        <div>Bz = <span id="bz-val">—</span></div>
+        <div>|B| = <span id="bn-val">—</span></div>
+        <div style="margin-top:4px; border-top: 1px solid #ddd; padding-top:4px">
+          Purity Tr(ρ²) = <span id="pur-val" style="font-weight:700">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bloch sphere -->
+    <div class="panel" style="padding:10px">
+      <div class="panel-title">Bloch Sphere</div>
+      <svg id="bloch-svg" width="280" height="280"></svg>
+      <div class="legend" style="margin-top:6px">
+        <div class="legend-item"><div class="legend-dot" style="background:#C8102E"></div>Trajectory</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2A1A0E"></div>Current state</div>
+      </div>
+    </div>
+
+  </div><!-- end left-col -->
+
+  <!-- RIGHT COLUMN: plots -->
+  <div class="right-col">
+
+    <div class="panel">
+      <div class="panel-title">Bloch Component Decay vs Time</div>
+      <div class="plots-grid">
+        <div class="plot-wrap">
+          <div class="plot-title">Bx(t) — decay rate 1/T₂</div>
+          <svg id="plt-bx" width="100%" height="140"></svg>
+        </div>
+        <div class="plot-wrap">
+          <div class="plot-title">By(t) — decay rate 1/T₂</div>
+          <svg id="plt-by" width="100%" height="140"></svg>
+        </div>
+        <div class="plot-wrap">
+          <div class="plot-title">Bz(t) — decay rate 1/T₁</div>
+          <svg id="plt-bz" width="100%" height="140"></svg>
+        </div>
+        <div class="plot-wrap">
+          <div class="panel-title">Purity Tr(ρ²) vs Time</div>
+          <svg id="plt-pur" width="100%" height="140"></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Physics Notes</div>
+      <div style="font-size:12px; line-height:1.7; color:#2A1A0E">
+        <strong>Bloch equations</strong> (infinite-temperature bath, Bz_eq=0):<br>
+        dBx/dt = −Bx/T₂ &nbsp;|&nbsp; dBy/dt = −By/T₂ &nbsp;|&nbsp; dBz/dt = −Bz/T₁<br><br>
+        <strong>Constraint:</strong> 1/T₂ = 1/(2T₁) + 1/T_φ — so T₂ ≤ 2T₁ always.<br>
+        T₂ equals 2T₁ only when T_φ → ∞ (no pure dephasing).<br><br>
+        <strong>Initial state:</strong> |θ=60°, φ=45°⟩ &nbsp;→&nbsp;
+        Bx₀=By₀=√6/4≈0.612, Bz₀=0.5<br>
+        Shows spiral inward: faster transverse (T₂) vs longitudinal (T₁) decay.<br><br>
+        <strong>Purity:</strong> Tr(ρ²) = (1+|B|²)/2. Pure state=1.0; fully mixed=0.5.<br><br>
+        <strong>Physics checks:</strong>
+        <span id="check-p1">P1 (T_φ→∞ ⟹ T₂→2T₁): —</span> &nbsp;|&nbsp;
+        <span id="check-p2">P2 (T₁→∞ ⟹ Bz const): —</span> &nbsp;|&nbsp;
+        <span id="check-p3">P3 (t=5T₂ nearly mixed): —</span>
+      </div>
+    </div>
+
+  </div><!-- end right-col -->
+</div><!-- end layout -->
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const BX0 = Math.sqrt(6)/4;  // ≈ 0.6124
+const BY0 = Math.sqrt(6)/4;
+const BZ0 = 0.5;
+
+// ── State ──────────────────────────────────────────────────────────────────
+let T1 = 100, Tphi = 300;
+let tCurrent = 0;
+let playing = false;
+let animId = null;
+let lastTime = null;
+
+// Log-scale mapping for sliders (10 to 10000 μs)
+const LOG_MIN = Math.log10(10), LOG_MAX = Math.log10(10000);
+function sliderToUs(v) {
+  return Math.pow(10, LOG_MIN + (v/100)*(LOG_MAX - LOG_MIN));
+}
+function usToSlider(us) {
+  return 100 * (Math.log10(us) - LOG_MIN) / (LOG_MAX - LOG_MIN);
+}
+function fmtUs(v) {
+  if (v < 10) return v.toFixed(2) + ' μs';
+  if (v < 1000) return v.toFixed(1) + ' μs';
+  return (v/1000).toFixed(2) + ' ms';
+}
+
+function computeT2(t1, tph) {
+  return 1 / (1/(2*t1) + 1/tph);
+}
+
+// ── Slider wiring ──────────────────────────────────────────────────────────
+document.getElementById('sl-T1').addEventListener('input', function() {
+  T1 = sliderToUs(+this.value);
+  document.getElementById('val-T1').textContent = fmtUs(T1);
+  onParamChange();
+});
+document.getElementById('sl-Tphi').addEventListener('input', function() {
+  Tphi = sliderToUs(+this.value);
+  document.getElementById('val-Tphi').textContent = fmtUs(Tphi);
+  onParamChange();
+});
+document.getElementById('sl-time').addEventListener('input', function() {
+  tCurrent = (+this.value / 1000) * 5 * computeT2(T1, Tphi);
+  redraw();
+});
+
+function onParamChange() {
+  const T2 = computeT2(T1, Tphi);
+  const limit = 2 * T1;
+  document.getElementById('t2-val').textContent = 'T₂ = ' + fmtUs(T2);
+  document.getElementById('t2-limit').textContent = fmtUs(limit);
+  const ok = T2 <= limit * 1.0001;
+  const chk = document.getElementById('t2-check');
+  chk.textContent = ok ? '✓ physical' : '✗ unphysical';
+  chk.className = ok ? 'constraint-ok' : 'constraint-warn';
+  // clamp t to new max
+  const tMax = 5 * T2;
+  if (tCurrent > tMax) tCurrent = tMax;
+  document.getElementById('sl-time').value = Math.round((tCurrent / tMax) * 1000);
+  runChecks();
+  redraw();
+}
+
+// ── Platform presets ───────────────────────────────────────────────────────
+function applyPreset(name) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  if (name === 'sc') {
+    T1 = 100; Tphi = 300;
+    document.getElementById('preset-desc').textContent = 'T₁=100 μs, T₂=120 μs (T_φ=300 μs)';
+    document.getElementById('preset-sc').classList.add('active');
+  } else if (name === 'nv') {
+    T1 = 3000; Tphi = 1200;
+    document.getElementById('preset-desc').textContent = 'T₁=3000 μs, T₂=1000 μs (T_φ=1200 μs)';
+    document.getElementById('preset-nv').classList.add('active');
+  } else {
+    document.getElementById('preset-custom').classList.add('active');
+  }
+  document.getElementById('sl-T1').value = usToSlider(T1);
+  document.getElementById('sl-Tphi').value = usToSlider(Tphi);
+  document.getElementById('val-T1').textContent = fmtUs(T1);
+  document.getElementById('val-Tphi').textContent = fmtUs(Tphi);
+  tCurrent = 0;
+  document.getElementById('sl-time').value = 0;
+  onParamChange();
+}
+
+// ── Animation ──────────────────────────────────────────────────────────────
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('play-btn').textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) { lastTime = null; requestAnimationFrame(animStep); }
+}
+function animStep(ts) {
+  if (!playing) return;
+  if (!lastTime) lastTime = ts;
+  const dt = (ts - lastTime) / 1000; // real seconds
+  lastTime = ts;
+  const T2 = computeT2(T1, Tphi);
+  const tMax = 5 * T2;
+  tCurrent += dt * (tMax / 6); // full sweep in ~6 real seconds
+  if (tCurrent >= tMax) { tCurrent = tMax; playing = false; document.getElementById('play-btn').textContent = '▶ Play'; }
+  document.getElementById('sl-time').value = Math.round((tCurrent / tMax) * 1000);
+  redraw();
+  if (playing) requestAnimationFrame(animStep);
+}
+
+// ── Bloch sphere projection ────────────────────────────────────────────────
+// Orthographic: azimuth AZ=30°, elevation EL=25°
+const AZ = 30 * Math.PI / 180;
+const EL = 25 * Math.PI / 180;
+// Rotation matrix: first rotate around Z by AZ, then tilt up by EL
+// Screen x = Bx*cos(AZ) - By*sin(AZ)  (horizontal)
+// Screen y = -(Bx*sin(AZ)*sin(EL) + By*cos(AZ)*sin(EL) - Bz*cos(EL))  (up)
+function project(bx, by, bz) {
+  const sx =  bx*Math.cos(AZ) - by*Math.sin(AZ);
+  const sy = -(bx*Math.sin(AZ)*Math.sin(EL) + by*Math.cos(AZ)*Math.sin(EL) - bz*Math.cos(EL));
+  return [sx, sy];
+}
+
+function drawBloch() {
+  const svg = d3.select('#bloch-svg');
+  svg.selectAll('*').remove();
+  const W = 280, H = 280, CX = W/2, CY = H/2, R = 120;
+
+  const T2 = computeT2(T1, Tphi);
+  const tMax = 5 * T2;
+
+  // -- Sphere outline
+  svg.append('ellipse')
+    .attr('cx', CX).attr('cy', CY)
+    .attr('rx', R).attr('ry', R)
+    .attr('fill', '#f9f9f9').attr('stroke', '#2A1A0E').attr('stroke-width', 1.2);
+
+  // -- Equatorial ellipse (projected)
+  const nPts = 120;
+  function makeRing(axis, color, dashed) {
+    const pts = d3.range(nPts+1).map(i => {
+      const ang = (i/nPts) * 2 * Math.PI;
+      let bx=0, by=0, bz=0;
+      if (axis === 'z') { bx = Math.cos(ang); by = Math.sin(ang); bz = 0; }
+      if (axis === 'x') { bx = 0; by = Math.cos(ang); bz = Math.sin(ang); }
+      if (axis === 'y') { bx = Math.cos(ang); by = 0; bz = Math.sin(ang); }
+      const [sx, sy] = project(bx, by, bz);
+      return [CX + R*sx, CY + R*sy];
+    });
+    const line = d3.line()(pts);
+    svg.append('path').attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', color || '#545454')
+      .attr('stroke-width', 0.7)
+      .attr('stroke-dasharray', dashed ? '4,3' : null)
+      .attr('opacity', 0.5);
+  }
+  makeRing('z', '#545454', false);
+  makeRing('x', '#545454', true);
+  makeRing('y', '#545454', true);
+
+  // -- Axes
+  function drawAxis(bx, by, bz, label, col) {
+    const [sx, sy] = project(bx*1.2, by*1.2, bz*1.2);
+    const [sx0, sy0] = project(-bx*0.5, -by*0.5, -bz*0.5);
+    svg.append('line')
+      .attr('x1', CX + R*sx0).attr('y1', CY + R*sy0)
+      .attr('x2', CX + R*sx).attr('y2', CY + R*sy)
+      .attr('stroke', col || '#2A1A0E').attr('stroke-width', 1.2)
+      .attr('stroke-dasharray', '3,2').attr('opacity', 0.7);
+    svg.append('text')
+      .attr('x', CX + R*sx + 4).attr('y', CY + R*sy + 4)
+      .attr('font-size', 12).attr('font-family', 'Inter, Helvetica, Arial')
+      .attr('fill', col || '#2A1A0E').attr('font-weight', '700')
+      .text(label);
+  }
+  drawAxis(1,0,0,'x'); drawAxis(0,1,0,'y'); drawAxis(0,0,1,'z');
+
+  // -- Pole labels
+  function poleLabel(bx,by,bz, txt) {
+    const [sx,sy] = project(bx,by,bz);
+    svg.append('text')
+      .attr('x', CX+R*sx+5).attr('y', CY+R*sy)
+      .attr('font-size', 10).attr('font-family', 'Inter, Helvetica, Arial')
+      .attr('fill', '#545454').text(txt);
+  }
+  poleLabel(0,0,1.15,'|0⟩');
+  poleLabel(0,0,-1.15,'|1⟩');
+
+  // -- Trajectory path
+  const nTraj = 200;
+  const trajPts = d3.range(nTraj+1).map(i => {
+    const t = (i/nTraj) * tCurrent;
+    const bx = BX0 * Math.exp(-t/T2);
+    const by = BY0 * Math.exp(-t/T2);
+    const bz = BZ0 * Math.exp(-t/T1);
+    const [sx, sy] = project(bx, by, bz);
+    return [CX + R*sx, CY + R*sy];
+  });
+  const trajLine = d3.line()(trajPts);
+  svg.append('path').attr('d', trajLine)
+    .attr('fill', 'none')
+    .attr('stroke', '#C8102E')
+    .attr('stroke-width', 1.8)
+    .attr('opacity', 0.85);
+
+  // -- Initial point
+  {
+    const [sx, sy] = project(BX0, BY0, BZ0);
+    svg.append('circle')
+      .attr('cx', CX + R*sx).attr('cy', CY + R*sy).attr('r', 5)
+      .attr('fill', '#545454').attr('stroke', '#fff').attr('stroke-width', 1.5);
+  }
+
+  // -- Current state point
+  const bx_t = BX0 * Math.exp(-tCurrent/T2);
+  const by_t = BY0 * Math.exp(-tCurrent/T2);
+  const bz_t = BZ0 * Math.exp(-tCurrent/T1);
+  const [sx_t, sy_t] = project(bx_t, by_t, bz_t);
+  svg.append('circle')
+    .attr('cx', CX + R*sx_t).attr('cy', CY + R*sy_t).attr('r', 7)
+    .attr('fill', '#2A1A0E').attr('stroke', '#fff').attr('stroke-width', 2);
+
+  // -- Vector arrow from center
+  svg.append('line')
+    .attr('x1', CX).attr('y1', CY)
+    .attr('x2', CX + R*sx_t).attr('y2', CY + R*sy_t)
+    .attr('stroke', '#2A1A0E').attr('stroke-width', 2)
+    .attr('marker-end', 'url(#arrow)');
+
+  // Arrow marker
+  const defs = svg.append('defs');
+  defs.append('marker')
+    .attr('id', 'arrow').attr('viewBox', '0 0 10 10')
+    .attr('refX', 5).attr('refY', 5)
+    .attr('markerWidth', 5).attr('markerHeight', 5)
+    .attr('orient', 'auto')
+    .append('path').attr('d', 'M 0 0 L 10 5 L 0 10 z')
+    .attr('fill', '#2A1A0E');
+}
+
+// ── Component plots ────────────────────────────────────────────────────────
+function makePlot(svgId, yLabel, yMin, yMax, getY, color, timeConstLabel) {
+  const node = document.getElementById(svgId);
+  const W = node.getBoundingClientRect().width || 260;
+  const H = 140;
+  const margin = { top: 8, right: 12, bottom: 28, left: 38 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+
+  const T2 = computeT2(T1, Tphi);
+  const tMax = 5 * T2;
+
+  const svg = d3.select('#' + svgId);
+  svg.selectAll('*').remove();
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const xScale = d3.scaleLinear().domain([0, tMax]).range([0, pw]);
+  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([ph, 0]);
+
+  // Grid lines
+  g.append('g').call(d3.axisLeft(yScale).ticks(4).tickSize(-pw))
+    .selectAll('line').attr('stroke', '#e8e8e8').attr('stroke-width', 1);
+  g.select('.domain').remove();
+
+  // Curve
+  const nPts = 300;
+  const lineData = d3.range(nPts+1).map(i => {
+    const t = (i/nPts) * tMax;
+    return { t, y: getY(t) };
+  });
+  const lineFn = d3.line().x(d => xScale(d.t)).y(d => yScale(d.y)).curve(d3.curveCatmullRom);
+  g.append('path').datum(lineData).attr('d', lineFn)
+    .attr('fill', 'none').attr('stroke', color).attr('stroke-width', 2);
+
+  // Current time marker
+  const curY = getY(tCurrent);
+  g.append('line')
+    .attr('x1', xScale(tCurrent)).attr('y1', 0)
+    .attr('x2', xScale(tCurrent)).attr('y2', ph)
+    .attr('stroke', '#C8102E').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+  g.append('circle')
+    .attr('cx', xScale(tCurrent)).attr('cy', yScale(curY)).attr('r', 4)
+    .attr('fill', '#C8102E').attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+  // Time-constant label
+  if (timeConstLabel) {
+    const tc = (timeConstLabel === 'T2') ? T2 : T1;
+    if (tc <= tMax) {
+      g.append('line')
+        .attr('x1', xScale(tc)).attr('y1', 0)
+        .attr('x2', xScale(tc)).attr('y2', ph)
+        .attr('stroke', '#545454').attr('stroke-width', 1).attr('stroke-dasharray', '3,3').attr('opacity', 0.5);
+      g.append('text')
+        .attr('x', xScale(tc)+3).attr('y', 12)
+        .attr('font-size', 9).attr('fill', '#545454').attr('font-family', 'Inter,Helvetica,Arial')
+        .text(timeConstLabel);
+    }
+  }
+
+  // Axes
+  g.append('g').attr('transform', `translate(0,${ph})`).call(d3.axisBottom(xScale).ticks(4).tickFormat(d => d >= 1000 ? (d/1000).toFixed(1)+'ms' : d.toFixed(0)+'μs'))
+    .selectAll('text').attr('font-size', 9).attr('font-family', 'Inter,Helvetica,Arial').attr('fill', '#545454');
+  g.append('g').call(d3.axisLeft(yScale).ticks(4))
+    .selectAll('text').attr('font-size', 9).attr('font-family', 'Inter,Helvetica,Arial').attr('fill', '#545454');
+
+  // Y label
+  g.append('text').attr('transform', 'rotate(-90)')
+    .attr('x', -ph/2).attr('y', -28)
+    .attr('text-anchor', 'middle').attr('font-size', 10).attr('fill', '#545454')
+    .attr('font-family', 'Inter,Helvetica,Arial').text(yLabel);
+}
+
+function drawPlots() {
+  const T2 = computeT2(T1, Tphi);
+  makePlot('plt-bx', 'Bx(t)', -0.05, 0.7, t => BX0 * Math.exp(-t/T2), '#2A1A0E', 'T2');
+  makePlot('plt-by', 'By(t)', -0.05, 0.7, t => BY0 * Math.exp(-t/T2), '#545454', 'T2');
+  makePlot('plt-bz', 'Bz(t)', -0.05, 0.55, t => BZ0 * Math.exp(-t/T1), '#C8102E', 'T1');
+  makePlot('plt-pur', 'Tr(ρ²)', 0.48, 1.02, t => {
+    const bx = BX0*Math.exp(-t/T2), by = BY0*Math.exp(-t/T2), bz = BZ0*Math.exp(-t/T1);
+    return (1 + bx*bx + by*by + bz*bz) / 2;
+  }, '#C8102E', null);
+}
+
+// ── State readout ──────────────────────────────────────────────────────────
+function updateReadout() {
+  const T2 = computeT2(T1, Tphi);
+  const bx = BX0 * Math.exp(-tCurrent/T2);
+  const by = BY0 * Math.exp(-tCurrent/T2);
+  const bz = BZ0 * Math.exp(-tCurrent/T1);
+  const bn = Math.sqrt(bx*bx + by*by + bz*bz);
+  const pur = (1 + bn*bn) / 2;
+  document.getElementById('bx-val').textContent = bx.toFixed(4);
+  document.getElementById('by-val').textContent = by.toFixed(4);
+  document.getElementById('bz-val').textContent = bz.toFixed(4);
+  document.getElementById('bn-val').textContent = bn.toFixed(4);
+  document.getElementById('pur-val').textContent = pur.toFixed(4);
+  document.getElementById('time-display').textContent = 't = ' + tCurrent.toFixed(1) + ' μs';
+}
+
+// ── Physics checks ─────────────────────────────────────────────────────────
+function runChecks() {
+  // P1: T_φ → ∞ => T₂ → 2T₁
+  const bigTphi = 1e7;
+  const T2big = computeT2(T1, bigTphi);
+  const ratio1 = T2big / (2 * T1);
+  const p1ok = Math.abs(ratio1 - 1) < 0.01;
+  document.getElementById('check-p1').textContent =
+    `P1 (T_φ→∞ ⟹ T₂→2T₁): T₂=${T2big.toFixed(1)} vs 2T₁=${(2*T1).toFixed(1)} ${p1ok?'✓':'✗'}`;
+  document.getElementById('check-p1').style.color = p1ok ? '#1a7a1a' : '#C8102E';
+
+  // P2: T₁ → ∞ => Bz constant
+  const bigT1 = 1e7;
+  const T2_p2 = computeT2(bigT1, Tphi);
+  const t_test = T2_p2; // at t = T2
+  const bz_t1inf = BZ0 * Math.exp(-t_test / bigT1);
+  const p2ok = Math.abs(bz_t1inf - BZ0) / BZ0 < 0.001;
+  document.getElementById('check-p2').textContent =
+    `P2 (T₁→∞ ⟹ Bz const): Bz(T₂)=${bz_t1inf.toFixed(4)} vs ${BZ0.toFixed(4)} ${p2ok?'✓':'✗'}`;
+  document.getElementById('check-p2').style.color = p2ok ? '#1a7a1a' : '#C8102E';
+
+  // P3: t = 5*T2 => purity ≈ 0.5
+  const T2 = computeT2(T1, Tphi);
+  const t5 = 5 * T2;
+  const bx5 = BX0 * Math.exp(-t5/T2);
+  const by5 = BY0 * Math.exp(-t5/T2);
+  const bz5 = BZ0 * Math.exp(-t5/T1);
+  const pur5 = (1 + bx5*bx5 + by5*by5 + bz5*bz5) / 2;
+  const p3ok = Math.abs(pur5 - 0.5) < 0.01;
+  document.getElementById('check-p3').textContent =
+    `P3 (t=5T₂ mixed): Tr(ρ²)=${pur5.toFixed(4)} ${p3ok?'✓':'✗'}`;
+  document.getElementById('check-p3').style.color = p3ok ? '#1a7a1a' : '#C8102E';
+
+  // Console
+  console.log(`[BlochSim] P1: T2/2T1=${ratio1.toFixed(4)} ${p1ok?'PASS':'FAIL'} | P2: Bz drift=${Math.abs(bz_t1inf-BZ0).toFixed(6)} ${p2ok?'PASS':'FAIL'} | P3: purity@5T2=${pur5.toFixed(4)} ${p3ok?'PASS':'FAIL'}`);
+}
+
+// ── Master redraw ──────────────────────────────────────────────────────────
+function redraw() {
+  drawBloch();
+  drawPlots();
+  updateReadout();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+applyPreset('sc');
+runChecks();
+
+// Resize observer for responsive plots
+const ro = new ResizeObserver(() => { redraw(); });
+ro.observe(document.querySelector('.right-col'));
+</script>
+</body>
+</html>

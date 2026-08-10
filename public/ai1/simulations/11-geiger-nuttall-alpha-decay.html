@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geiger-Nuttall Law — Alpha Decay & Gamow Tunneling</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #FFFFFF;
+    color: #2A1A0E;
+    font-family: Inter, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    padding: 16px;
+  }
+  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #545454; margin-bottom: 16px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 12px; }
+  .right-col { display: flex; flex-direction: column; gap: 12px; }
+
+  .panel { border: 1.5px solid #2A1A0E; padding: 12px 14px; }
+  .panel-title {
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: #545454; margin-bottom: 8px;
+  }
+
+  .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .slider-label { width: 80px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  input[type=range] { flex: 1; accent-color: #2A1A0E; }
+  .slider-val { width: 80px; text-align: right; font-size: 12px; font-variant-numeric: tabular-nums; flex-shrink: 0; }
+
+  .info-panel {
+    background: #f7f7f7;
+    border: 1.5px solid #2A1A0E;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.7;
+    min-height: 60px;
+  }
+  .info-panel .nucleus-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-key { color: #545454; }
+
+  #gn-svg, #barrier-svg { display: block; width: 100%; }
+
+  .check-line { font-size: 11px; margin: 2px 0; }
+  .check-ok { color: #1a7a1a; font-weight: 700; }
+  .check-fail { color: #C8102E; font-weight: 700; }
+
+  .tab-row { display: flex; gap: 0; margin-bottom: 8px; }
+  .tab-btn {
+    border: 1.5px solid #2A1A0E; background: #fff; color: #2A1A0E;
+    padding: 4px 12px; font-size: 11px; font-family: inherit; font-weight: 600;
+    cursor: pointer; margin-right: -1px;
+  }
+  .tab-btn.active { background: #2A1A0E; color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>Geiger-Nuttall Law — Alpha Decay Half-Lives</h1>
+<p class="subtitle">WKB Gamow tunneling: log₁₀(t₁/₂) is linear in the exact Gamow factor γ — 24 orders of magnitude from one equation</p>
+
+<div class="layout">
+  <!-- LEFT: main scatter + controls -->
+  <div class="left-col">
+
+    <div class="panel">
+      <div class="panel-title" style="display:flex; justify-content:space-between; align-items:center">
+        <span id="plot-title-label">Geiger-Nuttall: log₁₀(t₁/₂) vs WKB Gamow factor γ</span>
+        <span id="r2-label" style="color:#C8102E; font-weight:700"></span>
+      </div>
+      <!-- Tab to switch x-axis -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-gamow" onclick="setXAxis('gamow')">Gamow γ (R²&gt;0.99)</button>
+        <button class="tab-btn" id="tab-raw" onclick="setXAxis('raw')">1/√E (naïve)</button>
+      </div>
+      <svg id="gn-svg" height="360"></svg>
+      <div style="font-size:11px; color:#545454; margin-top:4px">
+        Click any nucleus to inspect. RED line = best-fit. Color = element.
+        Gamow axis collapses all Z onto one universal line; 1/√E axis shows Z-dependent scatter.
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="panel">
+      <div class="panel-title">Sensitivity Sliders</div>
+      <div class="slider-row">
+        <span class="slider-label">ΔE_α (MeV)</span>
+        <input type="range" id="sl-dE" min="-2" max="2" step="0.05" value="0">
+        <span class="slider-val" id="val-dE">0.00 MeV</span>
+      </div>
+      <div style="font-size:11px; color:#545454; margin-bottom:8px">
+        Shifts selected nucleus energy ±2 MeV — see half-life change
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">R₀ scale (fm)</span>
+        <input type="range" id="sl-R0" min="0.96" max="1.44" step="0.01" value="1.20">
+        <span class="slider-val" id="val-R0">1.20 fm</span>
+      </div>
+      <div style="font-size:11px; color:#545454">
+        Nuclear radius R_nuc = R₀·A^(1/3). Shifts Gamow γ (intercept shifts, slope unchanged).
+      </div>
+    </div>
+
+    <!-- Physics checks -->
+    <div class="panel">
+      <div class="panel-title">Physics Checks</div>
+      <div id="check-p1" class="check-line">P1 (Gamow-axis R² &gt; 0.99): —</div>
+      <div id="check-p2" class="check-line">P2 (R₀ ±20% → slope unchanged &lt;5%): —</div>
+      <div id="check-p3" class="check-line">P3 (Po-212 vs U-238 range): —</div>
+    </div>
+
+  </div><!-- end left-col -->
+
+  <!-- RIGHT: info + barrier -->
+  <div class="right-col">
+
+    <!-- Selected nucleus info -->
+    <div class="panel">
+      <div class="panel-title">Selected Nucleus</div>
+      <div class="info-panel">
+        <div class="nucleus-name" id="sel-name">Click a nucleus on the plot</div>
+        <div class="stat-grid" id="sel-stats"></div>
+      </div>
+    </div>
+
+    <!-- Coulomb barrier -->
+    <div class="panel">
+      <div class="panel-title">Coulomb Barrier Profile</div>
+      <svg id="barrier-svg" height="220"></svg>
+      <div style="font-size:11px; color:#545454; margin-top:4px">
+        Shaded = classically forbidden region (Gamow tunneling zone).
+        R_nuc = nuclear radius; R_turn = classical turning point.
+      </div>
+    </div>
+
+    <!-- GN equation display -->
+    <div class="panel">
+      <div class="panel-title">Fit: log₁₀(t₁/₂) = A·γ + B</div>
+      <div style="font-size:13px; line-height:1.9; font-variant-numeric: tabular-nums">
+        <span style="color:#C8102E; font-weight:700">A = <span id="gn-A">—</span></span><br>
+        <span style="color:#545454">B = <span id="gn-B">—</span></span><br>
+        R² = <span id="gn-R2" style="font-weight:700">—</span>
+      </div>
+      <div style="margin-top:8px; font-size:11px; color:#545454; line-height:1.6">
+        γ = exact WKB Gamow integral:<br>
+        γ = (2Z_dZ_αα/β)[arccos(√u) − √(u(1−u))]<br>
+        where u = R_nuc/R_turn, β = v_α/c<br><br>
+        Decay rate λ ∝ exp(−2γ) → log(t₁/₂) ∝ γ ✓<br>
+        Gamow γ absorbs the Z-dependence → universal linear fit
+      </div>
+    </div>
+
+  </div><!-- end right-col -->
+</div>
+
+<script>
+// ── Nuclear data (NNDC) ────────────────────────────────────────────────────
+const alphaData = [
+  { name: "Po-212", Z: 84, A: 212, E: 8.785, t: 2.99e-7  },
+  { name: "Po-214", Z: 84, A: 214, E: 7.687, t: 1.64e-4  },
+  { name: "Po-216", Z: 84, A: 216, E: 6.778, t: 0.145    },
+  { name: "Po-218", Z: 84, A: 218, E: 6.002, t: 186.0    },
+  { name: "Po-210", Z: 84, A: 210, E: 5.307, t: 1.196e7  },
+  { name: "Rn-220", Z: 86, A: 220, E: 6.288, t: 55.6     },
+  { name: "Rn-222", Z: 86, A: 222, E: 5.490, t: 3.305e5  },
+  { name: "Ra-224", Z: 88, A: 224, E: 5.789, t: 3.14e5   },
+  { name: "Ra-226", Z: 88, A: 226, E: 4.871, t: 5.052e10 },
+  { name: "Th-228", Z: 90, A: 228, E: 5.423, t: 6.03e7   },
+  { name: "Th-232", Z: 90, A: 232, E: 4.082, t: 4.43e17  },
+  { name: "U-235",  Z: 92, A: 235, E: 4.679, t: 2.22e16  },
+  { name: "U-238",  Z: 92, A: 238, E: 4.270, t: 1.41e17  },
+  { name: "Pu-239", Z: 94, A: 239, E: 5.245, t: 7.61e11  },
+  { name: "Cm-244", Z: 96, A: 244, E: 5.805, t: 5.71e8   },
+];
+
+const elemColor = {
+  84: '#C8102E',  // Po
+  86: '#2A1A0E',  // Rn
+  88: '#545454',  // Ra
+  90: '#7a4a1a',  // Th
+  92: '#1a5a7a',  // U
+  94: '#6a1a7a',  // Pu
+  96: '#1a7a3a',  // Cm
+};
+const elemName = { 84:'Po', 86:'Rn', 88:'Ra', 90:'Th', 92:'U', 94:'Pu', 96:'Cm' };
+
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedIdx = 0;
+let dE = 0;
+let R0 = 1.20;
+let xAxisMode = 'gamow'; // 'gamow' or 'raw'
+
+function setXAxis(mode) {
+  xAxisMode = mode;
+  document.getElementById('tab-gamow').classList.toggle('active', mode==='gamow');
+  document.getElementById('tab-raw').classList.toggle('active', mode==='raw');
+  redraw();
+}
+
+// ── Linear regression ──────────────────────────────────────────────────────
+function linReg(xs, ys) {
+  const n = xs.length;
+  const sx = d3.sum(xs), sy = d3.sum(ys);
+  const sxx = d3.sum(xs.map(x => x*x));
+  const sxy = d3.sum(xs.map((x,i) => x*ys[i]));
+  const denom = n*sxx - sx*sx;
+  const A = (n*sxy - sx*sy) / denom;
+  const B = (sy - A*sx) / n;
+  const yMean = sy/n;
+  const ssTot = d3.sum(ys.map(y => (y-yMean)**2));
+  const ssRes = d3.sum(ys.map((y,i) => (y - (A*xs[i]+B))**2));
+  return { A, B, r2: 1 - ssRes/ssTot };
+}
+
+// ── Exact WKB Gamow integral ───────────────────────────────────────────────
+// γ = (2·Zd·Zα·α/β) · [arccos(√u) − √(u·(1−u))]
+// u = R_nuc/R_turn = R_nuc·E_α / (Zd·Zα·e²) = R_nuc·E / (Zd·Zα·1.44)
+// β = v_α/c = √(2E/m_α c²), m_α c² = 3727.4 MeV
+// Zα = 2, α_fs = 1/137.036
+function gamowExact(Zd, A_nuc, E_MeV, r0_fm) {
+  const Za = 2;
+  const alpha_fs = 1/137.036;
+  const mac2 = 3727.4; // MeV
+  const beta = Math.sqrt(2 * E_MeV / mac2);
+  const R_nuc = r0_fm * Math.pow(A_nuc, 1/3); // fm, use parent A for nuclear size
+  const R_turn = Zd * Za * 1.44 / E_MeV;      // fm, Coulomb turning point
+  const u = R_nuc / R_turn;
+  if (u >= 1) return 0;
+  const sqrtu = Math.sqrt(u);
+  const sqr1mu = Math.sqrt(1 - u);
+  const integral = Math.acos(sqrtu) - sqrtu * sqr1mu;
+  return (2 * Zd * Za * alpha_fs / beta) * integral;
+}
+
+// Approximate Gamow (for display): π·Zd·Zα·α/β − 2√(2·Zd·Zα·α·Rnuc·mac²)/ħc
+function gamowApprox(Zd, A_nuc, E_MeV, r0_fm) {
+  const Za = 2, alpha_fs = 1/137.036, mac2 = 3727.4, hbarc = 197.3;
+  const beta = Math.sqrt(2 * E_MeV / mac2);
+  const R_nuc = r0_fm * Math.pow(A_nuc, 1/3);
+  const t1 = Math.PI * Zd * Za * alpha_fs / beta;
+  const t2 = 2 * Math.sqrt(2 * Zd * Za * alpha_fs * R_nuc * mac2) / hbarc;
+  return t1 - t2;
+}
+
+// ── Format half-life ───────────────────────────────────────────────────────
+function fmtHL(t) {
+  if (t < 1e-9)  return (t*1e12).toFixed(2) + ' ps';
+  if (t < 1e-6)  return (t*1e9).toFixed(2) + ' ns';
+  if (t < 1e-3)  return (t*1e6).toFixed(2) + ' μs';
+  if (t < 1)     return (t*1e3).toFixed(2) + ' ms';
+  if (t < 60)    return t.toFixed(3) + ' s';
+  if (t < 3600)  return (t/60).toFixed(2) + ' min';
+  if (t < 86400) return (t/3600).toFixed(2) + ' h';
+  if (t < 3.15e7)  return (t/86400).toFixed(2) + ' d';
+  if (t < 3.15e9)  return (t/3.15e7).toFixed(2) + ' yr';
+  if (t < 3.15e12) return (t/3.15e9).toFixed(2) + ' kyr';
+  if (t < 3.15e15) return (t/3.15e12).toFixed(3) + ' Myr';
+  return (t/3.15e16).toFixed(3) + ' Gyr';
+}
+
+// ── Main scatter plot ──────────────────────────────────────────────────────
+function drawGN() {
+  const svgEl = document.getElementById('gn-svg');
+  const W = svgEl.getBoundingClientRect().width || 600;
+  const H = 360;
+  const margin = { top: 20, right: 20, bottom: 48, left: 60 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+
+  const svg = d3.select('#gn-svg');
+  svg.selectAll('*').remove();
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  // Compute x for each mode
+  const useGamow = (xAxisMode === 'gamow');
+  const pts = alphaData.map((d, i) => ({
+    ...d,
+    x: useGamow ? gamowExact(d.Z-2, d.A, d.E, R0) : 1/Math.sqrt(d.E),
+    y: Math.log10(d.t),
+    idx: i,
+  }));
+
+  const xs = pts.map(p => p.x);
+  const ys = pts.map(p => p.y);
+  const fit = linReg(xs, ys);
+
+  // Axis domains
+  const xPad = (d3.max(xs) - d3.min(xs)) * 0.05;
+  const xExt = [d3.min(xs) - xPad, d3.max(xs) + xPad];
+  const yExt = [-9, 20];
+
+  const xScale = d3.scaleLinear().domain(xExt).range([0, pw]);
+  const yScale = d3.scaleLinear().domain(yExt).range([ph, 0]);
+
+  // Grid
+  g.append('g').attr('class','grid')
+    .call(d3.axisLeft(yScale).ticks(8).tickSize(-pw).tickFormat(''))
+    .selectAll('line').attr('stroke','#ececec').attr('stroke-width',1);
+  g.append('g').attr('class','grid').attr('transform',`translate(0,${ph})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickSize(-ph).tickFormat(''))
+    .selectAll('line').attr('stroke','#ececec').attr('stroke-width',1);
+  g.selectAll('.domain').remove();
+
+  // Axes
+  g.append('g').attr('transform',`translate(0,${ph})`)
+    .call(d3.axisBottom(xScale).ticks(6).tickFormat(d => useGamow ? d.toFixed(0) : d.toFixed(2)))
+    .selectAll('text').attr('font-size',11).attr('fill','#545454').attr('font-family','Inter,Helvetica,Arial');
+  g.append('g')
+    .call(d3.axisLeft(yScale).ticks(8))
+    .selectAll('text').attr('font-size',11).attr('fill','#545454').attr('font-family','Inter,Helvetica,Arial');
+
+  // Axis labels
+  const xLabel = useGamow ? 'Gamow factor γ  (dimensionless)' : '1/√(E_α)   [MeV⁻¹/²]';
+  g.append('text').attr('x',pw/2).attr('y',ph+40)
+    .attr('text-anchor','middle').attr('font-size',12).attr('fill','#2A1A0E')
+    .attr('font-family','Inter,Helvetica,Arial').text(xLabel);
+  g.append('text').attr('transform','rotate(-90)').attr('x',-ph/2).attr('y',-48)
+    .attr('text-anchor','middle').attr('font-size',12).attr('fill','#2A1A0E')
+    .attr('font-family','Inter,Helvetica,Arial').text('log₁₀(t₁/₂ [s])');
+
+  // Fit line
+  const xLine = [xExt[0] - xPad*0.5, xExt[1] + xPad*0.5];
+  g.append('line')
+    .attr('x1', xScale(xLine[0])).attr('y1', yScale(fit.A*xLine[0]+fit.B))
+    .attr('x2', xScale(xLine[1])).attr('y2', yScale(fit.A*xLine[1]+fit.B))
+    .attr('stroke','#C8102E').attr('stroke-width',2).attr('opacity',0.8);
+
+  // Update displays
+  document.getElementById('r2-label').textContent = `R² = ${fit.r2.toFixed(4)}`;
+  document.getElementById('gn-A').textContent = fit.A.toFixed(3);
+  document.getElementById('gn-B').textContent = fit.B.toFixed(2);
+  document.getElementById('gn-R2').textContent = fit.r2.toFixed(5);
+
+  // Selected nucleus shifted point
+  const sel = alphaData[selectedIdx];
+  const selE = sel.E + dE;
+  const selX = selE > 0.5 ? (useGamow ? gamowExact(sel.Z-2, sel.A, selE, R0) : 1/Math.sqrt(selE)) : null;
+
+  // Data dots
+  pts.forEach(p => {
+    const isSel = (p.idx === selectedIdx);
+    g.append('circle')
+      .attr('cx', xScale(p.x)).attr('cy', yScale(p.y))
+      .attr('r', isSel ? 9 : 6)
+      .attr('fill', elemColor[p.Z] || '#2A1A0E')
+      .attr('stroke', isSel ? '#fff' : 'none')
+      .attr('stroke-width', isSel ? 2.5 : 0)
+      .attr('cursor','pointer').attr('opacity', 0.9)
+      .on('click', () => {
+        selectedIdx = p.idx; dE = 0;
+        document.getElementById('sl-dE').value = 0;
+        document.getElementById('val-dE').textContent = '0.00 MeV';
+        redraw();
+      })
+      .append('title').text(p.name);
+
+    // Label (skip if too close to edge)
+    if (p.x > xExt[0]+xPad*0.5 && p.x < xExt[1]-xPad*0.5) {
+      g.append('text')
+        .attr('x', xScale(p.x)+8).attr('y', yScale(p.y)+3)
+        .attr('font-size', 9).attr('fill', elemColor[p.Z] || '#2A1A0E')
+        .attr('font-family','Inter,Helvetica,Arial').attr('font-weight','600')
+        .text(p.name);
+    }
+  });
+
+  // Shifted energy marker
+  if (Math.abs(dE) > 0.001 && selX !== null) {
+    const origX = pts[selectedIdx].x;
+    const origY = pts[selectedIdx].y;
+    const newY = fit.A * selX + fit.B;
+    g.append('circle')
+      .attr('cx', xScale(selX)).attr('cy', yScale(newY))
+      .attr('r', 7).attr('fill','none').attr('stroke','#C8102E').attr('stroke-width',2).attr('stroke-dasharray','4,3');
+    g.append('line')
+      .attr('x1', xScale(origX)).attr('y1', yScale(origY))
+      .attr('x2', xScale(selX)).attr('y2', yScale(newY))
+      .attr('stroke','#C8102E').attr('stroke-width',1.5).attr('stroke-dasharray','4,3').attr('opacity',0.7);
+    const predictedT = Math.pow(10, newY);
+    document.getElementById('sel-name').textContent = sel.name + ' (ΔE shifted)';
+    document.getElementById('sel-stats').innerHTML = buildStatHTML(sel, selE, predictedT, newY, gamowExact(sel.Z-2, sel.A, selE, R0));
+  } else {
+    updateInfoPanel(fit);
+  }
+
+  // Element legend (top-right)
+  const elems = [...new Set(alphaData.map(d => d.Z))];
+  const legX = pw - elems.length*58 + 20;
+  const legG = g.append('g').attr('transform', `translate(${Math.max(0,legX)},0)`);
+  elems.forEach((Z, i) => {
+    legG.append('circle').attr('cx', i*58).attr('cy', 8).attr('r', 5).attr('fill', elemColor[Z]);
+    legG.append('text').attr('x', i*58+8).attr('y', 12)
+      .attr('font-size', 9).attr('fill', elemColor[Z]).attr('font-family','Inter,Helvetica,Arial').attr('font-weight','600')
+      .text(elemName[Z]);
+  });
+
+  return fit;
+}
+
+function buildStatHTML(d, E_used, t_pred, log_pred, gamma) {
+  const R_nuc = (R0 * Math.pow(d.A, 1/3)).toFixed(2);
+  const R_turn = (d.Z * 2 * 1.44 / E_used).toFixed(1);
+  return `
+    <span class="stat-key">Z (parent)</span><span>${d.Z}</span>
+    <span class="stat-key">A</span><span>${d.A}</span>
+    <span class="stat-key">E_α</span><span>${E_used.toFixed(3)} MeV</span>
+    <span class="stat-key">t₁/₂ measured</span><span>${fmtHL(d.t)}</span>
+    <span class="stat-key">t₁/₂ predicted</span><span>${fmtHL(t_pred)}</span>
+    <span class="stat-key">log₁₀(t) meas</span><span>${Math.log10(d.t).toFixed(2)}</span>
+    <span class="stat-key">Gamow γ</span><span>${gamma.toFixed(2)}</span>
+    <span class="stat-key">R_nuc</span><span>${R_nuc} fm</span>
+    <span class="stat-key">R_turn</span><span>${R_turn} fm</span>
+  `;
+}
+
+function updateInfoPanel(fit) {
+  const d = alphaData[selectedIdx];
+  const gamma = gamowExact(d.Z-2, d.A, d.E, R0);
+  const xval = xAxisMode === 'gamow' ? gamma : 1/Math.sqrt(d.E);
+  const log_pred = fit.A * xval + fit.B;
+  const t_pred = Math.pow(10, log_pred);
+  document.getElementById('sel-name').textContent = d.name;
+  document.getElementById('sel-stats').innerHTML = buildStatHTML(d, d.E, t_pred, log_pred, gamma);
+}
+
+// ── Coulomb barrier ────────────────────────────────────────────────────────
+function drawBarrier() {
+  const d = alphaData[selectedIdx];
+  const selE = d.E + dE;
+  if (selE <= 0.5) return;
+
+  const Zd = d.Z - 2;
+  const Za = 2;
+  const R_nuc = R0 * Math.pow(d.A, 1/3);   // fm
+  const R_turn = Zd * Za * 1.44 / selE;     // fm
+  const V_nuc_well = -40;                    // MeV approximate nuclear potential
+
+  const svgEl = document.getElementById('barrier-svg');
+  const W = svgEl.getBoundingClientRect().width || 320;
+  const H = 220;
+  const margin = { top: 14, right: 14, bottom: 36, left: 50 };
+  const pw = W - margin.left - margin.right;
+  const ph = H - margin.top - margin.bottom;
+
+  const svg = d3.select('#barrier-svg');
+  svg.selectAll('*').remove();
+  svg.attr('viewBox', `0 0 ${W} ${H}`);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const rMax = Math.min(2.8 * R_turn, 100);
+  const V_peak = Zd * Za * 1.44 / R_nuc;
+  const yMin = -55, yMax = Math.min(V_peak * 1.2, 65);
+
+  const xScale = d3.scaleLinear().domain([0, rMax]).range([0, pw]);
+  const yScale = d3.scaleLinear().domain([yMin, yMax]).range([ph, 0]);
+
+  // Grid lines
+  g.append('g').attr('class','grid')
+    .call(d3.axisLeft(yScale).ticks(5).tickSize(-pw).tickFormat(''))
+    .selectAll('line').attr('stroke','#ececec');
+  g.selectAll('.domain').remove();
+
+  // Axes
+  g.append('g').attr('transform',`translate(0,${ph})`)
+    .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d.toFixed(0)))
+    .selectAll('text').attr('font-size',10).attr('fill','#545454').attr('font-family','Inter,Helvetica,Arial');
+  g.append('g').call(d3.axisLeft(yScale).ticks(5))
+    .selectAll('text').attr('font-size',10).attr('fill','#545454').attr('font-family','Inter,Helvetica,Arial');
+
+  g.append('text').attr('x',pw/2).attr('y',ph+30).attr('text-anchor','middle')
+    .attr('font-size',11).attr('fill','#2A1A0E').attr('font-family','Inter,Helvetica,Arial').text('r  [fm]');
+  g.append('text').attr('transform','rotate(-90)').attr('x',-ph/2).attr('y',-38).attr('text-anchor','middle')
+    .attr('font-size',11).attr('fill','#2A1A0E').attr('font-family','Inter,Helvetica,Arial').text('V(r)  [MeV]');
+
+  // Classically forbidden shading
+  const xF1 = xScale(R_nuc), xF2 = R_turn < rMax ? xScale(R_turn) : pw;
+  g.append('rect').attr('x', xF1).attr('y', 0).attr('width', Math.max(0,xF2-xF1)).attr('height', ph)
+    .attr('fill','#C8102E').attr('opacity',0.10);
+
+  // Energy line
+  g.append('line').attr('x1',0).attr('y1',yScale(selE)).attr('x2',pw).attr('y2',yScale(selE))
+    .attr('stroke','#C8102E').attr('stroke-width',1.8).attr('stroke-dasharray','5,3');
+  g.append('text').attr('x',pw-3).attr('y',yScale(selE)-4).attr('text-anchor','end')
+    .attr('font-size',9).attr('fill','#C8102E').attr('font-family','Inter,Helvetica,Arial')
+    .text(`E_α = ${selE.toFixed(2)} MeV`);
+
+  // Zero line
+  g.append('line').attr('x1',0).attr('y1',yScale(0)).attr('x2',pw).attr('y2',yScale(0))
+    .attr('stroke','#bbb').attr('stroke-width',0.8);
+
+  // Potential curve
+  const vPts = [];
+  for (let i = 1; i <= 500; i++) {
+    const r = (i/500) * rMax;
+    const v = r < R_nuc ? V_nuc_well : (Zd * Za * 1.44 / r);
+    if (v < yMin - 5 || v > yMax + 10) continue;
+    vPts.push({ r, v: Math.max(yMin, Math.min(yMax+5, v)) });
+  }
+  // Vertical wall at R_nuc
+  const vAtRnuc = Zd * Za * 1.44 / R_nuc;
+  vPts.push({ r: R_nuc, v: Math.min(vAtRnuc, yMax+5) });
+  vPts.sort((a,b) => a.r - b.r);
+
+  const vLine = d3.line().x(d => xScale(d.r)).y(d => yScale(d.v));
+  g.append('path').datum(vPts).attr('d', vLine)
+    .attr('fill','none').attr('stroke','#2A1A0E').attr('stroke-width',2.2);
+
+  // R_nuc label
+  g.append('line').attr('x1',xScale(R_nuc)).attr('y1',0).attr('x2',xScale(R_nuc)).attr('y2',ph)
+    .attr('stroke','#2A1A0E').attr('stroke-width',1).attr('stroke-dasharray','3,2').attr('opacity',0.5);
+  g.append('text').attr('x',xScale(R_nuc)+2).attr('y',ph-2)
+    .attr('font-size',9).attr('fill','#2A1A0E').attr('font-family','Inter,Helvetica,Arial')
+    .text(`R=${R_nuc.toFixed(1)}`);
+
+  // R_turn label
+  if (R_turn < rMax) {
+    g.append('line').attr('x1',xScale(R_turn)).attr('y1',0).attr('x2',xScale(R_turn)).attr('y2',ph)
+      .attr('stroke','#545454').attr('stroke-width',1).attr('stroke-dasharray','3,2').attr('opacity',0.6);
+    g.append('text').attr('x',xScale(R_turn)+2).attr('y',14)
+      .attr('font-size',9).attr('fill','#545454').attr('font-family','Inter,Helvetica,Arial')
+      .text(`R_t=${R_turn.toFixed(1)}`);
+  }
+
+  // Tunneling arrow
+  if (R_turn < rMax && xScale(R_turn) - xScale(R_nuc) > 20) {
+    const defs = svg.append('defs');
+    defs.append('marker').attr('id','arr2').attr('viewBox','0 0 10 10').attr('refX',8).attr('refY',5)
+      .attr('markerWidth',5).attr('markerHeight',5).attr('orient','auto')
+      .append('path').attr('d','M 0 0 L 10 5 L 0 10 z').attr('fill','#C8102E');
+    const yArr = yScale(selE * 0.45);
+    g.append('line')
+      .attr('x1', xScale(R_nuc)+2).attr('y1', yArr)
+      .attr('x2', xScale(R_turn)-2).attr('y2', yArr)
+      .attr('stroke','#C8102E').attr('stroke-width',1.5).attr('marker-end','url(#arr2)');
+    g.append('text').attr('x',(xScale(R_nuc)+xScale(R_turn))/2).attr('y',yArr-4)
+      .attr('text-anchor','middle').attr('font-size',9).attr('fill','#C8102E').attr('font-family','Inter,Helvetica,Arial')
+      .text('quantum tunneling');
+  }
+}
+
+// ── Physics checks ─────────────────────────────────────────────────────────
+function runChecks(fitGamow, fitRaw) {
+  // P1: Gamow-axis R² > 0.99
+  const p1ok = fitGamow.r2 > 0.99;
+  const p1el = document.getElementById('check-p1');
+  p1el.textContent = `P1 (Gamow-axis R² > 0.99): R²=${fitGamow.r2.toFixed(5)} ${p1ok?'✓ PASS':'✗ FAIL'} | naïve R²=${fitRaw.r2.toFixed(4)}`;
+  p1el.className = 'check-line ' + (p1ok ? 'check-ok' : 'check-fail');
+
+  // P2: slope A unchanged when R₀ varies ±20%
+  // Compute fit at R₀=0.96 and R₀=1.44 on Gamow axis
+  const xsHi = alphaData.map(d => gamowExact(d.Z-2, d.A, d.E, 1.44));
+  const xsLo = alphaData.map(d => gamowExact(d.Z-2, d.A, d.E, 0.96));
+  const ys   = alphaData.map(d => Math.log10(d.t));
+  const fitHi = linReg(xsHi, ys);
+  const fitLo = linReg(xsLo, ys);
+  const slopeChange = Math.max(
+    Math.abs(fitHi.A - fitGamow.A) / Math.abs(fitGamow.A),
+    Math.abs(fitLo.A - fitGamow.A) / Math.abs(fitGamow.A)
+  ) * 100;
+  const interceptShift = Math.abs(fitHi.B - fitLo.B);
+  const p2ok = slopeChange < 5;
+  const p2el = document.getElementById('check-p2');
+  p2el.textContent = `P2 (R₀ ±20%): slope change=${slopeChange.toFixed(2)}% ${p2ok?'✓ PASS':'✗ FAIL'} | intercept shift=${interceptShift.toFixed(2)}`;
+  p2el.className = 'check-line ' + (p2ok ? 'check-ok' : 'check-fail');
+
+  // P3: Po-212 vs U-238 range
+  const po212 = alphaData.find(d => d.name==='Po-212');
+  const u238  = alphaData.find(d => d.name==='U-238');
+  const range = Math.log10(u238.t) - Math.log10(po212.t);
+  const p3ok = range > 22;
+  const p3el = document.getElementById('check-p3');
+  p3el.textContent = `P3 (Po-212 vs U-238 range): ${range.toFixed(2)} decades, ΔE=${(u238.E - po212.E).toFixed(2)} MeV ${p3ok?'✓ PASS':'✗'}`;
+  p3el.className = 'check-line ' + (p3ok ? 'check-ok' : 'check-fail');
+
+  // Console
+  console.log(`[GN] P1: Gamow R²=${fitGamow.r2.toFixed(5)} ${p1ok?'PASS':'FAIL'}`);
+  console.log(`[GN] P2: slope change=${slopeChange.toFixed(3)}%, intercept shift=${interceptShift.toFixed(3)} ${p2ok?'PASS':'FAIL'}`);
+  console.log(`[GN] P3: Po-212 log(t)=${Math.log10(po212.t).toFixed(2)}, U-238 log(t)=${Math.log10(u238.t).toFixed(2)}, range=${range.toFixed(2)} decades ${p3ok?'PASS':'FAIL'}`);
+}
+
+// ── Master redraw ──────────────────────────────────────────────────────────
+function redraw() {
+  const fitGamow = (() => {
+    const xs = alphaData.map(d => gamowExact(d.Z-2, d.A, d.E, R0));
+    const ys = alphaData.map(d => Math.log10(d.t));
+    return linReg(xs, ys);
+  })();
+  const fitRaw = (() => {
+    const xs = alphaData.map(d => 1/Math.sqrt(d.E));
+    const ys = alphaData.map(d => Math.log10(d.t));
+    return linReg(xs, ys);
+  })();
+
+  const fitCurrent = drawGN();
+  drawBarrier();
+  runChecks(fitGamow, fitRaw);
+
+  // Update fit-equation panel label
+  const lbl = xAxisMode === 'gamow'
+    ? 'Fit: log₁₀(t₁/₂) = A·γ + B'
+    : 'Fit: log₁₀(t₁/₂) = A/√E + B';
+  document.querySelector('.right-col .panel:last-child .panel-title').textContent = lbl;
+  document.querySelector('.right-col .panel:last-child div:first-of-type').innerHTML = xAxisMode === 'gamow'
+    ? `<span style="color:#C8102E;font-weight:700">A = <span id="gn-A">${fitCurrent.A.toFixed(3)}</span></span><br><span style="color:#545454">B = <span id="gn-B">${fitCurrent.B.toFixed(2)}</span></span><br>R² = <span id="gn-R2" style="font-weight:700">${fitCurrent.r2.toFixed(5)}</span>`
+    : `<span style="color:#C8102E;font-weight:700">A = <span id="gn-A">${fitCurrent.A.toFixed(2)}</span></span><br><span style="color:#545454">B = <span id="gn-B">${fitCurrent.B.toFixed(2)}</span></span><br>R² = <span id="gn-R2" style="font-weight:700">${fitCurrent.r2.toFixed(5)}</span>`;
+}
+
+// ── Sliders ────────────────────────────────────────────────────────────────
+document.getElementById('sl-dE').addEventListener('input', function() {
+  dE = +this.value;
+  document.getElementById('val-dE').textContent = (dE >= 0 ? '+' : '') + dE.toFixed(2) + ' MeV';
+  redraw();
+});
+document.getElementById('sl-R0').addEventListener('input', function() {
+  R0 = +this.value;
+  document.getElementById('val-R0').textContent = R0.toFixed(2) + ' fm';
+  redraw();
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+selectedIdx = 0; // Po-212 default
+redraw();
+
+// Responsive
+const ro = new ResizeObserver(() => redraw());
+ro.observe(document.querySelector('.left-col'));
+</script>
+</body>
+</html>
