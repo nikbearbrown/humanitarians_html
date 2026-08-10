@@ -61,7 +61,6 @@ const projects = [
     slug: "boyle",
     description: "AI-assisted documentary infrastructure for scientific reproducibility using the MVAL protocol.",
     tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
-    substackUrl: "https://boyleproject.substack.com/",
   },
   {
     name: "80 Days to Stay",
