@@ -65,7 +65,7 @@ const projects = [
   },
   {
     name: "80 Days to Stay",
-    slug: "80-days-to-stay",
+    slug: "80-days",
     description: "Job tools and agentic AI for OPT job search transparency and efficiency.",
     tiers: ["Tier 4 — Judgment"],
   },
