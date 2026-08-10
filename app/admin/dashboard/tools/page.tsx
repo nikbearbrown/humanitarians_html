@@ -439,12 +439,12 @@ export default function ToolsAdminPage() {
                         </p>
                       )}
                       {t.claude_url && (
-                        <p className="flex items-center gap-1">
-                          <ExternalLink className="h-3.5 w-3.5" />
-                          <a href={t.claude_url} target="_blank" rel="noopener noreferrer" className="underline">
-                            {t.claude_url}
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={t.claude_url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                            Open Artifact
                           </a>
-                        </p>
+                        </Button>
                       )}
                     </div>
                   </CardContent>
