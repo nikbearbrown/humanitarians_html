@@ -31,9 +31,17 @@ const nextConfig = {
       'gru-reference.html', 'gru.html', 'tictoc-reference-v2.html', 'walker-unity.html',
     ]
     return [
-      { source: '/tools', destination: '/ai1/tools', permanent: true },
-      { source: '/tools/Addams', destination: '/ai1/tools/addams', permanent: true },
-      { source: '/tools/:slug', destination: '/ai1/tools/:slug', permanent: true },
+      // NO /tools <-> /ai1/tools redirect, in EITHER direction. These were
+      // permanent: true (308), which browsers cache indefinitely and never
+      // revalidate. A later commit reversed the pair; any client that saw both
+      // deploys now has one leg cached and gets the other from the server, so
+      // /ai1/tools/:slug loops forever (ERR_TOO_MANY_REDIRECTS) without ever
+      // hitting the network for the second hop. We cannot evict a client cache,
+      // so we stop serving our leg: both app/tools/[slug] and
+      // app/ai1/tools/[slug] now render, which terminates the loop for every
+      // already-poisoned browser. /ai1/tools stays canonical via
+      // alternates.canonical metadata. If a redirect is ever reinstated here it
+      // MUST be permanent: false (307) so it stays evictable.
       { source: '/:file(.*\\-tool\\.html)', destination: '/artifacts/:file', permanent: true },
       ...rootFilesMovedToArtifacts.map(f => ({
         source: `/${f}`, destination: `/artifacts/${f}`, permanent: true,

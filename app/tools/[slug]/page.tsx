@@ -15,15 +15,21 @@ function getArtifactDoc(slug: string) {
   return docs.find(d => d.slug === slug) || null
 }
 
+// /ai1/tools/:slug is the canonical URL for a tool. This route renders rather
+// than redirecting there: a permanent redirect forms a loop against the reverse
+// 308 already cached in browsers (see next.config.mjs). Canonical is declared.
+const canonical = (slug: string) => `https://www.humanitarians.ai/ai1/tools/${slug}`
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+  const alternates = { canonical: canonical(slug) }
   const doc = getArtifactDoc(slug)
-  if (doc) return { title: `${doc.title} - Tools`, description: doc.description || doc.title }
+  if (doc) return { title: `${doc.title} - Tools`, description: doc.description || doc.title, alternates }
   try {
     const rows = await sql`SELECT name, description FROM tools WHERE slug = ${slug}`
-    if (rows.length > 0) return { title: `${rows[0].name} - Tools`, description: rows[0].description || rows[0].name }
+    if (rows.length > 0) return { title: `${rows[0].name} - Tools`, description: rows[0].description || rows[0].name, alternates }
   } catch {}
-  return { title: 'Tool - Humanitarians AI' }
+  return { title: 'Tool - Humanitarians AI', alternates }
 }
 
 export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
