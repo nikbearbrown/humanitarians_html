@@ -42,7 +42,15 @@ const nextConfig = {
       // already-poisoned browser. /ai1/tools stays canonical via
       // alternates.canonical metadata. If a redirect is ever reinstated here it
       // MUST be permanent: false (307) so it stays evictable.
-      { source: '/:file(.*\\-tool\\.html)', destination: '/artifacts/:file', permanent: true },
+      // [^/]+ NOT .* — this is a self-matching redirect if the pattern can
+      // cross a slash. With .*, a request for /artifacts/wilkes-tool.html has
+      // :file capture "artifacts/wilkes-tool.html", so the destination becomes
+      // /artifacts/artifacts/wilkes-tool.html — which still ends in -tool.html,
+      // matches again, and loops forever (ERR_TOO_MANY_REDIRECTS). It broke all
+      // 37 artifacts whose filename ends in -tool.html while leaving the other 8
+      // (e.g. cajal-reference.html) working. [^/]+ matches a single top-level
+      // segment only, so the destination cannot re-match the source.
+      { source: '/:file([^/]+\\-tool\\.html)', destination: '/artifacts/:file', permanent: true },
       ...rootFilesMovedToArtifacts.map(f => ({
         source: `/${f}`, destination: `/artifacts/${f}`, permanent: true,
       })),
