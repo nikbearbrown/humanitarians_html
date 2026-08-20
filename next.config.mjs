@@ -51,6 +51,15 @@ const nextConfig = {
       // (e.g. cajal-reference.html) working. [^/]+ matches a single top-level
       // segment only, so the destination cannot re-match the source.
       { source: '/:file([^/]+\\-tool\\.html)', destination: '/artifacts/:file', permanent: true },
+
+      // Lyrical Literacy consolidation (2026-08-20). These three routes were
+      // byte-near clones of app/lyrical-literacy/page.tsx with only the <title>
+      // and <h1> swapped; the pages are moved to _to_delete/. permanent: false
+      // (307) DELIBERATELY — see the /tools note above: a 308 is cached by the
+      // browser forever and cannot be evicted if this ever needs reversing.
+      { source: '/brain-cognitive-development', destination: '/lyrical-literacy', permanent: false },
+      { source: '/programs/lyrical-literacy/learn-more', destination: '/lyrical-literacy', permanent: false },
+      { source: '/programs/lyrical-literacy/lyrical-literacy-details', destination: '/lyrical-literacy', permanent: false },
       ...rootFilesMovedToArtifacts.map(f => ({
         source: `/${f}`, destination: `/artifacts/${f}`, permanent: true,
       })),

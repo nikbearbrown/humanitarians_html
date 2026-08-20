@@ -655,7 +655,7 @@ export default function CompliancePage() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-muted dark:bg-neutral-800 rounded-lg">
                       <h4 className="font-bold mb-2">
-                        <a href="/brain-cognitive-development" className="text-primary hover:underline">Cognitive Development</a>
+                        <a href="/lyrical-literacy" className="text-primary hover:underline">Cognitive Development</a>
                       </h4>
                       <p className="text-sm">YouTube videos and Spotify songs designed to "exercise the brain"</p>
                     </div>
