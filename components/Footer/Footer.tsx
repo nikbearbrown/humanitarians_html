@@ -1,19 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
 import ThemeToggle from "@/components/ThemeToggle"
 
 export default function Footer() {
  const currentYear = new Date().getFullYear()
- const { theme } = useTheme()
- const [mounted, setMounted] = useState(false)
-
- useEffect(() => {
-   setMounted(true)
- }, [])
 
  return (
    <footer className="w-full border-t bg-background">
@@ -23,17 +14,7 @@ export default function Footer() {
          <div className="md:col-span-3">
            <div className="max-w-sm">
              <Link href="/" className="flex items-center space-x-2">
-               {mounted ? (
-                 <Image
-                   src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
-                   alt="HUMANITARIANS AI"
-                   width={300}
-                   height={67}
-                   className="h-16 w-auto"
-                 />
-               ) : (
-                 <div className="h-16 w-72 bg-muted animate-pulse rounded" />
-               )}
+               <span className="text-xl font-bold tracking-tighter">Humanitarians AI</span>
              </Link>
              <p className="mt-4 text-sm text-muted-foreground">
                Humanitarians AI Incorporated
