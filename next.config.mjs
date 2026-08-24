@@ -51,7 +51,10 @@ const nextConfig = {
       // (e.g. cajal-reference.html) working. [^/]+ matches a single top-level
       // segment only, so the destination cannot re-match the source.
       { source: '/:file([^/]+\\-tool\\.html)', destination: '/artifacts/:file', permanent: true },
-
+      // 80 Days to Stay route rename (2026-08-24). Keep the old /80-days URL
+      // working for bookmarks, shared links, and any indexed external references.
+      // permanent: false (307) so the redirect stays easy to reverse if needed.
+      { source: '/80-days', destination: '/80-days-to-stay', permanent: false },
       // Lyrical Literacy consolidation (2026-08-20). These three routes were
       // byte-near clones of app/lyrical-literacy/page.tsx with only the <title>
       // and <h1> swapped; the pages are moved to _to_delete/. permanent: false

@@ -118,7 +118,7 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors font-medium">All Projects</Link></li>
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
-               <li><Link href="/80-days" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
+               <li><Link href="/80-days-to-stay" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
                <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
                <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li>
                <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
