@@ -1,8 +1,34 @@
+import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import GoFundMeWidget from "@/components/GoFundMeWidget"
 import PayPalDonateButton from "@/components/PayPalDonateButton"
 import Link from "next/link"
+
+type DonationOption = {
+  title: string
+  description: string
+  action: ReactNode
+  enabled: boolean
+}
+
 export default function DonatePage() {
+  const donationOptions: DonationOption[] = [
+    {
+      title: "GoFundMe Campaign",
+      description: "Join our active fundraising campaign and see real-time progress toward our goals.",
+      action: <GoFundMeWidget size="medium" />,
+      enabled: false,
+    },
+    {
+      title: "Direct Donation",
+      description: "Make a secure donation directly to our registered nonprofit account via PayPal.",
+      action: <PayPalDonateButton />,
+      enabled: true,
+    },
+  ]
+
+  const activeDonationOptions = donationOptions.filter((option) => option.enabled)
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
@@ -14,35 +40,28 @@ export default function DonatePage() {
           </p>
         </div>
         {/* Primary Donation Options - Card Layout */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {/* GoFundMe Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
-            <div className="text-center space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">GoFundMe Campaign</h2>
-                <p className="text-muted-foreground">
-                  Join our active fundraising campaign and see real-time progress toward our goals.
-                </p>
+        <div className="grid gap-8 mb-16 md:grid-cols-12">
+          {activeDonationOptions.map((option, index) => {
+            const isOddLast =
+              activeDonationOptions.length % 2 === 1 && index === activeDonationOptions.length - 1
+
+            return (
+              <div
+                key={option.title}
+                className={`border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow md:col-span-6 ${
+                  isOddLast ? "md:col-start-4" : ""
+                }`}
+              >
+                <div className="text-center space-y-6">
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-bold">{option.title}</h2>
+                    <p className="text-muted-foreground">{option.description}</p>
+                  </div>
+                  <div className="flex justify-center">{option.action}</div>
+                </div>
               </div>
-              <div className="flex justify-center">
-                <GoFundMeWidget size="medium" />
-              </div>
-            </div>
-          </div>
-          {/* PayPal Card */}
-          <div className="border rounded-lg p-8 bg-background dark:bg-neutral-800 dark:border-neutral-700 hover:shadow-lg transition-shadow">
-            <div className="text-center space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Direct Donation</h2>
-                <p className="text-muted-foreground">
-                  Make a secure donation directly to our registered nonprofit account via PayPal.
-                </p>
-              </div>
-              <div className="flex justify-center">
-                <PayPalDonateButton />
-              </div>
-            </div>
-          </div>
+            )
+          })}
         </div>
         {/* Additional Support Options */}
         <div className="mt-16 bg-muted dark:bg-neutral-800 p-8 rounded-lg border dark:border-neutral-700">
