@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ProjectGetStarted from "@/components/ProjectGetStarted";
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 
@@ -198,75 +199,11 @@ And put it in the oven for baby and me.`}
             </div>
           </section>
 
-          {/* ===== RESOURCES SECTION ===== */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Further Resources</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/">
-                GitHub Repository
-              </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/@humanitariansai">
-                YouTube Channel
-              </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/">
-                Official Website
-              </SecondaryButton>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <h3 className="text-lg font-semibold mb-2">Connect with Humanitarians AI</h3>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
-                <a 
-                  href="https://www.linkedin.com/company/105696953/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  LinkedIn
-                </a>
-                <a 
-                  href="https://www.youtube.com/@humanitariansai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  YouTube
-                </a>
-                <a 
-                  href="https://www.humanitarians.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Website
-                </a>
-                <a 
-                  href="https://github.com/Humanitariansai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  GitHub
-                </a>
-                <a 
-                  href="https://music.apple.com/us/artist/humanitarians-ai/1781414009"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Apple Music
-                </a>
-                <a 
-                  href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Spotify
-                </a>
-              </div>
-            </div>
-          </section>
+          <ProjectGetStarted
+            projectName="Musinique"
+            githubUrl="https://github.com/Humanitariansai/"
+            youtubeUrl="https://www.youtube.com/@humanitariansai"
+          />
         </div>
       </div>
     </div>
