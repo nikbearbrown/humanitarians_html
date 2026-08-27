@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import PrimaryButton from "@/components/ui/primary-button"
-import SecondaryButton from "@/components/ui/secondary-button"
+import ProjectGetStarted from "@/components/ProjectGetStarted"
 
 export const metadata: Metadata = {
   title: "Popper Framework - Computational Skepticism & AI Validation",
@@ -317,20 +316,11 @@ export default function PopperPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/Popper">
-                Popper GitHub
-              </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB-_qAesCOzXfu1394C8G4v_">
-                Popper YouTube
-              </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/">
-                Humanitarians AI
-              </SecondaryButton>
-            </div>
-          </section>
+          <ProjectGetStarted
+            projectName="Popper"
+            githubUrl="https://github.com/Humanitariansai/Popper"
+            youtubeUrl="https://www.youtube.com/playlist?list=PLgOGgHS58rB-_qAesCOzXfu1394C8G4v_"
+          />
         </div>
       </div>
     </div>
