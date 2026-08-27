@@ -83,13 +83,13 @@ const projects = [
   //   tiers: ["Tier 3 — Social & Ethical"],
   //   substackUrl: "https://zebonastic.substack.com/",
   // },
-  {
-    name: "Wilkes",
-    slug: "wilkes",
-    description: "Developer portfolio verification measuring intent and decision patterns, not just syntax.",
-    tiers: ["Tier 4 — Judgment"],
-    substackUrl: "https://wilkesproject.substack.com/",
-  },
+  // {
+  //   name: "Wilkes",
+  //   slug: "wilkes",
+  //   description: "Developer portfolio verification measuring intent and decision patterns, not just syntax.",
+  //   tiers: ["Tier 4 — Judgment"],
+  //   substackUrl: "https://wilkesproject.substack.com/",
+  // },
 ]
 
 export default function ProjectsPage() {
