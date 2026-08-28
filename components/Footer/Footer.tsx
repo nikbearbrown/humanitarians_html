@@ -92,10 +92,12 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
                <li><Link href="/books" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
-               <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li>
+               {/* Temporarily hidden until the notes section is ready. */}
+               {/* <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li> */}
                <li><Link href="/ai1" className="text-muted-foreground hover:text-foreground transition-colors">AI+1</Link></li>
                <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
-               <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li>
+               {/* Temporarily hidden until the newsletter is live again. */}
+               {/* <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li> */}
              </ul>
            </div>
 
@@ -119,7 +121,6 @@ export default function Footer() {
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors font-medium">All Projects</Link></li>
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
                <li><Link href="/80-days-to-stay" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
-               <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
                <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li>
                <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
                <li><a href="https://www.irreducibly.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Irreducibly Human</a></li>
@@ -129,8 +130,8 @@ export default function Footer() {
                <li><a href="https://www.musinique.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</a></li>
                <li><a href="https://www.mycroft.biz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</a></li>
                <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
-               <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li>
-               <li><a href="https://www.zebonastic.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</a></li>
+               {/* TODO: Revisit the Wilkes footer link later. */}
+               {/* <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li> */}
              </ul>
            </div>
 
