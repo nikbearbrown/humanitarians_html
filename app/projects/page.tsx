@@ -56,13 +56,13 @@ const projects = [
     tiers: ["Tier 4 — Judgment"],
     substackUrl: "https://popperskepticism.substack.com/",
   },
-  {
-    name: "Boyle",
-    slug: "boyle",
-    description: "AI-assisted documentary infrastructure for scientific reproducibility using the MVAL protocol.",
-    tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
-    substackUrl: "https://boyleproject.substack.com/",
-  },
+  // {
+  //   name: "Boyle",
+  //   slug: "boyle",
+  //   description: "AI-assisted documentary infrastructure for scientific reproducibility using the MVAL protocol.",
+  //   tiers: ["Tier 4 — Judgment", "Tier 5 — Causal Reasoning"],
+  //   substackUrl: "https://boyleproject.substack.com/",
+  // },
   {
     name: "80 Days to Stay",
     slug: "80-days-to-stay",
@@ -76,20 +76,20 @@ const projects = [
     tiers: ["Tier 5 — Causal Reasoning"],
     substackUrl: "https://musinique.substack.com/",
   },
-  {
-    name: "Zebonastic",
-    slug: "zebonastic",
-    description: "AI-generated creative work and digital prompts exploring generative aesthetics.",
-    tiers: ["Tier 3 — Social & Ethical"],
-    substackUrl: "https://zebonastic.substack.com/",
-  },
-  {
-    name: "Wilkes",
-    slug: "wilkes",
-    description: "Developer portfolio verification measuring intent and decision patterns, not just syntax.",
-    tiers: ["Tier 4 — Judgment"],
-    substackUrl: "https://wilkesproject.substack.com/",
-  },
+  // {
+  //   name: "Zebonastic",
+  //   slug: "zebonastic",
+  //   description: "AI-generated creative work and digital prompts exploring generative aesthetics.",
+  //   tiers: ["Tier 3 — Social & Ethical"],
+  //   substackUrl: "https://zebonastic.substack.com/",
+  // },
+  // {
+  //   name: "Wilkes",
+  //   slug: "wilkes",
+  //   description: "Developer portfolio verification measuring intent and decision patterns, not just syntax.",
+  //   tiers: ["Tier 4 — Judgment"],
+  //   substackUrl: "https://wilkesproject.substack.com/",
+  // },
 ]
 
 export default function ProjectsPage() {
