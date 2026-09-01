@@ -1,86 +1,114 @@
 Campaign,Ad Group,Keyword,Current match type,Action,Reason
-Humanitarians AI,AI Literacy & Fluency,AI transparency,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,AI Trust,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,AI Validation,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,Large Language Models,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Humanitarians AI,AI Literacy & Fluency,AI transparency,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,AI Trust,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,AI Validation,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,Large Language Models,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Humanitarians AI,AI Literacy & Fluency,prompt engineering guide,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-Humanitarians AI,AI Literacy & Fluency,AI prompt engineering,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,AI for career growth,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,Agentic AI,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,AI literacy course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,AI Literacy & Fluency,ethical AI training,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai and education,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai technology in education,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,using ai in education,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai in teaching,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai teaching ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai in schools,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,use of ai in education,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai in teaching and learning,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,education in ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,teaching with ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,how work ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Humanitarians AI,AI Literacy & Fluency,AI prompt engineering,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,AI for career growth,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,Agentic AI,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,AI literacy course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,ethical AI training,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,AI Literacy & Fluency,human AI collaboration,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+Humanitarians AI,AI Literacy & Fluency,Computational Skepticism,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+Humanitarians AI,AI Literacy & Fluency,AI skills for graduates,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+Humanitarians AI,AI Literacy & Fluency,AI ethics for students,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+Humanitarians AI,AI Literacy & Fluency,learn AI fluency,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+AI Literacy,AI Literacy Program,ai education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,artificial intelligence and education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai teacher,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai schools,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai in learning,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai and education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai technology in education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,using ai in education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai in teaching,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai teaching ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai in schools,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,use of ai in education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai in teaching and learning,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,education in ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai education programs,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,artificial intelligence in teaching and learning,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai in education industry,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,use of artificial intelligence in education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai for teachers,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai on education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,education with ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,teaching an ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai and teaching,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai educator,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ethical ai in education,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+AI Literacy,AI Literacy Program,teaching with ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,how work ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,AI Literacy Program,will ai replace my job,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,AI Literacy Program,ai for educators,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,ai help in education,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,AI Literacy Program,ai for educators,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,ai help in education,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,AI Literacy Program,how to use ai at work,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 AI Literacy,AI Literacy Program,"""how to use ai at work""",Phrase match,Keep,Already phrase match
 AI Literacy,AI Literacy Program,ai to improve communication skills,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,AI Literacy Program,communication skills in ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,AI Literacy Program,artificial intelligence communication skills,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,AI Literacy Program,communication skills in ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,communication skills artificial intelligence,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,AI Literacy Program,artificial intelligence communication skills,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,AI Literacy Program,"""ai literacy for beginners""",Phrase match,Keep,Already phrase match
 AI Literacy,AI Literacy Program,"""future proof your career with ai""",Phrase match,Keep,Already phrase match
 AI Literacy,AI Literacy Program,"""ai mentorship for professionals""",Phrase match,Keep,Already phrase match
 AI Literacy,AI Literacy Program,"""learn prompt engineering basics""",Phrase match,Keep,Already phrase match
 AI Literacy,AI Literacy Program,"""will ai replace my job""",Phrase match,Keep,Already phrase match
 AI Literacy,Ai Fluency,"""ai training""",Phrase match,Keep,Already phrase match
-AI Literacy,Ai Fluency,ai training courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,artificial intelligence training,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,artificial intelligence online course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai ethics,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,learn ai online,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai classes,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai university courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai training courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai training,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,artificial intelligence training,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,artificial intelligence online course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai ethics,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,learn ai online,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai classes,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai university courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,"""learn ai online""",Phrase match,Keep,Already phrase match
-AI Literacy,Ai Fluency,best ai courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,best ai courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,"""ai ethics""",Phrase match,Keep,Already phrase match
-AI Literacy,Ai Fluency,machine learning and artificial intelligence courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai training programs,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai programming course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai learning course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,machine learning and artificial intelligence courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai training programs,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai programming course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,ai finance courses,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 AI Literacy,Ai Fluency,ai in finance courses,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 AI Literacy,Ai Fluency,ai for business course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,Ai Fluency,ai in teaching and learning,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai in teaching and learning,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,ai in healthcare course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 AI Literacy,Ai Fluency,ai capstone project,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
+AI Literacy,Ai Fluency,ai interpretability,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,ai for finance course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,Ai Fluency,ai engineer course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,course on ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,about ai course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai engineer course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,course on ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,about ai course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,ai healthcare course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 AI Literacy,Ai Fluency,ai for healthcare course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,Ai Fluency,ai basics course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,building ai course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,ai course in engineering,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai basics course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,building ai course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,ai course in engineering,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,"""ai interpretability""",Phrase match,Keep,Already phrase match
 AI Literacy,Ai Fluency,ethical ai course,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-AI Literacy,Ai Fluency,ai fluency,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai fluency,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,"""ai capstone project""",Phrase match,Keep,Already phrase match
-AI Literacy,Ai Fluency,ai specialization courses,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai specialization courses,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,"""ai literacy""",Phrase match,Keep,Already phrase match
-AI Literacy,Ai Fluency,ai literacy,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-AI Literacy,Ai Fluency,generative ai course,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+AI Literacy,Ai Fluency,ai literacy,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+AI Literacy,Ai Fluency,generative ai course,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 AI Literacy,Ai Fluency,"""ai fluency""",Phrase match,Keep,Already phrase match
-Fellows,Fellows Program,ai development,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Fellows,Fellows Program,artificial intelligence software development,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Fellows,Fellows Program,ai software engineer,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Fellows,Fellows Program,ai for social good,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Fellows,Fellows Program,ai development,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,ai developers,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,artificial intelligence software development,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,ai software engineer,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,ai for social good,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Fellows,Fellows Program,"""open source ai projects""",Phrase match,Keep,Already phrase match
-Fellows,Fellows Program,ai software developers,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Fellows,Fellows Program,ai software developers,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Fellows,Fellows Program,"""data science volunteer opportunities""",Phrase match,Keep,Already phrase match
-Fellows,Fellows Program,web development ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Fellows,Fellows Program,software engineer ai,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Fellows,Fellows Program,ai career development,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Fellows,Fellows Program,web development ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,software engineer ai,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,ai career development,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Fellows,Fellows Program,generative ai aws,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Fellows,Fellows Program,"""ai mentorship program""",Phrase match,Keep,Already phrase match
 Fellows,Fellows Program,"""volunteer ai projects""",Phrase match,Keep,Already phrase match
 Fellows,Fellows Program,"""nonprofit technology fellowship""",Phrase match,Keep,Already phrase match
@@ -101,10 +129,10 @@ Fellows,OPT,"""volunteer work for opt""",Phrase match,Keep,Already phrase match
 Fellows,OPT,"""opt volunteer requirements""",Phrase match,Keep,Already phrase match
 Fellows,OPT,"""volunteer during opt""",Phrase match,Keep,Already phrase match
 Humanitarians AI,Lyrical Literacy,educational songs for toddlers,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-Humanitarians AI,Lyrical Literacy,educational songs,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
-Humanitarians AI,Lyrical Literacy,educational music for kids,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Humanitarians AI,Lyrical Literacy,educational songs,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
+Humanitarians AI,Lyrical Literacy,educational music for kids,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Humanitarians AI,Lyrical Literacy,music for brain development,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
-Humanitarians AI,Lyrical Literacy,neuroscience of music,Broad match,Pause,"Generic or expensive head term; unwinnable at a $2 cap, drags CTR"
+Humanitarians AI,Lyrical Literacy,neuroscience of music,Broad match,Pause,Generic or expensive head term; unwinnable at a $2 cap and drags account CTR
 Humanitarians AI,Lyrical Literacy,songs for language learning,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 Humanitarians AI,Lyrical Literacy,songs for adhd focus,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
 Humanitarians AI,Lyrical Literacy,music for reading comprehension,Broad match,"Pause broad, add as phrase",Specific enough to keep; broad match was widening it into paid territory
