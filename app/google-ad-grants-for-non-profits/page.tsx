@@ -145,7 +145,7 @@ export default function GoogleAdGrantsForNonprofits() {
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
                 className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/videoseries?list=PLgOGgHS58rB_UlZbv-XkgfYnc8Let9XzA" 
+                src="https://www.youtube.com/embed/videoseries?list=PLgOGgHS58rB_UlZbv-XkgfYnc8Let9XzA&enablejsapi=1" 
                 title="YouTube video player" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 

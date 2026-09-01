@@ -37,3 +37,6 @@ Thumbs.db
 ehthumbs.db 
 # Local scratch/trash (VM cannot delete files; deletions land here)
 _to_delete/
+
+# local scrape cache for scripts/youtube/sync.py
+.cache/

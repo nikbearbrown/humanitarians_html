@@ -16,7 +16,7 @@ export default function Ai1Page() {
   const pub = join(process.cwd(), 'public')
   const toolCount = scanHtmlDir(join(pub, 'artifacts')).length
   const lectureCount = lectureManifest.reduce((n, g) => n + g.docs.length, 0)
-  const vizCount = scanFlatCategory(join(pub, 'courses', 'visualization'), '/courses/visualization', '/ai1/visualizations').length
+  const vizCount = scanFlatCategory(join(pub, 'ai1', 'visualization'), '/ai1/visualization', '/ai1/visualizations').length
   const simCount = scanFlatCategory(join(pub, 'ai1', 'simulations'), '/ai1/simulations', '/ai1/simulations').length
 
   const sections = [

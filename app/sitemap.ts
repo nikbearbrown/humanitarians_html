@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { neon } from '@neondatabase/serverless'
-import path from 'path'
-import { scanCourses } from '@/lib/courses'
+import videoData from '@/data/youtube/videos.json'
+import playlistData from '@/data/youtube/playlists.json'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.humanitarians.ai'
 
@@ -11,11 +11,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${BASE_URL}/books`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/courses`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE_URL}/dev`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/donate`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/fellows`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/notes`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/projects`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/reports`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/substack`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
@@ -30,12 +28,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ]
 
-  // Course pages (filesystem-based)
-  const courses = scanCourses(path.join(process.cwd(), 'public/courses'))
-  for (const course of courses) {
+  // Video articles + series (static data from scripts/youtube/sync.py)
+  entries.push({ url: `${BASE_URL}/videos/library`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 })
+  for (const p of playlistData as { slug: string; videoIds: string[] }[]) {
+    if (p.videoIds.length === 0) continue
+    entries.push({ url: `${BASE_URL}/videos/playlist/${p.slug}`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 })
+  }
+  for (const v of videoData as { slug: string; uploadDate: string | null }[]) {
     entries.push({
-      url: `${BASE_URL}/courses/${course.slug}`,
-      lastModified: new Date(),
+      url: `${BASE_URL}/videos/${v.slug}`,
+      lastModified: v.uploadDate ? new Date(v.uploadDate) : new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     })
@@ -83,18 +85,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
 
-    // Videos
-    const videos = await db`
-      SELECT youtube_id, published_at FROM videos WHERE published = true
-    `
-    for (const v of videos) {
-      entries.push({
-        url: `${BASE_URL}/videos`,
-        lastModified: v.published_at ? new Date(v.published_at) : new Date(),
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      })
-    }
   } catch {
     // If database is not configured, just return static pages
   }

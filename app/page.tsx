@@ -16,42 +16,42 @@ const COURSES = [
     description:
       'AI finds correlations. Humans build causal models. Counterfactual thinking, interventionist reasoning, and the kind of "why" questions that statistical models cannot answer.',
     link: 'Explore Causal Reasoning',
-    href: '/notes/Irreducibly-Human/Irreducibly-Human-Causal-Reasoning',
+    href: 'https://www.irreducibly.xyz/',
   },
   {
     title: 'ETHICAL PLAY',
     description:
       'Moral reasoning under uncertainty, value pluralism, and the limits of rule-based ethics. Developing the capacity for ethical judgment that cannot be reduced to optimization or alignment.',
     link: 'Explore Ethical Play',
-    href: '/notes/Irreducibly-Human/Irreducibly-Human-Ethical-Play',
+    href: 'https://www.irreducibly.xyz/',
   },
   {
     title: 'AIMAGINEERING',
     description:
       'Generative AI produces outputs. Humans produce meaning. Creative process, aesthetic judgment, conceptual blending, and the difference between novelty and genuine originality.',
     link: 'Explore AIMagineering',
-    href: '/notes/Irreducibly-Human/Irreducibly-Human-AImagineering',
+    href: 'https://www.irreducibly.xyz/',
   },
   {
     title: 'EMBODIED TEACHING',
     description:
       'Teaching is irreducibly human. Presence, improvisation, emotional attunement, and the embodied skills that make mentorship effective — none of which transfer to a language model.',
     link: 'Explore Embodied Teaching',
-    href: '/notes/Embodied-Teaching/Irreducibly-Human-Embodied-Teaching',
+    href: 'https://www.irreducibly.xyz/',
   },
   {
     title: 'CONDUCTING AI',
     description:
       'The five supervisory capacities: plausibility auditing, problem formulation, tool orchestration, interpretive judgment, and executive integration. The course that teaches you to conduct the orchestra, not play every instrument.',
     link: 'Explore Conducting AI',
-    href: '/notes/Irreducibly-Human/Irreducibly-Human-Conducting-AI',
+    href: 'https://www.irreducibly.xyz/',
   },
   {
     title: 'THE AI SHERPA',
     description:
       'A practitioner\'s guide for experiential learning. The full 18-chapter arc — from design failure diagnosis through the Sherpa infrastructure to domain field guides for co-op, study abroad, clinical, trades, and corporate early career programs.',
     link: 'Explore The AI Sherpa',
-    href: '/notes/AI-Sherpa/Irreducibly-Human-AI-Sherpa',
+    href: 'https://www.irreducibly.xyz/',
   },
 ]
 
@@ -94,7 +94,7 @@ export default function Home() {
               <div className="relative w-full aspect-video">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-md"
-                  src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV"
+                  src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV&enablejsapi=1"
                   title="Humanitarians AI Introduction"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -219,7 +219,7 @@ export default function Home() {
               <div className="relative w-full aspect-video">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-md"
-                  src="https://www.youtube.com/embed/dDoXAkTZLFI?si=Jvy7xBVEIhIpZqjp"
+                  src="https://www.youtube.com/embed/dDoXAkTZLFI?si=Jvy7xBVEIhIpZqjp&enablejsapi=1"
                   title="Addams Documentation System"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
@@ -272,12 +272,23 @@ export default function Home() {
                 <p className="text-muted-foreground leading-relaxed flex-1">
                   {course.description}
                 </p>
-                <Link
-                  href={course.href}
-                  className="mt-6 text-sm font-medium text-foreground hover:underline"
-                >
-                  {course.link} →
-                </Link>
+                {course.href.startsWith('http') ? (
+                  <a
+                    href={course.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-6 text-sm font-medium text-foreground hover:underline"
+                  >
+                    {course.link} →
+                  </a>
+                ) : (
+                  <Link
+                    href={course.href}
+                    className="mt-6 text-sm font-medium text-foreground hover:underline"
+                  >
+                    {course.link} →
+                  </Link>
+                )}
               </div>
             ))}
           </div>

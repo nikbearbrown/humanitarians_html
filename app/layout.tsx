@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/react'
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { GoogleAnalytics } from '@next/third-parties/google'
+import GoogleAdsTag from '@/components/analytics/GoogleAdsTag'
 
 // ✅ Import your Spotify client component
 import Spotify from "@/components/Spotify/Spotify" 
@@ -44,6 +45,8 @@ export default function RootLayout({
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}
+        {/* Google Ads tag (AW-…) for the account's Website conversion actions; shares gtag.js with GA4 */}
+        <GoogleAdsTag loadLibrary={!process.env.NEXT_PUBLIC_GA_ID} />
       </body>
     </html>
   )

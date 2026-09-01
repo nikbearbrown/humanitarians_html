@@ -2,9 +2,13 @@ import { Button } from "@/components/ui/button"
 import GoFundMeWidget from "@/components/GoFundMeWidget"
 import PayPalDonateButton from "@/components/PayPalDonateButton"
 import Link from "next/link"
+import ConversionPing from '@/components/analytics/ConversionPing'
+import { CONVERSION_LABELS } from '@/lib/gtag'
 export default function DonatePage() {
   return (
     <div className="container mx-auto px-4 py-12">
+      {/* Google Ads 'Donate' conversion (set NEXT_PUBLIC_AW_LABEL_DONATE from the action's Tag setup) */}
+      {CONVERSION_LABELS.donate && <ConversionPing label={CONVERSION_LABELS.donate} />}
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Support Our Mission</h1>

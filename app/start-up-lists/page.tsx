@@ -25,7 +25,7 @@ export default function StartUpLists() {
             <p className="text-muted-foreground">Video coming soon</p>
             {/* <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/[VIDEO_ID]"
+              src="https://www.youtube.com/embed/[VIDEO_ID]?enablejsapi=1"
               title="80 Days to Stay Startup Lists Overview"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"

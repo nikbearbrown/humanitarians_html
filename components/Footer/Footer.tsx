@@ -111,7 +111,7 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
                <li><Link href="/books" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
-               <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li>
+               {/* /notes removed 2026-09-01 (Ad Grants audit); section moved to _to_delete/notes-20260901 */}
                <li><Link href="/ai1" className="text-muted-foreground hover:text-foreground transition-colors">AI+1</Link></li>
                <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
                <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li>
@@ -139,7 +139,8 @@ export default function Footer() {
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
                <li><Link href="/80-days" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
                <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
-               <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li>
+               {/* Dayhoff link disabled 2026-09-01: www.mutant.org times out (Ad Grants broken-link audit). Restore when the domain is back. */}
+               {/* <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li> */}
                <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
                <li><a href="https://www.irreducibly.xyz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Irreducibly Human</a></li>
                <li><Link href="/lyrical-literacy" className="text-muted-foreground hover:text-foreground transition-colors">Lyrical Literacy</Link></li>

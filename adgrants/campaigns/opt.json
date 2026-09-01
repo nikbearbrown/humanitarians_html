@@ -1,0 +1,124 @@
+{
+  "name": "OPT | International students",
+  "weight": 4,
+  "note": "Flagship. OPT queries already bring ~10 organic visitors/day with no ads (Bear, 2026-09-01). High intent, long tail, nobody bidding. Keywords are phrase match; every final URL is on humanitarians.ai.",
+  "videoSlugs": [
+    "80-days-to-stay",
+    "from-500-000-urls-to-real-jobs-inside-the-80-days-to-stay-engine",
+    "building-a-visa-sponsorship-database-from-sec-data-80-days-to-stay-project",
+    "building-a-ai-powered-web-scraper-to-help-international-students-find-visa",
+    "why-linkedin-failed-us-building-a-real-database-for-international-student",
+    "filtering-500k-sec-companies-to-find-job-opportunities-using-claude-ai",
+    "filtering-millions-of-h-1b-records-to-find-real-hiring-signals",
+    "beyond-57-000-companies-scraping-ats-data-h-1b-history",
+    "find-companies-that-are-likely-to-hire-me-the-linkedin-feature-we-actually-need",
+    "knowing-a-companys-ats-is-a-win-for-your-application",
+    "the-strategic-minimalism-resume-strategy-winning-both-ats-and-human-readers",
+    "domain-inference-complete-62-hit-rate-now-using-llms-to-analyze-hiring",
+    "iterative-data-cleaning-from-58k-to-41k-companies-in-one-script",
+    "scraping-25k-startup-sites-preparing-them-for-a-language-model",
+    "llms-are-like-puppies-theyll-always-fetch-but-sometimes-the-wrong-thing-80-days",
+    "what-youll-do-if-you-join-mycroft-financial-ai-opt-eligible-open-source-project",
+    "madison-build-ai-agents-for-marketing-branding-opt-eligible-open-source-project",
+    "abhishek-ai-skunkworks-humanitarians-ai-testimonial",
+    "addams-your-humanitarians-ai-sherpa"
+  ],
+  "adGroups": [
+    {
+      "name": "OPT volunteer work",
+      "url": "https://www.humanitarians.ai/opt-volunteer-opportunities",
+      "keywords": [
+        "opt volunteer work", "volunteer work on opt", "does volunteering count as employment for opt",
+        "opt unpaid work rules", "can i volunteer on opt", "opt volunteer opportunities",
+        "opt volunteer position", "volunteer to maintain opt status", "opt employment requirements volunteering",
+        "opt 20 hours a week volunteer", "opt volunteer letter for sevis", "opt volunteer experience resume",
+        "unpaid internship on opt", "opt eligible volunteer work", "stem opt unpaid work rules",
+        "post completion opt volunteer", "opt volunteer ai project", "volunteer work counts as opt employment",
+        "opt volunteering nonprofit", "opt volunteer data science"
+      ],
+      "headlines": [
+        "OPT-Eligible Volunteer Work", "Volunteer Work That Counts", "Keep Your OPT Status Active",
+        "Documented, Verifiable Work", "20 Hours a Week, Real Projects", "AI Projects for OPT Students",
+        "Report Your Hours to SEVIS", "Free 501(c)(3) Program", "Humanitarians AI Fellows",
+        "Build a Portfolio on OPT", "Mentored AI Volunteer Roles", "Apply as a Fellow Today"
+      ],
+      "descriptions": [
+        "Unpaid work that meets OPT's 20-hour rule, with documented hours and real AI projects.",
+        "Join a 501(c)(3) fellowship: mentored projects, verifiable experience, weekly documentation.",
+        "Volunteer on open-source AI for good while you search. Everything we publish is free.",
+        "Students and recent graduates build portfolios that employers can check."
+      ]
+    },
+    {
+      "name": "OPT unemployment days",
+      "url": "https://www.humanitarians.ai/80-days-to-stay",
+      "keywords": [
+        "opt unemployment days", "opt 90 days unemployment", "90 day unemployment rule opt",
+        "how to count opt unemployment days", "opt unemployment days remaining", "what happens after 90 days unemployment opt",
+        "opt unemployment limit", "opt unemployment period rules", "stem opt 150 days unemployment",
+        "opt 90 days volunteer to stop clock", "opt unemployment clock", "opt grace period unemployment",
+        "running out of opt unemployment days", "opt unemployment tracker", "opt days of unemployment calculator",
+        "unemployment days opt f1", "opt status unemployment too long", "how to stop opt unemployment days"
+      ],
+      "headlines": [
+        "80 Days to Stay", "OPT Unemployment Day Count", "Stop the OPT Clock", "Job Tools for OPT Students",
+        "Find Sponsors Before Day 90", "Free Job Search Engine", "Built by OPT Students", "H-1B Sponsor Database",
+        "Real Hiring Signals, Not Ads", "Humanitarians AI", "Free 501(c)(3) Program", "Start Your Search Today"
+      ],
+      "descriptions": [
+        "Tools and data built by international students to find sponsors before OPT days run out.",
+        "Company databases from SEC and H-1B records, plus volunteer work that keeps OPT active.",
+        "A free nonprofit project for F-1 students on OPT. No fees, no upsell, no consultants.",
+        "See how the 80 Days to Stay engine finds real hiring signals across 500,000 pages."
+      ]
+    },
+    {
+      "name": "OPT job search and sponsors",
+      "url": "https://www.humanitarians.ai/80-days-to-stay",
+      "keywords": [
+        "companies hiring opt students", "jobs that sponsor opt", "opt friendly employers list",
+        "h1b sponsorship database", "companies that sponsor h1b", "startups that sponsor visas",
+        "find companies that sponsor h1b", "visa sponsorship jobs data science", "opt job search tool",
+        "sec form d startups hiring", "h1b sponsor companies list 2026", "which companies sponsor international students",
+        "opt job search international student", "f1 opt jobs data analyst", "employers open to opt candidates",
+        "opt to h1b job search strategy", "visa sponsorship database free", "h1b history by company",
+        "ats resume international student", "companies with h1b approvals"
+      ],
+      "headlines": [
+        "Who Actually Sponsors H-1B", "Companies Hiring OPT Students", "Free Sponsor Database",
+        "Built From SEC + H-1B Data", "Skip the Fake Sponsor Lists", "80 Days to Stay", "Job Search for OPT Students",
+        "Real Hiring Signals", "Free From a 501(c)(3)", "Humanitarians AI", "Made by International Students", "Search Sponsors Free"
+      ],
+      "descriptions": [
+        "A free database of companies with real sponsorship history, built from SEC and H-1B records.",
+        "Find employers likely to hire international students. No fees, built by OPT students.",
+        "Data tools and weekly videos on the OPT job search from a 501(c)(3) nonprofit.",
+        "Stop guessing which employers sponsor. See the data and the method behind it."
+      ]
+    },
+    {
+      "name": "OPT-eligible fellowship",
+      "url": "https://www.humanitarians.ai/fellows",
+      "keywords": [
+        "opt eligible fellowship", "ai fellowship for international students", "fellowship for opt students",
+        "opt eligible open source project", "volunteer research position international student",
+        "unpaid ai fellowship remote", "opt project experience data science", "ai for good fellowship",
+        "fellowship after graduation international students", "portfolio projects for opt students",
+        "mentored ai projects volunteer", "nonprofit ai fellowship remote", "cpt eligible ai project",
+        "f1 student volunteer research ai", "humanitarians ai fellowship", "opt fellows program ai"
+      ],
+      "headlines": [
+        "OPT-Eligible AI Fellowship", "Humanitarians AI Fellows", "Real Projects, Real Evidence",
+        "Mentored, Remote, Free", "Open-Source AI for Good", "Build What Employers Check",
+        "Fellowship for F-1 Students", "Weekly Documented Progress", "Free 501(c)(3) Program",
+        "Apply to Be a Fellow", "Portfolio Over Promises", "Join the Fellows Program"
+      ],
+      "descriptions": [
+        "A remote fellowship where international students build open-source AI projects with mentors.",
+        "Documented weekly work, verifiable portfolios, and OPT-eligible volunteer hours.",
+        "Humanitarians AI is a 501(c)(3). The fellowship is free and every project is public.",
+        "Bridge the gap between graduation and your first role with work you can point to."
+      ]
+    }
+  ]
+}

@@ -80,7 +80,7 @@ export default function ExplainersPage() {
               <div className="relative w-full aspect-video">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-md"
-                  src="https://www.youtube.com/embed/zZs1YdArwLg"
+                  src="https://www.youtube.com/embed/zZs1YdArwLg?enablejsapi=1"
                   title="How to Make Explainer Videos for Your Research"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

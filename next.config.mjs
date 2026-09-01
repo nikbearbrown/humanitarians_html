@@ -25,6 +25,12 @@ const nextConfig = {
   outputFileTracingExcludes: {
     '*': ['public/ai1/lectures/**', '**/public/ai1/lectures/**'],
   },
+  // Video article pages read content/videos/*.md and data/youtube/transcripts/*.json
+  // with fs at build/request time; make sure they ship with the functions.
+  outputFileTracingIncludes: {
+    '/videos/[slug]': ['./content/videos/**', './data/youtube/transcripts/**'],
+    '/videos/playlist/[playlist]': ['./content/videos/**'],
+  },
   async redirects() {
     const rootFilesMovedToArtifacts = [
       'addams.html', 'brutalist.html', 'cajal-reference.html', 'critiq-reference.html',
@@ -60,6 +66,15 @@ const nextConfig = {
       { source: '/brain-cognitive-development', destination: '/lyrical-literacy', permanent: false },
       { source: '/programs/lyrical-literacy/learn-more', destination: '/lyrical-literacy', permanent: false },
       { source: '/programs/lyrical-literacy/lyrical-literacy-details', destination: '/lyrical-literacy', permanent: false },
+      // /courses removed (2026-09-01, Ad Grants audit: footer-less thin pages). The chart
+      // references it hosted now live under /ai1/visualization and are browsed at
+      // /ai1/visualizations; everything else under /courses goes to AI+1. 307 on purpose.
+      { source: '/courses/visualization/:file*', destination: '/ai1/visualization/:file*', permanent: false },
+      { source: '/courses', destination: '/ai1', permanent: false },
+      { source: '/courses/:path*', destination: '/ai1', permanent: false },
+      // /notes removed 2026-09-01 (same audit). 307 on purpose.
+      { source: '/notes', destination: '/ai1', permanent: false },
+      { source: '/notes/:path*', destination: '/ai1', permanent: false },
       ...rootFilesMovedToArtifacts.map(f => ({
         source: `/${f}`, destination: `/artifacts/${f}`, permanent: true,
       })),

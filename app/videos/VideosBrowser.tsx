@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Search, X, Pin, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -17,7 +18,7 @@ interface Video {
 
 const PAGE_SIZE = 10
 
-export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; videos: Video[] }) {
+export default function VideosBrowser({ pinned, videos, slugMap = {} }: { pinned: Video[]; videos: Video[]; slugMap?: Record<string, string> }) {
   const [query, setQuery] = useState('')
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [page, setPage] = useState(1)
@@ -112,7 +113,7 @@ export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; vid
               <Card key={v.id} className="overflow-hidden">
                 <div className="aspect-video">
                   <iframe
-                    src={`https://www.youtube.com/embed/${v.youtube_id}`}
+                    src={`https://www.youtube.com/embed/${v.youtube_id}?enablejsapi=1`}
                     title={v.title}
                     width="100%"
                     height="100%"
@@ -125,7 +126,9 @@ export default function VideosBrowser({ pinned, videos }: { pinned: Video[]; vid
                 <CardHeader className="pt-4">
                   <CardTitle className="text-base flex items-center gap-2">
                     {v.pinned && <Pin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                    {v.title}
+                    {slugMap[v.youtube_id] ? (
+                      <Link href={`/videos/${slugMap[v.youtube_id]}`} className="hover:underline">{v.title}</Link>
+                    ) : v.title}
                   </CardTitle>
                   {v.description && (
                     <CardDescription className="line-clamp-2">{v.description}</CardDescription>

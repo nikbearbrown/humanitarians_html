@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic'
 
 function resolve(slug: string): string | null {
   if (slug.includes('..') || slug.includes('/') || slug.startsWith('.')) return null
-  const filePath = join(process.cwd(), 'public', 'courses', 'visualization', `${slug}.html`)
-  return existsSync(filePath) ? `/courses/visualization/${slug}.html` : null
+  const filePath = join(process.cwd(), 'public', 'ai1', 'visualization', `${slug}.html`)
+  return existsSync(filePath) ? `/ai1/visualization/${slug}.html` : null
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {

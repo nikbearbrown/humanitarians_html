@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 
 export default function VisualizationsPage() {
   const docs = scanFlatCategory(
-    join(process.cwd(), 'public', 'courses', 'visualization'),
-    '/courses/visualization',
+    join(process.cwd(), 'public', 'ai1', 'visualization'),
+    '/ai1/visualization',
     '/ai1/visualizations',
   )
 
@@ -23,7 +23,7 @@ export default function VisualizationsPage() {
         <Link href="/ai1" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">← AI+1</Link>
         <h1 className="text-4xl font-bold tracking-tighter mb-4">Visualizations</h1>
         <p className="text-muted-foreground mb-10">
-          {docs.length} interactive chart references. Also available as a narrated course under <Link href="/courses/visualization" className="underline hover:text-foreground">Courses</Link>.
+          {docs.length} interactive chart references, one page per chart family.
         </p>
 
         {docs.length === 0 && <p className="text-sm text-muted-foreground">Visualizations coming soon.</p>}

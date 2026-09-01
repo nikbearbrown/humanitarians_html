@@ -622,7 +622,7 @@ export default function OpenAIPage() {
       <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6">
         <iframe
           className="absolute top-0 left-0 w-full h-full"
-          src="https://www.youtube.com/embed/GN7yQntWJHU?si=3Zr_6e0L4dhIZ1nC"
+          src="https://www.youtube.com/embed/GN7yQntWJHU?si=3Zr_6e0L4dhIZ1nC&enablejsapi=1"
           title="Humanitarians AI Video"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
@@ -639,7 +639,7 @@ export default function OpenAIPage() {
       <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6">
         <iframe
           className="absolute top-0 left-0 w-full h-full"
-          src="https://www.youtube.com/embed/WKW12dO9NOc?si=ySG3X4c0tt7adJgV"
+          src="https://www.youtube.com/embed/WKW12dO9NOc?si=ySG3X4c0tt7adJgV&enablejsapi=1"
           title="AI Skunkworks Video"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"

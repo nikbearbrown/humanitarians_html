@@ -22,7 +22,7 @@ export default function TemplateTikTok() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/XXXXXXXXXX" // Replace with your featured video ID
+              src="https://www.youtube.com/embed/XXXXXXXXXX?enablejsapi=1" // Replace with your featured video ID
               title="YouTube video player"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -187,7 +187,7 @@ export default function TemplateTikTok() {
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
               <iframe 
                 className="absolute top-0 left-0 w-full h-full"
-                src="https://www.youtube.com/embed/XXXXXXXXXX" // Replace with your video or playlist ID
+                src="https://www.youtube.com/embed/XXXXXXXXXX?enablejsapi=1" // Replace with your video or playlist ID
                 title="YouTube video player" 
                 frameBorder="0" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
