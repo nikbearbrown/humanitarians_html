@@ -127,7 +127,8 @@ def descriptions_for(v, fm):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--daily-total', type=float, default=329.0, help='Ad Grants cap is $10,000/month ≈ $329/day')
+    ap.add_argument('--daily-total', type=float, default=314.0,
+                    help='Budget for the generated campaigns. Ad Grants cap is $10,000/month ≈ $329/day; $15/day is reserved for the three pre-existing campaigns (Humanitarians AI, Fellows, AI Literacy) kept at $5/day each as a niche layer.')
     ap.add_argument('--out', default='adgrants')
     ap.add_argument('--max-cpc', default='2.00')
     ap.add_argument('--locations', default=DEFAULT_LOCATIONS,
@@ -325,7 +326,7 @@ def main():
 
     lines = ['# Ad Grants long-tail campaign plan', '',
              f'Generated from data/youtube + content/videos. {len(camp_rows)} campaigns, {len(ad_rows)} ad groups/ads, {len(kw_rows)} phrase-match keywords ({len(all_kw)} unique).',
-             f'Daily budget: ${a.daily_total:.0f}/day total (the $10,000/month cap) split into {shares} shares of ${share_value:.2f}; flagship campaigns take several shares (see weight in adgrants/campaigns/*.json), each series campaign takes one.', '',
+             f'Daily budget: ${a.daily_total:.0f}/day for these campaigns, split into {shares} shares of ${share_value:.2f}; flagship campaigns take several shares (see weight in adgrants/campaigns/*.json), each series campaign takes one. The remaining ${329 - a.daily_total:.0f}/day of the $329 cap stays with the three pre-existing campaigns (Humanitarians AI, Fellows, AI Literacy) at $5/day each: niche, not irrelevant, but switched to Maximize clicks ($2 cap) and phrase match.', '',
              '## Import order (Google Ads Editor > Account > Import > From file)', '',
              '1. `1-campaigns.csv` (campaigns are PAUSED on import; enable after review)',
              '2. `2-sitelinks.csv`', '3. `3-keywords.csv`', '4. `4-ads.csv`', '',

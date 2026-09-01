@@ -1,7 +1,7 @@
 # Ad Grants long-tail campaign plan
 
 Generated from data/youtube + content/videos. 20 campaigns, 424 ad groups/ads, 3745 phrase-match keywords (3567 unique).
-Daily budget: $329/day total (the $10,000/month cap) split into 23 shares of $14.30; flagship campaigns take several shares (see weight in adgrants/campaigns/*.json), each series campaign takes one.
+Daily budget: $314/day for these campaigns, split into 23 shares of $13.65; flagship campaigns take several shares (see weight in adgrants/campaigns/*.json), each series campaign takes one. The remaining $15/day of the $329 cap stays with the three pre-existing campaigns (Humanitarians AI, Fellows, AI Literacy) at $5/day each: niche, not irrelevant, but switched to Maximize clicks ($2 cap) and phrase match.
 
 ## Import order (Google Ads Editor > Account > Import > From file)
 
@@ -16,26 +16,26 @@ Bid strategy is Maximize clicks with a $2.00 max CPC bid limit (the Ad Grants-al
 
 | Campaign | Ad groups | Keywords | $/day |
 |---|---|---|---|
-| OPT | International students | 23 | 228 | 57.22 |
-| LT | HAI | 19 | 164 | 14.30 |
-| LT | Humanitarians AI Fellows 1 | 25 | 217 | 14.30 |
-| LT | Humanitarians AI Fellows 2 | 25 | 222 | 14.30 |
-| LT | Mycroft Financial AI | 44 | 403 | 14.30 |
-| LT | Madison | 7 | 64 | 14.30 |
-| LT | INFO7375 Branding & AI | 21 | 181 | 14.30 |
-| LT | Claude | 21 | 189 | 14.30 |
-| LT | Lyrical Literacy | 18 | 177 | 14.30 |
-| LT | Lyrical Literacy (Songs for Pre-School Kids) | 8 | 75 | 14.30 |
-| LT | Medhavy | 6 | 53 | 14.30 |
-| LT | React | 5 | 43 | 14.30 |
-| LT | NeuroVEP | 1 | 8 | 14.30 |
-| LT | Popper (Computational Skepticism) | 1 | 7 | 14.30 |
-| LT | RAMAN Effect | 1 | 8 | 14.30 |
-| LT | More Videos 1 | 36 | 317 | 14.30 |
-| LT | More Videos 2 | 40 | 332 | 14.30 |
-| LT | More Videos 3 | 41 | 347 | 14.30 |
-| LT | More Videos 4 | 41 | 369 | 14.30 |
-| LT | More Videos 5 | 41 | 341 | 14.30 |
+| OPT | International students | 23 | 228 | 54.61 |
+| LT | HAI | 19 | 164 | 13.65 |
+| LT | Humanitarians AI Fellows 1 | 25 | 217 | 13.65 |
+| LT | Humanitarians AI Fellows 2 | 25 | 222 | 13.65 |
+| LT | Mycroft Financial AI | 44 | 403 | 13.65 |
+| LT | Madison | 7 | 64 | 13.65 |
+| LT | INFO7375 Branding & AI | 21 | 181 | 13.65 |
+| LT | Claude | 21 | 189 | 13.65 |
+| LT | Lyrical Literacy | 18 | 177 | 13.65 |
+| LT | Lyrical Literacy (Songs for Pre-School Kids) | 8 | 75 | 13.65 |
+| LT | Medhavy | 6 | 53 | 13.65 |
+| LT | React | 5 | 43 | 13.65 |
+| LT | NeuroVEP | 1 | 8 | 13.65 |
+| LT | Popper (Computational Skepticism) | 1 | 7 | 13.65 |
+| LT | RAMAN Effect | 1 | 8 | 13.65 |
+| LT | More Videos 1 | 36 | 317 | 13.65 |
+| LT | More Videos 2 | 40 | 332 | 13.65 |
+| LT | More Videos 3 | 41 | 347 | 13.65 |
+| LT | More Videos 4 | 41 | 369 | 13.65 |
+| LT | More Videos 5 | 41 | 341 | 13.65 |
 
 ## Operating rules
 
