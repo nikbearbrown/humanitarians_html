@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import PrimaryButton from "@/components/ui/primary-button"
-import SecondaryButton from "@/components/ui/secondary-button"
+import ProjectGetStarted from "@/components/ProjectGetStarted"
 
 export const metadata: Metadata = {
   title: "Dayhoff - AI-Powered Bioinformatics Framework",
@@ -295,72 +294,11 @@ export default function DayhoffPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
-            <p className="text-muted-foreground mb-6">
-              Dayhoff provides a comprehensive framework for AI-driven biological and public health intelligence. Explore the codebase, watch implementation demos, or join our collaborative development community.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/Humanitariansai/Dayhoff">
-                Dayhoff GitHub
-              </PrimaryButton>
-              <SecondaryButton href="https://youtube.com/playlist?list=PLgOGgHS58rB-sBjm4oEfMfFXcYZf89IDo&si=caS7A9UMCFewuuRB">
-                Dayhoff YouTube
-              </SecondaryButton>
-              <SecondaryButton href="https://www.humanitarians.ai/dayhoff">
-                Learn More
-              </SecondaryButton>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <h3 className="text-lg font-semibold mb-2">Connect with Humanitarians AI</h3>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
-                <a 
-                  href="https://music.apple.com/us/artist/humanitarians-ai/1781414009"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Apple Music
-                </a>
-                <a 
-                  href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Spotify
-                </a>
-                <a 
-                  href="https://www.humanitarians.ai/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Website
-                </a>
-                <a 
-                  href="https://www.youtube.com/@humanitariansai"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  YouTube
-                </a>
-                <a 
-                  href="https://www.linkedin.com/company/105696953/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  LinkedIn
-                </a>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Please like and subscribe to Humanitarian's AI YouTube to follow our progress and learn more about our transformative work in computational biology.
-              </p>
-            </div>
-          </section>
+          <ProjectGetStarted
+            projectName="Dayhoff"
+            githubUrl="https://github.com/Humanitariansai/Dayhoff"
+            youtubeUrl="https://youtube.com/playlist?list=PLgOGgHS58rB-sBjm4oEfMfFXcYZf89IDo&si=caS7A9UMCFewuuRB"
+          />
         </div>
       </div>
     </div>

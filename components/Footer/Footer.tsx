@@ -1,19 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
 import ThemeToggle from "@/components/ThemeToggle"
 
 export default function Footer() {
  const currentYear = new Date().getFullYear()
- const { theme } = useTheme()
- const [mounted, setMounted] = useState(false)
-
- useEffect(() => {
-   setMounted(true)
- }, [])
 
  return (
    <footer className="w-full border-t bg-background">
@@ -23,17 +14,7 @@ export default function Footer() {
          <div className="md:col-span-3">
            <div className="max-w-sm">
              <Link href="/" className="flex items-center space-x-2">
-               {mounted ? (
-                 <Image
-                   src={theme === 'dark' ? '/svg-logos/Humanitarians_white_logo.svg' : '/svg-logos/Humanitarians_black_logo.svg'}
-                   alt="HUMANITARIANS AI"
-                   width={300}
-                   height={67}
-                   className="h-16 w-auto"
-                 />
-               ) : (
-                 <div className="h-16 w-72 bg-muted animate-pulse rounded" />
-               )}
+               <span className="text-xl font-bold tracking-tighter">Humanitarians AI</span>
              </Link>
              <p className="mt-4 text-sm text-muted-foreground">
                Humanitarians AI Incorporated
@@ -111,10 +92,12 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link></li>
                <li><Link href="/books" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
-               {/* /notes removed 2026-09-01 (Ad Grants audit); section moved to _to_delete/notes-20260901 */}
+               {/* Temporarily hidden until the notes section is ready. */}
+               {/* <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li> */}
                <li><Link href="/ai1" className="text-muted-foreground hover:text-foreground transition-colors">AI+1</Link></li>
                <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
-               <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li>
+               {/* Temporarily hidden until the newsletter is live again. */}
+               {/* <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li> */}
              </ul>
            </div>
 
@@ -137,8 +120,7 @@ export default function Footer() {
              <ul className="space-y-2">
                <li><Link href="/projects" className="text-muted-foreground hover:text-foreground transition-colors font-medium">All Projects</Link></li>
                <li><Link href="/aiskunkworks" className="text-muted-foreground hover:text-foreground transition-colors">AI Skunkworks</Link></li>
-               <li><Link href="/80-days" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
-               <li><Link href="/boyle" className="text-muted-foreground hover:text-foreground transition-colors">Boyle</Link></li>
+               <li><Link href="/80-days-to-stay" className="text-muted-foreground hover:text-foreground transition-colors">80 Days to Stay</Link></li>
                {/* Dayhoff link disabled 2026-09-01: www.mutant.org times out (Ad Grants broken-link audit). Restore when the domain is back. */}
                {/* <li><a href="https://www.mutant.org" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Dayhoff</a></li> */}
                <li><Link href="/dewey" className="text-muted-foreground hover:text-foreground transition-colors">Dewey</Link></li>
@@ -149,8 +131,8 @@ export default function Footer() {
                <li><a href="https://www.musinique.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Musinique</a></li>
                <li><a href="https://www.mycroft.biz" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Mycroft</a></li>
                <li><Link href="/popper" className="text-muted-foreground hover:text-foreground transition-colors">Popper</Link></li>
-               <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li>
-               <li><a href="https://www.zebonastic.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Zebonastic</a></li>
+               {/* TODO: Revisit the Wilkes footer link later. */}
+               {/* <li><a href="https://www.wilkes.dev" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">Wilkes</a></li> */}
              </ul>
            </div>
 

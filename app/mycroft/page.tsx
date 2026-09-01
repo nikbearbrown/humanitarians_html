@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import PrimaryButton from "@/components/ui/primary-button"
-import SecondaryButton from "@/components/ui/secondary-button"
+import ProjectGetStarted from "@/components/ProjectGetStarted"
 
 export const metadata: Metadata = {
   title: "Mycroft - AI-Powered Investment Intelligence",
@@ -170,17 +169,11 @@ export default function MycroftPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Get Started</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="https://github.com/nikbearbrown/Mycroft">
-                Mycroft Github
-              </PrimaryButton>
-              <SecondaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB_nThkcMlBVf4Y6QLB9Bi3K">
-                Mycroft YouTube
-              </SecondaryButton>
-            </div>
-          </section>
+          <ProjectGetStarted
+            projectName="Mycroft"
+            githubUrl="https://github.com/nikbearbrown/Mycroft"
+            youtubeUrl="https://www.youtube.com/playlist?list=PLgOGgHS58rB_nThkcMlBVf4Y6QLB9Bi3K"
+          />
         </div>
       </div>
     </div>

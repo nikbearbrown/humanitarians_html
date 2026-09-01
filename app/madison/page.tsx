@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
-import PrimaryButton from "@/components/ui/primary-button"
-import SecondaryButton from "@/components/ui/secondary-button"
+import ProjectGetStarted from "@/components/ProjectGetStarted"
 
 export const metadata: Metadata = {
  title: "Madison - AI-Powered Marketing Intelligence",
@@ -214,20 +213,11 @@ export default function MadisonPage() {
            </div>
          </section>
 
-         <section>
-           <h2 className="text-3xl font-bold mb-6">Get Started</h2>
-           <p className="text-muted-foreground mb-6">
-             Madison provides a comprehensive framework for AI-driven marketing intelligence. Explore the codebase, watch implementation demos, or join our collaborative development community.
-           </p>
-           <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-             <PrimaryButton href="https://github.com/Humanitariansai/Madison">
-               Madison GitHub
-             </PrimaryButton>
-             <SecondaryButton href="https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51&si=L8wvKwPE_F37cgiD">
-               Madison YouTube
-             </SecondaryButton>
-           </div>
-         </section>
+         <ProjectGetStarted
+           projectName="Madison"
+           githubUrl="https://github.com/Humanitariansai/Madison"
+           youtubeUrl="https://youtube.com/playlist?list=PLgOGgHS58rB-2XzQOaQbBGUk30ABMig51&si=L8wvKwPE_F37cgiD"
+         />
        </div>
      </div>
    </div>

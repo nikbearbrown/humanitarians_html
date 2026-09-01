@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import ProjectGetStarted from "@/components/ProjectGetStarted";
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
@@ -308,21 +309,11 @@ export default function LyricalLiteracyArt() {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Get Involved</h2>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="/contact">Contact Us</PrimaryButton>
-              <SecondaryButton href="/donate">
-                Support the Project
-              </SecondaryButton>
-              <PrimaryButton href="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP">
-                Lyrical Literacy YouTube
-              </PrimaryButton>
-              <SecondaryButton href="https://github.com/Humanitariansai/Lyrical-Literacy">
-                GitHub Repository
-              </SecondaryButton>
-            </div>
-          </section>
+          <ProjectGetStarted
+            projectName="Lyrical Literacy"
+            githubUrl="https://github.com/Humanitariansai/Lyrical-Literacy"
+            youtubeUrl="https://www.youtube.com/playlist?list=PLgOGgHS58rB8TP77w79PdmqF6qAAILkDP"
+          />
         </div>
       </div>
     </div>
