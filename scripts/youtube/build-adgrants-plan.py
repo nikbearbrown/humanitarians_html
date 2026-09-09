@@ -167,21 +167,8 @@ def main():
     if loose:
         playlists.append({'id': 'LOOSE', 'slug': 'more-videos', 'title': 'More Videos', 'videoIds': [v['id'] for v in loose]})
 
-    CHUNK = 45
-    chunked = []
-    for p in playlists:
-        ids = p['videoIds']
-        if len(ids) <= CHUNK:
-            chunked.append(p)
-            continue
-        parts = (len(ids) + CHUNK - 1) // CHUNK
-        size = (len(ids) + parts - 1) // parts
-        for i in range(parts):
-            q = dict(p)
-            q['title'] = f"{p['title']} {i + 1}"
-            q['videoIds'] = ids[i * size:(i + 1) * size]
-            chunked.append(q)
-    playlists = chunked
+    # One campaign per playlist, however many videos it holds (Bear, 2026-09-09). Never split a
+    # playlist into numbered campaigns; a playlist is the series and the campaign is the series.
     shares = sum(sp.get('weight', 1) for sp in specs) + len(playlists)
     share_value = a.daily_total / shares
     budget_each = round(share_value, 2)

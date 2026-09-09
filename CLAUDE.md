@@ -49,6 +49,31 @@ hooks/                # use-toast, use-mobile
 middleware.ts         # Admin route protection
 ```
 
+## YouTube videos → pages → Ad Grants (updated often)
+
+Every public upload on the Humanitarians AI channel gets its own page at `/videos/<slug>`, and every
+YouTube playlist is one Google Ad Grants campaign. Bear adds videos to YouTube constantly, so this
+pipeline is re-run whenever the channel has changed. Never edit `data/youtube/*.json` by hand.
+
+```bash
+python3 scripts/youtube/sync.py                  # 1. yt-dlp scrape → data/youtube + content/videos/<slug>.md
+#   writes a script FALLBACK article (keywords: [], generated: "fallback") only for NEW slugs; never clobbers
+grep -l '^generated: "fallback"' content/videos/*.md   # 2. these need real articles
+#   write each one from its transcript, in place: 8 long-tail phrase keywords, 450–900 words, generated: "article"
+#   (Sep 2026: done with Sonnet subagents from a spec; the keywords feed the phrase-match campaigns)
+python3 scripts/youtube/build-adgrants-plan.py   # 3. regenerate adgrants/*.csv + adgrants/README.md
+npm run build                                    # 4. verify, then commit data/, content/, adgrants/
+```
+
+Rules:
+- One campaign per playlist, whatever its size. Never split a playlist into numbered campaigns.
+  Videos in no playlist go in the single `LT | More Videos` catch-all.
+- A video that sits in several playlists gets ONE ad group, in its smallest playlist.
+- Fallback articles produce no ad groups (empty keywords), so step 2 is not optional.
+- Ads land only on humanitarians.ai pages, never on YouTube. Flagship hand-written campaigns live in
+  `adgrants/campaigns/*.json` (e.g. OPT) and claim their video slugs out of the playlist campaigns.
+- Slugs are pinned in `data/youtube/slugs.json`; a renamed video keeps its URL.
+
 ## Color palette — HAI (Le Monde / walnut)
 
 This is the canonical palette going forward. All new pages and components must use these tokens.
