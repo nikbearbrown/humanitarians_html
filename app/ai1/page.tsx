@@ -3,7 +3,6 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { scanHtmlDir } from '@/lib/html-meta'
 import { scanFlatCategory } from '@/lib/ai1'
-import lectureManifest from '@/lib/lectures-manifest.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,13 +14,13 @@ export const metadata: Metadata = {
 export default function Ai1Page() {
   const pub = join(process.cwd(), 'public')
   const toolCount = scanHtmlDir(join(pub, 'artifacts')).length
-  const lectureCount = lectureManifest.reduce((n, g) => n + g.docs.length, 0)
   const vizCount = scanFlatCategory(join(pub, 'ai1', 'visualization'), '/ai1/visualization', '/ai1/visualizations').length
   const simCount = scanFlatCategory(join(pub, 'ai1', 'simulations'), '/ai1/simulations', '/ai1/simulations').length
 
   const sections = [
     { href: '/ai1/tools', title: 'Tools', count: toolCount, unit: 'tools', description: 'Claude projects — a curated directory of AI tools for educators, students, and professionals.' },
-    { href: '/ai1/lectures', title: 'Lectures', count: lectureCount, unit: 'decks', description: 'Narrated lecture decks, chapter by chapter, across the book library.' },
+    // The 1.2 GB deck library lives on its own Vercel project (nikbearbrown/lectures).
+    { href: 'https://lectures.humanitarians.ai', title: 'Lectures', count: null, unit: 'lectures.humanitarians.ai', description: 'Narrated lecture decks, chapter by chapter, across the book library.' },
     { href: '/ai1/visualizations', title: 'Visualizations', count: vizCount, unit: 'charts', description: 'Interactive D3 chart references — one page per chart family.' },
     { href: '/ai1/simulations', title: 'Simulations', count: simCount, unit: 'simulations', description: 'Interactive simulations and explorable explanations.' },
   ]
@@ -36,7 +35,7 @@ export default function Ai1Page() {
           {sections.map(s => (
             <Link key={s.href} href={s.href} className="group block border rounded-lg p-6 hover:border-foreground/40 transition-colors bg-card">
               <h2 className="text-xl font-semibold tracking-tight group-hover:underline mb-1">{s.title}</h2>
-              <p className="text-xs text-muted-foreground mb-3">{s.count} {s.unit}</p>
+              <p className="text-xs text-muted-foreground mb-3">{s.count === null ? s.unit : `${s.count} ${s.unit}`}</p>
               <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
             </Link>
           ))}

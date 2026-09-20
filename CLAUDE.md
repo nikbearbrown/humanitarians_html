@@ -49,6 +49,19 @@ hooks/                # use-toast, use-mobile
 middleware.ts         # Admin route protection
 ```
 
+## Heavy content lives on subdomains, never in this repo
+
+This site is the Ad Grants landing surface, so it stays small. Anything over a few MB gets its own
+repo + Vercel project under `nik-bear-brown`, and this site only links or redirects to it
+(redirects in `next.config.mjs`, always `permanent: false`):
+
+| Subdomain | Repo | What |
+|---|---|---|
+| loonnet.humanitarians.ai | nikbearbrown/loonnet | LoonNet Godot games (~170 MB) |
+| lectures.humanitarians.ai | nikbearbrown/lectures | AI+1 narrated lecture decks (~1.2 GB) |
+
+Do not add game builds, lecture decks, videos, or other large static trees under `public/`.
+
 ## YouTube videos → pages → Ad Grants (updated often)
 
 Every public upload on the Humanitarians AI channel gets its own page at `/videos/<slug>`, and every

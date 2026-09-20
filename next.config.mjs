@@ -18,13 +18,6 @@ const nextConfig = {
   // otherwise infers a parent tracing root and (a) walks into siblings and
   // (b) makes exclude globs miss. Pin the root to THIS project.
   outputFileTracingRoot: projectDir,
-  // The deck library (1.2GB+) is served statically by the CDN and is never read
-  // inside a serverless function (lecture routes use lib/lectures-manifest.json).
-  // Exclude it from every function bundle so functions that touch public/ don't
-  // trace it in and blow the 250MB limit.
-  outputFileTracingExcludes: {
-    '*': ['public/ai1/lectures/**', '**/public/ai1/lectures/**'],
-  },
   // Video article pages read content/videos/*.md and data/youtube/transcripts/*.json
   // with fs at build/request time; make sure they ship with the functions.
   outputFileTracingIncludes: {
@@ -42,6 +35,12 @@ const nextConfig = {
       // its Ad Grants landing pages. 307, not 308, per the note below.
       { source: '/loonnet', destination: 'https://loonnet.humanitarians.ai', permanent: false },
       { source: '/loonnet/:path*', destination: 'https://loonnet.humanitarians.ai/:path*', permanent: false },
+      // The AI+1 lecture library (297 narrated decks, 1.2 GB) lives on its own
+      // Vercel project + repo (nikbearbrown/lectures). Paths are unchanged minus
+      // the /ai1/lectures prefix. 307 per the note below.
+      { source: '/ai1/lectures', destination: 'https://lectures.humanitarians.ai', permanent: false },
+      { source: '/ai1/lectures/view/:slug*', destination: 'https://lectures.humanitarians.ai/view/:slug*', permanent: false },
+      { source: '/ai1/lectures/:path*', destination: 'https://lectures.humanitarians.ai/:path*', permanent: false },
       // NO /tools <-> /ai1/tools redirect, in EITHER direction. These were
       // permanent: true (308), which browsers cache indefinitely and never
       // revalidate. A later commit reversed the pair; any client that saw both
