@@ -6,7 +6,7 @@ import { scanFlatCategory } from '@/lib/ai1'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Visualizations - AI+1 - Humanitarians AI',
+  title: 'Visualizations - AI for Good - Humanitarians AI',
   description: 'Interactive D3 chart references — one page per chart family.',
 }
 
@@ -20,7 +20,7 @@ export default function VisualizationsPage() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
-        <Link href="/ai1" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">← AI+1</Link>
+        <Link href="/ai1" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">← AI for Good</Link>
         <h1 className="text-4xl font-bold tracking-tighter mb-4">Visualizations</h1>
         <p className="text-muted-foreground mb-10">
           {docs.length} interactive chart references, one page per chart family.

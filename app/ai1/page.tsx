@@ -7,8 +7,8 @@ import { scanFlatCategory } from '@/lib/ai1'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'AI+1 - Humanitarians AI',
-  description: 'AI+1: tools, lectures, visualizations, and simulations for educators, students, and professionals.',
+  title: 'AI for Good - Humanitarians AI',
+  description: 'AI for Good: tools, lectures, visualizations, and simulations for educators, students, and professionals.',
 }
 
 export default function Ai1Page() {
@@ -28,8 +28,9 @@ export default function Ai1Page() {
   return (
     <div className="container px-4 md:px-6 mx-auto py-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold tracking-tighter mb-4">AI+1</h1>
-        <p className="text-muted-foreground mb-8">Tools, lectures, visualizations, and simulations — the AI+1 library.</p>
+        <Link href="/ai-for-good" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">← AI for Good</Link>
+        <h1 className="text-4xl font-bold tracking-tighter mb-4">AI for Good Library</h1>
+        <p className="text-muted-foreground mb-8">Tools, lectures, visualizations, and simulations.</p>
 
         <div className="grid gap-6 sm:grid-cols-2 mb-12">
           {sections.map(s => (

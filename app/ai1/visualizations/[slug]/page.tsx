@@ -15,9 +15,9 @@ function resolve(slug: string): string | null {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const src = resolve(slug)
-  if (!src) return { title: 'Visualization - AI+1' }
+  if (!src) return { title: 'Visualization - AI for Good' }
   const meta = readHtmlMetaLight(join(process.cwd(), 'public', src))
-  return { title: `${meta.title || 'Visualization'} - AI+1`, description: meta.description || undefined }
+  return { title: `${meta.title || 'Visualization'} - AI for Good`, description: meta.description || undefined }
 }
 
 export default async function VisualizationPage({ params }: { params: Promise<{ slug: string }> }) {

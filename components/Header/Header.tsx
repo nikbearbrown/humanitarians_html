@@ -32,7 +32,7 @@ export default function Header() {
   }, [isMenuOpen])
 
   const navigation = [
-    { name: "AI+1", href: "/ai1" },
+    { name: "AI for Good", href: "/ai-for-good" },
     { name: "Fellows", href: "/fellows" },
     { name: "Projects", href: "/projects" },
     { name: "Videos", href: "/videos" },

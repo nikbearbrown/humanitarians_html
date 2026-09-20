@@ -18,10 +18,10 @@ function getArtifactDoc(slug: string) {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const doc = getArtifactDoc(slug)
-  if (doc) return { title: `${doc.title} - Tools - AI+1`, description: doc.description || doc.title }
+  if (doc) return { title: `${doc.title} - Tools - AI for Good`, description: doc.description || doc.title }
   try {
     const rows = await sql`SELECT name, description FROM tools WHERE slug = ${slug}`
-    if (rows.length > 0) return { title: `${rows[0].name} - Tools - AI+1`, description: rows[0].description || rows[0].name }
+    if (rows.length > 0) return { title: `${rows[0].name} - Tools - AI for Good`, description: rows[0].description || rows[0].name }
   } catch {}
   return { title: 'Tool - Humanitarians AI' }
 }

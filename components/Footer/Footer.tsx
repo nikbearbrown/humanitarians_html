@@ -94,7 +94,7 @@ export default function Footer() {
                <li><Link href="/books" className="text-muted-foreground hover:text-foreground transition-colors">Books</Link></li>
                {/* Temporarily hidden until the notes section is ready. */}
                {/* <li><Link href="/notes" className="text-muted-foreground hover:text-foreground transition-colors">Notes</Link></li> */}
-               <li><Link href="/ai1" className="text-muted-foreground hover:text-foreground transition-colors">AI+1</Link></li>
+               <li><Link href="/ai-for-good" className="text-muted-foreground hover:text-foreground transition-colors">AI for Good</Link></li>
                <li><Link href="/videos" className="text-muted-foreground hover:text-foreground transition-colors">Videos</Link></li>
                {/* Temporarily hidden until the newsletter is live again. */}
                {/* <li><Link href="/substack" className="text-muted-foreground hover:text-foreground transition-colors">Newsletter</Link></li> */}
