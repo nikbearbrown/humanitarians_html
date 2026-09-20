@@ -5,6 +5,8 @@ import Image from "next/image"
 import { ExternalLink, Play, X } from "lucide-react"
 import { LOONNET_CREDIT, type LoonNetGame } from "@/data/loonnet-games"
 
+const LOONNET_GAMES_URL = "https://sheshngupta.github.io/loonnet-games"
+
 export default function LoonNetGames({ games }: { games: LoonNetGame[] }) {
   const [openGame, setOpenGame] = useState<LoonNetGame | null>(null)
 
@@ -96,7 +98,7 @@ export default function LoonNetGames({ games }: { games: LoonNetGame[] }) {
               </span>
               <h2 className="min-w-0 flex-1 truncate text-lg font-bold">{openGame.title}</h2>
               <a
-                href={`/loonnet/games/${openGame.id}/index.html`}
+                href={`${LOONNET_GAMES_URL}/${openGame.id}/index.html`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden items-center gap-2 text-sm font-medium underline underline-offset-4 sm:inline-flex"
@@ -115,7 +117,7 @@ export default function LoonNetGames({ games }: { games: LoonNetGame[] }) {
             </div>
             <div className="min-h-0 flex-1 bg-black">
               <iframe
-                src={`/loonnet/games/${openGame.id}/index.html`}
+                src={`${LOONNET_GAMES_URL}/${openGame.id}/index.html`}
                 title={openGame.title}
                 allow="autoplay; fullscreen; gamepad"
                 className="h-full w-full border-0"
