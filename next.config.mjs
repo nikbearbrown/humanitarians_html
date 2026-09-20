@@ -37,6 +37,11 @@ const nextConfig = {
       'gru-reference.html', 'gru.html', 'tictoc-reference-v2.html', 'walker-unity.html',
     ]
     return [
+      // LoonNet (four Godot games, ~170 MB of wasm/pck) lives on its own Vercel
+      // project + repo (nikbearbrown/loonnet) so it never bloats this site or
+      // its Ad Grants landing pages. 307, not 308, per the note below.
+      { source: '/loonnet', destination: 'https://loonnet.humanitarians.ai', permanent: false },
+      { source: '/loonnet/:path*', destination: 'https://loonnet.humanitarians.ai/:path*', permanent: false },
       // NO /tools <-> /ai1/tools redirect, in EITHER direction. These were
       // permanent: true (308), which browsers cache indefinitely and never
       // revalidate. A later commit reversed the pair; any client that saw both
