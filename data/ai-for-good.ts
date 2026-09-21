@@ -19,7 +19,7 @@ export const aiForGoodProjects: AiForGoodProject[] = [
   {
     name: "Mycroft",
     slug: "mycroft",
-    videoId: "1H0hsBU_foA",
+    videoId: "JLJnAVu2zac",
     description: "Educational experiment using specialized AI agents to analyze the investment landscape.",
     links: [
       { label: "GitHub", href: "https://github.com/nikbearbrown/Mycroft" },
