@@ -76,7 +76,7 @@ export const aiForGoodProjects: AiForGoodProject[] = [
   {
     name: "RAMAN Effect",
     slug: "raman-effect",
-    videoId: "3DJzPobJ6V8",
+    videoId: "8xu8FP7G7nE",
     description: "AI-driven spectroscopy and wastewater-based epidemiology for public health surveillance.",
     links: [
       { label: "GitHub", href: "https://github.com/Humanitariansai/RAMAN-Effect" },
