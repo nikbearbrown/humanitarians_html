@@ -43,7 +43,7 @@ export const aiForGoodProjects: AiForGoodProject[] = [
   {
     name: "LoonNet",
     slug: "loonnet",
-    videoId: "agK1y2PeDsY",
+    videoId: "c2bk5SMiEHk",
     description: "Browser games, drone footage, and annotation tools for the National Loon Center's work on the Whitefish Chain, built with Northeastern volunteers.",
     links: [
       { label: "loonnet.humanitarians.ai", href: "https://loonnet.humanitarians.ai" },
