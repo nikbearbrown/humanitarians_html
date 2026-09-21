@@ -31,7 +31,7 @@ export const aiForGoodProjects: AiForGoodProject[] = [
   {
     name: "Madison",
     slug: "madison",
-    videoId: "JL3d_ShVnSc",
+    videoId: "gYOFyBjRMZg",
     description: "Open-source agentic marketing and branding framework for data-driven advertising intelligence.",
     links: [
       { label: "madison.humanitarians.ai", href: "https://madison.humanitarians.ai" },
