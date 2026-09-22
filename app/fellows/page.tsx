@@ -51,6 +51,17 @@ export default async function FellowsPage() {
             Join our global community of talented volunteers dedicated to using AI for humanitarian causes. The Fellows Program offers hands-on experience with cutting-edge AI projects, professional development, and networking opportunities with like-minded innovators committed to positive impact.
           </p>
 
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src="https://www.youtube.com/embed/GN7yQntWJHU?si=8AjS_CU4w3MoSPJT&enablejsapi=1"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+
           {/* Joining card */}
           <div className="p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
             <h2 className="text-2xl font-bold mb-4">Joining Humanitarians AI</h2>
@@ -148,16 +159,6 @@ export default async function FellowsPage() {
                 allowFullScreen
               />
             </div>
-          </div>
-          <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
-            <iframe
-              className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/GN7yQntWJHU?si=8AjS_CU4w3MoSPJT&enablejsapi=1"
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
           </div>
         </div>
       </section>
