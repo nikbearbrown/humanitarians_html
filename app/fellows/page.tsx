@@ -218,9 +218,9 @@ export default async function FellowsPage() {
               <h2 className="text-3xl font-bold mb-6">Frictional Logs</h2>
               <div className="prose prose-lg dark:prose-invert mb-8">
                 <p>
-                  Every Fellow keeps a weekly <strong>Frictional log</strong> — a short, dated,
-                  honest record of what they tried, where the work resisted, what they did about it,
-                  and what they learned. It lives in their own folder in the{" "}
+                  Every piece of work carries a <strong>Frictional log</strong> — a short, dated,
+                  honest record of what was tried, where the work resisted, what was done about it,
+                  and what was learned. It lives in that work&apos;s own folder in the{" "}
                   <a
                     href={FELLOWS_REPO}
                     target="_blank"
@@ -229,7 +229,7 @@ export default async function FellowsPage() {
                   >
                     fellows repository
                   </a>{" "}
-                  alongside the work it describes.
+                  beside the evidence it describes.
                 </p>
                 <p>
                   <strong>This is not graded and it is not a performance review.</strong> Nothing about it
@@ -300,17 +300,18 @@ export default async function FellowsPage() {
                   <li className="flex gap-3">
                     <FolderGit2 className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <span>
-                      One file, <code className="text-sm">FRICTIONAL.md</code>, at the top of your fellow
-                      folder — <code className="text-sm">fellows/first-name-last-initial/</code>. Append a
-                      dated entry each week; never rewrite an earlier one.
+                      One <code className="text-sm">FRICTIONAL.md</code> per work folder —
+                      <code className="text-sm">fellows/first-name-last-initial/YYYY-MM-DD-slug/</code>.
+                      Each one logs the process behind <em>that</em> piece of work and sits beside the
+                      evidence it describes. Append dated entries as you go; never rewrite an earlier one.
                     </span>
                   </li>
                   <li className="flex gap-3">
                     <GitCommitHorizontal className="w-5 h-5 mt-0.5 shrink-0 text-primary" />
                     <span>
                       Point each entry at something a reader can open — a commit, a beat sheet, a review
-                      note, a capture. The commit history is itself part of the record, so commit weekly
-                      rather than in one batch at the end.
+                      note, a capture in that same folder. The commit history is itself part of the record,
+                      so commit as you work rather than in one batch at the end.
                     </span>
                   </li>
                   <li className="flex gap-3">
