@@ -118,7 +118,7 @@ export default function FellowsPage() {
 
             <h3 className="text-lg font-bold mb-3">What to include with your application</h3>
             <p className="text-muted-foreground mb-6">
-              Please provide a resume, LinkedIn profile, and/or portfolio link when you apply.
+              Please provide a resume, LinkedIn profile, GitHub ID, and/or portfolio link when you apply.
             </p>
 
             <h3 className="text-lg font-bold mb-3">Important information for OPT volunteers</h3>
