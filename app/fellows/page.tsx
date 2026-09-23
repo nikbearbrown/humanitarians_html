@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 import Link from "next/link"
-import { Users, FolderOpen, DoorOpen, GraduationCap, Film, Eye, FlaskConical, MailX, NotebookPen, CalendarDays, FolderGit2, ShieldCheck, Lightbulb, GitCommitHorizontal, Bot } from "lucide-react"
-import { getAllProjectsWithFellows } from '@/lib/fellows'
+import { Film, Eye, Mail, FlaskConical, MailX, NotebookPen, CalendarDays, FolderGit2, ShieldCheck, Lightbulb, GitCommitHorizontal, Bot } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Fellows Program - Humanitarians AI",
@@ -15,32 +14,7 @@ export const dynamic = 'force-dynamic'
 const BRUTALIST_PLAYLIST = "https://www.youtube.com/playlist?list=PLG9A_zHUv8A4"
 const FELLOWS_REPO = "https://github.com/nikbearbrown/humanitarians-youtube/tree/main/fellows"
 
-export default async function FellowsPage() {
-  const projects = await getAllProjectsWithFellows()
-
-  // Calculate stats from live data
-  const allFellowIds = new Set<string>()
-  const currentFellowIds = new Set<string>()
-  const alumniIds = new Set<string>()
-  for (const p of projects) {
-    for (const f of p.fellows) {
-      allFellowIds.add(f.id)
-      if (f.status === 'current') currentFellowIds.add(f.id)
-      if (f.status === 'alumni') alumniIds.add(f.id)
-    }
-  }
-  const totalFellows = allFellowIds.size
-  const activeProjects = projects.length
-  const openProjects = projects.filter((p) => p.open).length
-  const alumniCount = alumniIds.size
-
-  const stats = [
-    { label: "Fellows", value: totalFellows, icon: Users },
-    { label: "Active Projects", value: activeProjects, icon: FolderOpen },
-    { label: "Open Projects", value: openProjects, icon: DoorOpen },
-    { label: "Alumni", value: alumniCount, icon: GraduationCap },
-  ]
-
+export default function FellowsPage() {
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
@@ -54,8 +28,8 @@ export default async function FellowsPage() {
           <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-8">
             <iframe
               className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/GN7yQntWJHU?si=8AjS_CU4w3MoSPJT&enablejsapi=1"
-              title="YouTube video player"
+              src="https://www.youtube.com/embed/m18KFHOoMDs?si=wfx6Ff2KuieFegdZ&enablejsapi=1"
+              title="Humanitarians AI: Harnessing Technology for Social Good"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
@@ -79,6 +53,19 @@ export default async function FellowsPage() {
               </a>{" "}
               is encouraged.
             </p>
+
+            <div className="flex items-center gap-3 p-4 mb-6 rounded-lg border bg-background dark:bg-neutral-800">
+              <Mail className="w-6 h-6 shrink-0 text-primary" />
+              <p>
+                To join, email HR at{" "}
+                <a
+                  href="mailto:hr@humanitarians.ai"
+                  className="font-bold text-lg text-primary underline underline-offset-4 hover:text-primary/80"
+                >
+                  hr@humanitarians.ai
+                </a>
+              </p>
+            </div>
 
             <h3 className="text-lg font-bold mb-3">During your trial month</h3>
             <ul className="space-y-3 mb-6">
@@ -119,7 +106,8 @@ export default async function FellowsPage() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <PrimaryButton href={BRUTALIST_PLAYLIST}>Watch the Brutalist Tutorials</PrimaryButton>
+              <PrimaryButton href="mailto:hr@humanitarians.ai">Email hr@humanitarians.ai</PrimaryButton>
+              <SecondaryButton href={BRUTALIST_PLAYLIST}>Watch the Brutalist Tutorials</SecondaryButton>
               <SecondaryButton href="/projects">View Projects</SecondaryButton>
             </div>
           </div>
@@ -173,20 +161,6 @@ export default async function FellowsPage() {
             <p className="text-lg text-muted-foreground mb-8">
               Join our global community of talented volunteers dedicated to using AI for humanitarian causes.
             </p>
-
-            {/* Stat pills */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full border bg-background dark:bg-neutral-800 text-sm"
-                >
-                  <s.icon className="w-4 h-4 text-muted-foreground" />
-                  <span className="font-bold">{s.value}</span>
-                  <span className="text-muted-foreground">{s.label}</span>
-                </div>
-              ))}
-            </div>
 
             {/* CTA buttons */}
             <div className="flex flex-wrap gap-4 justify-center">

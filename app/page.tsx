@@ -94,7 +94,7 @@ export default function Home() {
               <div className="relative w-full aspect-video">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full rounded-md"
-                  src="https://www.youtube.com/embed/GN7yQntWJHU?si=gTXWalKvsLDP8nbV&enablejsapi=1"
+                  src="https://www.youtube.com/embed/m18KFHOoMDs?si=wfx6Ff2KuieFegdZ&enablejsapi=1"
                   title="Humanitarians AI Introduction"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
