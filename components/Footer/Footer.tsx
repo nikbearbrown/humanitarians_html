@@ -44,7 +44,7 @@ export default function Footer() {
                    <circle cx="4" cy="4" r="2" />
                  </svg>
                </Link>
-               <Link href="mailto:info@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
+               <Link href="mailto:hr@humanitarians.ai" className="text-sm hover:text-primary transition-colors">
                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block">
                    <rect width="20" height="16" x="2" y="4" rx="2" />
                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
@@ -105,6 +105,7 @@ export default function Footer() {
            <div className="space-y-4">
              <h3 className="text-lg font-semibold">Resources</h3>
              <ul className="space-y-2">
+               <li><Link href="/resources" className="text-muted-foreground hover:text-foreground transition-colors font-medium">Student AI Resources</Link></li>
                <li><Link href="https://www.youtube.com/@humanitariansai" className="text-muted-foreground hover:text-foreground transition-colors">YouTube</Link></li>
                <li><Link href="https://humanitariansai.substack.com/" className="text-muted-foreground hover:text-foreground transition-colors">Substack</Link></li>
                <li><Link href="https://open.spotify.com/artist/3cj3R4pDpYQHaWx0MM2vFV" className="text-muted-foreground hover:text-foreground transition-colors">Spotify</Link></li>
@@ -168,7 +169,7 @@ export default function Footer() {
              specifically for our organization. We maintain proper documentation for all visual and written content 
              as required by Google Ad Grants Policy. Humanitarians AI respects intellectual property rights and does 
              not use copyrighted materials without appropriate permission or licensing. For questions regarding our 
-             content or to request permission to use our materials, please <Link href="mailto:info@humanitarians.ai" className="text-primary hover:underline">contact us</Link>.
+             content or to request permission to use our materials, please <Link href="mailto:hr@humanitarians.ai" className="text-primary hover:underline">contact us</Link>.
            </p>
          </div>
        </div>
@@ -176,7 +177,11 @@ export default function Footer() {
        {/* Contact Information & Transparency */}
        <div className="mt-6 text-center">
          <p className="text-sm text-muted-foreground">
-           <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:info@humanitarians.ai" className="text-primary hover:underline">info@humanitarians.ai</a>
+           <strong>Contact Us:</strong> Humanitarians AI | <a href="mailto:hr@humanitarians.ai" className="text-primary hover:underline">hr@humanitarians.ai</a>
+         </p>
+         <p className="mt-2 text-sm text-muted-foreground">
+           <strong>When We&apos;re Open:</strong> Monday to Wednesday, business hours. Our board is 100% volunteer, so only expect replies to emails sent Monday to Wednesday.{' '}
+           <Link href="/contact" className="text-primary hover:underline">Plan ahead</Link>.
          </p>
          <p className="mt-2 text-sm text-muted-foreground">
            Support our mission by <Link href="/donate" className="text-primary hover:underline">donating</Link> today. 

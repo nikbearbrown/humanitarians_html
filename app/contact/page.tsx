@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Mail, Users, Lightbulb, Heart } from "lucide-react"
+import { Mail, Users, Lightbulb, Heart, Clock } from "lucide-react"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 
@@ -67,6 +67,26 @@ export default function ContactPage() {
             </div>
           </section>
 
+          {/* When We're Open */}
+          <section>
+            <div className="flex items-center mb-6">
+              <Clock className="w-8 h-8 mr-3 text-primary" />
+              <h2 className="text-3xl font-bold">When We&apos;re Open</h2>
+            </div>
+
+            <div className="p-6 border-l-4 border-primary bg-muted rounded-lg">
+              <p className="text-2xl font-bold mb-4">Monday to Wednesday, business hours</p>
+              <div className="prose prose-lg dark:prose-invert">
+                <p>
+                  The Board of Humanitarians AI is 100% volunteer and has other obligations. Only expect responses to email requests sent Monday to Wednesday during business hours.
+                </p>
+                <p>
+                  <strong>If you need something, plan ahead.</strong>
+                </p>
+              </div>
+            </div>
+          </section>
+
           {/* Project Collaboration & General Inquiries */}
           <section>
             <div className="flex items-center mb-6">
@@ -84,7 +104,7 @@ export default function ContactPage() {
                   <Mail className="w-5 h-5 mr-2 text-primary" />
                   <h3 className="font-bold">Email</h3>
                 </div>
-                <p className="text-sm">info@humanitarians.ai</p>
+                <p className="text-sm">hr@humanitarians.ai</p>
               </div>
               
               <div className="prose prose-lg dark:prose-invert mb-6">
@@ -128,15 +148,15 @@ export default function ContactPage() {
                   Mentors typically meet with Fellows weekly, provide structured guidance, and help document their technical and professional growth. Your expertise can make a significant difference in both our Fellows' development and the social impact of our work.
                 </p>
                 <p>
-                  For donations, media inquiries, or other general questions, please also contact info@humanitarians.ai.
+                  For donations, media inquiries, or other general questions, please also contact hr@humanitarians.ai.
                 </p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <PrimaryButton href="mailto:info@humanitarians.ai?subject=Mentor Application">
+                <PrimaryButton href="mailto:hr@humanitarians.ai?subject=Mentor Application">
                   Become a Mentor
                 </PrimaryButton>
-                <SecondaryButton href="mailto:info@humanitarians.ai?subject=Partnership Inquiry">
+                <SecondaryButton href="mailto:hr@humanitarians.ai?subject=Partnership Inquiry">
                   Partnership Inquiry
                 </SecondaryButton>
                 <SecondaryButton href="/mentors">
@@ -174,13 +194,13 @@ export default function ContactPage() {
               <div className="p-6 border rounded-lg">
                 <h3 className="text-xl font-bold mb-4">General & Mentorship</h3>
                 <div className="space-y-2 mb-4">
-                  <p className="text-sm"><strong>Email:</strong> info@humanitarians.ai</p>
+                  <p className="text-sm"><strong>Email:</strong> hr@humanitarians.ai</p>
                   <p className="text-sm"><strong>For:</strong> Projects, partnerships, mentoring, donations, media</p>
-                  <p className="text-sm"><strong>Response:</strong> Within 2-3 business days</p>
+                  <p className="text-sm"><strong>Response:</strong> Requests sent Monday to Wednesday, business hours</p>
                 </div>
                 <div className="flex gap-2">
-                  <PrimaryButton href="mailto:info@humanitarians.ai" className="text-xs px-3 py-1">
-                    Email Info
+                  <PrimaryButton href="mailto:hr@humanitarians.ai" className="text-xs px-3 py-1">
+                    Email HR
                   </PrimaryButton>
                   <SecondaryButton href="/mentors" className="text-xs px-3 py-1">
                     Mentor Info

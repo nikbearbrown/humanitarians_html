@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Mentors Guidelines - Humanitarians AI",
@@ -365,6 +366,7 @@ export default function MentorPage() {
                 View Fellows GitHub
               </PrimaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </section>
         </div>
       </div>

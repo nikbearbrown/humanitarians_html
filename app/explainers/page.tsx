@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import PrimaryButton from '@/components/ui/primary-button'
 import SecondaryButton from '@/components/ui/secondary-button'
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: 'How to Make Explainer Videos for Your Research | Humanitarians AI',
@@ -145,6 +146,7 @@ export default function ExplainersPage() {
               hr@humanitarians.ai
             </a>
           </p>
+          <OpenHours className="mt-6" />
         </div>
       </section>
     </div>

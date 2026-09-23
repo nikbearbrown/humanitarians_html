@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { scanHtmlDir } from '@/lib/html-meta'
 import { scanFlatCategory } from '@/lib/ai1'
+import OpenHours from "@/components/OpenHours"
 
 export const dynamic = 'force-dynamic'
 
@@ -70,6 +71,7 @@ export default function Ai1Page() {
           <p className="mt-2 text-sm font-bold">
             Reach out to HR <a href="mailto:hr@humanitarians.ai" className="underline hover:text-foreground">hr@humanitarians.ai</a> for OPT (Not Professor Bear)
           </p>
+          <OpenHours className="mt-6" />
           <p className="mt-2 text-sm text-muted-foreground">
             <Link href="/ai1/tools/addams" className="underline hover:text-foreground">Addams — OPT Volunteer Documentation System</Link> is <span className="font-bold">MANDATORY</span> weekly for current volunteers
           </p>

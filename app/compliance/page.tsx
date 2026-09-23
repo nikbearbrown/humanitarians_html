@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Ad Grants Compliance - Humanitarians AI",
@@ -103,7 +104,7 @@ export default function CompliancePage() {
               
               <div className="p-6 border rounded-lg mb-6">
                 <p className="mb-2"><strong>Organization Name:</strong> Humanitarians AI Incorporated</p>
-                <p className="mb-2"><strong>Contact Email:</strong> info@humanitarians.ai</p>
+                <p className="mb-2"><strong>Contact Email:</strong> hr@humanitarians.ai</p>
                 <p className="mb-2"><strong>Website:</strong> https://www.humanitarians.ai/</p>
                 <p className="mb-2"><strong>501(c)(3) Status:</strong> Active</p>
                 <p className="mb-2"><strong>State ID:</strong> 001846362</p>
@@ -293,7 +294,7 @@ export default function CompliancePage() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dim-gray mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Contact email (info@humanitarians.ai) and contact page link are displayed on every page.</span>
+                    <span>Contact email (hr@humanitarians.ai) and contact page link are displayed on every page.</span>
                   </li>
                   <li className="flex items-start">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dim-gray mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -704,13 +705,14 @@ export default function CompliancePage() {
               If you have any questions about our Google Ad Grants compliance or need additional information, please contact us:
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <PrimaryButton href="mailto:info@humanitarians.ai">
+              <PrimaryButton href="mailto:hr@humanitarians.ai">
                 Email Us
               </PrimaryButton>
               <SecondaryButton href="/contact">
                 Contact
               </SecondaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </section>
         </div>
       </div>

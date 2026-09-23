@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "AI Literacy & Prompt Engineering - Humanitarians AI",
@@ -114,10 +115,11 @@ export default function AILiteracy() {
               <PrimaryButton href="https://www.youtube.com/@humanitariansai">
                 Subscribe on YouTube
               </PrimaryButton>
-              <SecondaryButton href="mailto:info@humanitarians.ai">
+              <SecondaryButton href="mailto:hr@humanitarians.ai">
                 Contact Mentorship
               </SecondaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </section>
         </div>
       </div>

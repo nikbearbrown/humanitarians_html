@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Startup Lists - 80 Days to Stay | Humanitarians AI",
@@ -147,11 +148,12 @@ export default function StartUpLists() {
               <p className="text-muted-foreground mb-4">
                 E-commerce, CleanTech, EdTech, and other industry lists coming soon
               </p>
-              <SecondaryButton href="mailto:contact@humanitarians.ai">
+              <SecondaryButton href="mailto:hr@humanitarians.ai">
                 Request Industry
               </SecondaryButton>
             </div>
           </div>
+          <OpenHours className="mt-6" />
         </section>
 
         {/* ===== WHY SO CHEAP ===== */}

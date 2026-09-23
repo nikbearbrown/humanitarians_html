@@ -5,6 +5,7 @@ import PayPalDonateButton from "@/components/PayPalDonateButton"
 import Link from "next/link"
 import ConversionPing from '@/components/analytics/ConversionPing'
 import { CONVERSION_LABELS } from '@/lib/gtag'
+import OpenHours from "@/components/OpenHours"
 
 type DonationOption = {
   title: string
@@ -76,7 +77,7 @@ export default function DonatePage() {
               <p className="mb-4 text-muted-foreground">
                 Partner with us to support our mission and demonstrate your commitment to ethical AI.
               </p>
-              <Link href="mailto:info@humanitarians.ai">
+              <Link href="mailto:hr@humanitarians.ai">
                 <Button variant="outline" className="dark:border-neutral-700">
                   Learn More
                 </Button>
@@ -94,6 +95,7 @@ export default function DonatePage() {
               </Link>
             </div>
           </div>
+          <OpenHours className="mt-6" />
         </div>
       </div>
     </div>

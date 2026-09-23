@@ -3,6 +3,7 @@ import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 import Link from "next/link"
 import { Film, Eye, Mail, FlaskConical, MailX, NotebookPen, CalendarDays, FolderGit2, ShieldCheck, Lightbulb, GitCommitHorizontal, Bot } from "lucide-react"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Fellows Program - Humanitarians AI",
@@ -110,6 +111,7 @@ export default function FellowsPage() {
               <SecondaryButton href={BRUTALIST_PLAYLIST}>Watch the Brutalist Tutorials</SecondaryButton>
               <SecondaryButton href="/projects">View Projects</SecondaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </div>
 
           {/* Email policy card */}

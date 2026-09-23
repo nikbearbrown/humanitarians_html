@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "AI Consulting for Nonprofits - Humanitarians AI",
@@ -19,7 +20,7 @@ export default function ConsultingPage() {
             Cutting-edge AI solutions for social impact, led by Dr. Nicholas Brown. As a 501(c)(3) nonprofit, we provide expert consulting services to help organizations leverage AI for social good.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <PrimaryButton href="mailto:info@humanitarians.ai?subject=Consulting Inquiry">
+            <PrimaryButton href="mailto:hr@humanitarians.ai?subject=Consulting Inquiry">
               Request a Consultation
             </PrimaryButton>
             <SecondaryButton href="#services">
@@ -256,8 +257,8 @@ export default function ConsultingPage() {
                 </div>
               </div>
               <div className="mt-6 flex flex-wrap gap-4">
-                <PrimaryButton href="mailto:info@humanitarians.ai?subject=Consulting Inquiry">
-                  Contact Us at info@humanitarians.ai
+                <PrimaryButton href="mailto:hr@humanitarians.ai?subject=Consulting Inquiry">
+                  Contact Us at hr@humanitarians.ai
                 </PrimaryButton>
                 <SecondaryButton href="https://github.com/Humanitariansai">
                   View Our GitHub
@@ -274,7 +275,7 @@ export default function ConsultingPage() {
           <section>
             <h2 className="text-3xl font-bold mb-6">Transform Your Mission with AI</h2>
             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <PrimaryButton href="mailto:info@humanitarians.ai?subject=Consulting Inquiry">
+              <PrimaryButton href="mailto:hr@humanitarians.ai?subject=Consulting Inquiry">
                 Request a Consultation
               </PrimaryButton>
               <SecondaryButton href="/about">
@@ -284,6 +285,7 @@ export default function ConsultingPage() {
                 Explore Our Projects
               </PrimaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </section>
         </div>
       </div>

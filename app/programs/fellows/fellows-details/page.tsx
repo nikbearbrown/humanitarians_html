@@ -3,6 +3,7 @@ import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Fellows Program - Program Details - Humanitarians AI",
@@ -283,6 +284,7 @@ export default function FellowsDetailsPage() {
                 View GitHub Projects
               </PrimaryButton>
             </div>
+            <OpenHours className="mt-6" />
           </section>
         </div>
       </div>

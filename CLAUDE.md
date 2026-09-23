@@ -87,25 +87,82 @@ Rules:
   `adgrants/campaigns/*.json` (e.g. OPT) and claim their video slugs out of the playlist campaigns.
 - Slugs are pinned in `data/youtube/slugs.json`; a renamed video keeps its URL.
 
+## Typography — current state (facts, measured 2026-09-23)
+
+**Next.js app: one font, Inter.** Loaded in `app/layout.tsx` via `next/font/google` as `Inter({ subsets: ["latin"] })` (variable font, no weights pinned) and applied to `<body>` with `inter.className`. `tailwind.config.ts` defines no `fontFamily`, so `font-sans` and `font-mono` are Tailwind defaults. No other file in `app/` or `components/` imports `next/font` or sets `font-family`.
+
+**Standalone HTML under `public/` (236 files) loads its own fonts** — these pages do not inherit Inter:
+
+| Folder | Fonts loaded (Google Fonts unless noted) |
+|---|---|
+| `public/artifacts/*-tool.html` (≈40 files) | Inter; some also Playfair Display, EB Garamond, DM Serif Display, Spectral; Courier Prime for typewriter blocks |
+| `public/artifacts/*-reference.html` | Helvetica Neue / Arial stack (system); EB Garamond |
+| `public/ai1/simulations/` | Montserrat (33 files), Inter (11), Spectral (a few) |
+| `public/ai1/visualization/` | JetBrains Mono + Inter |
+| older tool pages | `'Courier New', monospace` (system, ~650 declarations) |
+
+Counts of Google Fonts `<link>` loads across `public/`: JetBrains Mono 60, Inter 49, Montserrat 33, Playfair Display 5, EB Garamond 5, Spectral 1, DM Serif Display 1.
+
+## Logos and wordmarks — files in `public/`
+
+| Path | What it is | Source |
+|---|---|---|
+| `public/logos/humanitarians/hai-monogram.svg` | Humanitarians AI "H/A" monogram, vector, fill `#171717`, 311×368 | `brutalist.art/logos/humanitarians/humanitarians-logo-1.svg` |
+| `public/logos/humanitarians/hai-wordmark.svg` | "HUMANITARIANS AI" wordmark, outlined paths (no live text), fill `#171717`, 1061×133 | `brutalist.art/runtime/remotion/public/hai-wordmark-outlined.svg` |
+| `public/logos/bear-brown/bear-brown-monogram.svg` | "BB" script monogram | `brutalist.art/logos/bear-brown/bear-brown-logo-1.svg` |
+| `public/logos/bear-brown/bear-brown-signature.svg` | "Bear Brown" signature | `brutalist.art/logos/bear-brown/bear-brown-logo-2.svg` |
+| `public/logos/musinique/musinique-logo-1.svg`, `-2.svg` | Musinique headphone "M", two versions | `brutalist.art/logos/musinique/` |
+| `public/logos/medhavy/` (44 files) | Medhavy "M" + book + circuit concepts, `medhavy-logo-NN` and `medhavy-selected-*` | `brutalist.art/logos/medhavy/` + `brutalist-art/logos/medhavy/` (retired tree) |
+| `public/svg-logos/Humanitarians_{black,white}_logo.svg` | older traced HAI logo, 7680×2497, ~260 KB each | pre-existing |
+| `public/svg-logos/NikBearBrown_*`, `bearbrown_*` | older traced Bear Brown logos | pre-existing |
+
+Medhavy drafts left out of `public/` because the name is misspelled or different: `medhavy-logo-01` ("Medhaay"), `-08` ("MEDHVAY"), `-30`–`-33` and `medhavy-selected-2-06`–`-09` ("sandamcat" / "SANDANCAT"). They remain in the toolkit. The toolkit also holds audio logo stings (`brutalist.art/logos/<brand>/*.mp3`) and Northeastern / SEIS marks (`logos/northeastern/`, `logos/seis/`); none were copied here.
+
 ## Color palette — HAI (Le Monde / walnut)
 
-This is the canonical palette going forward. All new pages and components must use these tokens.
+CSS variables are in `app/globals.css`; named Tailwind tokens (`obsidian`, `blood-red`, `warm-clay`, `dim-gray`, `mist`, `silver`) are in `tailwind.config.ts`. There are no `walnut` or `sky-faint` Tailwind tokens ("walnut" is the palette's name). `tailwind.config.ts` maps `chart-1`…`chart-5` and `sidebar-*` colors to CSS variables that `globals.css` does not define.
 
-| Token | Hex | Role | WCAG on bg |
+| Token | Hex | Mapped to | Contrast on white |
 |---|---|---|---|
-| `obsidian` | `#1B1B1B` | primary text | 17.22:1 AAA |
-| `blood-red` | `#7A0000` | buttons + danger/emphasis (→ `bg-primary`, `bg-destructive`) | 11.5:1 AAA |
-| `warm-clay` | `#A89068` | callout surface (→ `bg-accent`) | 3.06:1 AA large |
-| `dim-gray` | `#4A4D4F` | secondary accent | 8.52:1 AAA |
-| `mist` | `#797C7F` | muted text (→ `text-muted-foreground`) | 4.2:1 AA large |
-| `silver` | `#8F8F8F` | borders only (→ `border-silver`) | 3.23:1 AA large |
-| `pure-white` | `#FFFFFF` | page background (→ `bg-background`) | — |
+| `obsidian` | `#1B1B1B` | `--foreground` (`#1C1C1C`) | 17.2:1 |
+| `blood-red` | `#7A0000` | `--primary`, `--destructive`, `--ring` | 11.5:1 |
+| `dim-gray` | `#4A4D4F` | named token only (`text-dim-gray`, 50 uses) | 8.5:1 |
+| `warm-clay` | `#A89068` | `--accent` | 3.1:1 |
+| `mist` | `#797C7F` | nearest to `--muted-foreground`, which resolves to `#7D7D7D` | 4.2:1 (`#7D7D7D`: 4.1:1) |
+| `silver` | `#8F8F8F` | `--border`, `--input` | 3.2:1 |
+| `pure-white` | `#FFFFFF` | `--background` | — |
 
-**Section alt bg** uses `bg-muted` (→ `--muted: 38 40% 97%`, a warm-white tint derived from warm-clay). `silver` is a mid-gray border color — do not use it as a section or badge background.
+`--muted` / `--secondary` = `38 40% 97%` = `#FAF8F4` (section alt background). Dark mode (`.dark`): background `#171717`, card `#212121`, muted `#2B2B2B`, foreground `#F5F5F5`, muted-foreground `#A1A1A1`, primary `#B20000`, destructive `#C20000`, accent `#645640`, border `#4C4C4C`, ring `#B20000`.
 
-CSS variables are defined in `app/globals.css`. Named Tailwind tokens (`bg-walnut`, `bg-sky-faint`, `bg-silver`, etc.) are available via `tailwind.config.ts`.
+**Avoid hardcoding hex values.** Use semantic tokens (`bg-primary`, `text-muted-foreground`, `bg-destructive`) or named palette tokens instead.
 
-**Avoid hardcoding hex values.** Use semantic tokens (`bg-primary`, `text-muted-foreground`, `bg-destructive`) or named palette tokens (`bg-walnut`, `bg-silver`, `bg-sky-faint`) instead.
+## Accessibility — WCAG facts (measured 2026-09-23)
+
+Ratios are computed from the resolved CSS variables (sRGB relative luminance). WCAG 2.2 AA thresholds: normal text 4.5:1; large text (≥ 24px, or ≥ 18.66px bold) 3:1; non-text UI such as input borders and focus rings 3:1.
+
+| Pair | Light | Dark |
+|---|---|---|
+| `foreground` on `background` | 17.0:1 pass | 16.4:1 pass |
+| `foreground` on `muted` | 16.1:1 pass | 12.9:1 pass |
+| `primary-foreground` on `primary` (buttons) | 11.5:1 pass | 7.2:1 pass |
+| `accent-foreground` on `accent` | 5.5:1 pass | 6.5:1 pass |
+| `muted-foreground` on `background` | 4.1:1 — large text only | 6.9:1 pass |
+| `muted-foreground` on `muted` | 3.9:1 — large text only | 5.4:1 pass |
+| `primary` as text/link on `background` | 11.5:1 pass | 2.5:1 fail |
+| `ring` (focus) on `background` | 11.5:1 pass | 2.5:1 fail |
+| `border` / `input` on `background` | 3.2:1 pass | 2.1:1 fail |
+
+The `globals.css` comment says `accent-foreground` on warm-clay is 4.9:1; measured is 5.5:1.
+
+**Codebase counts (`app/` + `components/`):**
+- `text-muted-foreground`: 1,000 uses; 385 of them on the same element as `text-sm` or `text-xs`.
+- `text-primary`: 419 uses.
+- `<html lang="en">` is set in `app/layout.tsx`.
+- `<main>` appears in 2 files. No skip-to-content link exists.
+- `focus-visible:` utilities: 73 uses. 24 files use `outline-none` without any `focus-visible:` style.
+- `prefers-reduced-motion` / `motion-reduce:` / `motion-safe:`: 0 uses.
+- `<iframe>`: 90, of which 81 have no `title`.
+- `<img>` without `alt`: 10. `next/image` is imported in 37 files.
 
 ## Key patterns
 
@@ -115,6 +172,8 @@ CSS variables are defined in `app/globals.css`. Named Tailwind tokens (`bg-walnu
 - **Grid layouts**: Typically `lg:grid-cols-3` (1+2 split for text+video) or `md:grid-cols-2` (card grids)
 - **Links**: Internal = Next.js `Link`, external = `<a>` with `target="_blank" rel="noopener noreferrer"`
 - **Path alias**: `@/*` maps to project root
+- **Primary email**: `hr@humanitarians.ai` is the one address used across `app/` and `components/` (info@ and contact@ were replaced 2026-09-23). Personal addresses in `public/` reports and tools, the Ad Grants files, and synced YouTube descriptions in `data/youtube/videos.json` were not changed.
+- **Email hours ("When We're Open")**: Monday to Wednesday, business hours; the board is 100% volunteer. The wording lives in `components/OpenHours.tsx`, which is placed under the last humanitarians.ai email on all 34 pages that show one (inserted by `scripts/add_open_hours.py`, dry run by default, `--apply` to write). `/contact` has its own full "When We're Open" card (second section), and `components/Footer/Footer.tsx` has a one-line version.
 
 ## Environment variables
 

@@ -3,6 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "OpenAI Nik Bear Brown",
@@ -71,8 +72,9 @@ export default function OpenAIPage() {
     <div className="mt-8">
       <h3 className="text-2xl font-bold mb-4">How We Built It</h3>
       <p>
-        This page links to Github repositories and YouTube videos on the Humanitarians AI and Nik Bear Brown channels that cover the technical details of implementation. For each project, we provide step-by-step guides, code examples, and best practices. If you need help building anything covered here, reach out to info@humanitarians.ai for assistance and collaboration opportunities.
+        This page links to Github repositories and YouTube videos on the Humanitarians AI and Nik Bear Brown channels that cover the technical details of implementation. For each project, we provide step-by-step guides, code examples, and best practices. If you need help building anything covered here, reach out to hr@humanitarians.ai for assistance and collaboration opportunities.
       </p>
+      <OpenHours className="mt-6" />
     </div>
     
     <div className="mt-8">

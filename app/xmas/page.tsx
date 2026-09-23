@@ -4,6 +4,7 @@ import Link from "next/link";
 import PrimaryButton from "@/components/ui/primary-button";
 import SecondaryButton from "@/components/ui/secondary-button";
 import VideoThumbnail from "@/components/VideoThumbnail/VideoThumbnail";
+import OpenHours from "@/components/OpenHours"
 
 export const metadata: Metadata = {
   title: "Lyrical Literacy Christmas Songs - Humanitarians AI",
@@ -286,12 +287,13 @@ export default function Xmas() {
               <p className="text-muted-foreground mb-4">For more information about our Christmas music tools</p>
               <div className="flex flex-wrap justify-center gap-4 mt-4">
                 <a 
-                  href="mailto:info@humanitarians.ai"
+                  href="mailto:hr@humanitarians.ai"
                   className="text-sm text-primary hover:underline"
                 >
-                  Email: info@humanitarians.ai
+                  Email: hr@humanitarians.ai
                 </a>
               </div>
+              <OpenHours className="mt-6" />
             </div>
           </section>
         </div>
