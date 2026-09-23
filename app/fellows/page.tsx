@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import PrimaryButton from "@/components/ui/primary-button"
 import SecondaryButton from "@/components/ui/secondary-button"
 import Link from "next/link"
-import { Film, Eye, Mail, FlaskConical, MailX, NotebookPen, CalendarDays, FolderGit2, ShieldCheck, Lightbulb, GitCommitHorizontal, Bot } from "lucide-react"
-import OpenHours from "@/components/OpenHours"
+import { Film, Eye, Mail, FlaskConical, MailX, NotebookPen, CalendarDays, FolderGit2, ShieldCheck, Lightbulb, GitCommitHorizontal, Bot, Clock } from "lucide-react"
 
 export const metadata: Metadata = {
   title: "Fellows Program - Humanitarians AI",
@@ -111,7 +110,22 @@ export default function FellowsPage() {
               <SecondaryButton href={BRUTALIST_PLAYLIST}>Watch the Brutalist Tutorials</SecondaryButton>
               <SecondaryButton href="/projects">View Projects</SecondaryButton>
             </div>
-            <OpenHours className="mt-6" />
+          </div>
+
+          {/* When We're Open card */}
+          <div className="p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
+            <h2 className="flex items-center gap-3 text-2xl font-bold mb-4">
+              <Clock className="w-7 h-7 shrink-0 text-primary" aria-hidden="true" />
+              When We&apos;re Open
+            </h2>
+            <p className="text-xl font-bold mb-4">Monday to Wednesday, business hours</p>
+            <p className="mb-4">
+              The Board of Humanitarians AI is 100% volunteer and has other obligations. Only expect responses to email
+              requests sent Monday to Wednesday during business hours.
+            </p>
+            <p>
+              <strong>If you need something, plan ahead.</strong>
+            </p>
           </div>
 
           {/* Email policy card */}

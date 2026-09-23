@@ -173,7 +173,7 @@ The `globals.css` comment says `accent-foreground` on warm-clay is 4.9:1; measur
 - **Links**: Internal = Next.js `Link`, external = `<a>` with `target="_blank" rel="noopener noreferrer"`
 - **Path alias**: `@/*` maps to project root
 - **Primary email**: `hr@humanitarians.ai` is the one address used across `app/` and `components/` (info@ and contact@ were replaced 2026-09-23). Personal addresses in `public/` reports and tools, the Ad Grants files, and synced YouTube descriptions in `data/youtube/videos.json` were not changed.
-- **Email hours ("When We're Open")**: Monday to Wednesday, business hours; the board is 100% volunteer. The wording lives in `components/OpenHours.tsx`, which is placed under the last humanitarians.ai email on all 34 pages that show one (inserted by `scripts/add_open_hours.py`, dry run by default, `--apply` to write). `/contact` has its own full "When We're Open" card (second section), and `components/Footer/Footer.tsx` has a one-line version.
+- **Email hours ("When We're Open")**: Monday to Wednesday, business hours; the board is 100% volunteer. The wording lives in `components/OpenHours.tsx`, which is placed under the last humanitarians.ai email on the 33 other pages that show one (inserted by `scripts/add_open_hours.py`, dry run by default, `--apply` to write). `/contact` and `/fellows` instead have a full "When We're Open" card as their second card, and `components/Footer/Footer.tsx` has a one-line version.
 
 ## Environment variables
 
