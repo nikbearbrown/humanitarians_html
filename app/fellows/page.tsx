@@ -112,6 +112,49 @@ export default function FellowsPage() {
             </div>
           </div>
 
+          {/* Application and OPT agreement information */}
+          <div className="p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
+            <h2 className="text-2xl font-bold mb-4">Application and OPT Agreement Information</h2>
+
+            <h3 className="text-lg font-bold mb-3">What to include with your application</h3>
+            <p className="text-muted-foreground mb-6">
+              Please provide a resume, LinkedIn profile, and/or portfolio link when you apply.
+            </p>
+
+            <h3 className="text-lg font-bold mb-3">Important information for OPT volunteers</h3>
+            <ul className="list-disc space-y-3 pl-6 mb-6 text-muted-foreground marker:text-primary">
+              <li>
+                Agreement dates begin after you have been approved for a project and we receive a copy of your valid,
+                physical Employment Authorization Document (EAD) card and a valid form of identification.
+              </li>
+              <li>
+                Initial agreements are for one month. If a renewal is approved, subsequent agreements run for two to
+                three months. Volunteers are solely responsible for tracking their agreement dates and requesting
+                renewals on time.
+              </li>
+              <li>
+                For SEVP reporting guidance, contact Northeastern University&apos;s Office of Global Services (OGS) or
+                your school&apos;s international student office.
+              </li>
+              <li>
+                Our business address will appear on your agreement. We do not have a phone number to provide.
+              </li>
+              <li>
+                This is a part-time, volunteer role. We currently provide agreements for OPT only, not STEM OPT.
+              </li>
+              <li>
+                We recommend that you do not perform volunteer work until your agreement is active and your physical
+                EAD card is in hand and valid.
+              </li>
+              <li>We do not backdate agreements for any reason.</li>
+            </ul>
+
+            <p className="text-sm text-muted-foreground">
+              Humanitarians AI cannot provide immigration advice. Confirm your individual reporting and eligibility
+              requirements with your school&apos;s international student office.
+            </p>
+          </div>
+
           {/* When We're Open card */}
           <div className="p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
             <h2 className="flex items-center gap-3 text-2xl font-bold mb-4">
