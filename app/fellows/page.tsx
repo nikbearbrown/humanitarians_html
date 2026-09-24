@@ -109,8 +109,90 @@ export default function FellowsPage() {
               <PrimaryButton href="mailto:hr@humanitarians.ai">Email hr@humanitarians.ai</PrimaryButton>
               <SecondaryButton href={BRUTALIST_PLAYLIST}>Watch the Brutalist Tutorials</SecondaryButton>
               <SecondaryButton href="/projects">View Projects</SecondaryButton>
+              <SecondaryButton href="#requesting-renewals">Requesting a Renewal</SecondaryButton>
             </div>
           </div>
+
+          <section id="requesting-renewals" aria-labelledby="renewals-heading" className="scroll-mt-24 p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
+            <h2 id="renewals-heading" className="text-2xl font-bold mb-4">Requesting a Fellowship Renewal</h2>
+            <p className="text-muted-foreground mb-4">
+              Send your renewal request to <a href="mailto:hr@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">hr@humanitarians.ai</a> before
+              your current agreement expires, Monday to Wednesday during business hours. Renewals require approval;
+              agreements are not backdated.
+            </p>
+            <p className="mb-6">
+              Professor Bear needs a short executive summary: <strong>What did you accomplish? Are your weekly
+              hours documented? Where is the evidence?</strong> Put the summary in the email itself so the reviewer
+              can assess your request without searching through folders or previous messages.
+            </p>
+
+            <h3 className="text-lg font-bold mb-3">What to include</h3>
+            <ol className="list-decimal space-y-3 pl-6 mb-6 text-muted-foreground marker:text-primary">
+              <li><strong className="text-foreground">Your request:</strong> name, project, current agreement end date,
+                reporting period, and requested renewal dates.</li>
+              <li><strong className="text-foreground">Two or three completed results:</strong> describe what you delivered,
+                your personal contribution, and link each result to an artifact.</li>
+              <li><strong className="text-foreground">Actual hours for each week:</strong> link dated work records and
+                identify any week below 20 hours or with missing records. A monthly average can hide gaps.</li>
+              <li><strong className="text-foreground">Videos and Frictional logs:</strong> provide direct links to each
+                required video, the relevant <a href="#frictional-logs" className="underline underline-offset-4 hover:text-primary">dated log entry</a>,
+                and supporting work such as commits, documents, review notes, or demonstrations.</li>
+              <li><strong className="text-foreground">Your next steps:</strong> a clear research or project plan with
+                specific deliverables and target dates, plus any unresolved issues.</li>
+            </ol>
+
+            <div className="rounded-lg border bg-background dark:bg-neutral-800 p-4 md:p-6 mb-6">
+              <h3 className="text-lg font-bold mb-3">Copy this email format</h3>
+              <div className="space-y-3 text-sm break-words">
+                <p><strong>Subject:</strong> Fellowship renewal — [Name] — [Project] — [Requested dates]</p>
+                <p><strong>Request:</strong> Please renew my fellowship from [date] through [date]. My current agreement
+                  ends [date]. This summary covers [reporting dates].</p>
+                <p><strong>Completed:</strong> [Two or three results, your contribution, and a direct evidence link for each.]</p>
+                <p><strong>Hours status:</strong> [20+ hours documented for every reported week / exceptions / incomplete records.]</p>
+                <p><strong>Degree relevance and supervision:</strong> [How the work relates to your degree; supervisor
+                  name and available review or feedback evidence.]</p>
+                <p><strong>Authorization:</strong> [Authorization type and dates; current agreement dates. Send sensitive
+                  documents privately to HR, never in public logs.]</p>
+                <p><strong>Next period:</strong> [Deliverable and target date.]</p>
+                <p><strong>Outstanding issues:</strong> [Missing evidence, unfinished work, or other exceptions; otherwise None.]</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border mb-4">
+              <table className="w-full min-w-[600px] text-sm text-left">
+                <caption className="text-left font-semibold p-4">Weekly evidence index — include one row for every week in the reporting period</caption>
+                <thead className="bg-background dark:bg-neutral-800">
+                  <tr>
+                    <th scope="col" className="p-3">Week / dates</th>
+                    <th scope="col" className="p-3">Actual hours</th>
+                    <th scope="col" className="p-3">Video links</th>
+                    <th scope="col" className="p-3">Log and work evidence</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted-foreground">
+                  <tr className="border-t">
+                    <td className="p-3">[Date range]</td>
+                    <td className="p-3">[Hours worked]</td>
+                    <td className="p-3">[STEM/AI video] · [Progress video]</td>
+                    <td className="p-3">[Dated log] · [Commit, document, or artifact]</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Make evidence one click away. Use descriptive link titles with dates, check viewing permissions, and
+              link to the specific item rather than a repository homepage or folder. During the trial month, include
+              both required videos for each week. A finished video or commit demonstrates an output; pair it with
+              dated records of tasks and time worked to document hours. Report gaps honestly.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              For post-completion OPT, document at least 20 hours of qualifying work per week. Hours alone do not
+              establish full OPT compliance: the work must relate to your degree and meet applicable authorization,
+              reporting, and employment requirements. Humanitarians AI provides agreements for OPT, not STEM OPT.
+              Confirm individual requirements with your school&apos;s international student office. See{" "}
+              <a href="https://www.ice.gov/doclib/sevis/pdf/opt_policy_guidance_042010.pdf" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-primary">SEVP guidance, section 7.2.1</a>.
+            </p>
+          </section>
 
           {/* Application and OPT agreement information */}
           <div className="p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
