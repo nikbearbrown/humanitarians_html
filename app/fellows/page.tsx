@@ -116,14 +116,18 @@ export default function FellowsPage() {
           <section id="requesting-renewals" aria-labelledby="renewals-heading" className="scroll-mt-24 p-6 md:p-8 border border-l-4 border-l-primary rounded-lg bg-muted dark:bg-neutral-900 mb-8">
             <h2 id="renewals-heading" className="text-2xl font-bold mb-4">Requesting a Fellowship Renewal</h2>
             <p className="text-muted-foreground mb-4">
-              Send your renewal request to <a href="mailto:hr@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">hr@humanitarians.ai</a> before
+              Send your renewal request to <a href="mailto:hr@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">hr@humanitarians.ai</a> and{" "}
+              <a href="mailto:bear@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">bear@humanitarians.ai</a> before
               your current agreement expires, Monday to Wednesday during business hours. Renewals require approval;
               agreements are not backdated.
             </p>
             <p className="mb-6">
               Professor Bear needs a short executive summary: <strong>What did you accomplish? Are your weekly
-              hours documented? Where is the evidence?</strong> Put the summary in the email itself so the reviewer
-              can assess your request without searching through folders or previous messages.
+              hours documented? Where is the evidence?</strong> Save your renewal report as a Markdown file in your own{" "}
+              <a href="https://github.com/nikbearbrown/humanitarians-youtube/tree/main/fellows" className="underline underline-offset-4 hover:text-primary">fellows folder</a>.
+              Email both recipients a short summary and a direct link to that report. Professor Bear is very busy and
+              will not hunt through folders, playlists, or previous messages for evidence. Writing the clear report
+              and making every supporting video, log, and artifact easy to open is the Fellow’s responsibility.
             </p>
 
             <h3 className="text-lg font-bold mb-3">What to include</h3>
@@ -144,7 +148,9 @@ export default function FellowsPage() {
             <div className="rounded-lg border bg-background dark:bg-neutral-800 p-4 md:p-6 mb-6">
               <h3 className="text-lg font-bold mb-3">Copy this email format</h3>
               <div className="space-y-3 text-sm break-words">
+                <p><strong>To:</strong> hr@humanitarians.ai; bear@humanitarians.ai</p>
                 <p><strong>Subject:</strong> Fellowship renewal — [Name] — [Project] — [Requested dates]</p>
+                <p><strong>Markdown renewal report:</strong> [Direct GitHub link to the report in your fellows folder.]</p>
                 <p><strong>Request:</strong> Please renew my fellowship from [date] through [date]. My current agreement
                   ends [date]. This summary covers [reporting dates].</p>
                 <p><strong>Completed:</strong> [Two or three results, your contribution, and a direct evidence link for each.]</p>
