@@ -149,6 +149,7 @@ export default function FellowsPage() {
               <h3 className="text-lg font-bold mb-3">Copy this email format</h3>
               <div className="space-y-3 text-sm break-words">
                 <p><strong>To:</strong> hr@humanitarians.ai; bear@humanitarians.ai</p>
+                <p><strong>CC:</strong> Your current Project Manager who you report to</p>
                 <p><strong>Subject:</strong> Fellowship renewal — [Name] — [Project] — [Requested dates]</p>
                 <p><strong>Markdown renewal report:</strong> [Direct GitHub link to the report in your fellows folder.]</p>
                 <p><strong>Request:</strong> Please renew my fellowship from [date] through [date]. My current agreement
