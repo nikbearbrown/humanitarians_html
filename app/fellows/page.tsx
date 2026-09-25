@@ -121,6 +121,11 @@ export default function FellowsPage() {
               your current Project Manager (the person you report to) on CC, before your current agreement expires, Monday to Wednesday during business hours. Renewals require approval;
               agreements are not backdated.
             </p>
+            <p className="text-muted-foreground mb-4">
+              Before you send your request, watch the renewal videos in the{" "}
+              <a href="https://www.youtube.com/playlist?list=PLLvEy8b-oJSI" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 text-foreground hover:text-primary">Fellows playlist on YouTube</a>:
+              how to submit a renewal request, and how to organize your fellows folder.
+            </p>
             <p className="mb-6">
               Professor Bear needs a short executive summary: <strong>What did you accomplish? Are your weekly
               hours documented? Where is the evidence?</strong> Save your renewal report as a Markdown file in your own{" "}
