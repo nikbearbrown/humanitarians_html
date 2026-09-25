@@ -117,8 +117,8 @@ export default function FellowsPage() {
             <h2 id="renewals-heading" className="text-2xl font-bold mb-4">Requesting a Fellowship Renewal</h2>
             <p className="text-muted-foreground mb-4">
               Send your renewal request to <a href="mailto:hr@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">hr@humanitarians.ai</a> and{" "}
-              <a href="mailto:bear@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">bear@humanitarians.ai</a> before
-              your current agreement expires, Monday to Wednesday during business hours. Renewals require approval;
+              <a href="mailto:bear@humanitarians.ai" className="underline underline-offset-4 text-foreground hover:text-primary">bear@humanitarians.ai</a>, with
+              your current Project Manager (the person you report to) on CC, before your current agreement expires, Monday to Wednesday during business hours. Renewals require approval;
               agreements are not backdated.
             </p>
             <p className="mb-6">
