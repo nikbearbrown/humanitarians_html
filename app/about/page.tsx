@@ -129,7 +129,7 @@ export default function AboutPage() {
                 <div className="p-6 border rounded-lg text-center">
                   {/* <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div> */}
                   <h3 className="text-xl font-bold mb-2">Shesh Narayan Gupta</h3>
-                  <p className="text-muted-foreground">Member, Board of Directors</p>
+                  <p className="text-muted-foreground">Executive Board Member</p>
                 </div>
 
                 {/* Robert Cole Harris */}

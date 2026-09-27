@@ -23,8 +23,8 @@ export const leadership: LeadershipMember[] = [
   },
   {
     name: "Shesh Narayan Gupta",
-    role: "Member, Board of Directors",
-    bio: "Shesh Narayan Gupta is a Senior Manager of Data Science at Capital One, a published researcher, and an author working at the intersection of data science, generative AI, and interactive storytelling. He wrote Generative AI for Game Development: Crafting Narrative Worlds with Machines and supports Humanitarians AI as a member of its Board of Directors.",
+    role: "Executive Board Member",
+    bio: "Shesh Narayan Gupta is a Senior Manager of Data Science at Capital One, a published researcher, and an author working at the intersection of data science, generative AI, and interactive storytelling. He wrote Generative AI for Game Development: Crafting Narrative Worlds with Machines and supports Humanitarians AI as an Executive Board Member.",
     imageUrl: "/people/shesh-narayan-gupta.jpg",
     linkedinUrl: "https://www.linkedin.com/in/shesh-narayan-gupta/",
   },
