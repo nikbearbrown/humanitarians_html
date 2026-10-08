@@ -31,14 +31,6 @@ const clients = [
     linkLabel: "Visit Medhavy",
   },
   {
-    name: "The National Loon Center",
-    status: "Coming Fall 2026",
-    description:
-      "The National Loon Center Foundation in Crosslake, Minnesota is dedicated to protecting loons and preserving the freshwater they depend on. We look forward to beginning work with their team this fall.",
-    link: "https://www.nationallooncenter.org/",
-    linkLabel: "Visit the National Loon Center",
-  },
-  {
     name: "Lyrical Literacy Client",
     status: "Coming Fall 2026",
     description:
