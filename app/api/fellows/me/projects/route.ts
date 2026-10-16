@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const rows = await sql`
-      SELECT p.id, p.name
+      SELECT p.id, p.name, fp.role
       FROM projects p
       JOIN fellow_projects fp ON fp.project_id = p.id
       WHERE fp.fellow_id = ${fellow.id}

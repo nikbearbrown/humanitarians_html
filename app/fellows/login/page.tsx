@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,13 @@ export default function FellowLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [notice, setNotice] = useState('')
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('reset') === 'done') {
+      setNotice('Your password was changed. Sign in with the new one.')
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -27,7 +34,9 @@ export default function FellowLoginPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Login failed')
-      router.push('/fellows/me')
+      // Back to the page that sent them here (e.g. /ledger), if it is on this site.
+      const next = new URLSearchParams(window.location.search).get('next') || ''
+      router.push(next.startsWith('/') && !next.startsWith('//') ? next : '/fellows/me')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password')
     } finally {
@@ -43,6 +52,12 @@ export default function FellowLoginPage() {
           <p className="text-sm text-muted-foreground mb-8">
             Sign in with the credentials provided by HR.
           </p>
+
+          {notice && (
+            <div className="rounded-md bg-muted p-3 text-sm mb-4">
+              {notice}
+            </div>
+          )}
 
           {error && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
@@ -64,7 +79,12 @@ export default function FellowLoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link href="/fellows/forgot-password" className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
