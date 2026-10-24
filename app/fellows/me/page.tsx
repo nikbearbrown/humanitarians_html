@@ -12,6 +12,7 @@ import { Linkedin } from 'lucide-react'
 interface ProjectOption {
   id: string
   name: string
+  role?: 'fellow' | 'pm'
 }
 
 interface ReportEntry {
@@ -210,7 +211,12 @@ export default function FellowDashboard() {
         <div className="container px-4 md:px-6 mx-auto max-w-2xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold tracking-tighter">My Profile</h1>
-            <Button variant="outline" size="sm" onClick={handleLogout}>Sign Out</Button>
+            <div className="flex gap-2">
+              {myProjects.some((p) => p.role === 'pm') && (
+                <Button asChild variant="outline" size="sm"><Link href="/ledger">Project Ledger</Link></Button>
+              )}
+              <Button variant="outline" size="sm" onClick={handleLogout}>Sign Out</Button>
+            </div>
           </div>
 
           {/* Preview card */}
