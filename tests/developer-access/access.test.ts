@@ -1,3 +1,4 @@
+import { permitMemberLogin, loginAccountHash } from '../../lib/member-login-limit'
 import { assertDatabaseEnvironment } from '../../lib/db'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
@@ -223,4 +224,51 @@ test('logout while role feature is disabled permanently revokes copied cookie',a
   assert.equal(response.status,200)
  } finally {process.env.DEVELOPER_ACCESS_ENABLED='true'}
  assert.equal(await resolveDeveloper(token,query),null)
+})
+
+
+test('logout failure retains both cookie deletions and reports unconfirmed server revocation',async()=>{
+ const token=(await issueDeveloperSession(developer,passwordHash,query))!
+ await db.exec('ALTER TABLE developer_sessions RENAME TO developer_sessions_unavailable')
+ try {
+  const response=await logout(req('/api/fellows/auth/logout','POST',{}, {cookie:'developer_session='+token}))
+  assert.equal(response.status,503)
+  for(const name of ['developer_session','fellow_session']) {
+   assert.equal(response.cookies.get(name)?.value,'')
+   assert.equal(response.cookies.get(name)?.maxAge,0)
+  }
+  assert.match((await response.json()).error,/revocation could not be confirmed/)
+ } finally {await db.exec('ALTER TABLE developer_sessions_unavailable RENAME TO developer_sessions')}
+ await revokeDeveloperSession(token,query)
+})
+
+test('application database clients cannot bypass the shared preview isolation gate',async()=>{
+ async function walk(dir:string):Promise<string[]> {const entries=await readdir(dir,{withFileTypes:true});return (await Promise.all(entries.map(e=>e.isDirectory()?walk(dir+'/'+e.name):Promise.resolve([dir+'/'+e.name])))).flat()}
+ for(const path of [...await walk('app'),...await walk('lib')].filter(f=>/\.tsx?$/.test(f)&&f!=='lib/db.ts')) {
+  const source=await readFile(path,'utf8')
+  assert.doesNotMatch(source,/\bneon\s*\(|\bnew\s+(?:Pool|Client)\s*\(/,path)
+ }
+})
+
+
+test('durable login window limits repeated unknown-account attempts without revealing account existence',async()=>{
+ const email=randomUUID()+'@example.org'
+ for(let i=0;i<10;i++) assert.equal((await login(req('/api/fellows/auth/login','POST',{email,password:'incorrect'}))).status,401)
+ const blocked=await login(req('/api/fellows/auth/login','POST',{email,password:'incorrect'}))
+ assert.equal(blocked.status,429);assert.equal(blocked.headers.get('retry-after'),'900')
+ const key=loginAccountHash(email)
+ assert.equal(await permitMemberLogin(email.toUpperCase(),query),false)
+ await db.query("UPDATE member_login_windows SET window_start=now()-interval '16 minutes' WHERE account_hash=$1",[key])
+ assert.equal(await permitMemberLogin(email,query),true)
+ assert.equal((await db.query<{attempts:number}>('SELECT attempts FROM member_login_windows WHERE account_hash=$1',[key])).rows[0].attempts,1)
+})
+
+test('malformed login inputs are rejected and unavailable throttle fails closed',async()=>{
+ for(const body of [{email:[],password:'test'},{email:'test@example.org',password:{}},{email:'x'.repeat(255),password:'test'}]) assert.equal((await login(req('/api/fellows/auth/login','POST',body))).status,400)
+ await db.exec('ALTER TABLE member_login_windows RENAME TO member_login_windows_unavailable')
+ try {
+  const response=await login(req('/api/fellows/auth/login','POST',{email:member+'@example.org',password:'synthetic-test-only-password'}))
+  assert.equal(response.status,500);assert.equal(response.cookies.get('developer_session'),undefined)
+  assert.doesNotMatch(JSON.stringify(await response.json()),/relation|member_login_windows/)
+ } finally {await db.exec('ALTER TABLE member_login_windows_unavailable RENAME TO member_login_windows')}
 })

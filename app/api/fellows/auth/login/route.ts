@@ -2,14 +2,20 @@ import { attachDeveloperSession, clearDeveloperSession } from '@/lib/dashboard-a
 import { sameOriginMutation } from '@/lib/developer-access-core'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
+import { permitMemberLogin } from '@/lib/member-login-limit'
+import type { Query } from '@/lib/developer-access-core'
 import { verifyPassword, createFellowSession } from '@/lib/fellow-auth'
 
 export async function POST(req: NextRequest) {
   if (!sameOriginMutation(req)) return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
   try {
     const { email, password } = await req.json()
-    if (!email || !password) {
+    if (typeof email !== 'string' || !email || email.length > 254 || typeof password !== 'string' || !password || password.length > 1024) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+    }
+
+    if (process.env.DEVELOPER_ACCESS_ENABLED === 'true' && !await permitMemberLogin(email, sql as unknown as Query)) {
+      return NextResponse.json({ error: 'Too many sign-in attempts. Please try again in 15 minutes.' }, { status: 429, headers: { 'Retry-After': '900' } })
     }
 
     const rows = await sql`
@@ -32,7 +38,7 @@ export async function POST(req: NextRequest) {
     return res
   } catch (error: unknown) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Server error' },
+      { error: 'Sign-in is temporarily unavailable. Please try again later.' },
       { status: 500 }
     )
   }

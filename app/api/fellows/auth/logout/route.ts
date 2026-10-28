@@ -8,6 +8,11 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ success: true })
   clearFellowSession(res)
   try { await clearDeveloperSession(req, res) }
-  catch { return NextResponse.json({ error: 'Could not revoke dashboard session. Try signing out again.' }, { status: 503 }) }
+  catch {
+    const failed = NextResponse.json({ error: 'Browser sign-out completed, but server session revocation could not be confirmed. Contact an administrator if you suspect another copy of this session is in use.' }, { status: 503 })
+    // Keep both deletion headers even when the database cannot revoke a copied token.
+    for (const cookie of res.cookies.getAll()) failed.cookies.set(cookie)
+    return failed
+  }
   return res
 }

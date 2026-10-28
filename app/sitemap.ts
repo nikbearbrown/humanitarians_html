@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
-import { neon } from '@neondatabase/serverless'
+import { sql as db } from '@/lib/db'
 import videoData from '@/data/youtube/videos.json'
 import playlistData from '@/data/youtube/playlists.json'
 
@@ -45,7 +45,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const db = neon(process.env.DATABASE_URL!)
 
     // Blog posts
     const blogPosts = await db`

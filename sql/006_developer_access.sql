@@ -59,4 +59,10 @@ CREATE FUNCTION protect_developer_audit() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN RAISE EXCEPTION 'Developer audit is append-only'; END $$;
 CREATE TRIGGER developer_audit_immutable BEFORE UPDATE OR DELETE ON developer_access_audit
  FOR EACH ROW EXECUTE FUNCTION protect_developer_audit();
+-- Durable, atomic per-account login window; no raw email or network address stored.
+CREATE TABLE member_login_windows (
+ account_hash text PRIMARY KEY CHECK (account_hash ~ '^[a-f0-9]{64}$'),
+ window_start timestamptz NOT NULL,
+ attempts integer NOT NULL CHECK (attempts BETWEEN 1 AND 11)
+);
 COMMIT;

@@ -13,6 +13,8 @@
     "../../middleware.ts",
     "./*.ts",
     "../../app/fellows/login/page.tsx",
+    "../../app/fellows/me/page.tsx",
+    "../../app/sitemap.ts",
     "../../app/blog/[slug]/page.tsx",
     "../../app/substack/[section]/[slug]/page.tsx",
     "../../app/tools/[slug]/page.tsx",
