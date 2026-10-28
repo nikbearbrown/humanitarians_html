@@ -214,3 +214,13 @@ test('preview refuses an inherited database until isolation has been explicitly 
   if(isolated===undefined) delete process.env.ISOLATED_STAGING_DATABASE;else process.env.ISOLATED_STAGING_DATABASE=isolated
  }
 })
+
+test('logout while role feature is disabled permanently revokes copied cookie',async()=>{
+ const token=(await issueDeveloperSession(developer,passwordHash,query))!
+ process.env.DEVELOPER_ACCESS_ENABLED='false'
+ try {
+  const response=await logout(req('/api/fellows/auth/logout','POST',{}, {cookie:'developer_session='+token}))
+  assert.equal(response.status,200)
+ } finally {process.env.DEVELOPER_ACCESS_ENABLED='true'}
+ assert.equal(await resolveDeveloper(token,query),null)
+})

@@ -35,5 +35,7 @@ export async function attachDeveloperSession(id: string, verifiedHash: string, r
 }
 export async function clearDeveloperSession(req: NextRequest, res: NextResponse) {
   res.cookies.set(DEVELOPER_COOKIE, '', { ...cookieOptions, maxAge: 0 });
-  if (enabled()) await revokeDeveloperSession(req.cookies.get(DEVELOPER_COOKIE)?.value, db);
+  // Turning authorization off must not suspend logout/revocation. Otherwise an
+  // old copied cookie would become valid again when the flag is re-enabled.
+  await revokeDeveloperSession(req.cookies.get(DEVELOPER_COOKIE)?.value, db);
 }
