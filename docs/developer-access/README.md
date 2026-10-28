@@ -60,3 +60,10 @@ Rollback: disable `DEVELOPER_ACCESS_ENABLED`, redeploy the previous reviewed pro
 Source access is a separate GitHub collaborator permission. Repository authorship or an app role does not prove collaborator access. Give a developer the reviewed source branch and synthetic fixture/test workflow first. A production dashboard role is for deliberate site operations, not required to implement or test the timesheet. The unpublished timesheet branch still needs its own review/migration/rollout; this role must not be treated as supervisor approval authority. The two branches touch Ledger authorization, so their eventual integration needs an explicit review rather than a blind merge.
 
 Sanitizer guidance: https://github.com/cure53/DOMPurify (server use with current jsdom; sanitize before rendering and do not subsequently introduce unsafe markup).
+
+
+## Staging environment discovery (2026-10-28)
+
+Vercel project `humanitarians-html` has Node 22.x and protects all previews with Vercel Authentication. The existing `DATABASE_URL`, owner password and fellow-session secret environment entries target Production, Preview and Development together; no custom staging environment was configured. We did not decrypt or copy these credentials. This is not an isolated synthetic-test database.
+
+Preview SQL access now fails closed unless `ISOLATED_STAGING_DATABASE=true` is configured **after** verifying a separate synthetic database and branch-specific credentials. Do not set this flag merely to silence an error. Branch publication can build a protected preview, but database-backed flows remain unavailable until isolation is established. Do not test account creation, role grants or migration against inherited production data.

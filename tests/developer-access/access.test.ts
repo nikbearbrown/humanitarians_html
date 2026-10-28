@@ -1,3 +1,4 @@
+import { assertDatabaseEnvironment } from '../../lib/db'
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { readFile, readdir } from 'node:fs/promises'
@@ -200,4 +201,16 @@ test('developer without PM assignment can read Ledger but cannot edit or forge s
  assert.ok([401,403].includes(write.status))
  await assert.rejects(saveLedgerProject(project,{}, {fellowId:id,name:'Synthetic reader',admin:true,readOnly:true}),/read-only/)
  assert.deepEqual(await snapshot(),before)
+})
+
+test('preview refuses an inherited database until isolation has been explicitly verified',()=>{
+ const prior=process.env.VERCEL_ENV, isolated=process.env.ISOLATED_STAGING_DATABASE
+ try {
+  process.env.VERCEL_ENV='preview';delete process.env.ISOLATED_STAGING_DATABASE
+  assert.throws(()=>assertDatabaseEnvironment(),/isolated staging/)
+  process.env.ISOLATED_STAGING_DATABASE='true';assert.doesNotThrow(()=>assertDatabaseEnvironment())
+ } finally {
+  if(prior===undefined) delete process.env.VERCEL_ENV;else process.env.VERCEL_ENV=prior
+  if(isolated===undefined) delete process.env.ISOLATED_STAGING_DATABASE;else process.env.ISOLATED_STAGING_DATABASE=isolated
+ }
 })
