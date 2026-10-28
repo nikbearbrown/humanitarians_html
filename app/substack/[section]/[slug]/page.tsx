@@ -1,3 +1,4 @@
+import { contentHtml } from '@/lib/content-html'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { sql } from '@/lib/db'
@@ -30,7 +31,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ sectio
             {article.subtitle && <p className="text-xl text-muted-foreground mt-3">{article.subtitle}</p>}
             {article.display_date && <time className="text-sm text-muted-foreground mt-4 block">{article.display_date}</time>}
           </header>
-          <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-foreground prose-a:underline prose-img:rounded-lg" dangerouslySetInnerHTML={{ __html: article.content || '' }} />
+          <div className="prose prose-neutral dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-foreground prose-a:underline prose-img:rounded-lg" dangerouslySetInnerHTML={{ __html: contentHtml(article.content || '') }} />
           <div className="mt-16 border-t pt-8">
             <p className="text-lg font-semibold">Enjoy this article?</p>
             <p className="text-muted-foreground mt-1">Subscribe on Substack to get new posts delivered to your inbox.</p>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 import { hashPassword } from '@/lib/fellow-auth'
 import crypto from 'crypto'
 
@@ -9,10 +9,10 @@ function generateTempPassword(): string {
 }
 
 export async function PATCH(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await dashboardAccess(req, 'identity-admin'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const { id } = await params

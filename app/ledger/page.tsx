@@ -1,3 +1,4 @@
+import { dashboardIdentity } from '@/lib/dashboard-auth'
 // URL: /ledger -- the Project Ledger, for project managers and admins.
 
 import type { Metadata } from 'next'
@@ -18,9 +19,11 @@ export const dynamic = 'force-dynamic'
 export default async function LedgerPage() {
   const admin = await isAdmin()
   const fellow = await getFellowFromCookies()
-  if (!fellow && !admin) redirect('/fellows/login?next=/ledger')
+  const developer = (await dashboardIdentity())?.role === 'developer'
+  if (!fellow && !admin && !developer) redirect('/fellows/login?next=/ledger')
 
-  if (!admin && !(await isProjectManager(fellow!.id))) {
+  const pm = fellow ? await isProjectManager(fellow.id) : false
+  if (!admin && !pm && !developer) {
     return (
       <section className="w-full py-12 md:py-20">
         <div className="container px-4 md:px-6 mx-auto max-w-lg">
@@ -37,5 +40,5 @@ export default async function LedgerPage() {
     )
   }
 
-  return <LedgerWidget />
+  return <>{developer && !admin && !pm && <p role="status" className="border p-4 m-4">Developer view: internal project information is read-only. Supervisor editing and sign-off require a separate PM assignment.</p>}<LedgerWidget /></>
 }

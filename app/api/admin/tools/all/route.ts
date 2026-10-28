@@ -1,15 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { join } from 'path'
 import { sql } from '@/lib/db'
 import { scanHtmlDir } from '@/lib/html-meta'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 
 /**
  * Returns ALL tools: filesystem artifacts merged with DB tools.
  * Filesystem artifact tags are merged with any DB tags for the same slug.
  */
-export async function GET() {
-  if (!(await isAdmin())) {
+export async function GET(req: NextRequest) {
+  if (!(await dashboardAccess(req, 'content'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -21,7 +21,7 @@ export async function GET() {
       tool_type: string; claude_url: string | null; tags: string[]
     }> = []
     try {
-      dbTools = await sql`SELECT * FROM tools ORDER BY created_at DESC`
+      dbTools = await sql`SELECT * FROM tools ORDER BY created_at DESC` as typeof dbTools
     } catch {}
 
     const dbBySlug = new Map(dbTools.map(t => [t.slug, t]))

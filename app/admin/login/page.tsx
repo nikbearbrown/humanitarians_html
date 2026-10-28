@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -32,6 +33,7 @@ export default function AdminLoginPage() {
     <div className="container px-4 md:px-6 mx-auto py-24">
       <div className="max-w-sm mx-auto">
         <h1 className="text-2xl font-bold tracking-tighter mb-6">Admin Login</h1>
+        <p className="mb-6 text-sm"><Link className="underline" href="/fellows/login?next=/admin/dashboard">Developer sign in with your own member email and password</Link>. A separately approved developer role is required.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
           <div className="space-y-2">

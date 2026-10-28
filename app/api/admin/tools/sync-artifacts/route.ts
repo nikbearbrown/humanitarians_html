@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 
 function titleCase(slug: string): string { return slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') }
 function extractTitle(html: string): string | null { const match = html.match(/<title[^>]*>([^<]+)<\/title>/i); return match ? match[1].trim() : null }
 
-export async function POST() {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function POST(req: NextRequest) {
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const dir = join(process.cwd(), 'public', 'artifacts')
     let files: string[]

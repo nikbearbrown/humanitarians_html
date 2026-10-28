@@ -36,7 +36,7 @@ export default function FellowLoginPage() {
       if (!res.ok) throw new Error(data.error || 'Login failed')
       // Back to the page that sent them here (e.g. /ledger), if it is on this site.
       const next = new URLSearchParams(window.location.search).get('next') || ''
-      router.push(next.startsWith('/') && !next.startsWith('//') ? next : '/fellows/me')
+      router.push(next.startsWith('/') && !next.startsWith('//') && !/[\\\x00-\x20]/.test(next) ? next : '/fellows/me')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password')
     } finally {

@@ -1,3 +1,4 @@
+import { contentHtml } from '@/lib/content-html'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { sql } from '@/lib/db'
@@ -69,7 +70,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </header>
 
         <div className="prose prose-neutral dark:prose-invert max-w-none text-base leading-[1.7] prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-foreground prose-a:underline prose-img:rounded-lg overflow-x-hidden">
-          <BlogVizHydrator html={post.content || ''} />
+          <BlogVizHydrator html={contentHtml(post.content || '')} />
         </div>
 
         {post.byline && (

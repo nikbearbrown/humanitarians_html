@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 
-export async function GET() {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+  if (!(await dashboardAccess(req, 'roster-read'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
     const rows = await sql`

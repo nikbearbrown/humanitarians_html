@@ -30,7 +30,7 @@ export type LedgerProject = {
 }
 
 // Who is looking: a signed-in fellow, or an admin (who may not be a fellow).
-export type Viewer = { fellowId: string | null; name: string; admin: boolean }
+export type Viewer = { readOnly?: boolean; fellowId: string | null; name: string; admin: boolean }
 
 export class LedgerError extends Error {
   constructor(message: string, public status = 400) { super(message) }
@@ -67,7 +67,7 @@ export async function listLedger(viewer: Viewer): Promise<LedgerProject[]> {
       strands: Array.isArray(p.strands) ? (p.strands as string[]) : [],
       phase: text(p.phase) || 'Active', next: text(p.next_step), due: '',
       target: Number(p.weekly_hours_target ?? 20), touched: '',
-      canEdit: viewer.admin, team: [], notes: [], weeks: [], pmLog: [],
+      canEdit: !viewer.readOnly && viewer.admin, team: [], notes: [], weeks: [], pmLog: [],
     })
     pmIds.set(p.id as string, new Set())
   }
@@ -93,7 +93,7 @@ export async function listLedger(viewer: Viewer): Promise<LedgerProject[]> {
     proj.team.push(member)
   }
   for (const proj of byId.values()) {
-    if (viewer.fellowId && pmIds.get(proj.id)!.has(viewer.fellowId)) proj.canEdit = true
+    if (!viewer.readOnly && viewer.fellowId && pmIds.get(proj.id)!.has(viewer.fellowId)) proj.canEdit = true
   }
 
   const touch = (proj: LedgerProject, at: string) => { if (at > proj.touched) proj.touched = at }
@@ -154,6 +154,7 @@ const sameItem = (row: Row, it: { task: string; next: string; hours: number }) =
 // Saves one project as the ledger page sent it. Rows that did not change are
 // left alone, so their "updated" time and "by" name stay as they were.
 export async function saveLedgerProject(projectId: string, body: Partial<LedgerProject>, viewer: Viewer): Promise<void> {
+  if (viewer.readOnly) throw new LedgerError('Developer Ledger access is read-only.', 403)
   const [projRows, memberRows, entryRows, updateRows, fellows] = await Promise.all([
     sql`SELECT id FROM projects WHERE id = ${projectId} AND active = true LIMIT 1`,
     sql`SELECT fellow_id, role FROM fellow_projects WHERE project_id = ${projectId} ORDER BY created_at`,

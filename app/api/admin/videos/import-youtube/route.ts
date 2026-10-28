@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 import { fetchYouTubeVideos } from '@/lib/youtube'
 
 export async function POST(req: NextRequest) {
-  if (!(await isAdmin())) {
+  if (!(await dashboardAccess(req, 'content'))) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

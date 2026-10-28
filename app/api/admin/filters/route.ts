@@ -1,10 +1,12 @@
+import { dashboardAccess } from '@/lib/dashboard-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs/promises'
 import path from 'path'
 
 const FILTERS_PATH = path.join(process.cwd(), 'public/artifacts/filters.json')
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const raw = await fs.readFile(FILTERS_PATH, 'utf-8')
     const tags = JSON.parse(raw)
@@ -16,6 +18,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const body = await req.json()
 

@@ -1,8 +1,11 @@
+import { attachDeveloperSession, clearDeveloperSession } from '@/lib/dashboard-auth'
+import { sameOriginMutation } from '@/lib/developer-access-core'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import { verifyPassword, createFellowSession } from '@/lib/fellow-auth'
 
 export async function POST(req: NextRequest) {
+  if (!sameOriginMutation(req)) return NextResponse.json({ error: 'Invalid request origin' }, { status: 403 })
   try {
     const { email, password } = await req.json()
     if (!email || !password) {
@@ -24,6 +27,8 @@ export async function POST(req: NextRequest) {
 
     const res = NextResponse.json({ success: true })
     await createFellowSession(fellow.id as string, res)
+    await clearDeveloperSession(req, res)
+    await attachDeveloperSession(fellow.id as string, fellow.password_hash as string, res)
     return res
   } catch (error: unknown) {
     return NextResponse.json(

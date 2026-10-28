@@ -1,3 +1,4 @@
+import { contentHtml } from '@/lib/content-html'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { join } from 'path'
@@ -76,7 +77,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
       </div>
       <div className="flex-1 w-full">
         {useRawEmbed ? (
-          <div className="w-full h-full" style={{ minHeight: 'calc(100vh - 12rem)' }} dangerouslySetInnerHTML={{ __html: tool.artifact_embed_code.replace(/height="[^"]*"/, 'height="100%" style="min-height:calc(100vh - 12rem);width:100%;border:none;"') }} />
+          <div className="w-full h-full" style={{ minHeight: 'calc(100vh - 12rem)' }} dangerouslySetInnerHTML={{ __html: contentHtml(tool.artifact_embed_code) }} />
         ) : iframeSrc ? (
           <iframe src={iframeSrc} title={tool.name} className="w-full border-none" style={{ minHeight: 'calc(100vh - 12rem)' }} allow="clipboard-write" allowFullScreen />
         ) : (

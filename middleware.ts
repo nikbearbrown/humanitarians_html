@@ -26,6 +26,12 @@ async function isValidSession(cookieValue: string, secret: string): Promise<bool
 }
 
 export async function middleware(request: NextRequest) {
+  // A cookie's presence never authorizes data: the server layout checks the
+  // live grant/session, and each route handler independently checks permission.
+  if (process.env.DEVELOPER_ACCESS_ENABLED === 'true' &&
+      /^[a-f0-9]{64}$/.test(request.cookies.get('developer_session')?.value || '')) {
+    return NextResponse.next()
+  }
   const session = request.cookies.get('admin_session')
   const secret = process.env.ADMIN_PASSWORD
 

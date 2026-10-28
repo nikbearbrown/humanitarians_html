@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "../../lib/developer-access-core.ts",
+    "../../lib/dashboard-auth.ts",
+    "../../app/api/admin/**/*.ts",
+    "../../app/api/fellows/auth/login/route.ts",
+    "../../app/api/fellows/auth/logout/route.ts",
+    "../../app/admin/**/*.tsx",
+    "../../middleware.ts",
+    "./*.ts",
+    "../../app/fellows/login/page.tsx",
+    "../../app/blog/[slug]/page.tsx",
+    "../../app/substack/[section]/[slug]/page.tsx",
+    "../../app/tools/[slug]/page.tsx",
+    "../../app/ai1/tools/[slug]/page.tsx",
+    "../../app/ledger/page.tsx"
+  ],
+  "exclude": [
+    "../../node_modules"
+  ]
+}

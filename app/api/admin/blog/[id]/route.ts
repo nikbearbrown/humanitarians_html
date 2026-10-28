@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-auth'
+import { dashboardAccess } from '@/lib/dashboard-auth'
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await params
   try {
     const rows = await sql`SELECT * FROM blog_posts WHERE id = ${id}`
@@ -13,7 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await params
   const body = await req.json()
   try {
@@ -37,8 +37,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   } catch (error: unknown) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Database error' }, { status: 500 }) }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!(await dashboardAccess(req, 'content'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { id } = await params
   try { await sql`DELETE FROM blog_posts WHERE id = ${id}`; return NextResponse.json({ success: true }) } catch (error: unknown) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Database error' }, { status: 500 }) }
 }
