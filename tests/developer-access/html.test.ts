@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { spawnSync } from 'node:child_process';
 import { contentHtml } from '../../lib/content-html';
+test('server sanitizer loads when the host cannot require ESM dependencies', () => {
+ const result = spawnSync(process.execPath, ['--no-experimental-require-module', '-e',
+  `const { JSDOM } = require('jsdom'); const purify = require('dompurify')(new JSDOM('').window); if (purify.sanitize('<p>ok</p><script>bad()</script>') !== '<p>ok</p>') process.exit(1);`
+ ], { encoding: 'utf8' });
+ assert.equal(result.status, 0, result.stderr);
+});
 test('published HTML cannot execute inline scripts, handlers, forms, srcdoc or javascript URLs', () => {
  const clean = contentHtml(`<p>Hello <strong>world</strong></p><script>fetch('/api/admin/fellows')</script><img src=x onerror="fetch('/api/admin/fellows')"><a href="javascript:alert(1)">bad</a><form action="/api/admin/login"><input name=password></form><iframe srcdoc="<script>alert(1)</script>"></iframe>`);
  assert.match(clean, /<strong>world<\/strong>/);

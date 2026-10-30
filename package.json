@@ -68,7 +68,7 @@
     "dompurify": "^3.4.17",
     "embla-carousel-react": "8.5.1",
     "input-otp": "1.4.1",
-    "jsdom": "^29.1.1",
+    "jsdom": "26.1.0",
     "lucide-react": "^0.454.0",
     "next": "^15.5.24",
     "next-themes": "latest",
@@ -91,7 +91,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",
     "@types/adm-zip": "^0.5.8",
-    "@types/jsdom": "^30.0.0",
+    "@types/jsdom": "21.1.7",
     "@types/node": "^22.15.31",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
