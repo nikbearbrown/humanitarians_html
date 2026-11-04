@@ -1,3 +1,4 @@
+import { legacyIdentityWriteDenied } from "@/lib/timesheets/session"
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import { isAdmin } from '@/lib/admin-auth'
@@ -12,6 +13,8 @@ export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const frozen = legacyIdentityWriteDenied()
+  if (frozen) return frozen
   if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {

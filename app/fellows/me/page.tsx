@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Linkedin } from 'lucide-react'
+import { ProfileLinks } from '@/components/profile-links'
+import { PROFILE_LINK_FIELDS, type ProfileLinkValues } from '@/lib/profile-links'
 
 interface ProjectOption {
   id: string
@@ -22,7 +23,7 @@ interface ReportEntry {
   created_at: string
 }
 
-interface FellowProfile {
+interface FellowProfile extends ProfileLinkValues {
   id: string
   name: string
   slug: string
@@ -49,10 +50,11 @@ export default function FellowDashboard() {
   const router = useRouter()
   const [fellow, setFellow] = useState<FellowProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [logoutError, setLogoutError] = useState('')
 
   // Profile edit
   const [bio, setBio] = useState('')
-  const [linkedinUrl, setLinkedinUrl] = useState('')
+  const [links, setLinks] = useState<ProfileLinkValues>({})
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [employer, setEmployer] = useState('')
   const [employerRole, setEmployerRole] = useState('')
@@ -89,7 +91,7 @@ export default function FellowDashboard() {
         if (!data) return
         setFellow(data)
         setBio(data.bio || '')
-        setLinkedinUrl(data.linkedin_url || '')
+        setLinks(Object.fromEntries(PROFILE_LINK_FIELDS.map(({key}) => [key, data[key] || ""])))
         setEmployer(data.employer || '')
         setEmployerRole(data.employer_role || '')
         setWillingToBeContacted(data.willing_to_be_contacted)
@@ -111,7 +113,7 @@ export default function FellowDashboard() {
     try {
       const formData = new FormData()
       formData.set('bio', bio)
-      formData.set('linkedin_url', linkedinUrl)
+      for (const {key} of PROFILE_LINK_FIELDS) formData.set(key, links[key] || '')
       if (photoFile) formData.set('photo', photoFile)
       if (fellow?.status === 'alumni') {
         formData.set('employer', employer)
@@ -197,8 +199,14 @@ export default function FellowDashboard() {
   }
 
   async function handleLogout() {
-    await fetch('/api/fellows/auth/logout', { method: 'POST' })
-    router.push('/fellows')
+    setLogoutError('')
+    try {
+      const res = await fetch('/api/fellows/auth/logout', { method: 'POST' })
+      if (!res.ok) throw new Error('Sign out could not be confirmed. Please try again.')
+      router.push('/fellows')
+    } catch {
+      setLogoutError('Sign out could not be confirmed. Please try again.')
+    }
   }
 
   if (loading) return <div className="container px-4 md:px-6 mx-auto py-12"><p className="text-muted-foreground">Loading...</p></div>
@@ -212,10 +220,11 @@ export default function FellowDashboard() {
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold tracking-tighter">My Profile</h1>
             <div className="flex gap-2">
-              {myProjects.some((p) => p.role === 'pm') && (
-                <Button asChild variant="outline" size="sm"><Link href="/ledger">Project Ledger</Link></Button>
+              {(
+                <Button asChild variant="outline" size="sm"><Link href="/ledger">Timesheets with evidence</Link></Button>
               )}
               <Button variant="outline" size="sm" onClick={handleLogout}>Sign Out</Button>
+              {logoutError && <p role="alert" className="text-destructive">{logoutError}</p>}
             </div>
           </div>
 
@@ -244,11 +253,7 @@ export default function FellowDashboard() {
                   {fellow.bio && <p className="text-sm text-muted-foreground mb-2">{fellow.bio}</p>}
                   <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                     <span>Fellow since {formatDate(fellow.joined_date)}</span>
-                    {fellow.linkedin_url && (
-                      <a href={fellow.linkedin_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground">
-                        <Linkedin className="w-3.5 h-3.5" /> LinkedIn
-                      </a>
-                    )}
+                    <ProfileLinks profile={fellow} />
                   </div>
                   {fellow.status === 'alumni' && fellow.employer && (
                     <p className="text-sm mt-2">
@@ -267,7 +272,7 @@ export default function FellowDashboard() {
             </CardContent>
           </Card>
 
-          {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">{error}</div>}
+          {error && <div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">{error}</div>}
         </div>
       </section>
 
@@ -279,7 +284,7 @@ export default function FellowDashboard() {
               <CardTitle>Edit Profile</CardTitle>
             </CardHeader>
             <CardContent>
-              {saveMsg && <div className="rounded-md bg-muted border border-border p-3 text-sm text-foreground mb-4">{saveMsg}</div>}
+              {saveMsg && <div role="status" className="rounded-md bg-muted border border-border p-3 text-sm text-foreground mb-4">{saveMsg}</div>}
 
               <form onSubmit={handleSaveProfile} className="space-y-4">
                 <div className="space-y-2">
@@ -298,13 +303,20 @@ export default function FellowDashboard() {
                   {fellow.photo_url && (
                     <img src={fellow.photo_url} alt="Current" className="w-12 h-12 rounded-full object-cover mb-2" />
                   )}
-                  <Input id="photo" type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
+                  <Input id="photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="photo-help" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
+                    <p id="photo-help" className="text-xs text-muted-foreground">JPEG, PNG or WebP, up to 2 MB and 16 megapixels. Your profile photo is public. Only upload a photo you want displayed publicly.</p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn URL</Label>
-                  <Input id="linkedin" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="https://linkedin.com/in/..." />
-                </div>
+                <fieldset className="space-y-4">
+                  <legend className="font-medium">Profile links</legend>
+                  <p id="profile-links-help" className="text-sm text-muted-foreground">All four links are optional and appear on your public profile. Leave a field blank to remove its link.</p>
+                  {PROFILE_LINK_FIELDS.map(({key, label, placeholder}) => (
+                    <div key={key} className="space-y-2">
+                      <Label htmlFor={key}>{label} (optional)</Label>
+                      <Input id={key} type="url" maxLength={2048} autoCapitalize="none" spellCheck={false} aria-describedby="profile-links-help" value={links[key] || ''} onChange={(e) => setLinks(previous => ({...previous, [key]: e.target.value}))} placeholder={placeholder} />
+                    </div>
+                  ))}
+                </fieldset>
 
                 {fellow.status === 'alumni' && (
                   <>

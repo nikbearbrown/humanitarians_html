@@ -1,24 +1,34 @@
-// lib/ledger-viewer.ts
-// Who may use the Project Ledger: admins, and fellows who are the PM of at least
-// one project. Other fellows don't sign in to it; their PM logs their work.
-
-import { NextRequest, NextResponse } from 'next/server'
-import { getFellowFromSession } from '@/lib/fellow-auth'
-import { isAdmin } from '@/lib/admin-auth'
-import { isProjectManager, type Viewer } from '@/lib/ledger'
-
-export type LedgerDenied = 'signed-out' | 'not-pm'
-
-export async function getLedgerViewer(req: NextRequest): Promise<Viewer | LedgerDenied> {
-  const fellow = await getFellowFromSession(req)
-  const admin = await isAdmin()
-  if (!fellow && !admin) return 'signed-out'
-  if (!admin && !(await isProjectManager(fellow!.id))) return 'not-pm'
-  return { fellowId: fellow?.id ?? null, name: fellow?.name || 'Admin', admin }
+import { NextRequest, NextResponse } from "next/server";
+import { getTimesheetActor } from "@/lib/timesheets/session";
+import { isProjectManager, type Viewer } from "@/lib/ledger";
+import { sql } from "@/lib/db";
+export type LedgerDenied = "signed-out" | "not-pm" | "disabled";
+export async function getLedgerViewer(
+  req: NextRequest,
+): Promise<Viewer | LedgerDenied> {
+  if (process.env.TIMESHEETS_ENABLED !== "true") return "disabled";
+  try {
+    const fellow = await getTimesheetActor(req);
+    if (!fellow || fellow.status !== "current") return "signed-out";
+    const board =
+      await sql`SELECT 1 FROM timesheet_board_viewers WHERE fellow_id=${fellow.id}::uuid AND revoked_at IS NULL`;
+    if (!board.length && !(await isProjectManager(fellow.id))) return "not-pm";
+    return { fellowId: fellow.id, name: fellow.name, admin: board.length > 0 };
+  } catch {
+    return "disabled";
+  }
 }
-
 export function ledgerDenied(reason: LedgerDenied): NextResponse {
-  return reason === 'signed-out'
-    ? NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    : NextResponse.json({ error: 'The Project Ledger is for project managers.' }, { status: 403 })
+  return NextResponse.json(
+    {
+      error:
+        reason === "disabled"
+          ? "Ledger is awaiting an approved rollout."
+          : "Ledger is restricted to authorized supervisors and board viewers.",
+    },
+    {
+      status: reason === "disabled" ? 503 : reason === "signed-out" ? 401 : 403,
+      headers: { "Cache-Control": "private, no-store" },
+    },
+  );
 }

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 export default function FellowForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
-  const [done, setDone] = useState<'' | 'sent' | 'printed'>('')
+  const [done, setDone] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,7 +25,7 @@ export default function FellowForgotPasswordPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Could not send the email')
-      setDone(data.mail === 'printed' ? 'printed' : 'sent')
+      setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not send the email')
     } finally {
@@ -43,16 +43,14 @@ export default function FellowForgotPasswordPage() {
           </p>
 
           {error && (
-            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
+            <div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive mb-4">
               {error}
             </div>
           )}
 
           {done ? (
-            <div className="rounded-md bg-muted p-4 text-sm">
-              {done === 'printed'
-                ? 'No email was sent: this server has no mailbox set up yet (SMTP_USER and SMTP_PASS).'
-                : 'If a fellow account uses that email, a reset link is on its way. It expires in 60 minutes.'}
+            <div role="status" className="rounded-md bg-muted p-4 text-sm">
+              If a fellow account uses that email, we have accepted the reset request. Check your inbox and spam folder. The link expires in 60 minutes.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">

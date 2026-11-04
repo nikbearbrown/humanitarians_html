@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:timesheets": "node --import tsx --test tests/timesheets/*.test.ts",
+    "typecheck:timesheets": "tsc --project tests/timesheets/tsconfig.json --noEmit",
+    "test:timesheets:browser": "node --import tsx tests/timesheets/browser-smoke.mts",
+    "test:profile-links:browser": "node --import tsx tests/timesheets/profile-links-browser.mts",
+    "test:roster:browser": "node --import tsx tests/timesheets/roster-browser.mts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -85,12 +90,16 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.11",
+    "@playwright/test": "^1.64.1",
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^22.15.31",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "postcss": "^8.5.28",
+    "prettier": "^3.9.10",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
