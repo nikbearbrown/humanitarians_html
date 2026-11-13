@@ -1,3 +1,5 @@
+import { safeProfileLink } from '@/lib/profile-links'
+import { ProfileLinks } from '@/components/profile-links'
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -138,20 +140,10 @@ export default async function FellowProfilePage({
                 <p className="text-muted-foreground mb-3">{fellow.bio}</p>
               )}
 
-              {/* LinkedIn + joined */}
+              {/* Standard profile links and joined date */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span>Fellow since {formatDate(fellow.joined_date)}</span>
-                {fellow.linkedin_url && (
-                  <a
-                    href={fellow.linkedin_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 hover:text-foreground transition-colors"
-                  >
-                    <Linkedin className="w-4 h-4" />
-                    LinkedIn
-                  </a>
-                )}
+                <ProfileLinks profile={fellow} />
               </div>
             </div>
           </div>
@@ -245,9 +237,9 @@ export default async function FellowProfilePage({
                     {fellow.employer && <span>{fellow.employer}</span>}
                   </p>
                 )}
-                {fellow.linkedin_url && (
+                {safeProfileLink('linkedin_url', fellow.linkedin_url) && (
                   <a
-                    href={fellow.linkedin_url}
+                    href={safeProfileLink('linkedin_url', fellow.linkedin_url)!}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2"

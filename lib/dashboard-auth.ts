@@ -4,6 +4,7 @@ import { sql } from '@/lib/db';
 import { isAdmin, isValidSession } from '@/lib/admin-auth';
 import { authorizeDeveloper, resolveDeveloper, issueDeveloperSession, revokeDeveloperSession,
   sameOriginMutation, DEVELOPER_COOKIE, SESSION_SECONDS, type Capability, type Query } from './developer-access-core';
+import { identityAdmin, identityAdminFromCookies } from './identity-admin';
 const db = sql as unknown as Query;
 const enabled = () => process.env.DEVELOPER_ACCESS_ENABLED === 'true';
 const cookieOptions = { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' as const, path: '/' };
@@ -12,12 +13,16 @@ export async function dashboardAccess(req: NextRequest, capability: Capability):
   if (!sameOriginMutation(req)) return false;
   // Legacy owner access is retained; it is never converted into a developer identity.
   try { if (isValidSession(req.cookies.get('admin_session')?.value || '')) return true; } catch { /* invalid owner cookie */ }
+  // While timesheets are on, a named identity admin reads the roster it administers.
+  if (capability === 'roster-read' && await identityAdmin(req)) return true;
   if (!enabled()) return false;
   try { return !!await authorizeDeveloper(req, req.cookies.get(DEVELOPER_COOKIE)?.value, capability, db); }
   catch { return false; } // Missing migration, revoked access or database failure fails closed.
 }
 export async function dashboardIdentity() {
   if (await isAdmin()) return { role: 'owner' as const, name: 'Owner', fellowId: null };
+  const identity = await identityAdminFromCookies();
+  if (identity) return { role: 'identity-admin' as const, name: identity.name, fellowId: identity.fellowId };
   if (!enabled()) return null;
   try {
     const actor = await resolveDeveloper((await cookies()).get(DEVELOPER_COOKIE)?.value, db);

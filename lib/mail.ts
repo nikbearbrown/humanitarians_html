@@ -5,8 +5,8 @@
 // imported from route handlers, never from middleware.
 //
 // If no mailbox is configured:
-//   - in development the message is printed in the terminal running
-//     `npm run dev`, so the flow can be tried without any email setup;
+//   - in development only a delivery-disabled notice is printed; message bodies
+//     and password-reset tokens are never logged;
 //   - in production nothing is sent and an error is logged.
 
 import nodemailer from 'nodemailer';
@@ -23,11 +23,7 @@ export async function sendMail(mail: Mail): Promise<'sent' | 'printed' | 'skippe
       console.error('Email not sent: SMTP_USER and SMTP_PASS are not set.');
       return 'skipped';
     }
-    console.log(
-      '\n----- EMAIL (not sent: SMTP_USER and SMTP_PASS are not set) -----\n' +
-      'To: ' + mail.to + '\nSubject: ' + mail.subject + '\n\n' + mail.text +
-      '\n---------------------------------------------------------------------------\n'
-    );
+    console.log('Email not sent: no SMTP mailbox is configured. Message content is not logged.');
     return 'printed';
   }
 

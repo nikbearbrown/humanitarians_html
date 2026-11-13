@@ -26,6 +26,8 @@ export default function NewFellowPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [tempPassword, setTempPassword] = useState('')
+  // Set instead of a password when an identity admin creates the member (timesheets on).
+  const [activation, setActivation] = useState('')
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -55,7 +57,8 @@ export default function NewFellowPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create fellow')
-      setTempPassword(data.temp_password)
+      if (data.activation) setActivation(data.activation)
+      else setTempPassword(data.temp_password)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error creating fellow')
     } finally {
@@ -73,6 +76,24 @@ export default function NewFellowPage() {
     await navigator.clipboard.writeText(tempPassword)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (activation) {
+    return (
+      <div className="max-w-lg mx-auto space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Fellow Created</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p role="status" className="text-sm">{activation}</p>
+            <Button variant="outline" onClick={() => router.push('/admin/dashboard/fellows')}>
+              Back to fellows
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   if (tempPassword) {

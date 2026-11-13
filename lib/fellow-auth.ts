@@ -95,7 +95,7 @@ async function resolveFellowFromCookieValue(
 
   const rows = await sql`
     SELECT id, name, slug, email, bio, photo_url, status, joined_date,
-           linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+           linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
     FROM fellows WHERE id = ${fellowId}
     LIMIT 1
   `

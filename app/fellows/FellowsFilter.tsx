@@ -1,8 +1,9 @@
 "use client"
 
+import { ProfileLinks } from '@/components/profile-links'
+
 import { useState } from "react"
 import Link from "next/link"
-import { Linkedin } from "lucide-react"
 import type { ProjectWithFellows } from "@/types/fellows"
 
 function getInitials(name: string): string {
@@ -165,18 +166,8 @@ export default function FellowsFilter({
                           </p>
                         )}
 
-                        {/* LinkedIn */}
-                        {fellow.linkedin_url && (
-                          <a
-                            href={fellow.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-auto flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                          >
-                            <Linkedin className="w-3.5 h-3.5" />
-                            LinkedIn
-                          </a>
-                        )}
+                        {/* Standard profile links */}
+                        <ProfileLinks profile={fellow} />
                       </div>
                     )
                   })}

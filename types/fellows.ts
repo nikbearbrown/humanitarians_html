@@ -35,6 +35,9 @@ export type Fellow = {
   photo_url: string | null
   status: 'current' | 'alumni'
   joined_date: string
+  github_url: string | null
+  website_url: string | null
+  youtube_url: string | null
   linkedin_url: string | null
   employer: string | null
   employer_role: string | null

@@ -103,7 +103,7 @@ export default function BulkUploadPage() {
       <div>
         <h2 className="text-2xl font-bold tracking-tighter">Bulk Upload Fellows</h2>
         <p className="text-sm text-muted-foreground">
-          Upload a CSV file with columns: name, email, project_slug (optional), role (optional — defaults to &quot;fellow&quot;).
+          Upload a CSV file with columns: name, email, project_slug (optional), role (optional — defaults to &quot;fellow&quot;), and status. Use current/active or alumni/inactive. A file without a status column imports as current; a blank or unknown status is rejected. Existing accounts are not updated: the results identify status conflicts for separate review.
         </p>
       </div>
 

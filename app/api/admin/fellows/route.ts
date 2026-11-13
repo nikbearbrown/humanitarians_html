@@ -2,14 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import { dashboardAccess } from '@/lib/dashboard-auth'
 import { hashPassword } from '@/lib/fellow-auth'
+import { identityWriteAccess, auditStatement, ACTIVATION_NOTE } from '@/lib/identity-admin'
 import crypto from 'crypto'
 
 function generateTempPassword(): string {
   return crypto.randomBytes(12).toString('base64url').slice(0, 16)
 }
 
+// Create one member. Timesheets off: owner admin, temporary password returned (as before).
+// Timesheets on: a named identity admin (lib/identity-admin.ts); no password is shown.
 export async function POST(req: NextRequest) {
-  if (!(await dashboardAccess(req, 'identity-admin'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const access = await identityWriteAccess(req, async () => await dashboardAccess(req, 'identity-admin'))
+  if (!access.ok) return access.response
+  const admin = access.admin
 
   try {
     const body = await req.json()
@@ -31,26 +36,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'A fellow with this email already exists' }, { status: 409 })
     }
 
-    // Insert fellow
-    const rows = await sql`
-      INSERT INTO fellows (name, slug, email, password_hash, status, joined_date)
-      VALUES (${name}, ${slug}, ${email}, ${password_hash}, ${fellowStatus}, ${joinedDate})
-      RETURNING id
-    `
-    const fellowId = (rows[0] as Record<string, unknown>).id as string
-
-    // Insert project assignments
-    if (Array.isArray(project_ids)) {
-      for (const projectId of project_ids) {
-        const role = projectId === pm_project_id ? 'pm' : 'fellow'
-        await sql`
+    // Member, assignments and (when timesheets are on) the audit row commit together.
+    const fellowId = crypto.randomUUID()
+    const projects: string[] = Array.isArray(project_ids) ? project_ids.map(String) : []
+    const statements = [
+      sql`INSERT INTO fellows (id, name, slug, email, password_hash, status, joined_date)
+          VALUES (${fellowId}, ${name}, ${slug}, ${email}, ${password_hash}, ${fellowStatus}, ${joinedDate})`,
+      ...projects.map((projectId) => sql`
           INSERT INTO fellow_projects (fellow_id, project_id, role)
-          VALUES (${fellowId}, ${projectId}, ${role})
-        `
-      }
-    }
+          VALUES (${fellowId}, ${projectId}, ${projectId === pm_project_id ? 'pm' : 'fellow'})`),
+    ]
+    if (admin) statements.push(auditStatement(admin, 'create', fellowId, { projects, pm_project_id: pm_project_id || null }))
+    await sql.transaction(statements)
 
-    return NextResponse.json({ id: fellowId, temp_password: tempPassword }, { status: 201 })
+    return admin
+      ? NextResponse.json({ id: fellowId, activation: ACTIVATION_NOTE }, { status: 201 })
+      : NextResponse.json({ id: fellowId, temp_password: tempPassword }, { status: 201 })
   } catch (error: unknown) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Database error' },

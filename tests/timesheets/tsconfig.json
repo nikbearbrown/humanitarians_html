@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "incremental": false
+  },
+  "include": [
+    "../../lib/timesheets/**/*.ts",
+    "../../lib/ledger-viewer.ts",
+    "../../lib/admin-roster.ts",
+    "../../app/api/admin/fellows/list/route.ts",
+    "../../app/admin/dashboard/fellows/page.tsx",
+    "../../app/api/timesheets/**/*.ts",
+    "../../app/api/ledger/**/*.ts",
+    "../../app/ledger/**/*.tsx",
+    "../../app/api/fellows/auth/**/*.ts",
+    "../../app/admin/dashboard/fellows/bulk/page.tsx",
+    "../../app/fellows/forgot-password/page.tsx",
+    "../../app/fellows/me/page.tsx",
+    "../../app/fellows/[slug]/page.tsx",
+    "../../app/fellows/FellowsFilter.tsx",
+    "../../components/timesheets/**/*.tsx",
+    "./*.test.ts"
+  ],
+  "exclude": ["../../node_modules"]
+}

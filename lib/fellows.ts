@@ -28,6 +28,9 @@ function toPublicFellow(row: Record<string, unknown>): PublicFellow {
     status: row.status as 'current' | 'alumni',
     joined_date: row.joined_date as string,
     linkedin_url: row.linkedin_url as string | null,
+    github_url: (row.github_url as string | null) ?? null,
+    website_url: (row.website_url as string | null) ?? null,
+    youtube_url: (row.youtube_url as string | null) ?? null,
     employer: row.employer as string | null,
     employer_role: row.employer_role as string | null,
     willing_to_be_contacted: row.willing_to_be_contacted as boolean,
@@ -61,7 +64,7 @@ export async function getProjectBySlug(
 
   const fellowRows = await sql`
     SELECT f.id, f.name, f.slug, f.bio, f.photo_url, f.status,
-           f.joined_date, f.linkedin_url, f.employer, f.employer_role,
+           f.joined_date, f.linkedin_url, f.github_url, f.website_url, f.youtube_url, f.employer, f.employer_role,
            f.willing_to_be_contacted, f.created_at,
            fp.role
     FROM fellows f
@@ -90,7 +93,7 @@ export async function getAllProjectsWithFellows(): Promise<ProjectWithFellows[]>
   for (const project of projects) {
     const fellowRows = await sql`
       SELECT f.id, f.name, f.slug, f.bio, f.photo_url, f.status,
-             f.joined_date, f.linkedin_url, f.employer, f.employer_role,
+             f.joined_date, f.linkedin_url, f.github_url, f.website_url, f.youtube_url, f.employer, f.employer_role,
              f.willing_to_be_contacted, f.created_at,
              fp.role
       FROM fellows f
@@ -122,14 +125,14 @@ export async function getAllFellows(
   const rows = status
     ? await sql`
         SELECT id, name, slug, bio, photo_url, status, joined_date,
-               linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+               linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
         FROM fellows
         WHERE status = ${status}
         ORDER BY name ASC
       `
     : await sql`
         SELECT id, name, slug, bio, photo_url, status, joined_date,
-               linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+               linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
         FROM fellows
         ORDER BY name ASC
       `
@@ -141,7 +144,7 @@ export async function getFellowBySlug(
 ): Promise<FellowWithProjects | null> {
   const fellowRows = await sql`
     SELECT id, name, slug, bio, photo_url, status, joined_date,
-           linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+           linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
     FROM fellows WHERE slug = ${slug}
     LIMIT 1
   `
@@ -189,7 +192,7 @@ export async function getProjectFellows(
 ): Promise<(PublicFellow & { role: 'fellow' | 'pm' })[]> {
   const rows = await sql`
     SELECT f.id, f.name, f.slug, f.bio, f.photo_url, f.status,
-           f.joined_date, f.linkedin_url, f.employer, f.employer_role,
+           f.joined_date, f.linkedin_url, f.github_url, f.website_url, f.youtube_url, f.employer, f.employer_role,
            f.willing_to_be_contacted, f.created_at,
            fp.role
     FROM fellows f
@@ -244,7 +247,7 @@ export async function getAllFellowsAdmin(): Promise<
 > {
   const rows = await sql`
     SELECT id, name, slug, email, bio, photo_url, status, joined_date,
-           linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+           linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
     FROM fellows
     ORDER BY name ASC
   `
@@ -256,7 +259,7 @@ export async function getFellowByIdAdmin(
 ): Promise<Omit<Fellow, 'password_hash'> | null> {
   const rows = await sql`
     SELECT id, name, slug, email, bio, photo_url, status, joined_date,
-           linkedin_url, employer, employer_role, willing_to_be_contacted, created_at
+           linkedin_url, github_url, website_url, youtube_url, employer, employer_role, willing_to_be_contacted, created_at
     FROM fellows WHERE id = ${id}
     LIMIT 1
   `
