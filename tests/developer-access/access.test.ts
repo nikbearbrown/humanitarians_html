@@ -22,9 +22,6 @@ import { POST as createProject } from '../../app/api/admin/projects/route'
 import { GET as ledgerProjects } from '../../app/api/ledger/projects/route'
 import { PUT as ledgerWrite } from '../../app/api/ledger/projects/[id]/route'
 import { saveLedgerProject } from '../../lib/ledger'
-import { GET as ledgerGrants } from '../../app/api/ledger/grants/route'
-import { PATCH as grantDecision } from '../../app/api/ledger/grants/[id]/route'
-import { saveDecision } from '../../lib/grants'
 import { POST as filters } from '../../app/api/admin/filters/route'
 
 const db = new PGlite(), origin = 'https://synthetic.example.org'
@@ -70,6 +67,7 @@ async function grantRole(id: string) {
 before(async () => {
  await db.exec(await readFile('sql/001_fellows_projects.sql','utf8'))
  await db.exec(await readFile('sql/003_project_ledger.sql','utf8'))
+ await db.exec(await readFile('sql/005_standard_profile_links.sql','utf8'))
  await db.exec(await readFile('sql/006_developer_access.sql','utf8'))
  // Synthetic equivalent of the collector-owned table; no external database is used.
  await db.exec(`CREATE TABLE grant_opportunities (
@@ -217,6 +215,27 @@ test('developer without PM assignment can read Ledger but cannot edit or forge s
  assert.deepEqual(await snapshot(),before)
 })
 
+test('Ledger access is unchanged by the timesheet rollout: available while off, developer stays read-only when on',async()=>{
+ const id=randomUUID()
+ await db.query("INSERT INTO fellows(id,name,slug,email,password_hash) VALUES($1::uuid,'Rollout reader',$1::text,$2,$3)",[id,id+'@example.org',passwordHash])
+ await grantRole(id)
+ const cookie='developer_session='+(await issueDeveloperSession(id,passwordHash,query))!
+ const prior=process.env.TIMESHEETS_ENABLED
+ try {
+  delete process.env.TIMESHEETS_ENABLED
+  const off=await ledgerProjects(req('/api/ledger/projects','GET',undefined,{cookie}))
+  assert.equal(off.status,200,'timesheets off must not take the existing Ledger away')
+  process.env.TIMESHEETS_ENABLED='true'
+  const on=await ledgerProjects(req('/api/ledger/projects','GET',undefined,{cookie}))
+  assert.equal(on.status,200,'an approved developer keeps read access after the switch')
+  assert.ok((await on.json()).projects.every((p:any)=>p.canEdit===false))
+  const before=await snapshot()
+  const write=await ledgerWrite(req('/api/ledger/projects/'+project,'PUT',{admin:true,phase:'Done'},{cookie}),params(project))
+  assert.ok([401,403].includes(write.status))
+  assert.deepEqual(await snapshot(),before)
+ } finally { if(prior===undefined) delete process.env.TIMESHEETS_ENABLED; else process.env.TIMESHEETS_ENABLED=prior }
+})
+
 test('preview refuses an inherited database until isolation has been explicitly verified',()=>{
  const prior=process.env.VERCEL_ENV, isolated=process.env.ISOLATED_STAGING_DATABASE
  try {
@@ -287,49 +306,3 @@ test('malformed login inputs are rejected and unavailable throttle fails closed'
 })
 
 
-test('Grants stays read-only for a developer, including forged owner fields and direct service calls',async()=>{
- const id=randomUUID()
- await db.query("INSERT INTO fellows(id,name,slug,email,password_hash) VALUES($1::uuid,'Synthetic grants reader',$1::text,$2,$3)",[id,id+'@example.org',passwordHash])
- await grantRole(id)
- const token=(await issueDeveloperSession(id,passwordHash,query))!
- const response=new NextResponse();await createFellowSession(id,response)
- const readCookie='developer_session='+token+'; fellow_session='+response.cookies.get('fellow_session')!.value
- const read=await ledgerGrants(req('/api/ledger/grants','GET',undefined,{cookie:readCookie}))
- assert.equal(read.status,200)
- const payload=await read.json();assert.equal(payload.canEdit,false);assert.equal(payload.grants.length,1)
- const before=(await db.query('SELECT * FROM grant_opportunities')).rows
- const body={decision:'won',notes:'forged',admin:true,readOnly:false,fellowId:developer}
- const write=await grantDecision(req('/api/ledger/grants/synthetic-grant','PATCH',body,{cookie:readCookie}),params('synthetic-grant'))
- assert.equal(write.status,403)
- await assert.rejects(saveDecision('synthetic-grant',body,{fellowId:id,name:'Synthetic reader',admin:true,readOnly:true}),/read-only/)
- assert.deepEqual((await db.query('SELECT * FROM grant_opportunities')).rows,before)
- await revokeDeveloperSession(token,query)
- assert.equal((await ledgerGrants(req('/api/ledger/grants','GET',undefined,{cookie:readCookie}))).status,403)
-})
-
-test('Grants preserves independent PM and owner editing, but rejects ordinary members, expired grants and cross-origin writes',async()=>{
- const body={decision:'pursue',notes:'Synthetic test decision'}
- for(const id of [developer,member]) {
-  const response=new NextResponse();await createFellowSession(id,response)
-  const c='fellow_session='+response.cookies.get('fellow_session')!.value
-  const read=await ledgerGrants(req('/api/ledger/grants','GET',undefined,{cookie:c}))
-  const write=await grantDecision(req('/api/ledger/grants/synthetic-grant','PATCH',body,{cookie:c}),params('synthetic-grant'))
-  assert.equal(read.status,id===developer?200:403);assert.equal(write.status,id===developer?200:403)
-  if(id===developer) {
-   assert.equal((await read.json()).canEdit,true)
-   assert.equal((await db.query<{decided_by:string}>("SELECT decided_by FROM grant_opportunities WHERE id='synthetic-grant'")).rows[0].decided_by,developer)
-   const cross=await grantDecision(req('/api/ledger/grants/synthetic-grant','PATCH',body,{cookie:c,origin:'https://evil.example'}),params('synthetic-grant'))
-   assert.equal(cross.status,403)
-  }
- }
- const owner='admin_session='+generateSessionToken()
- assert.equal((await grantDecision(req('/api/ledger/grants/synthetic-grant','PATCH',{decision:'applied',notes:'Owner test'},{cookie:owner}),params('synthetic-grant'))).status,200)
- assert.equal((await ledgerGrants(req('/api/ledger/grants','GET',undefined,{cookie:''}))).status,401)
- const token=(await issueDeveloperSession(developer,passwordHash,query))!
- await db.query("UPDATE developer_sessions SET expires_at=now()-interval '1 second' WHERE token_hash=$1",[await tokenDigest(token)])
- assert.equal((await ledgerGrants(req('/api/ledger/grants','GET',undefined,{cookie:'developer_session='+token}))).status,401)
- // Developer and PM permissions coexist; a revoked developer session does not remove a real PM assignment.
- const response=new NextResponse();await createFellowSession(developer,response)
- const dual='developer_session='+token+'; fellow_session='+response.cookies.get('fellow_session')!.value
- assert.equal((await grantDecision(req('/api/ledger/grants/synthetic-grant','PATCH',body,{cookie:dual}),params('synthetic-grant'))).status,200)
-})

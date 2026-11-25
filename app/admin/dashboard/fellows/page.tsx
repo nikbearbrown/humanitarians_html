@@ -7,24 +7,20 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Plus, Upload, Pencil } from 'lucide-react'
 
-interface FellowRow {
-  id: string
-  name: string
-  email: string
-  status: string
-  joined_date: string
-  project_count: number
-}
+import { rosterView, isUnassigned, type RosterAccount, type RosterRoleFilter, type RosterStatusFilter } from '@/lib/roster-filters'
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return 'not recorded'
   return new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 export default function FellowsAdminPage() {
-  const [fellows, setFellows] = useState<FellowRow[]>([])
+  const [fellows, setFellows] = useState<RosterAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'current' | 'alumni'>('all')
+  const [statusFilter, setStatusFilter] = useState<RosterStatusFilter>('current')
+  const [roleFilter, setRoleFilter] = useState<RosterRoleFilter>('all')
+  const [search, setSearch] = useState('')
 
   const fetchFellows = useCallback(async () => {
     try {
@@ -40,13 +36,11 @@ export default function FellowsAdminPage() {
 
   useEffect(() => { fetchFellows() }, [fetchFellows])
 
-  const filtered = statusFilter === 'all'
-    ? fellows
-    : fellows.filter((f) => f.status === statusFilter)
+  const { rows: filtered, counts } = rosterView(fellows, statusFilter, roleFilter, search)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tighter">Fellows</h2>
           <p className="text-sm text-muted-foreground">Manage fellows, assign projects, reset passwords</p>
@@ -66,7 +60,8 @@ export default function FellowsAdminPage() {
         {(['all', 'current', 'alumni'] as const).map((s) => (
           <button
             key={s}
-            onClick={() => setStatusFilter(s)}
+            aria-pressed={statusFilter === s}
+            onClick={() => { setStatusFilter(s); if (s === 'alumni' && roleFilter === 'pm') setRoleFilter('all') }}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
               statusFilter === s
                 ? 'bg-foreground text-background'
@@ -78,12 +73,33 @@ export default function FellowsAdminPage() {
         ))}
       </div>
 
-      {error && <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+      <div className="space-y-3">
+        <label htmlFor="roster-search" className="block text-sm font-medium">Search people or projects</label>
+        <input id="roster-search" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Name, email, project name or slug" className="w-full rounded-md border bg-background px-3 py-2" />
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Staff and assignment filters">
+          {([
+            ['all', 'Everyone', counts.all],
+            ['pm', 'Project managers', counts.pm],
+            ['board', 'Board / C-suite', null],
+            ['unassigned', 'Unassigned', counts.unassigned],
+          ] as const).map(([key, label, count]) => (
+            <Button key={key} variant={roleFilter === key ? 'default' : 'outline'} aria-pressed={roleFilter === key}
+              onClick={() => { setRoleFilter(key); if (key === 'pm') setStatusFilter('current') }}>
+              {label} ({loading || error ? '…' : count === null ? 'unknown' : count})
+            </Button>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground">Project managers are current accounts assigned as PM to an active project. Job titles in a spreadsheet do not grant access. Counts follow the status and search filters.</p>
+        {roleFilter === 'board' && <p role="status" className="rounded-md border p-3 text-sm">Board / C-suite classification has not been recorded in the app. {loading || error ? 'The roster is not available yet.' : `${counts.boardUnknown} matching accounts have unknown classification.`} A reviewed classification import is needed; Ledger viewing permission does not establish a board position.</p>}
+        {!loading && !error && <p role="status" className="text-sm">{filtered.length} accounts shown{roleFilter === 'board' ? '; board membership is unknown, not zero' : ''}.</p>}
+      </div>
+
+      {error && <div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
 
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-muted-foreground">No fellows found.</p>
+        <p className="text-muted-foreground">{roleFilter === 'board' ? 'No verified board classification to display.' : 'No accounts match these filters.'}</p>
       ) : (
         <div className="grid gap-3">
           {filtered.map((fellow) => (
@@ -102,6 +118,12 @@ export default function FellowsAdminPage() {
                   <CardDescription>
                     {fellow.email} · Joined {formatDate(fellow.joined_date)}
                   </CardDescription>
+                  <ul className="text-sm space-y-1" aria-label={`Projects for ${fellow.name}`}>
+                    {fellow.projects.map(project => <li key={project.id}>
+                      {project.name} <span className="text-muted-foreground">({project.slug}) · {project.role === 'pm' ? 'Project manager' : 'Fellow'}{project.active ? '' : ' · Archived project'}</span>
+                    </li>)}
+                    {isUnassigned(fellow) && <li className="text-muted-foreground">Unassigned to an active project</li>}
+                  </ul>
                 </div>
                 <div className="flex gap-2 ml-4">
                   <Link href={`/admin/dashboard/fellows/${fellow.id}/edit`}>

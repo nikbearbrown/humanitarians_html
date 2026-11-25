@@ -1,24 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import { NextRequest } from 'next/server'
 import { dashboardAccess } from '@/lib/dashboard-auth'
-
+import { adminRosterHandler, listAdminRoster } from '@/lib/admin-roster'
+// Roster reads follow the dashboard roles (owner admin, or a developer with roster-read).
+// PM/board Ledger grants do not grant directory access.
 export async function GET(req: NextRequest) {
-  if (!(await dashboardAccess(req, 'roster-read'))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  try {
-    const rows = await sql`
-      SELECT f.id, f.name, f.email, f.status, f.joined_date,
-             COUNT(fp.id)::int AS project_count
-      FROM fellows f
-      LEFT JOIN fellow_projects fp ON fp.fellow_id = f.id
-      GROUP BY f.id
-      ORDER BY f.name ASC
-    `
-    return NextResponse.json(rows)
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Database error' },
-      { status: 500 }
-    )
-  }
+  const allowed = await dashboardAccess(req, 'roster-read')
+  return adminRosterHandler({ authorized: async () => allowed, list: listAdminRoster })()
 }

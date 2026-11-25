@@ -1,22 +1,33 @@
-import { dashboardIdentity } from '@/lib/dashboard-auth'
-// URL: /ledger -- the Project Ledger, for project managers and admins.
-
+// URL: /ledger
+// TIMESHEETS_ENABLED off (today's site): the Project Ledger, unchanged, for PMs,
+//   owner admins and approved developers (read-only).
+// TIMESHEETS_ENABLED on: fellow-entered evidence timesheets with PM review.
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import LedgerWidget from '@/components/ledger/LedgerWidget'
+import Timesheets from '@/components/timesheets/Timesheets'
+import { dashboardIdentity } from '@/lib/dashboard-auth'
 import { getFellowFromCookies } from '@/lib/fellow-auth'
 import { isAdmin } from '@/lib/admin-auth'
 import { isProjectManager } from '@/lib/ledger'
+import { getTimesheetActorFromCookies } from '@/lib/timesheets/session'
 
 export const metadata: Metadata = {
   title: 'Project Ledger | Humanitarians AI',
   robots: { index: false, follow: false },
+  referrer: 'no-referrer',
 }
 
 export const dynamic = 'force-dynamic'
 
 export default async function LedgerPage() {
+  if (process.env.TIMESHEETS_ENABLED === 'true') {
+    const fellow = await getTimesheetActorFromCookies()
+    if (!fellow || fellow.status !== 'current') redirect('/fellows/login?next=/ledger')
+    return <Timesheets />
+  }
+
   const admin = await isAdmin()
   const fellow = await getFellowFromCookies()
   const developer = (await dashboardIdentity())?.role === 'developer'

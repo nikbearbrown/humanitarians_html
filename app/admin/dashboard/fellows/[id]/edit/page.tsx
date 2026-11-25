@@ -56,6 +56,8 @@ export default function EditFellowPage() {
 
   // Password reset
   const [tempPassword, setTempPassword] = useState('')
+  // Set instead of a password when an identity admin resets it (timesheets on).
+  const [activation, setActivation] = useState('')
   const [copied, setCopied] = useState(false)
   const [resetting, setResetting] = useState(false)
 
@@ -134,7 +136,8 @@ export default function EditFellowPage() {
       const res = await fetch(`/api/admin/fellows/${id}/reset-password`, { method: 'PATCH' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to reset password')
-      setTempPassword(data.temp_password)
+      if (data.activation) setActivation(data.activation)
+      else setTempPassword(data.temp_password)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error resetting password')
     } finally {
@@ -324,7 +327,9 @@ export default function EditFellowPage() {
           <p className="text-sm text-muted-foreground">
             Generate a new temporary password. The fellow will need to receive it directly — it is shown once.
           </p>
-          {tempPassword ? (
+          {activation ? (
+            <p role="status" className="text-sm">Password reset. The member's sessions have ended. {activation}</p>
+          ) : tempPassword ? (
             <div className="rounded-md bg-accent/10 border border-border p-4">
               <p className="text-sm font-medium mb-2">
                 Temp password — copy now. Cannot be recovered after leaving this page.
